@@ -1,0 +1,6 @@
+{
+  "rulesDirectory": [
+    "node_modules/codelyzer"
+  ],
+  "extends": "tslint-config-swimlane/base"
+}

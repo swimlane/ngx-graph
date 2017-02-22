@@ -1,0 +1,11 @@
+.directed-graph {
+  .edge {
+    stroke: #333;
+    fill: none;
+  }
+
+  .panning-rect {
+    fill: rgba(0,0,0,0);
+    cursor: move;
+  }
+}

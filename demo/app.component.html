@@ -1,0 +1,98 @@
+<main [class]="theme">
+  <div class="chart-col">
+    <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
+      <ngx-charts-directed-graph
+        class="chart-container"
+        [legend]="showLegend"
+        [links]="hierarchialGraph.links"
+        (legendLabelClick)="onLegendLabelClick($event)"
+        [nodes]="hierarchialGraph.nodes"
+        [scheme]="colorScheme"
+        [view]="view"
+        (select)="select($event)">
+      </ngx-charts-directed-graph>
+    </div>
+  </div>
+  <div class="sidebar">
+    <h1>
+      Ngx-<strong>Charts</strong>-DAG
+      <small class="subtitle">Directed Acyclic Graph Visualization</small>
+    </h1>
+
+    <h3>Theme</h3>
+    <select
+      [ngModel]="theme"
+      (ngModelChange)="theme = $event">>
+      <option [value]="'dark'">Dark</option>
+      <option [value]="'light'">Light</option>
+    </select>
+
+    <h3 (click)="dataVisable = !dataVisable" style="cursor: pointer">
+      <span
+        [class.arrow-down]="dataVisable"
+        [class.arrow-right]="!dataVisable">
+      </span>
+      <strong>Data</strong>
+    </h3>
+    <div [hidden]="!dataVisable" style="margin-left: 10px;">
+      <div>
+        <label>
+          <input type="checkbox" [checked]="realTimeData" (change)="realTimeData = $event.target.checked">
+          Real-time
+        </label>
+      </div>
+    </div>
+    <div>
+      <h3 (click)="dimVisiable = !dimVisiable" style="cursor: pointer">
+        <span
+          [class.arrow-down]="dimVisiable"
+          [class.arrow-right]="!dimVisiable">
+        </span>
+        <strong>Dimensions</strong>
+      </h3>
+      <div [hidden]="!dimVisiable" style="margin-left: 10px;">
+        <label>
+          <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked)">
+          Fit Container
+        </label> <br />
+        <div *ngIf="!fitContainer">
+          <label>Width:</label><br />
+          <input type="number" [(ngModel)]="width"><br />
+          <label>Height:</label><br />
+          <input type="number" [(ngModel)]="height"><br />
+          <button (click)="applyDimensions()">Apply dimensions</button>
+        </div>
+      </div>
+    </div>
+    <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
+      <span
+        [class.arrow-down]="colorVisible"
+        [class.arrow-right]="!colorVisible">
+      </span>
+      <strong>Color Scheme</strong>
+    </h3>
+    <select
+      [hidden]="!colorVisible"
+      style="margin-left: 10px;"
+      [ngModel]="selectedColorScheme"
+      (ngModelChange)="setColorScheme($event)">
+      <option *ngFor="let scheme of colorSets" [value]="scheme.name">{{scheme.name}}</option>
+    </select>
+
+    <h3 (click)="optsVisible = !optsVisible" style="cursor: pointer">
+      <span
+        [class.arrow-down]="optsVisible"
+        [class.arrow-right]="!optsVisible">
+      </span>
+      <strong>Options</strong>
+    </h3>
+    <div [hidden]="!optsVisible" style="margin-left: 10px;">
+      <div *ngIf="chart.options.includes('showLegend')">
+        <label>
+          <input type="checkbox" [checked]="showLegend" (change)="showLegend = $event.target.checked">
+          Show Legend
+        </label> <br />
+      </div>
+    </div>
+  </div>
+</main>
