@@ -11,22 +11,29 @@
         [view]="view"
         (select)="select($event)">
 
+        <template #defsTemplate>
+          <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+            <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+          </svg:marker>
+        </template>
+
         <template #nodeTemplate let-node>
           <svg:g class="node">
             <svg:rect [attr.width]="node.width + 10" [attr.height]="node.height" [attr.fill]="node.options.color" />
-            <svg:text alignment-baseline="central" [style.font-size]="'12px'" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
-            <svg:circle r="5" [attr.cx]="node.width + 10" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" stroke="#fff" />
+            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
+            <svg:circle r="5" [attr.cx]="node.width + 10" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" stroke="#fff" (click)="toggleExpand(node)" />
           </svg:g>
         </template>
 
-        <!-- <template #linkTemplate let-link>
+        <template #linkTemplate let-link>
           <svg:g class="edge">
-            <svg:path *ngIf="!linkTemplate"
-              strokeWidth="2"
+            <svg:path
+              stroke-width="2"
               [attr.d]="link.line"
+              marker-end="url(#arrow)"
             />
           </svg:g>
-        </template> -->
+        </template>
 
       </ngx-charts-directed-graph>
     </div>

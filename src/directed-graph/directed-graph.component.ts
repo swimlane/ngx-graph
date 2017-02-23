@@ -41,6 +41,13 @@ import * as dagre from 'dagre';
       (legendLabelDeactivate)="onDeactivate($event)"
       mouse-wheel (mouseWheelUp)="zoom($event, 'in')" (mouseWheelDown)="zoom($event, 'out')">
       <svg:g *ngIf="initialized" [attr.transform]="transform" class="directed-graph chart">
+
+        <defs>
+          <template *ngIf="defsTemplate"
+            [ngTemplateOutlet]="defsTemplate">
+          </template>
+        </defs>
+
         <svg:rect
           class="panning-rect"
           [attr.width]="dims.width * 100"
@@ -75,7 +82,7 @@ import * as dagre from 'dagre';
               [ngTemplateOutlet]="nodeTemplate"
               [ngOutletContext]="{ $implicit: node }">
             </template>
-            <svg:circle *ngIf="!nodeTemplate" r="10" [attr.fill]="node.options.color" />
+            <svg:circle *ngIf="!nodeTemplate" r="10" [attr.cx]="node.width / 2" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" />
           </svg:g>
         </svg:g>
       </svg:g>
@@ -111,7 +118,9 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
   @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
+
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
 
   colors: ColorHelper;

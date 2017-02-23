@@ -47,7 +47,7 @@ export class AppComponent implements OnInit {
       hierarchialGraph: generateHierarchialGraph(),
     });
 
-    this.setColorScheme('cool');
+    this.setColorScheme('picnic');
   }
 
   ngOnInit() {
@@ -127,6 +127,10 @@ export class AppComponent implements OnInit {
 
   onLegendLabelClick(entry) {
     console.log('Legend clicked', entry);
+  }
+
+  toggleExpand(node) {
+    console.log('toggle expand', node);
   }
 
 }

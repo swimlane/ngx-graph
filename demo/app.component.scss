@@ -251,10 +251,18 @@ main {
   .node {
     text {
       fill: #fff;
+      font-size: 12px;
+      font-weight: bold;
     }
   }
 
   .edge {
-    stroke: #666 !important;
+    path  {
+      stroke: #666 !important;
+    }
+  }
+
+  .arrow-head {
+    fill: #666;
   }
 }
