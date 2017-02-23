@@ -6,6 +6,7 @@ import {
   Input,
   TemplateRef,
   ViewChild,
+  ViewChildren,
   Output,
   ViewEncapsulation,
   EventEmitter,
@@ -14,9 +15,17 @@ import {
   style,
   transition,
   animate,
+  QueryList
 } from '@angular/core';
 
-import { BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
+import {
+  BaseChartComponent,
+  ChartComponent,
+  calculateViewDimensions,
+  ViewDimensions,
+  ColorHelper
+} from '@swimlane/ngx-charts';
+
 import d3 from '../d3';
 import * as dagre from 'dagre';
 
@@ -46,17 +55,17 @@ import * as dagre from 'dagre';
               [ngOutletContext]="{ $implicit: link }">
             </template>
             <svg:path *ngIf="!linkTemplate"
-              strokeWidth="1" class="edge"
+              class="edge"
               [attr.d]="link.line"
             />
           </svg:g>
         </svg:g>
         <svg:g class="nodes">
           <svg:g *ngFor="let node of _nodes; trackBy:trackNodeBy"
+            #nodeElement
+            [id]="node.id"
             [@nodeAnimation]="'active'"
-            [attr.transform]="'translate(' + node.x + ',' + node.y + ')'"
-            [attr.fill]="colors.getColor(groupResultsBy(node))"
-            [attr.stroke]="colors.getColor(groupResultsBy(node))"
+            [attr.transform]="node.options.transform"
             (click)="onClick(node)"
             ngx-tooltip
             [tooltipPlacement]="'top'"
@@ -66,7 +75,7 @@ import * as dagre from 'dagre';
               [ngTemplateOutlet]="nodeTemplate"
               [ngOutletContext]="{ $implicit: node }">
             </template>
-            <svg:circle *ngIf="!nodeTemplate" r="10" />
+            <svg:circle *ngIf="!nodeTemplate" r="10" [attr.fill]="node.options.color" />
           </svg:g>
         </svg:g>
       </svg:g>
@@ -103,6 +112,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
   @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
+  @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
 
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -131,58 +141,44 @@ export class DirectedGraphComponent extends BaseChartComponent {
         showLegend: this.legend,
       });
 
-      // if (!this.initialized) {
-      this.createGraph();
-      // }
-
       this.seriesDomain = this.getSeriesDomain();
       this.setColors();
       this.legendOptions = this.getLegendOptions();
 
+      this.createGraph();
       this.updateTransform();
-
       this.initialized = true;
     });
   }
 
-  createGraph() {
-    this.graph = new dagre.graphlib.Graph();
-    this.graph.setGraph({
-      rankdir: 'LR',
-      // align: 'UL',
-      marginx: 20,
-      marginy: 20,
-      // acyclicer: 'greedy',
-      edgesep: 10,
-      ranker: 'longest-path'
-    });
+  ngAfterViewInit() {
+    super.ngAfterViewInit();
 
-    // Default to assigning a new object as a label for each new edge.
-    this.graph.setDefaultEdgeLabel(() => { return {}; });
+    this.draw();
+  }
 
-    this._nodes = this.nodes.map(n => {
-      return Object.assign({}, n);
-    })
+  draw() {
+    if (this.nodeElements && this.nodeElements.length) {
+      this.nodeElements.map(elem => {
+        let nativeElement = elem.nativeElement;
+        let node = this._nodes.find(n => n.id === nativeElement.id);
 
-    this._links = this.links.map(l => {
-      return Object.assign({}, l);
-    })
-
-    for (let node of this._nodes) {
-      node.width = 40;
-      node.height = 40;
-      this.graph.setNode(node.id, node);
-    }
-
-    for (let edge of this._links) {
-      this.graph.setEdge(edge.source, edge.target);
+        let dims = nativeElement.getBBox();
+        node.width = dims.width;
+        node.height = dims.height;
+      });
     }
 
     dagre.layout(this.graph);
 
     let index = {};
-    this.nodes.map(n => {
+    this._nodes.map(n => {
       index[n.id] = n;
+
+      n.options = {
+        color: this.colors.getColor(this.groupResultsBy(n)),
+        transform: `translate( ${n.x - n.width / 2}, ${n.y - n.height / 2})`
+      };
     });
 
     this._links = [];
@@ -199,6 +195,48 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x));
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y));
+  }
+
+  createGraph() {
+    this.graph = new dagre.graphlib.Graph();
+    this.graph.setGraph({
+      rankdir: 'LR',
+      // align: 'UL',
+      marginx: 20,
+      marginy: 20,
+      // acyclicer: 'greedy',
+      edgesep: 10,
+      ranksep: 100,
+      ranker: 'longest-path'
+    });
+
+    // Default to assigning a new object as a label for each new edge.
+    this.graph.setDefaultEdgeLabel(() => { return {}; });
+
+    this._nodes = this.nodes.map(n => {
+      return Object.assign({}, n);
+    });
+
+    this._links = this.links.map(l => {
+      return Object.assign({}, l);
+    });
+
+    for (let node of this._nodes) {
+      node.width = 20  ;
+      node.height = 30;
+      this.graph.setNode(node.id, node);
+
+      node.options = {
+        color: this.colors.getColor(this.groupResultsBy(node)),
+        transform: `translate( ${node.x - node.width / 2}, ${node.y - node.height / 2})`
+      };
+    }
+
+    for (let edge of this._links) {
+      this.graph.setEdge(edge.source, edge.target);
+    }
+
+    this.draw();
   }
 
   generateLine(points, interpolation = 'linear') {
@@ -229,11 +267,11 @@ export class DirectedGraphComponent extends BaseChartComponent {
   }
 
   updateTransform() {
-    this.panOffset.x = Math.max((this.graphDims.width * (this.zoomLevel - 1) * -1), this.panOffset.x);
-    this.panOffset.y = Math.max((this.graphDims.height * (this.zoomLevel - 1) * -1), this.panOffset.y);
-
-    this.panOffset.x = Math.min(0, this.panOffset.x);
-    this.panOffset.y = Math.min(0, this.panOffset.y);
+    // this.panOffset.x = Math.max((this.graphDims.width * (this.zoomLevel - 1) * -1), this.panOffset.x);
+    // this.panOffset.y = Math.max((this.graphDims.height * (this.zoomLevel - 1) * -1), this.panOffset.y);
+    //
+    // this.panOffset.x = Math.min(0, this.panOffset.x);
+    // this.panOffset.y = Math.min(0, this.panOffset.y);
 
     this.transform = `
       translate(${ this.panOffset.x }, ${ this.panOffset.y }) scale(${this.zoomLevel})

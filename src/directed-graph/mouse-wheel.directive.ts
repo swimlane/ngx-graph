@@ -1,4 +1,4 @@
-//https://github.com/SodhanaLibrary/angular2-examples/blob/master/app/mouseWheelDirective/mousewheel.directive.ts
+// https://github.com/SodhanaLibrary/angular2-examples/blob/master/app/mouseWheelDirective/mousewheel.directive.ts
 
 import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
 

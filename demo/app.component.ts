@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import d3 from '../src/d3';
 
 import { colorSets } from '../src/utils/color-sets';
-import { single, multi, countries, bubble, generateData, generateGraph, generateHierarchialGraph } from './data';
+import { countries, generateHierarchialGraph } from './data';
 import chartGroups from './chartTypes';
 import { id } from '../src/utils/id';
 
@@ -44,13 +44,11 @@ export class AppComponent implements OnInit {
       countries,
       colorSets,
       chartGroups,
-      graph: generateGraph(50),
       hierarchialGraph: generateHierarchialGraph(),
     });
 
     this.setColorScheme('cool');
   }
-
 
   ngOnInit() {
     this.selectChart(this.chartType);
@@ -67,25 +65,9 @@ export class AppComponent implements OnInit {
       return;
     }
 
-
     const country = this.countries[Math.floor(Math.random() * this.countries.length)];
     const add = Math.random() < 0.7;
     const remove = Math.random() < 0.5;
-
-    if (remove) {
-      if (this.graph.nodes.length > 1) {
-        const index = Math.floor(Math.random() * this.graph.nodes.length);
-        const value = this.graph.nodes[index].value;
-        this.graph.nodes.splice(index, 1);
-        const nodes = [ ...this.graph.nodes ];
-
-        const links = this.graph.links.filter(link => {
-          return link.source !== value && link.source.value !== value &&
-            link.target !== value && link.target.value !== value;
-        });
-        this.graph = { links, nodes };
-      }
-    }
 
     if (add) {
       // directed graph
@@ -100,7 +82,7 @@ export class AppComponent implements OnInit {
       this.hierarchialGraph.links.push({
         source: this.hierarchialGraph.nodes[Math.floor(Math.random() * (this.hierarchialGraph.nodes.length - 1))].id,
         target: hNode.id
-      })
+      });
 
       this.hierarchialGraph.links = [...this.hierarchialGraph.links];
       this.hierarchialGraph.nodes = [...this.hierarchialGraph.nodes];

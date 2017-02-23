@@ -10,6 +10,24 @@
         [scheme]="colorScheme"
         [view]="view"
         (select)="select($event)">
+
+        <template #nodeTemplate let-node>
+          <svg:g class="node">
+            <svg:rect [attr.width]="node.width + 10" [attr.height]="node.height" [attr.fill]="node.options.color" />
+            <svg:text alignment-baseline="central" [style.font-size]="'12px'" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
+            <svg:circle r="5" [attr.cx]="node.width + 10" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" stroke="#fff" />
+          </svg:g>
+        </template>
+
+        <!-- <template #linkTemplate let-link>
+          <svg:g class="edge">
+            <svg:path *ngIf="!linkTemplate"
+              strokeWidth="2"
+              [attr.d]="link.line"
+            />
+          </svg:g>
+        </template> -->
+
       </ngx-charts-directed-graph>
     </div>
   </div>
@@ -19,79 +37,81 @@
       <small class="subtitle">Directed Acyclic Graph Visualization</small>
     </h1>
 
-    <h3>Theme</h3>
-    <select
-      [ngModel]="theme"
-      (ngModelChange)="theme = $event">>
-      <option [value]="'dark'">Dark</option>
-      <option [value]="'light'">Light</option>
-    </select>
+    <div class="sidebar-body">
+      <h3>Theme</h3>
+      <select
+        [ngModel]="theme"
+        (ngModelChange)="theme = $event">>
+        <option [value]="'dark'">Dark</option>
+        <option [value]="'light'">Light</option>
+      </select>
 
-    <h3 (click)="dataVisable = !dataVisable" style="cursor: pointer">
-      <span
-        [class.arrow-down]="dataVisable"
-        [class.arrow-right]="!dataVisable">
-      </span>
-      <strong>Data</strong>
-    </h3>
-    <div [hidden]="!dataVisable" style="margin-left: 10px;">
-      <div>
-        <label>
-          <input type="checkbox" [checked]="realTimeData" (change)="realTimeData = $event.target.checked">
-          Real-time
-        </label>
-      </div>
-    </div>
-    <div>
-      <h3 (click)="dimVisiable = !dimVisiable" style="cursor: pointer">
+      <h3 (click)="dataVisable = !dataVisable" style="cursor: pointer">
         <span
-          [class.arrow-down]="dimVisiable"
-          [class.arrow-right]="!dimVisiable">
+          [class.arrow-down]="dataVisable"
+          [class.arrow-right]="!dataVisable">
         </span>
-        <strong>Dimensions</strong>
+        <strong>Data</strong>
       </h3>
-      <div [hidden]="!dimVisiable" style="margin-left: 10px;">
-        <label>
-          <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked)">
-          Fit Container
-        </label> <br />
-        <div *ngIf="!fitContainer">
-          <label>Width:</label><br />
-          <input type="number" [(ngModel)]="width"><br />
-          <label>Height:</label><br />
-          <input type="number" [(ngModel)]="height"><br />
-          <button (click)="applyDimensions()">Apply dimensions</button>
+      <div [hidden]="!dataVisable" style="margin-left: 10px;">
+        <div>
+          <label>
+            <input type="checkbox" [checked]="realTimeData" (change)="realTimeData = $event.target.checked">
+            Real-time
+          </label>
         </div>
       </div>
-    </div>
-    <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
-      <span
-        [class.arrow-down]="colorVisible"
-        [class.arrow-right]="!colorVisible">
-      </span>
-      <strong>Color Scheme</strong>
-    </h3>
-    <select
-      [hidden]="!colorVisible"
-      style="margin-left: 10px;"
-      [ngModel]="selectedColorScheme"
-      (ngModelChange)="setColorScheme($event)">
-      <option *ngFor="let scheme of colorSets" [value]="scheme.name">{{scheme.name}}</option>
-    </select>
+      <div>
+        <h3 (click)="dimVisiable = !dimVisiable" style="cursor: pointer">
+          <span
+            [class.arrow-down]="dimVisiable"
+            [class.arrow-right]="!dimVisiable">
+          </span>
+          <strong>Dimensions</strong>
+        </h3>
+        <div [hidden]="!dimVisiable" style="margin-left: 10px;">
+          <label>
+            <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked)">
+            Fit Container
+          </label> <br />
+          <div *ngIf="!fitContainer">
+            <label>Width:</label><br />
+            <input type="number" [(ngModel)]="width"><br />
+            <label>Height:</label><br />
+            <input type="number" [(ngModel)]="height"><br />
+            <button (click)="applyDimensions()">Apply dimensions</button>
+          </div>
+        </div>
+      </div>
+      <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
+        <span
+          [class.arrow-down]="colorVisible"
+          [class.arrow-right]="!colorVisible">
+        </span>
+        <strong>Color Scheme</strong>
+      </h3>
+      <select
+        [hidden]="!colorVisible"
+        style="margin-left: 10px;"
+        [ngModel]="selectedColorScheme"
+        (ngModelChange)="setColorScheme($event)">
+        <option *ngFor="let scheme of colorSets" [value]="scheme.name">{{scheme.name}}</option>
+      </select>
 
-    <h3 (click)="optsVisible = !optsVisible" style="cursor: pointer">
-      <span
-        [class.arrow-down]="optsVisible"
-        [class.arrow-right]="!optsVisible">
-      </span>
-      <strong>Options</strong>
-    </h3>
-    <div [hidden]="!optsVisible" style="margin-left: 10px;">
-      <div *ngIf="chart.options.includes('showLegend')">
-        <label>
-          <input type="checkbox" [checked]="showLegend" (change)="showLegend = $event.target.checked">
-          Show Legend
-        </label> <br />
+      <h3 (click)="optsVisible = !optsVisible" style="cursor: pointer">
+        <span
+          [class.arrow-down]="optsVisible"
+          [class.arrow-right]="!optsVisible">
+        </span>
+        <strong>Options</strong>
+      </h3>
+      <div [hidden]="!optsVisible" style="margin-left: 10px;">
+        <div *ngIf="chart.options.includes('showLegend')">
+          <label>
+            <input type="checkbox" [checked]="showLegend" (change)="showLegend = $event.target.checked">
+            Show Legend
+          </label> <br />
+        </div>
       </div>
     </div>
   </div>
