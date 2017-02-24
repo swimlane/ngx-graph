@@ -1,4 +1,5 @@
 import { id } from '../src/utils/id';
+import * as tasks from './data/turbine.json';
 
 export const countries = [
   'Abkhazia', 'Afghanistan', 'Akrotiri and Dhekelia', 'Aland', 'Albania',
@@ -113,19 +114,48 @@ export function generateHierarchialGraph() {
   }, {
     source: '3',
     target: '5'
-  }, {
-    source: '3',
-    target: '4'
-  }, {
-    source: '3',
-    target: '6'
-  }, {
-    source: '5',
-    target: '6'
-  }, {
-    source: '4',
-    target: '6'
   }];
 
   return { links, nodes };
+}
+
+export function getTurbineData() {
+  const nodes = [];
+  const links = [];
+
+  for (let key in tasks.tasks) {
+    let node = tasks.tasks[key];
+    node.id = id();
+    node.label = key;
+
+    nodes.push(node);
+  }
+
+  for (let node of nodes) {
+    if (node['on-success']) {
+      for (let label of node['on-success']) {
+        let target = nodes.find(n => n.label === label);
+
+        links.push({
+          source: node.id,
+          target: target.id,
+          label: 'on success'
+        });
+      }
+    }
+
+    if (node['on-error']) {
+      for (let label of node['on-error']) {
+        let target = nodes.find(n => n.label === label);
+
+        links.push({
+          source: node.id,
+          target: target.id,
+          label: 'on error'
+        });
+      }
+    }
+  }
+
+  return {nodes, links};
 }

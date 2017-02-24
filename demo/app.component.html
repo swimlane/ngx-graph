@@ -3,12 +3,14 @@
     <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
       <ngx-charts-directed-graph
         class="chart-container"
+        [view]="view"
         [legend]="showLegend"
         [links]="hierarchialGraph.links"
         (legendLabelClick)="onLegendLabelClick($event)"
         [nodes]="hierarchialGraph.nodes"
         [scheme]="colorScheme"
-        [view]="view"
+        [orientation]="orientation"
+        [curve]="curve"
         (select)="select($event)">
 
         <template #defsTemplate>
@@ -19,9 +21,9 @@
 
         <template #nodeTemplate let-node>
           <svg:g class="node">
-            <svg:rect [attr.width]="node.width + 10" [attr.height]="node.height" [attr.fill]="node.options.color" />
+            <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" />
             <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
-            <svg:circle r="5" [attr.cx]="node.width + 10" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" stroke="#fff" (click)="toggleExpand(node)" />
+            <!-- <svg:circle r="5" [attr.cx]="node.width" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" stroke="#fff" (click)="toggleExpand(node)" /> -->
           </svg:g>
         </template>
 
@@ -119,6 +121,21 @@
             Show Legend
           </label> <br />
         </div>
+
+        <label>Orientation</label>
+        <select [(ngModel)]="orientation">
+          <option *ngFor="let orient of orientations" [value]="orient.value">{{orient.label}}</option>
+        </select>
+
+        <label>Line Interpolation</label>
+        <select
+          [ngModel]="curveType"
+          (ngModelChange)="setInterpolationType($event)">
+          <option *ngFor="let interpolationType of interpolationTypes" [value]="interpolationType">
+            {{interpolationType}}
+          </option>
+        </select>
+
       </div>
     </div>
   </div>

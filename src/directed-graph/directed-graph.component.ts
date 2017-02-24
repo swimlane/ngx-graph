@@ -71,7 +71,6 @@ import * as dagre from 'dagre';
           <svg:g *ngFor="let node of _nodes; trackBy:trackNodeBy"
             #nodeElement
             [id]="node.id"
-            [@nodeAnimation]="'active'"
             [attr.transform]="node.options.transform"
             (click)="onClick(node)"
             ngx-tooltip
@@ -82,7 +81,11 @@ import * as dagre from 'dagre';
               [ngTemplateOutlet]="nodeTemplate"
               [ngOutletContext]="{ $implicit: node }">
             </template>
-            <svg:circle *ngIf="!nodeTemplate" r="10" [attr.cx]="node.width / 2" [attr.cy]="node.height / 2" [attr.fill]="node.options.color" />
+            <svg:circle *ngIf="!nodeTemplate"
+              r="10"
+              [attr.cx]="node.width / 2"
+              [attr.cy]="node.height / 2"
+              [attr.fill]="node.options.color" />
           </svg:g>
         </svg:g>
       </svg:g>
@@ -93,16 +96,16 @@ import * as dagre from 'dagre';
   ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('nodeAnimation', [
-      transition('void => *', [
-        style({
-          transform: 'translateX(-500px)',
-        }),
-        animate(500, style({opacity: 1, transform: '*'}))
-      ])
-    ])
-  ]
+  // animations: [
+  //   trigger('nodeAnimation', [
+  //     transition('void => *', [
+  //       style({
+  //         transform: 'translateX(-500px)',
+  //       }),
+  //       animate(500, style({opacity: 1, transform: '*'}))
+  //     ])
+  //   ])
+  // ]
 })
 export class DirectedGraphComponent extends BaseChartComponent {
 
@@ -112,6 +115,8 @@ export class DirectedGraphComponent extends BaseChartComponent {
   @Input() activeEntries: any[] = [];
   @Input() zoomLevel: number = 1;
   @Input() panOffset: any = {x: 0, y: 0};
+  @Input() orientation: string = 'LR';
+  @Input() curve: any;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -163,7 +168,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
   ngAfterViewInit() {
     super.ngAfterViewInit();
 
-    this.draw();
+    this.update();
   }
 
   draw() {
@@ -173,8 +178,14 @@ export class DirectedGraphComponent extends BaseChartComponent {
         let node = this._nodes.find(n => n.id === nativeElement.id);
 
         let dims = nativeElement.getBBox();
-        node.width = dims.width;
         node.height = dims.height;
+
+        if (nativeElement.getElementsByTagName('text').length) {
+          let textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+          node.width = textDims.width + 20;
+        } else {
+          node.width = dims.width;
+        }
       });
     }
 
@@ -204,19 +215,21 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x));
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y));
+
+    this.cd.markForCheck();
   }
 
   createGraph() {
     this.graph = new dagre.graphlib.Graph();
     this.graph.setGraph({
-      rankdir: 'LR',
+      rankdir: this.orientation,
       // align: 'UL',
       marginx: 20,
       marginy: 20,
       // acyclicer: 'greedy',
-      edgesep: 10,
+      edgesep: 100,
       ranksep: 100,
-      ranker: 'longest-path'
+      // ranker: 'longest-path'
     });
 
     // Default to assigning a new object as a label for each new edge.
@@ -231,7 +244,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
     });
 
     for (let node of this._nodes) {
-      node.width = 20  ;
+      node.width = 20;
       node.height = 30;
       this.graph.setNode(node.id, node);
 
@@ -246,10 +259,12 @@ export class DirectedGraphComponent extends BaseChartComponent {
     }
 
     this.draw();
+
+    setTimeout(() => { this.draw(); }, 50);
   }
 
   generateLine(points, interpolation = 'linear') {
-    let lineFunction = d3.line().x(d => d.x).y(d => d.y);
+    let lineFunction = d3.line().x(d => d.x).y(d => d.y).curve(this.curve);
     return lineFunction(points);
   }
 
