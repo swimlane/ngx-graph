@@ -1,5 +1,5 @@
 import { id } from '../src/utils/id';
-import tasks from './data/turbine.json';
+import * as tasks from './data/turbine.json';
 
 export const countries = [
   'Abkhazia', 'Afghanistan', 'Akrotiri and Dhekelia', 'Aland', 'Albania',
