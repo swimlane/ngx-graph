@@ -7,6 +7,7 @@ declare var HMR: boolean;
 declare var IS_DEV: boolean;
 
 declare module 'dagre';
+declare module '*.json';
 
 interface ErrorStackTraceLimit {
   stackTraceLimit: number;
