@@ -26,6 +26,8 @@ import {
   ColorHelper
 } from '@swimlane/ngx-charts';
 
+import { id } from '../utils';
+
 import d3 from '../d3';
 import * as dagre from 'dagre';
 
@@ -55,6 +57,7 @@ import * as dagre from 'dagre';
           [attr.transform]="'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' "
           (mousedown)="isPanning = true"
         />
+
         <svg:g class="links">
           <svg:g *ngFor="let link of _links; trackBy:trackLinkBy">
             <template *ngIf="linkTemplate"
@@ -67,11 +70,13 @@ import * as dagre from 'dagre';
             />
           </svg:g>
         </svg:g>
+
         <svg:g class="nodes">
           <svg:g *ngFor="let node of _nodes; trackBy:trackNodeBy"
+            class="node-group"
             #nodeElement
             [id]="node.id"
-            [attr.transform]="node.options.transform"
+            [style.transform]="node.options.transform"
             (click)="onClick(node)"
             ngx-tooltip
             [tooltipPlacement]="'top'"
@@ -96,16 +101,13 @@ import * as dagre from 'dagre';
   ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // animations: [
-  //   trigger('nodeAnimation', [
-  //     transition('void => *', [
-  //       style({
-  //         transform: 'translateX(-500px)',
-  //       }),
-  //       animate(500, style({opacity: 1, transform: '*'}))
-  //     ])
-  //   ])
-  // ]
+  animations: [
+    trigger('link', [
+      transition('* => *', [
+        animate(500, style({transform: '*'}))
+      ])
+    ])
+  ]
 })
 export class DirectedGraphComponent extends BaseChartComponent {
 
@@ -142,6 +144,9 @@ export class DirectedGraphComponent extends BaseChartComponent {
   _nodes: any[];
   _links: any[];
 
+  animationCounter: number = 1;
+  animationState: string = '';
+
   @Input() groupResultsBy: (node: any) => string = node => node.label;
 
   update(): void {
@@ -162,13 +167,17 @@ export class DirectedGraphComponent extends BaseChartComponent {
       this.createGraph();
       this.updateTransform();
       this.initialized = true;
+      this.animationState = `animation${this.animationCounter}`;
+      this.animationCounter += 1;
     });
   }
 
   ngAfterViewInit() {
     super.ngAfterViewInit();
 
-    this.update();
+    setTimeout(() => {
+      this.update();
+    });
   }
 
   draw() {
@@ -197,20 +206,26 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
       n.options = {
         color: this.colors.getColor(this.groupResultsBy(n)),
-        transform: `translate( ${n.x - n.width / 2}, ${n.y - n.height / 2})`
+        transform: `translate( ${n.x - n.width / 2}px, ${n.y - n.height / 2}px)`
       };
     });
 
+    let oldLinks = [...this._links];
+
     this._links = [];
+
     for (let k in this.graph._edgeLabels) {
       let l = this.graph._edgeLabels[k];
+
+      let normKey = k.replace(/[^\w]*/g, '');
+      let oldLink = oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
 
       let points = l.points;
       let line = this.generateLine(points);
 
-      this._links.push({
-        line
-      });
+      let newLink = Object.assign({}, oldLink);
+      newLink.line = line;
+      this._links.push(newLink);
     }
 
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x));
@@ -240,7 +255,13 @@ export class DirectedGraphComponent extends BaseChartComponent {
     });
 
     this._links = this.links.map(l => {
-      return Object.assign({}, l);
+      let newLink = Object.assign({}, l);
+
+      if (!newLink.id) {
+        newLink.id = id();
+      }
+
+      return newLink;
     });
 
     for (let node of this._nodes) {
