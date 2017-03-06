@@ -267,7 +267,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
             .duration(500)
             .attr('d', l.line);
 
-
           let textPathSelection = d3.select(this.chartElement.nativeElement).select(`#${l.id}`);
           textPathSelection
             .attr('d', l.oldLine)

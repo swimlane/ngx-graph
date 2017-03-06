@@ -17,7 +17,7 @@ import * as import8 from '@angular/core/src/change_detection/constants';
 import * as import9 from '@angular/core/src/linker/component_factory';
 import * as import10 from '@angular/core/src/linker/element_ref';
 import * as import11 from '@angular/core/src/zone/ng_zone';
-import * as import12 from '@angular/common/src/location/location';
+import * as import12 from '@angular/common/src/location/location_strategy';
 import * as import13 from './directed-graph.component.css.ngstyle';
 import * as import14 from '@angular/core/src/animation/animation_transition';
 import * as import15 from '@angular/core/src/animation/animation_sequence_player';
@@ -246,7 +246,7 @@ class View_DirectedGraphComponent_Host0 extends import2.AppView<any> {
   createInternal(rootSelector:string):import9.ComponentRef<any> {
     this._el_0 = import3.selectOrCreateRenderHostElement(this.renderer,'ngx-charts-directed-graph',import3.EMPTY_INLINE_ARRAY,rootSelector,(null as any));
     this.compView_0 = new View_DirectedGraphComponent0(this.viewUtils,this,0,this._el_0);
-    this._DirectedGraphComponent_0_3 = new Wrapper_DirectedGraphComponent(new import10.ElementRef(this._el_0),this.injectorGet(import11.NgZone,this.parentIndex),this.compView_0.ref,this.injectorGet(import12.Location,this.parentIndex));
+    this._DirectedGraphComponent_0_3 = new Wrapper_DirectedGraphComponent(new import10.ElementRef(this._el_0),this.injectorGet(import11.NgZone,this.parentIndex),this.compView_0.ref,this.injectorGet(import12.LocationStrategy,this.parentIndex));
     this._query_linkTemplate_0_0 = new import6.QueryList<any>();
     this._query_nodeTemplate_0_1 = new import6.QueryList<any>();
     this._query_defsTemplate_0_2 = new import6.QueryList<any>();
@@ -371,10 +371,40 @@ class View_DirectedGraphComponent2 extends import2.AppView<any> {
     return (null as any);
   }
 }
-class View_DirectedGraphComponent6 extends import2.AppView<any> {
+class View_DirectedGraphComponent4 extends import2.AppView<any> {
+  _el_0:any;
+  /*private*/ _expr_1:any;
+  /*private*/ _expr_2:any;
+  constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
+    super(View_DirectedGraphComponent4,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    this._expr_1 = import1.UNINITIALIZED;
+    this._expr_2 = import1.UNINITIALIZED;
+  }
+  createInternal(rootSelector:string):import9.ComponentRef<any> {
+    this._el_0 = import3.createRenderElement(this.renderer,(null as any),':svg:path',new import3.InlineArray2(2,'class','text-path'),(null as any));
+    this.init(this._el_0,((<any>this.renderer).directRenderer? (null as any): [this._el_0]),(null as any));
+    return (null as any);
+  }
+  detectChangesInternal(throwOnChange:boolean):void {
+    const currVal_1:any = this.context.$implicit.line;
+    if (import3.checkBinding(throwOnChange,this._expr_1,currVal_1)) {
+      this.renderer.setElementAttribute(this._el_0,'d',((currVal_1 == null)? (null as any): currVal_1.toString()));
+      this._expr_1 = currVal_1;
+    }
+    const currVal_2:any = this.context.$implicit.id;
+    if (import3.checkBinding(throwOnChange,this._expr_2,currVal_2)) {
+      this.renderer.setElementAttribute(this._el_0,'id',((currVal_2 == null)? (null as any): currVal_2.toString()));
+      this._expr_2 = currVal_2;
+    }
+  }
+  visitRootNodesInternal(cb:any,ctx:any):void {
+    cb(this._el_0,ctx);
+  }
+}
+class View_DirectedGraphComponent7 extends import2.AppView<any> {
   _text_0:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent6,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent7,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
     this._text_0 = this.renderer.createText((null as any),'\n            ',(null as any));
@@ -385,7 +415,7 @@ class View_DirectedGraphComponent6 extends import2.AppView<any> {
     cb(this._text_0,ctx);
   }
 }
-class View_DirectedGraphComponent5 extends import2.AppView<any> {
+class View_DirectedGraphComponent6 extends import2.AppView<any> {
   _anchor_0:any;
   /*private*/ _vc_0:import20.ViewContainer;
   _TemplateRef_0_5:any;
@@ -393,7 +423,7 @@ class View_DirectedGraphComponent5 extends import2.AppView<any> {
   _el_1:any;
   _map_5:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent5,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent6,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
     this._map_5 = import3.pureProxy1((p0:any):{[key: string]:any} => {
       return {$implicit: p0};
     });
@@ -429,15 +459,15 @@ class View_DirectedGraphComponent5 extends import2.AppView<any> {
     cb(this._el_1,ctx);
   }
   createEmbeddedViewInternal(nodeIndex:number):import2.AppView<any> {
-    if ((nodeIndex == 0)) { return new View_DirectedGraphComponent6(this.viewUtils,this,0,this._anchor_0,this._vc_0); }
+    if ((nodeIndex == 0)) { return new View_DirectedGraphComponent7(this.viewUtils,this,0,this._anchor_0,this._vc_0); }
     return (null as any);
   }
 }
-class View_DirectedGraphComponent7 extends import2.AppView<any> {
+class View_DirectedGraphComponent8 extends import2.AppView<any> {
   _el_0:any;
   /*private*/ _expr_1:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent7,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent8,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
     this._expr_1 = import1.UNINITIALIZED;
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
@@ -456,7 +486,7 @@ class View_DirectedGraphComponent7 extends import2.AppView<any> {
     cb(this._el_0,ctx);
   }
 }
-class View_DirectedGraphComponent4 extends import2.AppView<any> {
+class View_DirectedGraphComponent5 extends import2.AppView<any> {
   _el_0:any;
   _text_1:any;
   _anchor_2:any;
@@ -471,7 +501,7 @@ class View_DirectedGraphComponent4 extends import2.AppView<any> {
   _text_5:any;
   /*private*/ _expr_12:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent4,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent5,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
     this._expr_12 = import1.UNINITIALIZED;
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
@@ -531,15 +561,15 @@ class View_DirectedGraphComponent4 extends import2.AppView<any> {
     cb(this._el_0,ctx);
   }
   createEmbeddedViewInternal(nodeIndex:number):import2.AppView<any> {
-    if ((nodeIndex == 2)) { return new View_DirectedGraphComponent5(this.viewUtils,this,2,this._anchor_2,this._vc_2); }
-    if ((nodeIndex == 4)) { return new View_DirectedGraphComponent7(this.viewUtils,this,4,this._anchor_4,this._vc_4); }
+    if ((nodeIndex == 2)) { return new View_DirectedGraphComponent6(this.viewUtils,this,2,this._anchor_2,this._vc_2); }
+    if ((nodeIndex == 4)) { return new View_DirectedGraphComponent8(this.viewUtils,this,4,this._anchor_4,this._vc_4); }
     return (null as any);
   }
 }
-class View_DirectedGraphComponent10 extends import2.AppView<any> {
+class View_DirectedGraphComponent11 extends import2.AppView<any> {
   _text_0:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent10,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent11,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
     this._text_0 = this.renderer.createText((null as any),'\n            ',(null as any));
@@ -550,7 +580,7 @@ class View_DirectedGraphComponent10 extends import2.AppView<any> {
     cb(this._text_0,ctx);
   }
 }
-class View_DirectedGraphComponent9 extends import2.AppView<any> {
+class View_DirectedGraphComponent10 extends import2.AppView<any> {
   _anchor_0:any;
   /*private*/ _vc_0:import20.ViewContainer;
   _TemplateRef_0_5:any;
@@ -558,7 +588,7 @@ class View_DirectedGraphComponent9 extends import2.AppView<any> {
   _el_1:any;
   _map_5:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent9,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent10,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
     this._map_5 = import3.pureProxy1((p0:any):{[key: string]:any} => {
       return {$implicit: p0};
     });
@@ -594,17 +624,17 @@ class View_DirectedGraphComponent9 extends import2.AppView<any> {
     cb(this._el_1,ctx);
   }
   createEmbeddedViewInternal(nodeIndex:number):import2.AppView<any> {
-    if ((nodeIndex == 0)) { return new View_DirectedGraphComponent10(this.viewUtils,this,0,this._anchor_0,this._vc_0); }
+    if ((nodeIndex == 0)) { return new View_DirectedGraphComponent11(this.viewUtils,this,0,this._anchor_0,this._vc_0); }
     return (null as any);
   }
 }
-class View_DirectedGraphComponent11 extends import2.AppView<any> {
+class View_DirectedGraphComponent12 extends import2.AppView<any> {
   _el_0:any;
   /*private*/ _expr_1:any;
   /*private*/ _expr_2:any;
   /*private*/ _expr_3:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent11,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent12,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
     this._expr_1 = import1.UNINITIALIZED;
     this._expr_2 = import1.UNINITIALIZED;
     this._expr_3 = import1.UNINITIALIZED;
@@ -635,7 +665,7 @@ class View_DirectedGraphComponent11 extends import2.AppView<any> {
     cb(this._el_0,ctx);
   }
 }
-class View_DirectedGraphComponent8 extends import2.AppView<any> {
+class View_DirectedGraphComponent9 extends import2.AppView<any> {
   _el_0:any;
   _text_1:any;
   _anchor_2:any;
@@ -651,7 +681,7 @@ class View_DirectedGraphComponent8 extends import2.AppView<any> {
   /*private*/ _expr_12:any;
   /*private*/ _expr_13:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
-    super(View_DirectedGraphComponent8,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
+    super(View_DirectedGraphComponent9,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
     this._expr_12 = import1.UNINITIALIZED;
     this._expr_13 = import1.UNINITIALIZED;
   }
@@ -718,8 +748,8 @@ class View_DirectedGraphComponent8 extends import2.AppView<any> {
     cb(this._el_0,ctx);
   }
   createEmbeddedViewInternal(nodeIndex:number):import2.AppView<any> {
-    if ((nodeIndex == 2)) { return new View_DirectedGraphComponent9(this.viewUtils,this,2,this._anchor_2,this._vc_2); }
-    if ((nodeIndex == 4)) { return new View_DirectedGraphComponent11(this.viewUtils,this,4,this._anchor_4,this._vc_4); }
+    if ((nodeIndex == 2)) { return new View_DirectedGraphComponent10(this.viewUtils,this,2,this._anchor_2,this._vc_2); }
+    if ((nodeIndex == 4)) { return new View_DirectedGraphComponent12(this.viewUtils,this,4,this._anchor_4,this._vc_4); }
     return (null as any);
   }
   handleEvent_0(eventName:string,$event:any):boolean {
@@ -742,35 +772,40 @@ class View_DirectedGraphComponent1 extends import2.AppView<any> {
   _TemplateRef_4_5:any;
   _NgIf_4_6:import24.Wrapper_NgIf;
   _text_5:any;
-  _text_6:any;
-  _el_7:any;
+  _anchor_6:any;
+  /*private*/ _vc_6:import20.ViewContainer;
+  _TemplateRef_6_5:any;
+  _NgFor_6_6:import27.Wrapper_NgFor;
+  _text_7:any;
   _text_8:any;
   _el_9:any;
   _text_10:any;
-  _anchor_11:any;
-  /*private*/ _vc_11:import20.ViewContainer;
-  _TemplateRef_11_5:any;
-  _NgFor_11_6:import27.Wrapper_NgFor;
+  _el_11:any;
   _text_12:any;
-  _text_13:any;
-  _el_14:any;
+  _anchor_13:any;
+  /*private*/ _vc_13:import20.ViewContainer;
+  _TemplateRef_13_5:any;
+  _NgFor_13_6:import27.Wrapper_NgFor;
+  _text_14:any;
   _text_15:any;
-  _anchor_16:any;
-  /*private*/ _vc_16:import20.ViewContainer;
-  _TemplateRef_16_5:any;
-  _NgFor_16_6:import27.Wrapper_NgFor;
+  _el_16:any;
   _text_17:any;
-  _text_18:any;
-  /*private*/ _expr_28:any;
-  /*private*/ _expr_29:any;
-  /*private*/ _expr_30:any;
-  /*private*/ _expr_31:any;
+  _anchor_18:any;
+  /*private*/ _vc_18:import20.ViewContainer;
+  _TemplateRef_18_5:any;
+  _NgFor_18_6:import27.Wrapper_NgFor;
+  _text_19:any;
+  _text_20:any;
+  /*private*/ _expr_33:any;
+  /*private*/ _expr_34:any;
+  /*private*/ _expr_35:any;
+  /*private*/ _expr_36:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
     super(View_DirectedGraphComponent1,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
-    this._expr_28 = import1.UNINITIALIZED;
-    this._expr_29 = import1.UNINITIALIZED;
-    this._expr_30 = import1.UNINITIALIZED;
-    this._expr_31 = import1.UNINITIALIZED;
+    this._expr_33 = import1.UNINITIALIZED;
+    this._expr_34 = import1.UNINITIALIZED;
+    this._expr_35 = import1.UNINITIALIZED;
+    this._expr_36 = import1.UNINITIALIZED;
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
     this._el_0 = import3.createRenderElement(this.renderer,(null as any),':svg:g',new import3.InlineArray2(2,'class','directed-graph chart'),(null as any));
@@ -781,27 +816,32 @@ class View_DirectedGraphComponent1 extends import2.AppView<any> {
     this._vc_4 = new import20.ViewContainer(4,2,this,this._anchor_4);
     this._TemplateRef_4_5 = new import22.TemplateRef_(this,4,this._anchor_4);
     this._NgIf_4_6 = new import24.Wrapper_NgIf(this._vc_4.vcRef,this._TemplateRef_4_5);
-    this._text_5 = this.renderer.createText(this._el_2,'\n        ',(null as any));
-    this._text_6 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
-    this._el_7 = import3.createRenderElement(this.renderer,this._el_0,':svg:rect',new import3.InlineArray2(2,'class','panning-rect'),(null as any));
+    this._text_5 = this.renderer.createText(this._el_2,'\n\n          ',(null as any));
+    this._anchor_6 = this.renderer.createTemplateAnchor(this._el_2,(null as any));
+    this._vc_6 = new import20.ViewContainer(6,2,this,this._anchor_6);
+    this._TemplateRef_6_5 = new import22.TemplateRef_(this,6,this._anchor_6);
+    this._NgFor_6_6 = new import27.Wrapper_NgFor(this._vc_6.vcRef,this._TemplateRef_6_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
+    this._text_7 = this.renderer.createText(this._el_2,'\n        ',(null as any));
     this._text_8 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
-    this._el_9 = import3.createRenderElement(this.renderer,this._el_0,':svg:g',new import3.InlineArray2(2,'class','links'),(null as any));
-    this._text_10 = this.renderer.createText(this._el_9,'\n          ',(null as any));
-    this._anchor_11 = this.renderer.createTemplateAnchor(this._el_9,(null as any));
-    this._vc_11 = new import20.ViewContainer(11,9,this,this._anchor_11);
-    this._TemplateRef_11_5 = new import22.TemplateRef_(this,11,this._anchor_11);
-    this._NgFor_11_6 = new import27.Wrapper_NgFor(this._vc_11.vcRef,this._TemplateRef_11_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
-    this._text_12 = this.renderer.createText(this._el_9,'\n        ',(null as any));
-    this._text_13 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
-    this._el_14 = import3.createRenderElement(this.renderer,this._el_0,':svg:g',new import3.InlineArray2(2,'class','nodes'),(null as any));
-    this._text_15 = this.renderer.createText(this._el_14,'\n          ',(null as any));
-    this._anchor_16 = this.renderer.createTemplateAnchor(this._el_14,(null as any));
-    this._vc_16 = new import20.ViewContainer(16,14,this,this._anchor_16);
-    this._TemplateRef_16_5 = new import22.TemplateRef_(this,16,this._anchor_16);
-    this._NgFor_16_6 = new import27.Wrapper_NgFor(this._vc_16.vcRef,this._TemplateRef_16_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
-    this._text_17 = this.renderer.createText(this._el_14,'\n        ',(null as any));
-    this._text_18 = this.renderer.createText(this._el_0,'\n      ',(null as any));
-    var disposable_0:Function = import3.subscribeToRenderElement(this,this._el_7,new import3.InlineArray2(2,'mousedown',(null as any)),this.eventHandler(this.handleEvent_7));
+    this._el_9 = import3.createRenderElement(this.renderer,this._el_0,':svg:rect',new import3.InlineArray2(2,'class','panning-rect'),(null as any));
+    this._text_10 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
+    this._el_11 = import3.createRenderElement(this.renderer,this._el_0,':svg:g',new import3.InlineArray2(2,'class','links'),(null as any));
+    this._text_12 = this.renderer.createText(this._el_11,'\n          ',(null as any));
+    this._anchor_13 = this.renderer.createTemplateAnchor(this._el_11,(null as any));
+    this._vc_13 = new import20.ViewContainer(13,11,this,this._anchor_13);
+    this._TemplateRef_13_5 = new import22.TemplateRef_(this,13,this._anchor_13);
+    this._NgFor_13_6 = new import27.Wrapper_NgFor(this._vc_13.vcRef,this._TemplateRef_13_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
+    this._text_14 = this.renderer.createText(this._el_11,'\n        ',(null as any));
+    this._text_15 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
+    this._el_16 = import3.createRenderElement(this.renderer,this._el_0,':svg:g',new import3.InlineArray2(2,'class','nodes'),(null as any));
+    this._text_17 = this.renderer.createText(this._el_16,'\n          ',(null as any));
+    this._anchor_18 = this.renderer.createTemplateAnchor(this._el_16,(null as any));
+    this._vc_18 = new import20.ViewContainer(18,16,this,this._anchor_18);
+    this._TemplateRef_18_5 = new import22.TemplateRef_(this,18,this._anchor_18);
+    this._NgFor_18_6 = new import27.Wrapper_NgFor(this._vc_18.vcRef,this._TemplateRef_18_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
+    this._text_19 = this.renderer.createText(this._el_16,'\n        ',(null as any));
+    this._text_20 = this.renderer.createText(this._el_0,'\n      ',(null as any));
+    var disposable_0:Function = import3.subscribeToRenderElement(this,this._el_9,new import3.InlineArray2(2,'mousedown',(null as any)),this.eventHandler(this.handleEvent_9));
     this.init(this._el_0,((<any>this.renderer).directRenderer? (null as any): [
       this._el_0,
       this._text_1,
@@ -809,19 +849,21 @@ class View_DirectedGraphComponent1 extends import2.AppView<any> {
       this._text_3,
       this._anchor_4,
       this._text_5,
-      this._text_6,
-      this._el_7,
+      this._anchor_6,
+      this._text_7,
       this._text_8,
       this._el_9,
       this._text_10,
-      this._anchor_11,
+      this._el_11,
       this._text_12,
-      this._text_13,
-      this._el_14,
+      this._anchor_13,
+      this._text_14,
       this._text_15,
-      this._anchor_16,
+      this._el_16,
       this._text_17,
-      this._text_18
+      this._anchor_18,
+      this._text_19,
+      this._text_20
     ]
     ),[disposable_0]);
     return (null as any);
@@ -829,65 +871,73 @@ class View_DirectedGraphComponent1 extends import2.AppView<any> {
   injectorGetInternal(token:any,requestNodeIndex:number,notFoundResult:any):any {
     if (((token === import22.TemplateRef) && (4 === requestNodeIndex))) { return this._TemplateRef_4_5; }
     if (((token === import25.NgIf) && (4 === requestNodeIndex))) { return this._NgIf_4_6.context; }
-    if (((token === import22.TemplateRef) && (11 === requestNodeIndex))) { return this._TemplateRef_11_5; }
-    if (((token === import29.NgFor) && (11 === requestNodeIndex))) { return this._NgFor_11_6.context; }
-    if (((token === import22.TemplateRef) && (16 === requestNodeIndex))) { return this._TemplateRef_16_5; }
-    if (((token === import29.NgFor) && (16 === requestNodeIndex))) { return this._NgFor_16_6.context; }
+    if (((token === import22.TemplateRef) && (6 === requestNodeIndex))) { return this._TemplateRef_6_5; }
+    if (((token === import29.NgFor) && (6 === requestNodeIndex))) { return this._NgFor_6_6.context; }
+    if (((token === import22.TemplateRef) && (13 === requestNodeIndex))) { return this._TemplateRef_13_5; }
+    if (((token === import29.NgFor) && (13 === requestNodeIndex))) { return this._NgFor_13_6.context; }
+    if (((token === import22.TemplateRef) && (18 === requestNodeIndex))) { return this._TemplateRef_18_5; }
+    if (((token === import29.NgFor) && (18 === requestNodeIndex))) { return this._NgFor_18_6.context; }
     return notFoundResult;
   }
   detectChangesInternal(throwOnChange:boolean):void {
     const currVal_4_0_0:any = this.parentView.context.defsTemplate;
     this._NgIf_4_6.check_ngIf(currVal_4_0_0,throwOnChange,false);
     this._NgIf_4_6.ngDoCheck(this,this._anchor_4,throwOnChange);
-    const currVal_11_0_0:any = this.parentView.context._links;
-    this._NgFor_11_6.check_ngForOf(currVal_11_0_0,throwOnChange,false);
-    const currVal_11_0_1:any = this.parentView.context.trackLinkBy;
-    this._NgFor_11_6.check_ngForTrackBy(currVal_11_0_1,throwOnChange,false);
-    this._NgFor_11_6.ngDoCheck(this,this._anchor_11,throwOnChange);
-    const currVal_16_0_0:any = this.parentView.context._nodes;
-    this._NgFor_16_6.check_ngForOf(currVal_16_0_0,throwOnChange,false);
-    const currVal_16_0_1:any = this.parentView.context.trackNodeBy;
-    this._NgFor_16_6.check_ngForTrackBy(currVal_16_0_1,throwOnChange,false);
-    this._NgFor_16_6.ngDoCheck(this,this._anchor_16,throwOnChange);
+    const currVal_6_0_0:any = this.parentView.context._links;
+    this._NgFor_6_6.check_ngForOf(currVal_6_0_0,throwOnChange,false);
+    this._NgFor_6_6.ngDoCheck(this,this._anchor_6,throwOnChange);
+    const currVal_13_0_0:any = this.parentView.context._links;
+    this._NgFor_13_6.check_ngForOf(currVal_13_0_0,throwOnChange,false);
+    const currVal_13_0_1:any = this.parentView.context.trackLinkBy;
+    this._NgFor_13_6.check_ngForTrackBy(currVal_13_0_1,throwOnChange,false);
+    this._NgFor_13_6.ngDoCheck(this,this._anchor_13,throwOnChange);
+    const currVal_18_0_0:any = this.parentView.context._nodes;
+    this._NgFor_18_6.check_ngForOf(currVal_18_0_0,throwOnChange,false);
+    const currVal_18_0_1:any = this.parentView.context.trackNodeBy;
+    this._NgFor_18_6.check_ngForTrackBy(currVal_18_0_1,throwOnChange,false);
+    this._NgFor_18_6.ngDoCheck(this,this._anchor_18,throwOnChange);
     this._vc_4.detectChangesInNestedViews(throwOnChange);
-    this._vc_11.detectChangesInNestedViews(throwOnChange);
-    this._vc_16.detectChangesInNestedViews(throwOnChange);
-    const currVal_28:any = this.parentView.context.transform;
-    if (import3.checkBinding(throwOnChange,this._expr_28,currVal_28)) {
-      this.renderer.setElementAttribute(this._el_0,'transform',((currVal_28 == null)? (null as any): currVal_28.toString()));
-      this._expr_28 = currVal_28;
+    this._vc_6.detectChangesInNestedViews(throwOnChange);
+    this._vc_13.detectChangesInNestedViews(throwOnChange);
+    this._vc_18.detectChangesInNestedViews(throwOnChange);
+    const currVal_33:any = this.parentView.context.transform;
+    if (import3.checkBinding(throwOnChange,this._expr_33,currVal_33)) {
+      this.renderer.setElementAttribute(this._el_0,'transform',((currVal_33 == null)? (null as any): currVal_33.toString()));
+      this._expr_33 = currVal_33;
     }
-    const currVal_29:any = (this.parentView.context.dims.width * 100);
-    if (import3.checkBinding(throwOnChange,this._expr_29,currVal_29)) {
-      this.renderer.setElementAttribute(this._el_7,'width',((currVal_29 == null)? (null as any): currVal_29.toString()));
-      this._expr_29 = currVal_29;
+    const currVal_34:any = (this.parentView.context.dims.width * 100);
+    if (import3.checkBinding(throwOnChange,this._expr_34,currVal_34)) {
+      this.renderer.setElementAttribute(this._el_9,'width',((currVal_34 == null)? (null as any): currVal_34.toString()));
+      this._expr_34 = currVal_34;
     }
-    const currVal_30:any = (this.parentView.context.dims.height * 100);
-    if (import3.checkBinding(throwOnChange,this._expr_30,currVal_30)) {
-      this.renderer.setElementAttribute(this._el_7,'height',((currVal_30 == null)? (null as any): currVal_30.toString()));
-      this._expr_30 = currVal_30;
+    const currVal_35:any = (this.parentView.context.dims.height * 100);
+    if (import3.checkBinding(throwOnChange,this._expr_35,currVal_35)) {
+      this.renderer.setElementAttribute(this._el_9,'height',((currVal_35 == null)? (null as any): currVal_35.toString()));
+      this._expr_35 = currVal_35;
     }
-    const currVal_31:any = (((('translate(' + ((0 - this.parentView.context.dims.width) * 50)) + ',') + ((0 - this.parentView.context.dims.height) * 50)) + ')');
-    if (import3.checkBinding(throwOnChange,this._expr_31,currVal_31)) {
-      this.renderer.setElementAttribute(this._el_7,'transform',((currVal_31 == null)? (null as any): currVal_31.toString()));
-      this._expr_31 = currVal_31;
+    const currVal_36:any = (((('translate(' + ((0 - this.parentView.context.dims.width) * 50)) + ',') + ((0 - this.parentView.context.dims.height) * 50)) + ')');
+    if (import3.checkBinding(throwOnChange,this._expr_36,currVal_36)) {
+      this.renderer.setElementAttribute(this._el_9,'transform',((currVal_36 == null)? (null as any): currVal_36.toString()));
+      this._expr_36 = currVal_36;
     }
   }
   destroyInternal():void {
     this._vc_4.destroyNestedViews();
-    this._vc_11.destroyNestedViews();
-    this._vc_16.destroyNestedViews();
+    this._vc_6.destroyNestedViews();
+    this._vc_13.destroyNestedViews();
+    this._vc_18.destroyNestedViews();
   }
   visitRootNodesInternal(cb:any,ctx:any):void {
     cb(this._el_0,ctx);
   }
   createEmbeddedViewInternal(nodeIndex:number):import2.AppView<any> {
     if ((nodeIndex == 4)) { return new View_DirectedGraphComponent2(this.viewUtils,this,4,this._anchor_4,this._vc_4); }
-    if ((nodeIndex == 11)) { return new View_DirectedGraphComponent4(this.viewUtils,this,11,this._anchor_11,this._vc_11); }
-    if ((nodeIndex == 16)) { return new View_DirectedGraphComponent8(this.viewUtils,this,16,this._anchor_16,this._vc_16); }
+    if ((nodeIndex == 6)) { return new View_DirectedGraphComponent4(this.viewUtils,this,6,this._anchor_6,this._vc_6); }
+    if ((nodeIndex == 13)) { return new View_DirectedGraphComponent5(this.viewUtils,this,13,this._anchor_13,this._vc_13); }
+    if ((nodeIndex == 18)) { return new View_DirectedGraphComponent9(this.viewUtils,this,18,this._anchor_18,this._vc_18); }
     return (null as any);
   }
-  handleEvent_7(eventName:string,$event:any):boolean {
+  handleEvent_9(eventName:string,$event:any):boolean {
     this.markPathToRootAsCheckOnce();
     var result:boolean = true;
     if ((eventName == 'mousedown')) {
@@ -989,7 +1039,7 @@ export class View_DirectedGraphComponent0 extends import2.AppView<import0.Direct
     if (!throwOnChange) {
       if (this._viewQuery_nodeElement_1.dirty) {
           this._viewQuery_nodeElement_1.reset([this._vc_3.mapNestedViews(View_DirectedGraphComponent1,(nestedView:View_DirectedGraphComponent1):any => {
-              return [nestedView._vc_16.mapNestedViews(View_DirectedGraphComponent8,(nestedView:View_DirectedGraphComponent8):any => {
+              return [nestedView._vc_18.mapNestedViews(View_DirectedGraphComponent9,(nestedView:View_DirectedGraphComponent9):any => {
                 return [new import10.ElementRef(nestedView._el_0)];
             })];
         })]);
@@ -998,7 +1048,7 @@ export class View_DirectedGraphComponent0 extends import2.AppView<import0.Direct
       }
       if (this._viewQuery_linkElement_2.dirty) {
           this._viewQuery_linkElement_2.reset([this._vc_3.mapNestedViews(View_DirectedGraphComponent1,(nestedView:View_DirectedGraphComponent1):any => {
-              return [nestedView._vc_11.mapNestedViews(View_DirectedGraphComponent4,(nestedView:View_DirectedGraphComponent4):any => {
+              return [nestedView._vc_13.mapNestedViews(View_DirectedGraphComponent5,(nestedView:View_DirectedGraphComponent5):any => {
                 return [new import10.ElementRef(nestedView._el_0)];
             })];
         })]);
