@@ -33,9 +33,13 @@
         <template #linkTemplate let-link>
           <svg:g class="edge">
             <svg:path
+              class="line"
               stroke-width="2"
               marker-end="url(#arrow)" >
             </svg:path>
+            <svg:text class="edge-label" text-anchor="middle">
+              <textPath class="text-path" [attr.href]="'#' + link.id" startOffset="50%">{{link.label}}</textPath>
+            </svg:text>
           </svg:g>
         </template>
 

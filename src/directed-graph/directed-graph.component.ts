@@ -49,6 +49,8 @@ import * as dagre from 'dagre';
           <template *ngIf="defsTemplate"
             [ngTemplateOutlet]="defsTemplate">
           </template>
+
+          <svg:path class="text-path" *ngFor="let link of _links" [attr.d]="link.line" [attr.id]="link.id"></svg:path>
         </defs>
 
         <svg:rect
@@ -225,6 +227,14 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
       let newLink = Object.assign({}, oldLink);
       newLink.line = line;
+      newLink.points = points;
+
+      let textPos = points[Math.floor(points.length / 2)];
+      if (textPos) {
+        newLink.textTransform = `translate(${textPos.x},${textPos.y})`;
+      }
+
+      newLink.textAngle = 0;
       if (!newLink.oldLine) {
         newLink.oldLine = newLink.line;
       }
@@ -250,9 +260,16 @@ export class DirectedGraphComponent extends BaseChartComponent {
         let l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
 
         if (l) {
-          let linkSelection = d3.select(linkEl.nativeElement).select('path');
-
+          let linkSelection = d3.select(linkEl.nativeElement).select('.line');
           linkSelection
+            .attr('d', l.oldLine)
+            .transition()
+            .duration(500)
+            .attr('d', l.line);
+
+
+          let textPathSelection = d3.select(this.chartElement.nativeElement).select(`#${l.id}`);
+          textPathSelection
             .attr('d', l.oldLine)
             .transition()
             .duration(500)

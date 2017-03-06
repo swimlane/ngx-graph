@@ -106,7 +106,8 @@ export class AppComponent implements OnInit {
 
       this.hierarchialGraph.links.push({
         source: this.hierarchialGraph.nodes[Math.floor(Math.random() * (this.hierarchialGraph.nodes.length - 1))].id,
-        target: hNode.id
+        target: hNode.id,
+        label: 'on success'
       });
 
       this.hierarchialGraph.links = [...this.hierarchialGraph.links];
