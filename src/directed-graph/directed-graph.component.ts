@@ -215,7 +215,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
       let normKey = k.replace(/[^\w]*/g, '');
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
-        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey)
+        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
       }
 
       oldLink.oldLine = oldLink.line;
@@ -234,7 +234,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
     this._links = newLinks;
 
-    if (this._links){
+    if (this._links) {
       this._oldLinks = this._links.map(l => {
         let newL =  Object.assign({}, l);
         newL.oldLine = l.line;
