@@ -78,7 +78,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.selectChart(this.chartType);
 
-    setInterval(this.updateData.bind(this), 1000);
+    setInterval(this.updateData.bind(this), 2000);
 
     if (!this.fitContainer) {
       this.applyDimensions();

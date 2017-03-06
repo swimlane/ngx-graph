@@ -1,6 +1,7 @@
 import {
   Component,
   ContentChild,
+  ContentChildren,
   ElementRef,
   HostListener,
   Input,
@@ -95,6 +96,7 @@ import * as dagre from 'dagre';
         </svg:g>
       </svg:g>
     </ngx-charts-chart>
+  
   `,
   styleUrls: [
     './directed-graph.component.scss'
@@ -129,6 +131,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
   @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
 
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
+  @ContentChildren('animation') animations: QueryList<ElementRef>;
 
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -143,6 +146,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
   graphDims: any = {width: 0, height: 0};
   _nodes: any[];
   _links: any[];
+  _oldLinks: any[] = [];
 
   animationCounter: number = 1;
   animationState: string = '';
@@ -174,7 +178,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
   ngAfterViewInit() {
     super.ngAfterViewInit();
-
     setTimeout(() => {
       this.update();
     });
@@ -210,26 +213,50 @@ export class DirectedGraphComponent extends BaseChartComponent {
       };
     });
 
-    let oldLinks = [...this._links];
-
-    this._links = [];
+    let newLinks = [];
 
     for (let k in this.graph._edgeLabels) {
       let l = this.graph._edgeLabels[k];
 
       let normKey = k.replace(/[^\w]*/g, '');
-      let oldLink = oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+      if (!oldLink) {
+        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey)
+      }
+
+      console.log('oldLink', oldLink);
+      oldLink.oldLine = oldLink.line;
 
       let points = l.points;
       let line = this.generateLine(points);
 
       let newLink = Object.assign({}, oldLink);
       newLink.line = line;
-      this._links.push(newLink);
+      if (!newLink.oldLine) {
+        newLink.oldLine = newLink.line;
+      }
+
+      newLinks.push(newLink);
+    }
+
+    this._links = newLinks;
+
+    if (this._links){
+      this._oldLinks = this._links.map(l => {
+        let newL =  Object.assign({}, l);
+        newL.oldLine = l.line;
+        return newL;
+      });
     }
 
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x));
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y));
+
+    setTimeout(() => {
+      this.animations.map(animEl => {
+        animEl.nativeElement.beginElement();
+      });
+    });
 
     this.cd.markForCheck();
   }
@@ -238,7 +265,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
     this.graph = new dagre.graphlib.Graph();
     this.graph.setGraph({
       rankdir: this.orientation,
-      // align: 'UL',
       marginx: 20,
       marginy: 20,
       // acyclicer: 'greedy',
@@ -279,9 +305,9 @@ export class DirectedGraphComponent extends BaseChartComponent {
       this.graph.setEdge(edge.source, edge.target);
     }
 
-    this.draw();
+    // this.draw();
 
-    setTimeout(() => { this.draw(); }, 50);
+    setTimeout(() => { this.draw(); }, 0);
   }
 
   generateLine(points, interpolation = 'linear') {
@@ -349,7 +375,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
   }
 
   trackLinkBy(index, link): any {
-    return link.index;
+    return link.id;
   }
 
   trackNodeBy(index, node): any {

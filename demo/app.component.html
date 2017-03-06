@@ -32,8 +32,9 @@
             <svg:path
               stroke-width="2"
               [attr.d]="link.line"
-              marker-end="url(#arrow)"
-            />
+              marker-end="url(#arrow)" >
+              <svg:animate #animation [attr.id]="link.id" attributeName="d" [attr.from]="link.oldLine" [attr.to]="link.line" dur="0.3s" />
+            </svg:path>
           </svg:g>
         </template>
 
