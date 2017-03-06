@@ -1,0 +1,10 @@
+.directed-graph .edge {
+  stroke: #666;
+  fill: none; }
+
+.directed-graph .panning-rect {
+  fill: transparent;
+  cursor: move; }
+
+.directed-graph .node-group {
+  transition: 0.5s ease-in-out; }
