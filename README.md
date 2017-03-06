@@ -10,6 +10,11 @@ https://swimlane.github.io/ngx-charts-dag/
 * Automatic layout using [Dagre](https://github.com/cpettitt/dagre)
 * Animations
 
+### How is it different than the `ngx-charts-force-directed-graph` component which is distributed with ngx-charts?
+This visualization uses the Dagre layout, which is specialized for directed graphs, where as `ngx-charts-force-directed-graph` uses D3's force directed layout.
+
+`ngx-charts-dag` is better suited for visualizing flow diagrams which have a clear start and end.
+
 ## Installation
 1. `npm install @swimlane/ngx-charts-dag --save`
 2. Make sure the peer dependencies are installed (d3)
