@@ -60,7 +60,10 @@ import * as dagre from 'dagre';
         />
 
         <svg:g class="links">
-          <svg:g *ngFor="let link of _links; trackBy:trackLinkBy">
+          <svg:g *ngFor="let link of _links; trackBy:trackLinkBy"
+            class="link-group"
+            #linkElement
+            [id]="link.id">
             <template *ngIf="linkTemplate"
               [ngTemplateOutlet]="linkTemplate"
               [ngOutletContext]="{ $implicit: link }">
@@ -78,11 +81,7 @@ import * as dagre from 'dagre';
             #nodeElement
             [id]="node.id"
             [style.transform]="node.options.transform"
-            (click)="onClick(node)"
-            ngx-tooltip
-            [tooltipPlacement]="'top'"
-            [tooltipType]="'tooltip'"
-            [tooltipTitle]="node.label">
+            (click)="onClick(node)">
             <template *ngIf="nodeTemplate"
               [ngTemplateOutlet]="nodeTemplate"
               [ngOutletContext]="{ $implicit: node }">
@@ -96,7 +95,7 @@ import * as dagre from 'dagre';
         </svg:g>
       </svg:g>
     </ngx-charts-chart>
-  
+
   `,
   styleUrls: [
     './directed-graph.component.scss'
@@ -131,7 +130,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
   @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
 
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
-  @ContentChildren('animation') animations: QueryList<ElementRef>;
+  @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -147,9 +146,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
   _nodes: any[];
   _links: any[];
   _oldLinks: any[] = [];
-
-  animationCounter: number = 1;
-  animationState: string = '';
 
   @Input() groupResultsBy: (node: any) => string = node => node.label;
 
@@ -171,8 +167,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
       this.createGraph();
       this.updateTransform();
       this.initialized = true;
-      this.animationState = `animation${this.animationCounter}`;
-      this.animationCounter += 1;
     });
   }
 
@@ -224,7 +218,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
         oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey)
       }
 
-      console.log('oldLink', oldLink);
       oldLink.oldLine = oldLink.line;
 
       let points = l.points;
@@ -253,8 +246,18 @@ export class DirectedGraphComponent extends BaseChartComponent {
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y));
 
     setTimeout(() => {
-      this.animations.map(animEl => {
-        animEl.nativeElement.beginElement();
+      this.linkElements.map(linkEl => {
+        let l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
+
+        if (l) {
+          let linkSelection = d3.select(linkEl.nativeElement).select('path');
+
+          linkSelection
+            .attr('d', l.oldLine)
+            .transition()
+            .duration(500)
+            .attr('d', l.line);
+        }
       });
     });
 
@@ -305,8 +308,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
       this.graph.setEdge(edge.source, edge.target);
     }
 
-    // this.draw();
-
     setTimeout(() => { this.draw(); }, 0);
   }
 
@@ -338,12 +339,6 @@ export class DirectedGraphComponent extends BaseChartComponent {
   }
 
   updateTransform() {
-    // this.panOffset.x = Math.max((this.graphDims.width * (this.zoomLevel - 1) * -1), this.panOffset.x);
-    // this.panOffset.y = Math.max((this.graphDims.height * (this.zoomLevel - 1) * -1), this.panOffset.y);
-    //
-    // this.panOffset.x = Math.min(0, this.panOffset.x);
-    // this.panOffset.y = Math.min(0, this.panOffset.y);
-
     this.transform = `
       translate(${ this.panOffset.x }, ${ this.panOffset.y }) scale(${this.zoomLevel})
     `;

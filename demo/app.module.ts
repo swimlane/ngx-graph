@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { APP_BASE_HREF, Location } from '@angular/common';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { AppComponent } from './app.component';
 import { NgxChartsDagModule } from '../src';
 
@@ -12,7 +13,7 @@ import { NgxChartsDagModule } from '../src';
       useFactory: getBaseLocation
     }
   ],
-  imports: [NgxChartsDagModule, BrowserModule, FormsModule],
+  imports: [NgxChartsModule, NgxChartsDagModule, BrowserModule, FormsModule],
   declarations: [AppComponent],
   bootstrap: [AppComponent]
 })
