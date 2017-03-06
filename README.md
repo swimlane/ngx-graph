@@ -1,16 +1,16 @@
 # ngx-charts-dag
 
-A Directed Acyclic Graph (DAG) visualization for angular - implemented using ngx-charts.
+A Directed Acyclic Graph (DAG) visualization for angular - implemented using [ngx-charts](https://github.com/swimlane/ngx-charts).
 
 ## Demo
 https://swimlane.github.io/ngx-charts-dag/
 
-# Features
+## Features
 * Custom templates for nodes and edges
 * Automatic layout using [Dagre](https://github.com/cpettitt/dagre)
 * Animations
 
-# Installation
+## Installation
 1. `npm install @swimlane/ngx-charts-dag --save`
 2. Make sure the peer dependencies are installed (d3)
 3. Import `NgxChartsDagModule` into your module
@@ -56,3 +56,6 @@ https://swimlane.github.io/ngx-charts-dag/
 
 </ngx-charts-directed-graph>
 ```
+
+## Credits
+`ngx-charts-dag` is a [Swimlane](http://swimlane.com) open-source project; we believe in giving back to the open-source community by sharing some of the projects we build for our application. Swimlane is an automated cyber security operations and incident response platform that enables cyber security teams to leverage threat intelligence, speed up incident response and automate security operations.
