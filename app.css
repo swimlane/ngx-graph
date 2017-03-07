@@ -1,6 +1,12 @@
 .directed-graph .edge {
   stroke: #666;
   fill: none; }
+  .directed-graph .edge .edge-label {
+    stroke: none;
+    font-size: 12px;
+    fill: #ffffff; }
+  .directed-graph .edge .text-path {
+    dominant-baseline: text-after-edge; }
 
 .directed-graph .panning-rect {
   fill: transparent;
