@@ -62,5 +62,63 @@ This visualization uses the Dagre layout, which is specialized for directed grap
 </ngx-charts-directed-graph>
 ```
 
+## Data
+
+### Nodes
+```
+[
+  {
+    id: 'start',
+    label: 'start'
+  }, {
+    id: '1',
+    label: 'Query ThreatConnect',
+  }, {
+    id: '2',
+    label: 'Query XForce',
+  }, {
+    id: '3',
+    label: 'Format Results'
+  }, {
+    id: '4',
+    label: 'Search Splunk'
+  }, {
+    id: '5',
+    label: 'Block LDAP'
+  }, {
+    id: '6',
+    label: 'Email Results'
+  }
+]
+```
+
+### Links
+```
+[
+  {
+    source: 'start',
+    target: '1',
+    label: 'links to'
+  }, {
+    source: 'start',
+    target: '2'
+  }, {
+    source: '1',
+    target: '3',
+    label: 'related to'
+  }, {
+    source: '2',
+    target: '4'
+  }, {
+    source: '2',
+    target: '6'
+  }, {
+    source: '3',
+    target: '5'
+  }
+]
+```
+
+
 ## Credits
 `ngx-charts-dag` is a [Swimlane](http://swimlane.com) open-source project; we believe in giving back to the open-source community by sharing some of the projects we build for our application. Swimlane is an automated cyber security operations and incident response platform that enables cyber security teams to leverage threat intelligence, speed up incident response and automate security operations.
