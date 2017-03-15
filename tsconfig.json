@@ -3,7 +3,6 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "declaration": true,
     "noEmitHelpers": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -19,7 +18,10 @@
     "suppressExcessPropertyErrors": true,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "dist",
-    "declarationDir": "release"
+    "lib": [
+      "es2016",
+      "dom"
+    ]
   },
   "files": [
     "src/declarations.d.ts",

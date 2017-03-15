@@ -1,36 +1,17 @@
 import {
-  Component,
-  ContentChild,
-  ContentChildren,
-  ElementRef,
-  HostListener,
-  Input,
-  TemplateRef,
-  ViewChild,
-  ViewChildren,
-  Output,
-  ViewEncapsulation,
-  EventEmitter,
-  ChangeDetectionStrategy,
-  trigger,
-  style,
-  transition,
-  animate,
-  QueryList
+  Component, ContentChild, ContentChildren, ElementRef, HostListener, Input,
+  TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter,
+  ChangeDetectionStrategy, trigger, style, transition, animate, QueryList, AfterViewInit
 } from '@angular/core';
 
 import {
-  BaseChartComponent,
-  ChartComponent,
-  calculateViewDimensions,
-  ViewDimensions,
-  ColorHelper
+  BaseChartComponent, ChartComponent, calculateViewDimensions,
+  ViewDimensions, ColorHelper
 } from '@swimlane/ngx-charts';
-
-import { id } from '../utils';
 
 import d3 from '../d3';
 import * as dagre from 'dagre';
+import { id } from '../utils';
 
 @Component({
   selector: 'ngx-charts-directed-graph',
@@ -42,17 +23,21 @@ import * as dagre from 'dagre';
       (legendLabelClick)="onClick($event)"
       (legendLabelActivate)="onActivate($event)"
       (legendLabelDeactivate)="onDeactivate($event)"
-      mouse-wheel (mouseWheelUp)="zoom($event, 'in')" (mouseWheelDown)="zoom($event, 'out')">
+      mouse-wheel 
+      (mouseWheelUp)="onZoom($event, 'in')" 
+      (mouseWheelDown)="onZoom($event, 'out')">
       <svg:g *ngIf="initialized" [attr.transform]="transform" class="directed-graph chart">
-
         <defs>
           <template *ngIf="defsTemplate"
             [ngTemplateOutlet]="defsTemplate">
           </template>
-
-          <svg:path class="text-path" *ngFor="let link of _links" [attr.d]="link.line" [attr.id]="link.id"></svg:path>
+          <svg:path 
+            class="text-path" 
+            *ngFor="let link of _links" 
+            [attr.d]="link.line" 
+            [attr.id]="link.id">
+          </svg:path>
         </defs>
-
         <svg:rect
           class="panning-rect"
           [attr.width]="dims.width * 100"
@@ -60,7 +45,6 @@ import * as dagre from 'dagre';
           [attr.transform]="'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' "
           (mousedown)="isPanning = true"
         />
-
         <svg:g class="links">
           <svg:g *ngFor="let link of _links; trackBy:trackLinkBy"
             class="link-group"
@@ -76,7 +60,6 @@ import * as dagre from 'dagre';
             />
           </svg:g>
         </svg:g>
-
         <svg:g class="nodes">
           <svg:g *ngFor="let node of _nodes; trackBy:trackNodeBy"
             class="node-group"
@@ -97,11 +80,8 @@ import * as dagre from 'dagre';
         </svg:g>
       </svg:g>
     </ngx-charts-chart>
-
   `,
-  styleUrls: [
-    './directed-graph.component.scss'
-  ],
+  styleUrls: ['./directed-graph.component.scss'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
@@ -112,14 +92,22 @@ import * as dagre from 'dagre';
     ])
   ]
 })
-export class DirectedGraphComponent extends BaseChartComponent {
+export class DirectedGraphComponent extends BaseChartComponent implements AfterViewInit {
 
   @Input() legend: boolean;
   @Input() nodes: any[] = [];
   @Input() links: any[] = [];
   @Input() activeEntries: any[] = [];
+
+  @Input() panOffsetX: number = 0;
+  @Input() panOffsetY: number = 0;
+  @Input() panningEnabled: boolean = true;
+
   @Input() zoomLevel: number = 1;
-  @Input() panOffset: any = {x: 0, y: 0};
+  @Input() zoomSpeed: number = 0.1;
+  @Input() minZoomLevel: number = 0.1;
+  @Input() maxZoomLevel: number = 4.0;
+
   @Input() orientation: string = 'LR';
   @Input() curve: any;
 
@@ -148,8 +136,13 @@ export class DirectedGraphComponent extends BaseChartComponent {
   _nodes: any[];
   _links: any[];
   _oldLinks: any[] = [];
-
+  
   @Input() groupResultsBy: (node: any) => string = node => node.label;
+
+  ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+    setTimeout(() => this.update());
+  }
 
   update(): void {
     super.update();
@@ -172,24 +165,17 @@ export class DirectedGraphComponent extends BaseChartComponent {
     });
   }
 
-  ngAfterViewInit() {
-    super.ngAfterViewInit();
-    setTimeout(() => {
-      this.update();
-    });
-  }
-
-  draw() {
+  draw(): void {
     if (this.nodeElements && this.nodeElements.length) {
       this.nodeElements.map(elem => {
-        let nativeElement = elem.nativeElement;
-        let node = this._nodes.find(n => n.id === nativeElement.id);
+        const nativeElement = elem.nativeElement;
+        const node = this._nodes.find(n => n.id === nativeElement.id);
 
-        let dims = nativeElement.getBBox();
+        const dims = nativeElement.getBBox();
         node.height = dims.height;
 
         if (nativeElement.getElementsByTagName('text').length) {
-          let textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+          const textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
           node.width = textDims.width + 20;
         } else {
           node.width = dims.width;
@@ -199,7 +185,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
     dagre.layout(this.graph);
 
-    let index = {};
+    const index = {};
     this._nodes.map(n => {
       index[n.id] = n;
 
@@ -209,12 +195,12 @@ export class DirectedGraphComponent extends BaseChartComponent {
       };
     });
 
-    let newLinks = [];
+    const newLinks = [];
 
-    for (let k in this.graph._edgeLabels) {
-      let l = this.graph._edgeLabels[k];
+    for (const k in this.graph._edgeLabels) {
+      const l = this.graph._edgeLabels[k];
 
-      let normKey = k.replace(/[^\w]*/g, '');
+      const normKey = k.replace(/[^\w]*/g, '');
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
         oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
@@ -222,14 +208,14 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
       oldLink.oldLine = oldLink.line;
 
-      let points = l.points;
-      let line = this.generateLine(points);
+      const points = l.points;
+      const line = this.generateLine(points);
 
-      let newLink = Object.assign({}, oldLink);
+      const newLink = Object.assign({}, oldLink);
       newLink.line = line;
       newLink.points = points;
 
-      let textPos = points[Math.floor(points.length / 2)];
+      const textPos = points[Math.floor(points.length / 2)];
       if (textPos) {
         newLink.textTransform = `translate(${textPos.x},${textPos.y})`;
       }
@@ -246,7 +232,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
     if (this._links) {
       this._oldLinks = this._links.map(l => {
-        let newL =  Object.assign({}, l);
+        const newL =  Object.assign({}, l);
         newL.oldLine = l.line;
         return newL;
       });
@@ -257,17 +243,17 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
     setTimeout(() => {
       this.linkElements.map(linkEl => {
-        let l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
+        const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
 
         if (l) {
-          let linkSelection = d3.select(linkEl.nativeElement).select('.line');
+          const linkSelection = d3.select(linkEl.nativeElement).select('.line');
           linkSelection
             .attr('d', l.oldLine)
             .transition()
             .duration(500)
             .attr('d', l.line);
 
-          let textPathSelection = d3.select(this.chartElement.nativeElement).select(`#${l.id}`);
+          const textPathSelection = d3.select(this.chartElement.nativeElement).select(`#${l.id}`);
           textPathSelection
             .attr('d', l.oldLine)
             .transition()
@@ -280,7 +266,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
     this.cd.markForCheck();
   }
 
-  createGraph() {
+  createGraph(): void {
     this.graph = new dagre.graphlib.Graph();
     this.graph.setGraph({
       rankdir: this.orientation,
@@ -293,14 +279,18 @@ export class DirectedGraphComponent extends BaseChartComponent {
     });
 
     // Default to assigning a new object as a label for each new edge.
-    this.graph.setDefaultEdgeLabel(() => { return {}; });
+    this.graph.setDefaultEdgeLabel(() => { 
+      return {
+        // todo
+      }; 
+    });
 
     this._nodes = this.nodes.map(n => {
       return Object.assign({}, n);
     });
 
     this._links = this.links.map(l => {
-      let newLink = Object.assign({}, l);
+      const newLink = Object.assign({}, l);
 
       if (!newLink.id) {
         newLink.id = id();
@@ -309,7 +299,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
       return newLink;
     });
 
-    for (let node of this._nodes) {
+    for (const node of this._nodes) {
       node.width = 20;
       node.height = 30;
       this.graph.setNode(node.id, node);
@@ -320,43 +310,43 @@ export class DirectedGraphComponent extends BaseChartComponent {
       };
     }
 
-    for (let edge of this._links) {
+    for (const edge of this._links) {
       this.graph.setEdge(edge.source, edge.target);
     }
 
-    setTimeout(() => { this.draw(); }, 0);
+    requestAnimationFrame(() => this.draw());
   }
 
-  generateLine(points, interpolation = 'linear') {
-    let lineFunction = d3.line().x(d => d.x).y(d => d.y).curve(this.curve);
+  generateLine(points, interpolation = 'linear'): any {
+    const lineFunction = d3.line().x(d => d.x).y(d => d.y).curve(this.curve);
     return lineFunction(points);
   }
 
-  zoom($event: MouseEvent, direction) {
+  onZoom($event: MouseEvent, direction): void {
     if (direction === 'in') {
-      this.zoomLevel += 0.1;
+      this.zoomLevel += this.zoomSpeed;
     } else {
-      this.zoomLevel -= 0.1;
+      this.zoomLevel -= this.zoomSpeed;
     }
 
-    this.zoomLevel = Math.max(this.zoomLevel, 0.1);
-    this.zoomLevel = Math.min(this.zoomLevel, 4.0);
+    this.zoomLevel = Math.max(this.zoomLevel, this.minZoomLevel);
+    this.zoomLevel = Math.min(this.zoomLevel, this.maxZoomLevel);
 
     this.updateTransform();
   }
 
-  pan(event) {
-    if (this.isPanning) {
-      this.panOffset.x += event.movementX;
-      this.panOffset.y += event.movementY;
+  onPan(event): void {
+    if (this.isPanning && this.panningEnabled) {
+      this.panOffsetX += event.movementX;
+      this.panOffsetY += event.movementY;
 
       this.updateTransform();
     }
   }
 
-  updateTransform() {
+  updateTransform(): void {
     this.transform = `
-      translate(${ this.panOffset.x }, ${ this.panOffset.y }) scale(${this.zoomLevel})
+      translate(${this.panOffsetX}, ${this.panOffsetY}) scale(${this.zoomLevel})
     `;
   }
 
@@ -397,7 +387,7 @@ export class DirectedGraphComponent extends BaseChartComponent {
     this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
   }
 
-  getLegendOptions() {
+  getLegendOptions(): any {
     return {
       scaleType: 'ordinal',
       domain: this.seriesDomain,
@@ -407,11 +397,12 @@ export class DirectedGraphComponent extends BaseChartComponent {
 
   @HostListener('document:mousemove', ['$event'])
   mousemove($event: MouseEvent): void {
-    this.pan($event);
+    this.onPan($event);
   }
 
   @HostListener('document:mouseup')
   mouseup(node, $event: MouseEvent): void {
     this.isPanning = false;
   }
+
 }

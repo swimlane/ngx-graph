@@ -63,7 +63,8 @@
     "directed acyclic graph"
   ],
   "author": [
-    "Marjan Georgiev"
+    "Marjan Georgiev",
+    "Austin McDaniel"
   ],
   "license": "MIT",
   "bugs": {
@@ -100,7 +101,6 @@
     "@types/d3-selection": "0.0.3",
     "@types/d3-shape": "0.0.4",
     "@types/d3-time-format": "2.0.4",
-    "@types/jasmine": "^2.5.41",
     "angular2-template-loader": "^0.6.0",
     "autoprefixer": "^6.7.0",
     "awesome-typescript-loader": "~3.0.0-beta.10",
