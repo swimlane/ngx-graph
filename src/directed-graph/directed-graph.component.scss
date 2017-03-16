@@ -1,4 +1,6 @@
 .directed-graph {
+  user-select: none;
+  
   .edge {
     stroke: #666;
     fill: none;
@@ -20,6 +22,12 @@
   }
 
   .node-group {
-    transition: 0.5s ease-in-out;
+    // transition: 0.5s ease-in-out;
+
+    .node {
+      &:focus {
+        outline: none;
+      }
+    }
   }
 }
