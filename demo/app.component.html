@@ -38,7 +38,13 @@
               marker-end="url(#arrow)" >
             </svg:path>
             <svg:text class="edge-label" text-anchor="middle">
-              <textPath class="text-path" [attr.href]="'#' + link.id" startOffset="50%">{{link.label}}</textPath>
+              <textPath 
+                class="text-path" 
+                [attr.href]="'#' + link.id" 
+                [style.dominant-baseline]="link.dominantBaseline" 
+                startOffset="50%">
+                {{link.label}}
+              </textPath>
             </svg:text>
           </svg:g>
         </template>
