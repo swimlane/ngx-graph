@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-charts-dag",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "A Directec Acyclic Graph visualization for angular!",
   "main": "release/index.js",
   "typings": "release/index.d.ts",
@@ -62,7 +62,7 @@
     "dag",
     "directed acyclic graph"
   ],
-  "author": [
+  "authors": [
     "Marjan Georgiev",
     "Austin McDaniel"
   ],

@@ -19,7 +19,11 @@
     "suppressExcessPropertyErrors": true,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "release",
-    "declarationDir": "release"
+    "declarationDir": "release",
+    "lib": [
+      "es2016",
+      "dom"
+    ]
   },
   "files": [
     "build/declarations.d.ts",

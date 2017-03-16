@@ -1,6 +1,12 @@
-// https://github.com/SodhanaLibrary/angular2-examples/blob/master/app/mouseWheelDirective/mousewheel.directive.ts
 "use strict";
 var core_1 = require('@angular/core');
+/**
+ * Mousewheel directive
+ * https://github.com/SodhanaLibrary/angular2-examples/blob/master/app/mouseWheelDirective/mousewheel.directive.ts
+ *
+ * @export
+ * @class MouseWheelDirective
+ */
 var MouseWheelDirective = (function () {
     function MouseWheelDirective() {
         this.mouseWheelUp = new core_1.EventEmitter();
@@ -34,7 +40,7 @@ var MouseWheelDirective = (function () {
         }
     };
     MouseWheelDirective.decorators = [
-        { type: core_1.Directive, args: [{ selector: '[mouse-wheel]' },] },
+        { type: core_1.Directive, args: [{ selector: '[mouseWheel]' },] },
     ];
     /** @nocollapse */
     MouseWheelDirective.ctorParameters = function () { return []; };

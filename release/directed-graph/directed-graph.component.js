@@ -6,9 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var core_1 = require('@angular/core');
 var ngx_charts_1 = require('@swimlane/ngx-charts');
-var utils_1 = require('../utils');
 var d3_1 = require('../d3');
 var dagre = require('dagre');
+var utils_1 = require('../utils');
 var DirectedGraphComponent = (function (_super) {
     __extends(DirectedGraphComponent, _super);
     function DirectedGraphComponent() {
@@ -16,19 +16,43 @@ var DirectedGraphComponent = (function (_super) {
         this.nodes = [];
         this.links = [];
         this.activeEntries = [];
-        this.zoomLevel = 1;
-        this.panOffset = { x: 0, y: 0 };
         this.orientation = 'LR';
+        this.draggingEnabled = true;
+        this.panOffsetX = 0;
+        this.panOffsetY = 0;
+        this.panningEnabled = true;
+        this.zoomLevel = 1;
+        this.zoomSpeed = 0.1;
+        this.minZoomLevel = 0.1;
+        this.maxZoomLevel = 4.0;
         this.activate = new core_1.EventEmitter();
         this.deactivate = new core_1.EventEmitter();
         this.margin = [0, 0, 0, 0];
         this.results = [];
         this.isPanning = false;
+        this.isDragging = false;
         this.initialized = false;
         this.graphDims = { width: 0, height: 0 };
         this._oldLinks = [];
         this.groupResultsBy = function (node) { return node.label; };
     }
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.ngAfterViewInit = function () {
+        var _this = this;
+        _super.prototype.ngAfterViewInit.call(this);
+        setTimeout(function () { return _this.update(); });
+    };
+    /**
+     * Base class update implementation for the dag graph
+     *
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.update = function () {
         var _this = this;
         _super.prototype.update.call(this);
@@ -47,31 +71,53 @@ var DirectedGraphComponent = (function (_super) {
             _this.initialized = true;
         });
     };
-    DirectedGraphComponent.prototype.ngAfterViewInit = function () {
-        var _this = this;
-        _super.prototype.ngAfterViewInit.call(this);
-        setTimeout(function () {
-            _this.update();
-        });
-    };
+    /**
+     * Draws the graph using dagre layouts
+     *
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.draw = function () {
         var _this = this;
+        // Calc view dims for the nodes
         if (this.nodeElements && this.nodeElements.length) {
             this.nodeElements.map(function (elem) {
                 var nativeElement = elem.nativeElement;
                 var node = _this._nodes.find(function (n) { return n.id === nativeElement.id; });
+                // calculate the height
                 var dims = nativeElement.getBBox();
-                node.height = dims.height;
-                if (nativeElement.getElementsByTagName('text').length) {
-                    var textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
-                    node.width = textDims.width + 20;
+                if (_this.nodeHeight) {
+                    node.height = _this.nodeHeight;
                 }
                 else {
-                    node.width = dims.width;
+                    node.height = dims.height;
                 }
+                if (_this.nodeMaxHeight)
+                    node.height = Math.max(node.height, _this.nodeMaxHeight);
+                if (_this.nodeMinHeight)
+                    node.height = Math.min(node.height, _this.nodeMinHeight);
+                if (_this.nodeWidth) {
+                    node.width = _this.nodeWidth;
+                }
+                else {
+                    // calculate the width
+                    if (nativeElement.getElementsByTagName('text').length) {
+                        var textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+                        node.width = textDims.width + 20;
+                    }
+                    else {
+                        node.width = dims.width;
+                    }
+                }
+                if (_this.nodeMaxWidth)
+                    node.width = Math.max(node.width, _this.nodeMaxWidth);
+                if (_this.nodeMinWidth)
+                    node.width = Math.min(node.width, _this.nodeMinWidth);
             });
         }
+        // Dagre to recalc the layout
         dagre.layout(this.graph);
+        // Tranposes view options to the node
         var index = {};
         this._nodes.map(function (n) {
             index[n.id] = n;
@@ -80,6 +126,7 @@ var DirectedGraphComponent = (function (_super) {
                 transform: "translate( " + (n.x - n.width / 2) + "px, " + (n.y - n.height / 2) + "px)"
             };
         });
+        // Update the labels to the new positions
         var newLinks = [];
         var _loop_1 = function(k) {
             var l = this_1.graph._edgeLabels[k];
@@ -102,6 +149,7 @@ var DirectedGraphComponent = (function (_super) {
             if (!newLink.oldLine) {
                 newLink.oldLine = newLink.line;
             }
+            this_1.calcDominantBaseline(newLink);
             newLinks.push(newLink);
         };
         var this_1 = this;
@@ -109,6 +157,7 @@ var DirectedGraphComponent = (function (_super) {
             _loop_1(k);
         }
         this._links = newLinks;
+        // Map the old links for animations
         if (this._links) {
             this._oldLinks = this._links.map(function (l) {
                 var newL = Object.assign({}, l);
@@ -116,29 +165,46 @@ var DirectedGraphComponent = (function (_super) {
                 return newL;
             });
         }
+        // Calculate the height/width total
         this.graphDims.width = Math.max.apply(Math, this._nodes.map(function (n) { return n.x; }));
         this.graphDims.height = Math.max.apply(Math, this._nodes.map(function (n) { return n.y; }));
-        setTimeout(function () {
-            _this.linkElements.map(function (linkEl) {
-                var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
-                if (l) {
-                    var linkSelection = d3_1.default.select(linkEl.nativeElement).select('.line');
-                    linkSelection
-                        .attr('d', l.oldLine)
-                        .transition()
-                        .duration(500)
-                        .attr('d', l.line);
-                    var textPathSelection = d3_1.default.select(_this.chartElement.nativeElement).select("#" + l.id);
-                    textPathSelection
-                        .attr('d', l.oldLine)
-                        .transition()
-                        .duration(500)
-                        .attr('d', l.line);
-                }
-            });
-        });
+        requestAnimationFrame(function () { return _this.redrawLines(); });
         this.cd.markForCheck();
     };
+    /**
+     * Redraws the lines when dragged or viewport updated
+     *
+     * @param {boolean} [animate=true]
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.redrawLines = function (animate) {
+        var _this = this;
+        if (animate === void 0) { animate = true; }
+        this.linkElements.map(function (linkEl) {
+            var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
+            if (l) {
+                var linkSelection = d3_1.default.select(linkEl.nativeElement).select('.line');
+                linkSelection
+                    .attr('d', l.oldLine)
+                    .transition()
+                    .duration(animate ? 500 : 0)
+                    .attr('d', l.line);
+                var textPathSelection = d3_1.default.select(_this.chartElement.nativeElement).select("#" + l.id);
+                textPathSelection
+                    .attr('d', l.oldTextPath)
+                    .transition()
+                    .duration(animate ? 500 : 0)
+                    .attr('d', l.textPath);
+            }
+        });
+    };
+    /**
+     * Creates the dagre graph engine
+     *
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.createGraph = function () {
         var _this = this;
         this.graph = new dagre.graphlib.Graph();
@@ -146,94 +212,243 @@ var DirectedGraphComponent = (function (_super) {
             rankdir: this.orientation,
             marginx: 20,
             marginy: 20,
-            // acyclicer: 'greedy',
             edgesep: 100,
-            ranksep: 100,
+            ranksep: 100
         });
         // Default to assigning a new object as a label for each new edge.
-        this.graph.setDefaultEdgeLabel(function () { return {}; });
+        this.graph.setDefaultEdgeLabel(function () {
+            return {};
+        });
         this._nodes = this.nodes.map(function (n) {
             return Object.assign({}, n);
         });
         this._links = this.links.map(function (l) {
             var newLink = Object.assign({}, l);
-            if (!newLink.id) {
+            if (!newLink.id)
                 newLink.id = utils_1.id();
-            }
             return newLink;
         });
         for (var _i = 0, _a = this._nodes; _i < _a.length; _i++) {
             var node = _a[_i];
             node.width = 20;
             node.height = 30;
+            // update dagre
             this.graph.setNode(node.id, node);
+            // set view options
             node.options = {
                 color: this.colors.getColor(this.groupResultsBy(node)),
-                transform: "translate( " + (node.x - node.width / 2) + ", " + (node.y - node.height / 2) + ")"
+                transform: "translate( " + (node.x - node.width / 2) + "px, " + (node.y - node.height / 2) + "px)"
             };
         }
+        // update dagre
         for (var _b = 0, _c = this._links; _b < _c.length; _b++) {
             var edge = _c[_b];
             this.graph.setEdge(edge.source, edge.target);
         }
-        setTimeout(function () { _this.draw(); }, 0);
+        requestAnimationFrame(function () { return _this.draw(); });
     };
-    DirectedGraphComponent.prototype.generateLine = function (points, interpolation) {
-        if (interpolation === void 0) { interpolation = 'linear'; }
+    /**
+     * Calculate the text directions / flipping
+     *
+     * @param {any} link
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.calcDominantBaseline = function (link) {
+        var firstPoint = link.points[0];
+        var lastPoint = link.points[link.points.length - 1];
+        link.oldTextPath = link.textPath;
+        if (lastPoint.x < firstPoint.x) {
+            link.dominantBaseline = 'text-before-edge';
+            // reverse text path for when its flipped upside down
+            link.textPath = this.generateLine(link.points.slice().reverse());
+        }
+        else {
+            link.dominantBaseline = 'text-after-edge';
+            link.textPath = link.line;
+        }
+    };
+    /**
+     * Generate the new line path
+     *
+     * @param {any} points
+     * @returns {*}
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.generateLine = function (points) {
         var lineFunction = d3_1.default.line().x(function (d) { return d.x; }).y(function (d) { return d.y; }).curve(this.curve);
         return lineFunction(points);
     };
-    DirectedGraphComponent.prototype.zoom = function ($event, direction) {
+    /**
+     * Zoom was invoked from event
+     *
+     * @param {MouseEvent} $event
+     * @param {any} direction
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.onZoom = function ($event, direction) {
         if (direction === 'in') {
-            this.zoomLevel += 0.1;
+            this.zoomLevel += this.zoomSpeed;
         }
         else {
-            this.zoomLevel -= 0.1;
+            this.zoomLevel -= this.zoomSpeed;
         }
-        this.zoomLevel = Math.max(this.zoomLevel, 0.1);
-        this.zoomLevel = Math.min(this.zoomLevel, 4.0);
+        this.zoomLevel = Math.max(this.zoomLevel, this.minZoomLevel);
+        this.zoomLevel = Math.min(this.zoomLevel, this.maxZoomLevel);
         this.updateTransform();
     };
-    DirectedGraphComponent.prototype.pan = function (event) {
-        if (this.isPanning) {
-            this.panOffset.x += event.movementX;
-            this.panOffset.y += event.movementY;
-            this.updateTransform();
+    /**
+     * Pan was invoked from event
+     *
+     * @param {any} event
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.onPan = function (event) {
+        this.panOffsetX += event.movementX;
+        this.panOffsetY += event.movementY;
+        this.updateTransform();
+    };
+    /**
+     * Drag was invoked from an event
+     *
+     * @param {any} event
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.onDrag = function (event) {
+        var node = this.draggingNode;
+        node.x += event.movementX / this.zoomLevel;
+        node.y += event.movementY / this.zoomLevel;
+        // move the node
+        var x = (node.x - (node.width / 2));
+        var y = (node.y - (node.height / 2));
+        node.options.transform = "translate(" + x + "px, " + y + "px)";
+        var _loop_2 = function(link) {
+            if (link.target === node.id || link.source === node.id) {
+                var sourceNode = this_2._nodes.find(function (n) { return n.id === link.source; });
+                var targetNode = this_2._nodes.find(function (n) { return n.id === link.target; });
+                // determine new arrow position
+                var dir = sourceNode.y <= targetNode.y ? -1 : 1;
+                var startingPoint = { x: sourceNode.x, y: (sourceNode.y - dir * (sourceNode.height / 2)) };
+                var endingPoint = { x: targetNode.x, y: (targetNode.y + dir * (targetNode.height / 2)) };
+                // generate new points
+                link.points = [startingPoint, endingPoint];
+                var line = this_2.generateLine(link.points);
+                this_2.calcDominantBaseline(link);
+                link.oldLine = link.line;
+                link.line = line;
+            }
+        };
+        var this_2 = this;
+        for (var _i = 0, _a = this._links; _i < _a.length; _i++) {
+            var link = _a[_i];
+            _loop_2(link);
         }
+        this.redrawLines(false);
     };
+    /**
+     * Update the entire view for the new pan position
+     *
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.updateTransform = function () {
-        this.transform = "\n      translate(" + this.panOffset.x + ", " + this.panOffset.y + ") scale(" + this.zoomLevel + ")\n    ";
+        this.transform = "\n      translate(" + this.panOffsetX + ", " + this.panOffsetY + ") scale(" + this.zoomLevel + ")\n    ";
     };
+    /**
+     * Node was clicked
+     *
+     * @param {any} data
+     * @param {any} node
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.onClick = function (data, node) {
         this.select.emit(data);
     };
+    /**
+     * Node was focused
+     *
+     * @param {any} event
+     * @returns {void}
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.onActivate = function (event) {
         if (this.activeEntries.indexOf(event) > -1)
             return;
         this.activeEntries = [event].concat(this.activeEntries);
         this.activate.emit({ value: event, entries: this.activeEntries });
     };
+    /**
+     * Node was defocused
+     *
+     * @param {any} event
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.onDeactivate = function (event) {
         var idx = this.activeEntries.indexOf(event);
         this.activeEntries.splice(idx, 1);
         this.activeEntries = this.activeEntries.slice();
         this.deactivate.emit({ value: event, entries: this.activeEntries });
     };
+    /**
+     * Get the domain series for the nodes
+     *
+     * @returns {any[]}
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.getSeriesDomain = function () {
         var _this = this;
         return this.nodes.map(function (d) { return _this.groupResultsBy(d); })
             .reduce(function (nodes, node) { return nodes.includes(node) ? nodes : nodes.concat([node]); }, [])
             .sort();
     };
+    /**
+     * Tracking for the link
+     *
+     * @param {any} index
+     * @param {any} link
+     * @returns {*}
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.trackLinkBy = function (index, link) {
         return link.id;
     };
+    /**
+     * Tracking for the node
+     *
+     * @param {any} index
+     * @param {any} node
+     * @returns {*}
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.trackNodeBy = function (index, node) {
         return node.id;
     };
+    /**
+     * Sets the colors the nodes
+     *
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.setColors = function () {
         this.colors = new ngx_charts_1.ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
     };
+    /**
+     * Gets the legend options
+     *
+     * @returns {*}
+     *
+     * @memberOf DirectedGraphComponent
+     */
     DirectedGraphComponent.prototype.getLegendOptions = function () {
         return {
             scaleType: 'ordinal',
@@ -241,19 +456,49 @@ var DirectedGraphComponent = (function (_super) {
             colors: this.colors
         };
     };
-    DirectedGraphComponent.prototype.mousemove = function ($event) {
-        this.pan($event);
+    /**
+     * On mouse move event, used for panning and dragging.
+     *
+     * @param {MouseEvent} $event
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.onMouseMove = function ($event) {
+        if (this.isPanning && this.panningEnabled) {
+            this.onPan($event);
+        }
+        else if (this.isDragging && this.draggingEnabled) {
+            this.onDrag($event);
+        }
     };
-    DirectedGraphComponent.prototype.mouseup = function (node, $event) {
+    /**
+     * On mouse up event to disable panning/dragging.
+     *
+     * @param {MouseEvent} $event
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.onMouseUp = function ($event) {
+        this.isDragging = false;
         this.isPanning = false;
+    };
+    /**
+     * On node mouse down to kick off dragging
+     *
+     * @param {MouseEvent} event
+     * @param {*} node
+     *
+     * @memberOf DirectedGraphComponent
+     */
+    DirectedGraphComponent.prototype.onNodeMouseDown = function (event, node) {
+        this.isDragging = true;
+        this.draggingNode = node;
     };
     DirectedGraphComponent.decorators = [
         { type: core_1.Component, args: [{
                     selector: 'ngx-charts-directed-graph',
-                    template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouse-wheel (mouseWheelUp)=\"zoom($event, 'in')\" (mouseWheelDown)=\"zoom($event, 'out')\">\n      <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n\n        <defs>\n          <template *ngIf=\"defsTemplate\"\n            [ngTemplateOutlet]=\"defsTemplate\">\n          </template>\n\n          <svg:path class=\"text-path\" *ngFor=\"let link of _links\" [attr.d]=\"link.line\" [attr.id]=\"link.id\"></svg:path>\n        </defs>\n\n        <svg:rect\n          class=\"panning-rect\"\n          [attr.width]=\"dims.width * 100\"\n          [attr.height]=\"dims.height * 100\"\n          [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n          (mousedown)=\"isPanning = true\"\n        />\n\n        <svg:g class=\"links\">\n          <svg:g *ngFor=\"let link of _links; trackBy:trackLinkBy\"\n            class=\"link-group\"\n            #linkElement\n            [id]=\"link.id\">\n            <template *ngIf=\"linkTemplate\"\n              [ngTemplateOutlet]=\"linkTemplate\"\n              [ngOutletContext]=\"{ $implicit: link }\">\n            </template>\n            <svg:path *ngIf=\"!linkTemplate\"\n              class=\"edge\"\n              [attr.d]=\"link.line\"\n            />\n          </svg:g>\n        </svg:g>\n\n        <svg:g class=\"nodes\">\n          <svg:g *ngFor=\"let node of _nodes; trackBy:trackNodeBy\"\n            class=\"node-group\"\n            #nodeElement\n            [id]=\"node.id\"\n            [style.transform]=\"node.options.transform\"\n            (click)=\"onClick(node)\">\n            <template *ngIf=\"nodeTemplate\"\n              [ngTemplateOutlet]=\"nodeTemplate\"\n              [ngOutletContext]=\"{ $implicit: node }\">\n            </template>\n            <svg:circle *ngIf=\"!nodeTemplate\"\n              r=\"10\"\n              [attr.cx]=\"node.width / 2\"\n              [attr.cy]=\"node.height / 2\"\n              [attr.fill]=\"node.options.color\" />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n\n  ",
-                    styleUrls: [
-                        './directed-graph.component.css'
-                    ],
+                    template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\" \n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n        <defs>\n          <template \n            *ngIf=\"defsTemplate\"\n            [ngTemplateOutlet]=\"defsTemplate\">\n          </template>\n          <svg:path \n            class=\"text-path\" \n            *ngFor=\"let link of _links\" \n            [attr.d]=\"link.textPath\" \n            [attr.id]=\"link.id\">\n          </svg:path>\n        </defs>\n        <svg:rect\n          class=\"panning-rect\"\n          [attr.width]=\"dims.width * 100\"\n          [attr.height]=\"dims.height * 100\"\n          [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n          (mousedown)=\"isPanning = true\"\n        />\n        <svg:g class=\"links\">\n          <svg:g \n            *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n            class=\"link-group\"\n            #linkElement\n            [id]=\"link.id\">\n            <template \n              *ngIf=\"linkTemplate\"\n              [ngTemplateOutlet]=\"linkTemplate\"\n              [ngOutletContext]=\"{ $implicit: link }\">\n            </template>\n            <svg:path \n              *ngIf=\"!linkTemplate\"\n              class=\"edge\"\n              [attr.d]=\"link.line\"\n            />\n          </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n          <svg:g \n            *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n            class=\"node-group\"\n            #nodeElement\n            [id]=\"node.id\"\n            [style.transform]=\"node.options.transform\"\n            (click)=\"onClick(node)\"\n            (mousedown)=\"onNodeMouseDown($event, node)\">\n            <template \n              *ngIf=\"nodeTemplate\"\n              [ngTemplateOutlet]=\"nodeTemplate\"\n              [ngOutletContext]=\"{ $implicit: node }\">\n            </template>\n            <svg:circle \n              *ngIf=\"!nodeTemplate\"\n              r=\"10\"\n              [attr.cx]=\"node.width / 2\"\n              [attr.cy]=\"node.height / 2\"\n              [attr.fill]=\"node.options.color\" \n            />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+                    styleUrls: ['./directed-graph.component.css'],
                     encapsulation: core_1.ViewEncapsulation.None,
                     changeDetection: core_1.ChangeDetectionStrategy.OnPush,
                     animations: [
@@ -272,10 +517,22 @@ var DirectedGraphComponent = (function (_super) {
         'nodes': [{ type: core_1.Input },],
         'links': [{ type: core_1.Input },],
         'activeEntries': [{ type: core_1.Input },],
-        'zoomLevel': [{ type: core_1.Input },],
-        'panOffset': [{ type: core_1.Input },],
         'orientation': [{ type: core_1.Input },],
         'curve': [{ type: core_1.Input },],
+        'draggingEnabled': [{ type: core_1.Input },],
+        'nodeHeight': [{ type: core_1.Input },],
+        'nodeMaxHeight': [{ type: core_1.Input },],
+        'nodeMinHeight': [{ type: core_1.Input },],
+        'nodeWidth': [{ type: core_1.Input },],
+        'nodeMinWidth': [{ type: core_1.Input },],
+        'nodeMaxWidth': [{ type: core_1.Input },],
+        'panOffsetX': [{ type: core_1.Input },],
+        'panOffsetY': [{ type: core_1.Input },],
+        'panningEnabled': [{ type: core_1.Input },],
+        'zoomLevel': [{ type: core_1.Input },],
+        'zoomSpeed': [{ type: core_1.Input },],
+        'minZoomLevel': [{ type: core_1.Input },],
+        'maxZoomLevel': [{ type: core_1.Input },],
         'activate': [{ type: core_1.Output },],
         'deactivate': [{ type: core_1.Output },],
         'linkTemplate': [{ type: core_1.ContentChild, args: ['linkTemplate',] },],
@@ -285,8 +542,8 @@ var DirectedGraphComponent = (function (_super) {
         'nodeElements': [{ type: core_1.ViewChildren, args: ['nodeElement',] },],
         'linkElements': [{ type: core_1.ViewChildren, args: ['linkElement',] },],
         'groupResultsBy': [{ type: core_1.Input },],
-        'mousemove': [{ type: core_1.HostListener, args: ['document:mousemove', ['$event'],] },],
-        'mouseup': [{ type: core_1.HostListener, args: ['document:mouseup',] },],
+        'onMouseMove': [{ type: core_1.HostListener, args: ['document:mousemove', ['$event'],] },],
+        'onMouseUp': [{ type: core_1.HostListener, args: ['document:mouseup',] },],
     };
     return DirectedGraphComponent;
 }(ngx_charts_1.BaseChartComponent));

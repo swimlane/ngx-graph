@@ -60,6 +60,18 @@ export class Wrapper_DirectedGraphComponent {
   /*private*/ _expr_11:any;
   /*private*/ _expr_12:any;
   /*private*/ _expr_13:any;
+  /*private*/ _expr_14:any;
+  /*private*/ _expr_15:any;
+  /*private*/ _expr_16:any;
+  /*private*/ _expr_17:any;
+  /*private*/ _expr_18:any;
+  /*private*/ _expr_19:any;
+  /*private*/ _expr_20:any;
+  /*private*/ _expr_21:any;
+  /*private*/ _expr_22:any;
+  /*private*/ _expr_23:any;
+  /*private*/ _expr_24:any;
+  /*private*/ _expr_25:any;
   subscription0:any;
   subscription1:any;
   subscription2:any;
@@ -81,6 +93,18 @@ export class Wrapper_DirectedGraphComponent {
     this._expr_11 = import1.UNINITIALIZED;
     this._expr_12 = import1.UNINITIALIZED;
     this._expr_13 = import1.UNINITIALIZED;
+    this._expr_14 = import1.UNINITIALIZED;
+    this._expr_15 = import1.UNINITIALIZED;
+    this._expr_16 = import1.UNINITIALIZED;
+    this._expr_17 = import1.UNINITIALIZED;
+    this._expr_18 = import1.UNINITIALIZED;
+    this._expr_19 = import1.UNINITIALIZED;
+    this._expr_20 = import1.UNINITIALIZED;
+    this._expr_21 = import1.UNINITIALIZED;
+    this._expr_22 = import1.UNINITIALIZED;
+    this._expr_23 = import1.UNINITIALIZED;
+    this._expr_24 = import1.UNINITIALIZED;
+    this._expr_25 = import1.UNINITIALIZED;
   }
   ngOnDetach(view:import2.AppView<any>,componentView:import2.AppView<any>,el:any):void {
   }
@@ -162,44 +186,140 @@ export class Wrapper_DirectedGraphComponent {
       this._expr_8 = currValue;
     }
   }
-  check_zoomLevel(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+  check_orientation(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
     if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_9,currValue))) {
       this._changed = true;
-      this.context.zoomLevel = currValue;
-      this._changes['zoomLevel'] = new import1.SimpleChange(this._expr_9,currValue);
+      this.context.orientation = currValue;
+      this._changes['orientation'] = new import1.SimpleChange(this._expr_9,currValue);
       this._expr_9 = currValue;
     }
   }
-  check_panOffset(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+  check_curve(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
     if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_10,currValue))) {
       this._changed = true;
-      this.context.panOffset = currValue;
-      this._changes['panOffset'] = new import1.SimpleChange(this._expr_10,currValue);
+      this.context.curve = currValue;
+      this._changes['curve'] = new import1.SimpleChange(this._expr_10,currValue);
       this._expr_10 = currValue;
     }
   }
-  check_orientation(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+  check_draggingEnabled(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
     if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_11,currValue))) {
       this._changed = true;
-      this.context.orientation = currValue;
-      this._changes['orientation'] = new import1.SimpleChange(this._expr_11,currValue);
+      this.context.draggingEnabled = currValue;
+      this._changes['draggingEnabled'] = new import1.SimpleChange(this._expr_11,currValue);
       this._expr_11 = currValue;
     }
   }
-  check_curve(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+  check_nodeHeight(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
     if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_12,currValue))) {
       this._changed = true;
-      this.context.curve = currValue;
-      this._changes['curve'] = new import1.SimpleChange(this._expr_12,currValue);
+      this.context.nodeHeight = currValue;
+      this._changes['nodeHeight'] = new import1.SimpleChange(this._expr_12,currValue);
       this._expr_12 = currValue;
     }
   }
-  check_groupResultsBy(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+  check_nodeMaxHeight(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
     if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_13,currValue))) {
       this._changed = true;
-      this.context.groupResultsBy = currValue;
-      this._changes['groupResultsBy'] = new import1.SimpleChange(this._expr_13,currValue);
+      this.context.nodeMaxHeight = currValue;
+      this._changes['nodeMaxHeight'] = new import1.SimpleChange(this._expr_13,currValue);
       this._expr_13 = currValue;
+    }
+  }
+  check_nodeMinHeight(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_14,currValue))) {
+      this._changed = true;
+      this.context.nodeMinHeight = currValue;
+      this._changes['nodeMinHeight'] = new import1.SimpleChange(this._expr_14,currValue);
+      this._expr_14 = currValue;
+    }
+  }
+  check_nodeWidth(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_15,currValue))) {
+      this._changed = true;
+      this.context.nodeWidth = currValue;
+      this._changes['nodeWidth'] = new import1.SimpleChange(this._expr_15,currValue);
+      this._expr_15 = currValue;
+    }
+  }
+  check_nodeMinWidth(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_16,currValue))) {
+      this._changed = true;
+      this.context.nodeMinWidth = currValue;
+      this._changes['nodeMinWidth'] = new import1.SimpleChange(this._expr_16,currValue);
+      this._expr_16 = currValue;
+    }
+  }
+  check_nodeMaxWidth(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_17,currValue))) {
+      this._changed = true;
+      this.context.nodeMaxWidth = currValue;
+      this._changes['nodeMaxWidth'] = new import1.SimpleChange(this._expr_17,currValue);
+      this._expr_17 = currValue;
+    }
+  }
+  check_panOffsetX(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_18,currValue))) {
+      this._changed = true;
+      this.context.panOffsetX = currValue;
+      this._changes['panOffsetX'] = new import1.SimpleChange(this._expr_18,currValue);
+      this._expr_18 = currValue;
+    }
+  }
+  check_panOffsetY(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_19,currValue))) {
+      this._changed = true;
+      this.context.panOffsetY = currValue;
+      this._changes['panOffsetY'] = new import1.SimpleChange(this._expr_19,currValue);
+      this._expr_19 = currValue;
+    }
+  }
+  check_panningEnabled(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_20,currValue))) {
+      this._changed = true;
+      this.context.panningEnabled = currValue;
+      this._changes['panningEnabled'] = new import1.SimpleChange(this._expr_20,currValue);
+      this._expr_20 = currValue;
+    }
+  }
+  check_zoomLevel(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_21,currValue))) {
+      this._changed = true;
+      this.context.zoomLevel = currValue;
+      this._changes['zoomLevel'] = new import1.SimpleChange(this._expr_21,currValue);
+      this._expr_21 = currValue;
+    }
+  }
+  check_zoomSpeed(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_22,currValue))) {
+      this._changed = true;
+      this.context.zoomSpeed = currValue;
+      this._changes['zoomSpeed'] = new import1.SimpleChange(this._expr_22,currValue);
+      this._expr_22 = currValue;
+    }
+  }
+  check_minZoomLevel(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_23,currValue))) {
+      this._changed = true;
+      this.context.minZoomLevel = currValue;
+      this._changes['minZoomLevel'] = new import1.SimpleChange(this._expr_23,currValue);
+      this._expr_23 = currValue;
+    }
+  }
+  check_maxZoomLevel(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_24,currValue))) {
+      this._changed = true;
+      this.context.maxZoomLevel = currValue;
+      this._changes['maxZoomLevel'] = new import1.SimpleChange(this._expr_24,currValue);
+      this._expr_24 = currValue;
+    }
+  }
+  check_groupResultsBy(currValue:any,throwOnChange:boolean,forceUpdate:boolean):void {
+    if ((forceUpdate || import3.checkBinding(throwOnChange,this._expr_25,currValue))) {
+      this._changed = true;
+      this.context.groupResultsBy = currValue;
+      this._changes['groupResultsBy'] = new import1.SimpleChange(this._expr_25,currValue);
+      this._expr_25 = currValue;
     }
   }
   ngDoCheck(view:import2.AppView<any>,el:any,throwOnChange:boolean):boolean {
@@ -216,11 +336,11 @@ export class Wrapper_DirectedGraphComponent {
   handleEvent(eventName:string,$event:any):boolean {
     var result:boolean = true;
     if ((eventName == 'document:mousemove')) {
-      const pd_sub_0:any = ((<any>this.context.mousemove($event)) !== false);
+      const pd_sub_0:any = ((<any>this.context.onMouseMove($event)) !== false);
       result = (pd_sub_0 && result);
     }
     if ((eventName == 'document:mouseup')) {
-      const pd_sub_1:any = ((<any>this.context.mouseup()) !== false);
+      const pd_sub_1:any = ((<any>this.context.onMouseUp()) !== false);
       result = (pd_sub_1 && result);
     }
     return result;
@@ -373,28 +493,34 @@ class View_DirectedGraphComponent2 extends import2.AppView<any> {
 }
 class View_DirectedGraphComponent4 extends import2.AppView<any> {
   _el_0:any;
-  /*private*/ _expr_1:any;
+  _text_1:any;
   /*private*/ _expr_2:any;
+  /*private*/ _expr_3:any;
   constructor(viewUtils:import3.ViewUtils,parentView:import2.AppView<any>,parentIndex:number,parentElement:any,declaredViewContainer:import20.ViewContainer) {
     super(View_DirectedGraphComponent4,renderType_DirectedGraphComponent,import7.ViewType.EMBEDDED,viewUtils,parentView,parentIndex,parentElement,import8.ChangeDetectorStatus.CheckAlways,declaredViewContainer);
-    this._expr_1 = import1.UNINITIALIZED;
     this._expr_2 = import1.UNINITIALIZED;
+    this._expr_3 = import1.UNINITIALIZED;
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
     this._el_0 = import3.createRenderElement(this.renderer,(null as any),':svg:path',new import3.InlineArray2(2,'class','text-path'),(null as any));
-    this.init(this._el_0,((<any>this.renderer).directRenderer? (null as any): [this._el_0]),(null as any));
+    this._text_1 = this.renderer.createText(this._el_0,'\n          ',(null as any));
+    this.init(this._el_0,((<any>this.renderer).directRenderer? (null as any): [
+      this._el_0,
+      this._text_1
+    ]
+    ),(null as any));
     return (null as any);
   }
   detectChangesInternal(throwOnChange:boolean):void {
-    const currVal_1:any = this.context.$implicit.line;
-    if (import3.checkBinding(throwOnChange,this._expr_1,currVal_1)) {
-      this.renderer.setElementAttribute(this._el_0,'d',((currVal_1 == null)? (null as any): currVal_1.toString()));
-      this._expr_1 = currVal_1;
-    }
-    const currVal_2:any = this.context.$implicit.id;
+    const currVal_2:any = this.context.$implicit.textPath;
     if (import3.checkBinding(throwOnChange,this._expr_2,currVal_2)) {
-      this.renderer.setElementAttribute(this._el_0,'id',((currVal_2 == null)? (null as any): currVal_2.toString()));
+      this.renderer.setElementAttribute(this._el_0,'d',((currVal_2 == null)? (null as any): currVal_2.toString()));
       this._expr_2 = currVal_2;
+    }
+    const currVal_3:any = this.context.$implicit.id;
+    if (import3.checkBinding(throwOnChange,this._expr_3,currVal_3)) {
+      this.renderer.setElementAttribute(this._el_0,'id',((currVal_3 == null)? (null as any): currVal_3.toString()));
+      this._expr_3 = currVal_3;
     }
   }
   visitRootNodesInternal(cb:any,ctx:any):void {
@@ -698,7 +824,7 @@ class View_DirectedGraphComponent9 extends import2.AppView<any> {
     this._TemplateRef_4_5 = new import22.TemplateRef_(this,4,this._anchor_4);
     this._NgIf_4_6 = new import24.Wrapper_NgIf(this._vc_4.vcRef,this._TemplateRef_4_5);
     this._text_5 = this.renderer.createText(this._el_0,'\n          ',(null as any));
-    var disposable_0:Function = import3.subscribeToRenderElement(this,this._el_0,new import3.InlineArray2(2,'click',(null as any)),this.eventHandler(this.handleEvent_0));
+    var disposable_0:Function = import3.subscribeToRenderElement(this,this._el_0,new import3.InlineArray4(4,'click',(null as any),'mousedown',(null as any)),this.eventHandler(this.handleEvent_0));
     this.init(this._el_0,((<any>this.renderer).directRenderer? (null as any): [
       this._el_0,
       this._text_1,
@@ -759,6 +885,10 @@ class View_DirectedGraphComponent9 extends import2.AppView<any> {
       const pd_sub_0:any = ((<any>this.parentView.parentView.context.onClick(this.context.$implicit)) !== false);
       result = (pd_sub_0 && result);
     }
+    if ((eventName == 'mousedown')) {
+      const pd_sub_1:any = ((<any>this.parentView.parentView.context.onNodeMouseDown($event,this.context.$implicit)) !== false);
+      result = (pd_sub_1 && result);
+    }
     return result;
   }
 }
@@ -809,22 +939,22 @@ class View_DirectedGraphComponent1 extends import2.AppView<any> {
   }
   createInternal(rootSelector:string):import9.ComponentRef<any> {
     this._el_0 = import3.createRenderElement(this.renderer,(null as any),':svg:g',new import3.InlineArray2(2,'class','directed-graph chart'),(null as any));
-    this._text_1 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
+    this._text_1 = this.renderer.createText(this._el_0,'\n        ',(null as any));
     this._el_2 = import3.createRenderElement(this.renderer,this._el_0,':svg:defs',import3.EMPTY_INLINE_ARRAY,(null as any));
     this._text_3 = this.renderer.createText(this._el_2,'\n          ',(null as any));
     this._anchor_4 = this.renderer.createTemplateAnchor(this._el_2,(null as any));
     this._vc_4 = new import20.ViewContainer(4,2,this,this._anchor_4);
     this._TemplateRef_4_5 = new import22.TemplateRef_(this,4,this._anchor_4);
     this._NgIf_4_6 = new import24.Wrapper_NgIf(this._vc_4.vcRef,this._TemplateRef_4_5);
-    this._text_5 = this.renderer.createText(this._el_2,'\n\n          ',(null as any));
+    this._text_5 = this.renderer.createText(this._el_2,'\n          ',(null as any));
     this._anchor_6 = this.renderer.createTemplateAnchor(this._el_2,(null as any));
     this._vc_6 = new import20.ViewContainer(6,2,this,this._anchor_6);
     this._TemplateRef_6_5 = new import22.TemplateRef_(this,6,this._anchor_6);
     this._NgFor_6_6 = new import27.Wrapper_NgFor(this._vc_6.vcRef,this._TemplateRef_6_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
     this._text_7 = this.renderer.createText(this._el_2,'\n        ',(null as any));
-    this._text_8 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
+    this._text_8 = this.renderer.createText(this._el_0,'\n        ',(null as any));
     this._el_9 = import3.createRenderElement(this.renderer,this._el_0,':svg:rect',new import3.InlineArray2(2,'class','panning-rect'),(null as any));
-    this._text_10 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
+    this._text_10 = this.renderer.createText(this._el_0,'\n        ',(null as any));
     this._el_11 = import3.createRenderElement(this.renderer,this._el_0,':svg:g',new import3.InlineArray2(2,'class','links'),(null as any));
     this._text_12 = this.renderer.createText(this._el_11,'\n          ',(null as any));
     this._anchor_13 = this.renderer.createTemplateAnchor(this._el_11,(null as any));
@@ -832,7 +962,7 @@ class View_DirectedGraphComponent1 extends import2.AppView<any> {
     this._TemplateRef_13_5 = new import22.TemplateRef_(this,13,this._anchor_13);
     this._NgFor_13_6 = new import27.Wrapper_NgFor(this._vc_13.vcRef,this._TemplateRef_13_5,this.parentView.parentView.injectorGet(import28.IterableDiffers,this.parentView.parentIndex),this.parentView.ref);
     this._text_14 = this.renderer.createText(this._el_11,'\n        ',(null as any));
-    this._text_15 = this.renderer.createText(this._el_0,'\n\n        ',(null as any));
+    this._text_15 = this.renderer.createText(this._el_0,'\n        ',(null as any));
     this._el_16 = import3.createRenderElement(this.renderer,this._el_0,':svg:g',new import3.InlineArray2(2,'class','nodes'),(null as any));
     this._text_17 = this.renderer.createText(this._el_16,'\n          ',(null as any));
     this._anchor_18 = this.renderer.createTemplateAnchor(this._el_16,(null as any));
@@ -983,7 +1113,7 @@ export class View_DirectedGraphComponent0 extends import2.AppView<import0.Direct
     this._viewQuery_nodeElement_1 = new import6.QueryList<any>();
     this._viewQuery_linkElement_2 = new import6.QueryList<any>();
     this._text_0 = this.renderer.createText(parentRenderNode,'\n    ',(null as any));
-    this._el_1 = import3.createRenderElement(this.renderer,parentRenderNode,'ngx-charts-chart',new import3.InlineArray2(2,'mouse-wheel',''),(null as any));
+    this._el_1 = import3.createRenderElement(this.renderer,parentRenderNode,'ngx-charts-chart',new import3.InlineArray2(2,'mouseWheel',''),(null as any));
     this._vc_1 = new import20.ViewContainer(1,(null as any),this,this._el_1);
     this.compView_1 = new import32.View_ChartComponent0(this.viewUtils,this,1,this._el_1);
     this._TooltipService_1_5 = new import31.TooltipService(this.parentView.injectorGet(import34.InjectionService,this.parentIndex));
@@ -996,7 +1126,7 @@ export class View_DirectedGraphComponent0 extends import2.AppView<import0.Direct
     this._NgIf_3_6 = new import24.Wrapper_NgIf(this._vc_3.vcRef,this._TemplateRef_3_5);
     this._text_4 = this.renderer.createText((null as any),'\n    ',(null as any));
     this.compView_1.create(this._ChartComponent_1_6.context);
-    this._text_5 = this.renderer.createText(parentRenderNode,'\n\n  ',(null as any));
+    this._text_5 = this.renderer.createText(parentRenderNode,'\n  ',(null as any));
     var disposable_0:Function = import3.subscribeToRenderElement(this,this._el_1,new import3.InlineArray16(16,'legendLabelClick',(null as any),'legendLabelActivate',(null as any),'legendLabelDeactivate',(null as any),'mouseWheelUp',(null as any),'mouseWheelDown',(null as any),'mousewheel',(null as any),'DOMMouseScroll',(null as any),'onmousewheel',(null as any)),this.eventHandler(this.handleEvent_1));
     this._ChartComponent_1_6.subscribe(this,this.eventHandler(this.handleEvent_1),true,true,true);
     this._MouseWheelDirective_1_7.subscribe(this,this.eventHandler(this.handleEvent_1),true,true);
@@ -1093,11 +1223,11 @@ export class View_DirectedGraphComponent0 extends import2.AppView<import0.Direct
       result = (pd_sub_2 && result);
     }
     if ((eventName == 'mouseWheelUp')) {
-      const pd_sub_3:any = ((<any>this.context.zoom($event,'in')) !== false);
+      const pd_sub_3:any = ((<any>this.context.onZoom($event,'in')) !== false);
       result = (pd_sub_3 && result);
     }
     if ((eventName == 'mouseWheelDown')) {
-      const pd_sub_4:any = ((<any>this.context.zoom($event,'out')) !== false);
+      const pd_sub_4:any = ((<any>this.context.onZoom($event,'out')) !== false);
       result = (pd_sub_4 && result);
     }
     return result;

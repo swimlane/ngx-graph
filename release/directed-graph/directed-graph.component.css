@@ -1,16 +1,14 @@
-.directed-graph .edge {
-  stroke: #666;
-  fill: none; }
-  .directed-graph .edge .edge-label {
-    stroke: none;
-    font-size: 12px;
-    fill: #ffffff; }
-  .directed-graph .edge .text-path {
-    dominant-baseline: text-after-edge; }
-
-.directed-graph .panning-rect {
-  fill: transparent;
-  cursor: move; }
-
-.directed-graph .node-group {
-  transition: 0.5s ease-in-out; }
+.directed-graph {
+  user-select: none; }
+  .directed-graph .edge {
+    stroke: #666;
+    fill: none; }
+    .directed-graph .edge .edge-label {
+      stroke: none;
+      font-size: 12px;
+      fill: #ffffff; }
+  .directed-graph .panning-rect {
+    fill: transparent;
+    cursor: move; }
+  .directed-graph .node-group .node:focus {
+    outline: none; }
