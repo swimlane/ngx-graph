@@ -110,6 +110,14 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
   @Input() curve: any;
   @Input() draggingEnabled: boolean = true;
 
+  @Input() nodeHeight: number;
+  @Input() nodeMaxHeight: number;
+  @Input() nodeMinHeight: number;
+
+  @Input() nodeWidth: number;
+  @Input() nodeMinWidth: number;
+  @Input() nodeMaxWidth: number;
+
   @Input() panOffsetX: number = 0;
   @Input() panOffsetY: number = 0;
   @Input() panningEnabled: boolean = true;
@@ -202,15 +210,29 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
         // calculate the height
         const dims = nativeElement.getBBox();
-        node.height = dims.height;
-
-        // calculate the width
-        if (nativeElement.getElementsByTagName('text').length) {
-          const textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
-          node.width = textDims.width + 20;
+        if(this.nodeHeight) { 
+          node.height = this.nodeHeight;
         } else {
-          node.width = dims.width;
+          node.height = dims.height;
         }
+
+        if(this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
+        if(this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
+
+        if(this.nodeWidth) {
+          node.width = this.nodeWidth;
+        } else {
+          // calculate the width
+          if (nativeElement.getElementsByTagName('text').length) {
+            const textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+            node.width = textDims.width + 20;
+          } else {
+            node.width = dims.width;
+          }
+        }
+
+        if(this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
+        if(this.nodeMinWidth) node.width = Math.min(node.width, this.nodeMinWidth);
       });
     }
 
