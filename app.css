@@ -1,19 +1,19 @@
-.directed-graph .edge {
-  stroke: #666;
-  fill: none; }
-  .directed-graph .edge .edge-label {
-    stroke: none;
-    font-size: 12px;
-    fill: #ffffff; }
-  .directed-graph .edge .text-path {
-    dominant-baseline: text-after-edge; }
-
-.directed-graph .panning-rect {
-  fill: transparent;
-  cursor: move; }
-
-.directed-graph .node-group {
-  -webkit-transition: 0.5s ease-in-out;
-  transition: 0.5s ease-in-out; }
+.directed-graph {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; }
+  .directed-graph .edge {
+    stroke: #666;
+    fill: none; }
+    .directed-graph .edge .edge-label {
+      stroke: none;
+      font-size: 12px;
+      fill: #ffffff; }
+  .directed-graph .panning-rect {
+    fill: transparent;
+    cursor: move; }
+  .directed-graph .node-group .node:focus {
+    outline: none; }
 
 /*# sourceMappingURL=app.map*/
