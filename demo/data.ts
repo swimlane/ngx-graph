@@ -123,18 +123,18 @@ export function getTurbineData() {
   const nodes = [];
   const links = [];
 
-  for (let key in tasks.tasks) {
-    let node = tasks.tasks[key];
+  for (const key in tasks.tasks) {
+    const node = tasks.tasks[key];
     node.id = id();
     node.label = key;
 
     nodes.push(node);
   }
 
-  for (let node of nodes) {
+  for (const node of nodes) {
     if (node['on-success']) {
-      for (let label of node['on-success']) {
-        let target = nodes.find(n => n.label === label);
+      for (const label of node['on-success']) {
+        const target = nodes.find(n => n.label === label);
 
         links.push({
           source: node.id,
@@ -145,8 +145,8 @@ export function getTurbineData() {
     }
 
     if (node['on-error']) {
-      for (let label of node['on-error']) {
-        let target = nodes.find(n => n.label === label);
+      for (const label of node['on-error']) {
+        const target = nodes.find(n => n.label === label);
 
         links.push({
           source: node.id,

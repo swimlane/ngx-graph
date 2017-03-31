@@ -27,10 +27,10 @@ import { id } from '../utils';
       (mouseWheelDown)="onZoom($event, 'out')">
       <svg:g *ngIf="initialized" [attr.transform]="transform" class="directed-graph chart">
         <defs>
-          <template 
+          <ng-template 
             *ngIf="defsTemplate"
             [ngTemplateOutlet]="defsTemplate">
-          </template>
+          </ng-template>
           <svg:path 
             class="text-path" 
             *ngFor="let link of _links" 
@@ -51,11 +51,11 @@ import { id } from '../utils';
             class="link-group"
             #linkElement
             [id]="link.id">
-            <template 
+            <ng-template 
               *ngIf="linkTemplate"
               [ngTemplateOutlet]="linkTemplate"
               [ngOutletContext]="{ $implicit: link }">
-            </template>
+            </ng-template>
             <svg:path 
               *ngIf="!linkTemplate"
               class="edge"
@@ -72,11 +72,11 @@ import { id } from '../utils';
             [style.transform]="node.options.transform"
             (click)="onClick(node)"
             (mousedown)="onNodeMouseDown($event, node)">
-            <template 
+            <ng-template 
               *ngIf="nodeTemplate"
               [ngTemplateOutlet]="nodeTemplate"
               [ngOutletContext]="{ $implicit: node }">
-            </template>
+            </ng-template>
             <svg:circle 
               *ngIf="!nodeTemplate"
               r="10"

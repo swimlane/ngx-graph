@@ -45,6 +45,7 @@ module.exports = function(env) {
       '@angular/core': '@angular/core',
       '@angular/common': '@angular/common',
       '@angular/forms': '@angular/forms',
+      '@angular/animations': '@angular/animations',
       'core-js': 'core-js',
       'core-js/es6': 'core-js/es6',
       'core-js/es7/reflect': 'core-js/es7/reflect',
