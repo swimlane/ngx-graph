@@ -97,7 +97,7 @@ export class AppComponent implements OnInit {
     if (add) {
       // directed graph
 
-      let hNode = {
+      const hNode = {
         id: id(),
         label: country
       };
