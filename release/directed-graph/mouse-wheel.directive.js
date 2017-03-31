@@ -1,5 +1,4 @@
-"use strict";
-var core_1 = require('@angular/core');
+import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
 /**
  * Mousewheel directive
  * https://github.com/SodhanaLibrary/angular2-examples/blob/master/app/mouseWheelDirective/mousewheel.directive.ts
@@ -9,8 +8,8 @@ var core_1 = require('@angular/core');
  */
 var MouseWheelDirective = (function () {
     function MouseWheelDirective() {
-        this.mouseWheelUp = new core_1.EventEmitter();
-        this.mouseWheelDown = new core_1.EventEmitter();
+        this.mouseWheelUp = new EventEmitter();
+        this.mouseWheelDown = new EventEmitter();
     }
     MouseWheelDirective.prototype.onMouseWheelChrome = function (event) {
         this.mouseWheelFunc(event);
@@ -39,19 +38,19 @@ var MouseWheelDirective = (function () {
             event.preventDefault();
         }
     };
-    MouseWheelDirective.decorators = [
-        { type: core_1.Directive, args: [{ selector: '[mouseWheel]' },] },
-    ];
-    /** @nocollapse */
-    MouseWheelDirective.ctorParameters = function () { return []; };
-    MouseWheelDirective.propDecorators = {
-        'mouseWheelUp': [{ type: core_1.Output },],
-        'mouseWheelDown': [{ type: core_1.Output },],
-        'onMouseWheelChrome': [{ type: core_1.HostListener, args: ['mousewheel', ['$event'],] },],
-        'onMouseWheelFirefox': [{ type: core_1.HostListener, args: ['DOMMouseScroll', ['$event'],] },],
-        'onMouseWheelIE': [{ type: core_1.HostListener, args: ['onmousewheel', ['$event'],] },],
-    };
     return MouseWheelDirective;
 }());
-exports.MouseWheelDirective = MouseWheelDirective;
+export { MouseWheelDirective };
+MouseWheelDirective.decorators = [
+    { type: Directive, args: [{ selector: '[mouseWheel]' },] },
+];
+/** @nocollapse */
+MouseWheelDirective.ctorParameters = function () { return []; };
+MouseWheelDirective.propDecorators = {
+    'mouseWheelUp': [{ type: Output },],
+    'mouseWheelDown': [{ type: Output },],
+    'onMouseWheelChrome': [{ type: HostListener, args: ['mousewheel', ['$event'],] },],
+    'onMouseWheelFirefox': [{ type: HostListener, args: ['DOMMouseScroll', ['$event'],] },],
+    'onMouseWheelIE': [{ type: HostListener, args: ['onmousewheel', ['$event'],] },],
+};
 //# sourceMappingURL=mouse-wheel.directive.js.map
