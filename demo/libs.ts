@@ -8,12 +8,14 @@ import { enableProdMode } from '@angular/core';
 import '@angular/platform-browser-dynamic';
 import '@angular/common';
 
-// externals
-import '../src/d3';
+let _decorateModuleRef = function identity<T>(value: T): T { return value; };
 
 if(IS_PRODUCTION) {
-  disableDebugTools();
   enableProdMode();
+  _decorateModuleRef = (modRef: any) => {
+    disableDebugTools();
+    return modRef;
+  };
 }
 
 if(IS_DEV) {

@@ -8,7 +8,8 @@ import {
   BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper
 } from '@swimlane/ngx-charts';
 
-import d3 from '../d3';
+import { select } from 'd3-selection';
+import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
 import { id } from '../utils';
 
@@ -23,18 +24,18 @@ import { id } from '../utils';
       (legendLabelActivate)="onActivate($event)"
       (legendLabelDeactivate)="onDeactivate($event)"
       mouseWheel
-      (mouseWheelUp)="onZoom($event, 'in')" 
+      (mouseWheelUp)="onZoom($event, 'in')"
       (mouseWheelDown)="onZoom($event, 'out')">
       <svg:g *ngIf="initialized" [attr.transform]="transform" class="directed-graph chart">
         <defs>
-          <ng-template 
+          <ng-template
             *ngIf="defsTemplate"
             [ngTemplateOutlet]="defsTemplate">
           </ng-template>
-          <svg:path 
-            class="text-path" 
-            *ngFor="let link of _links" 
-            [attr.d]="link.textPath" 
+          <svg:path
+            class="text-path"
+            *ngFor="let link of _links"
+            [attr.d]="link.textPath"
             [attr.id]="link.id">
           </svg:path>
         </defs>
@@ -46,17 +47,17 @@ import { id } from '../utils';
           (mousedown)="isPanning = true"
         />
         <svg:g class="links">
-          <svg:g 
+          <svg:g
             *ngFor="let link of _links; trackBy: trackLinkBy"
             class="link-group"
             #linkElement
             [id]="link.id">
-            <ng-template 
+            <ng-template
               *ngIf="linkTemplate"
               [ngTemplateOutlet]="linkTemplate"
               [ngOutletContext]="{ $implicit: link }">
             </ng-template>
-            <svg:path 
+            <svg:path
               *ngIf="!linkTemplate"
               class="edge"
               [attr.d]="link.line"
@@ -64,7 +65,7 @@ import { id } from '../utils';
           </svg:g>
         </svg:g>
         <svg:g class="nodes">
-          <svg:g 
+          <svg:g
             *ngFor="let node of _nodes; trackBy: trackNodeBy"
             class="node-group"
             #nodeElement
@@ -72,17 +73,17 @@ import { id } from '../utils';
             [style.transform]="node.options.transform"
             (click)="onClick(node)"
             (mousedown)="onNodeMouseDown($event, node)">
-            <ng-template 
+            <ng-template
               *ngIf="nodeTemplate"
               [ngTemplateOutlet]="nodeTemplate"
               [ngOutletContext]="{ $implicit: node }">
             </ng-template>
-            <svg:circle 
+            <svg:circle
               *ngIf="!nodeTemplate"
               r="10"
               [attr.cx]="node.width / 2"
               [attr.cy]="node.height / 2"
-              [attr.fill]="node.options.color" 
+              [attr.fill]="node.options.color"
             />
           </svg:g>
         </svg:g>
@@ -154,13 +155,13 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
   _nodes: any[];
   _links: any[];
   _oldLinks: any[] = [];
-  
+
   @Input() groupResultsBy: (node: any) => string = node => node.label;
 
   /**
    * Angular lifecycle event
-   * 
-   * 
+   *
+   *
    * @memberOf DirectedGraphComponent
    */
   ngAfterViewInit(): void {
@@ -170,8 +171,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Base class update implementation for the dag graph
-   * 
-   * 
+   *
+   *
    * @memberOf DirectedGraphComponent
    */
   update(): void {
@@ -197,8 +198,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Draws the graph using dagre layouts
-   * 
-   * 
+   *
+   *
    * @memberOf DirectedGraphComponent
    */
   draw(): void {
@@ -210,7 +211,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
         // calculate the height
         const dims = nativeElement.getBBox();
-        if(this.nodeHeight) { 
+        if(this.nodeHeight) {
           node.height = this.nodeHeight;
         } else {
           node.height = dims.height;
@@ -304,9 +305,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Redraws the lines when dragged or viewport updated
-   * 
-   * @param {boolean} [animate=true] 
-   * 
+   *
+   * @param {boolean} [animate=true]
+   *
    * @memberOf DirectedGraphComponent
    */
   redrawLines(animate = true): void {
@@ -314,14 +315,14 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
       const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (l) {
-        const linkSelection = d3.select(linkEl.nativeElement).select('.line');
+        const linkSelection = select(linkEl.nativeElement).select('.line');
         linkSelection
           .attr('d', l.oldLine)
           .transition()
           .duration(animate ? 500 : 0)
           .attr('d', l.line);
 
-        const textPathSelection = d3.select(this.chartElement.nativeElement).select(`#${l.id}`);
+        const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
         textPathSelection
           .attr('d', l.oldTextPath)
           .transition()
@@ -333,8 +334,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Creates the dagre graph engine
-   * 
-   * 
+   *
+   *
    * @memberOf DirectedGraphComponent
    */
   createGraph(): void {
@@ -350,8 +351,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
     });
 
     // Default to assigning a new object as a label for each new edge.
-    this.graph.setDefaultEdgeLabel(() => { 
-      return { /* empty */ }; 
+    this.graph.setDefaultEdgeLabel(() => {
+      return { /* empty */ };
     });
 
     this._nodes = this.nodes.map(n => {
@@ -367,7 +368,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
     for (const node of this._nodes) {
       node.width = 20;
       node.height = 30;
-      
+
       // update dagre
       this.graph.setNode(node.id, node);
 
@@ -388,9 +389,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Calculate the text directions / flipping
-   * 
-   * @param {any} link 
-   * 
+   *
+   * @param {any} link
+   *
    * @memberOf DirectedGraphComponent
    */
   calcDominantBaseline(link): void {
@@ -411,23 +412,23 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Generate the new line path
-   * 
-   * @param {any} points 
-   * @returns {*} 
-   * 
+   *
+   * @param {any} points
+   * @returns {*}
+   *
    * @memberOf DirectedGraphComponent
    */
   generateLine(points): any {
-    const lineFunction = d3.line().x(d => d.x).y(d => d.y).curve(this.curve);
+    const lineFunction = shape.line<any>().x(d => d.x).y(d => d.y).curve(this.curve);
     return lineFunction(points);
   }
 
   /**
    * Zoom was invoked from event
-   * 
-   * @param {MouseEvent} $event 
-   * @param {any} direction 
-   * 
+   *
+   * @param {MouseEvent} $event
+   * @param {any} direction
+   *
    * @memberOf DirectedGraphComponent
    */
   onZoom($event: MouseEvent, direction): void {
@@ -445,9 +446,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Pan was invoked from event
-   * 
-   * @param {any} event 
-   * 
+   *
+   * @param {any} event
+   *
    * @memberOf DirectedGraphComponent
    */
   onPan(event): void {
@@ -458,9 +459,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Drag was invoked from an event
-   * 
-   * @param {any} event 
-   * 
+   *
+   * @param {any} event
+   *
    * @memberOf DirectedGraphComponent
    */
   onDrag(event): void {
@@ -497,8 +498,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Update the entire view for the new pan position
-   * 
-   * 
+   *
+   *
    * @memberOf DirectedGraphComponent
    */
   updateTransform(): void {
@@ -509,10 +510,10 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Node was clicked
-   * 
-   * @param {any} data 
-   * @param {any} node 
-   * 
+   *
+   * @param {any} data
+   * @param {any} node
+   *
    * @memberOf DirectedGraphComponent
    */
   onClick(data, node): void {
@@ -521,10 +522,10 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Node was focused
-   * 
-   * @param {any} event 
-   * @returns {void} 
-   * 
+   *
+   * @param {any} event
+   * @returns {void}
+   *
    * @memberOf DirectedGraphComponent
    */
   onActivate(event): void {
@@ -535,9 +536,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Node was defocused
-   * 
-   * @param {any} event 
-   * 
+   *
+   * @param {any} event
+   *
    * @memberOf DirectedGraphComponent
    */
   onDeactivate(event): void {
@@ -551,9 +552,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Get the domain series for the nodes
-   * 
-   * @returns {any[]} 
-   * 
+   *
+   * @returns {any[]}
+   *
    * @memberOf DirectedGraphComponent
    */
   getSeriesDomain(): any[] {
@@ -564,11 +565,11 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Tracking for the link
-   * 
-   * @param {any} index 
-   * @param {any} link 
-   * @returns {*} 
-   * 
+   *
+   * @param {any} index
+   * @param {any} link
+   * @returns {*}
+   *
    * @memberOf DirectedGraphComponent
    */
   trackLinkBy(index, link): any {
@@ -577,11 +578,11 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Tracking for the node
-   * 
-   * @param {any} index 
-   * @param {any} node 
-   * @returns {*} 
-   * 
+   *
+   * @param {any} index
+   * @param {any} node
+   * @returns {*}
+   *
    * @memberOf DirectedGraphComponent
    */
   trackNodeBy(index, node): any {
@@ -590,8 +591,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Sets the colors the nodes
-   * 
-   * 
+   *
+   *
    * @memberOf DirectedGraphComponent
    */
   setColors(): void {
@@ -600,9 +601,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * Gets the legend options
-   * 
-   * @returns {*} 
-   * 
+   *
+   * @returns {*}
+   *
    * @memberOf DirectedGraphComponent
    */
   getLegendOptions(): any {
@@ -615,9 +616,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * On mouse move event, used for panning and dragging.
-   * 
-   * @param {MouseEvent} $event 
-   * 
+   *
+   * @param {MouseEvent} $event
+   *
    * @memberOf DirectedGraphComponent
    */
   @HostListener('document:mousemove', ['$event'])
@@ -631,9 +632,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * On mouse up event to disable panning/dragging.
-   * 
-   * @param {MouseEvent} $event 
-   * 
+   *
+   * @param {MouseEvent} $event
+   *
    * @memberOf DirectedGraphComponent
    */
   @HostListener('document:mouseup')
@@ -644,10 +645,10 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
   /**
    * On node mouse down to kick off dragging
-   * 
-   * @param {MouseEvent} event 
-   * @param {*} node 
-   * 
+   *
+   * @param {MouseEvent} event
+   * @param {*} node
+   *
    * @memberOf DirectedGraphComponent
    */
   onNodeMouseDown(event: MouseEvent, node: any): void {

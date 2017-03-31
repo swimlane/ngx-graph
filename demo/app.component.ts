@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import d3 from '../src/d3';
-
+import * as shape from 'd3-shape';
 import { colorSets } from '../src/utils/color-sets';
 import { countries, generateHierarchialGraph, getTurbineData } from './data';
 import chartGroups from './chartTypes';
@@ -52,7 +51,7 @@ export class AppComponent implements OnInit {
 
   // line interpolation
   curveType: string = 'Linear';
-  curve = d3.shape.curveLinear;
+  curve: any = shape.curveLinear;
   interpolationTypes = [
     'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
     'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
@@ -154,34 +153,34 @@ export class AppComponent implements OnInit {
   setInterpolationType(curveType) {
     this.curveType = curveType;
     if (curveType === 'Bundle') {
-      this.curve = d3.shape.curveBundle.beta(1);
+      this.curve = shape.curveBundle.beta(1);
     }
     if (curveType === 'Cardinal') {
-      this.curve = d3.shape.curveCardinal;
+      this.curve = shape.curveCardinal;
     }
     if (curveType === 'Catmull Rom') {
-      this.curve = d3.shape.curveCatmullRom;
+      this.curve = shape.curveCatmullRom;
     }
     if (curveType === 'Linear') {
-      this.curve = d3.shape.curveLinear;
+      this.curve = shape.curveLinear;
     }
     if (curveType === 'Monotone X') {
-      this.curve = d3.shape.curveMonotoneX;
+      this.curve = shape.curveMonotoneX;
     }
     if (curveType === 'Monotone Y') {
-      this.curve = d3.shape.curveMonotoneY;
+      this.curve = shape.curveMonotoneY;
     }
     if (curveType === 'Natural') {
-      this.curve = d3.shape.curveNatural;
+      this.curve = shape.curveNatural;
     }
     if (curveType === 'Step') {
-      this.curve = d3.shape.curveStep;
+      this.curve = shape.curveStep;
     }
     if (curveType === 'Step After') {
-      this.curve = d3.shape.curveStepAfter;
+      this.curve = shape.curveStepAfter;
     }
     if (curveType === 'Step Before') {
-      this.curve = d3.shape.curveStepBefore;
+      this.curve = shape.curveStepBefore;
     }
   }
 
