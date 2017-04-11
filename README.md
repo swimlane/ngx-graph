@@ -2,6 +2,10 @@
 
 A Directed Acyclic Graph (DAG) visualization for angular - implemented using [ngx-charts](https://github.com/swimlane/ngx-charts).
 
+**Note: ngx-charts-dag 2.0.0 works only with Angular 4.x. To use ngx-charts-dag with Angular 2.x, use ngx-charts-dag 1.x.**
+
+
+
 ## Demo
 https://swimlane.github.io/ngx-charts-dag/
 
