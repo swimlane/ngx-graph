@@ -1,0 +1,30 @@
+<ngx-charts-chart [view]="[width, height]" [showLegend]="legend" [legendOptions]="legendOptions" (legendLabelClick)="onClick($event)"
+    (legendLabelActivate)="onActivate($event)" (legendLabelDeactivate)="onDeactivate($event)" mouseWheel (mouseWheelUp)="onZoom($event, 'in')"
+    (mouseWheelDown)="onZoom($event, 'out')">
+    <svg:g *ngIf="initialized" [attr.transform]="transform" class="directed-graph chart">
+        <defs>
+            <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
+            </ng-template>
+            <svg:path class="text-path" *ngFor="let link of _links" [attr.d]="link.textPath" [attr.id]="link.id">
+            </svg:path>
+        </defs>
+        <svg:rect class="panning-rect" [attr.width]="dims.width * 100" [attr.height]="dims.height * 100" [attr.transform]="'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' "
+            (mousedown)="isPanning = true" />
+        <svg:g class="links">
+            <svg:g *ngFor="let link of _links; trackBy: trackLinkBy" class="link-group" #linkElement [id]="link.id">
+                <ng-template *ngIf="linkTemplate" [ngTemplateOutlet]="linkTemplate" [ngOutletContext]="{ $implicit: link }">
+                </ng-template>
+                <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
+            </svg:g>
+        </svg:g>
+        <svg:g class="nodes">
+            <svg:g *ngFor="let node of _nodes; trackBy: trackNodeBy" class="node-group" #nodeElement [id]="node.id" [attr.transform]="node.options.transform"
+                (click)="onClick(node)" (mousedown)="onNodeMouseDown($event, node)">
+                <ng-template *ngIf="nodeTemplate" [ngTemplateOutlet]="nodeTemplate" [ngOutletContext]="{ $implicit: node }">
+                </ng-template>
+                <svg:circle *ngIf="!nodeTemplate" r="10" [attr.cx]="node.width / 2" [attr.cy]="node.height / 2" [attr.fill]="node.options.color"
+                />
+            </svg:g>
+        </svg:g>
+    </svg:g>
+</ngx-charts-chart>
