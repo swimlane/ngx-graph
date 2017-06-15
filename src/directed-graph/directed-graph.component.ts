@@ -1,8 +1,10 @@
 import {
   Component, ContentChild, ContentChildren, ElementRef, HostListener, Input,
   TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter,
-  ChangeDetectionStrategy, trigger, style, transition, animate, QueryList, AfterViewInit
+  ChangeDetectionStrategy, QueryList, AfterViewInit
 } from '@angular/core';
+
+import { animate, style, transition, trigger } from '@angular/animations'
 
 import {
   BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper
@@ -70,7 +72,7 @@ import { id } from '../utils';
             class="node-group"
             #nodeElement
             [id]="node.id"
-            [style.transform]="node.options.transform"
+            [attr.transform]="node.options.transform"
             (click)="onClick(node)"
             (mousedown)="onNodeMouseDown($event, node)">
             <ng-template
@@ -96,7 +98,7 @@ import { id } from '../utils';
   animations: [
     trigger('link', [
       transition('* => *', [
-        animate(500, style({transform: '*'}))
+        animate(500, style({ transform: '*' }))
       ])
     ])
   ]
@@ -151,7 +153,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
   draggingNode: any;
   initialized: boolean = false;
   graph: any;
-  graphDims: any = {width: 0, height: 0};
+  graphDims: any = { width: 0, height: 0 };
   _nodes: any[];
   _links: any[];
   _oldLinks: any[] = [];
@@ -211,16 +213,16 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
         // calculate the height
         const dims = nativeElement.getBBox();
-        if(this.nodeHeight) {
+        if (this.nodeHeight) {
           node.height = this.nodeHeight;
         } else {
           node.height = dims.height;
         }
 
-        if(this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
-        if(this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
+        if (this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
+        if (this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
 
-        if(this.nodeWidth) {
+        if (this.nodeWidth) {
           node.width = this.nodeWidth;
         } else {
           // calculate the width
@@ -232,8 +234,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
           }
         }
 
-        if(this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
-        if(this.nodeMinWidth) node.width = Math.min(node.width, this.nodeMinWidth);
+        if (this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
+        if (this.nodeMinWidth) node.width = Math.min(node.width, this.nodeMinWidth);
       });
     }
 
@@ -246,7 +248,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
       index[n.id] = n;
       n.options = {
         color: this.colors.getColor(this.groupResultsBy(n)),
-        transform: `translate( ${n.x - n.width / 2}px, ${n.y - n.height / 2}px)`
+        transform: `translate(${n.x - n.width / 2}, ${n.y - n.height / 2})`
       };
     });
 
@@ -289,7 +291,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
     // Map the old links for animations
     if (this._links) {
       this._oldLinks = this._links.map(l => {
-        const newL =  Object.assign({}, l);
+        const newL = Object.assign({}, l);
         newL.oldLine = l.line;
         return newL;
       });
@@ -375,7 +377,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
       // set view options
       node.options = {
         color: this.colors.getColor(this.groupResultsBy(node)),
-        transform: `translate( ${node.x - node.width / 2}px, ${node.y - node.height / 2}px)`
+        transform: `translate( ${node.x - node.width / 2}, ${node.y - node.height / 2})`
       };
     }
 
@@ -472,9 +474,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
     // move the node
     const x = (node.x - (node.width / 2));
     const y = (node.y - (node.height / 2));
-    node.options.transform = `translate(${x}px, ${y}px)`;
+    node.options.transform = `translate(${x}, ${y})`;
 
-    for(const link of this._links) {
+    for (const link of this._links) {
       if (link.target === node.id || link.source === node.id) {
         const sourceNode = this._nodes.find(n => n.id === link.source);
         const targetNode = this._nodes.find(n => n.id === link.target);
@@ -529,8 +531,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @memberOf DirectedGraphComponent
    */
   onActivate(event): void {
-    if(this.activeEntries.indexOf(event) > -1) return;
-    this.activeEntries = [ event, ...this.activeEntries ];
+    if (this.activeEntries.indexOf(event) > -1) return;
+    this.activeEntries = [event, ...this.activeEntries];
     this.activate.emit({ value: event, entries: this.activeEntries });
   }
 
@@ -623,9 +625,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    */
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
-    if(this.isPanning && this.panningEnabled) {
+    if (this.isPanning && this.panningEnabled) {
       this.onPan($event);
-    } else if(this.isDragging && this.draggingEnabled) {
+    } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
   }
