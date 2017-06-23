@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-charts-dag",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A Directec Acyclic Graph visualization for angular!",
   "main": "release/index.js",
   "typings": "release/index.d.ts",
@@ -34,7 +34,7 @@
     "package:ts": "tsc --outDir release",
     "package:aot": "ngc -p tsconfig-aot.json",
     "package:replace-scss": "node ./config/replace-scss.js",
-    "package:minify": "uglifyjs release/index.js --source-map release/index.min.js.map --source-map-url release/index.js.map --compress --mangle --screw-ie8 --output release/index.min.js",
+    "package:minify": "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
     "deploy": "node ./config/deploy.js",
     "profile": "NODE_ENV=production webpack --profile --json > dist/stats.json"
   },

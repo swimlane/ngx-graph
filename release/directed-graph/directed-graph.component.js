@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 import { Component, ContentChild, ElementRef, HostListener, Input, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, trigger, style, transition, animate } from '@angular/core';
 import { BaseChartComponent, ChartComponent, calculateViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
@@ -215,6 +220,8 @@ var DirectedGraphComponent = (function (_super) {
             marginy: 20,
             edgesep: 100,
             ranksep: 100
+            // acyclicer: 'greedy',
+            // ranker: 'longest-path'
         });
         // Default to assigning a new object as a label for each new edge.
         this.graph.setDefaultEdgeLabel(function () {
