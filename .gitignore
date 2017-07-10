@@ -5,7 +5,6 @@ compiled/
 dist/
 build/
 coverage/
-release/
 .idea
 yarn.lock
 /ngx-charts.iml
