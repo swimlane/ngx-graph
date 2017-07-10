@@ -439,13 +439,13 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
   /**
    * Node was clicked
    *
-   * @param {any} data
-   * @param {any} node
+   * @param {any} event
+   * @returns {void}
    *
    * @memberOf DirectedGraphComponent
    */
-  onClick(data, node): void {
-    this.select.emit(data);
+  onClick(event): void {
+    this.select.emit(event);
   }
 
   /**
