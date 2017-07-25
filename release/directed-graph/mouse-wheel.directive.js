@@ -38,19 +38,19 @@ var MouseWheelDirective = (function () {
             event.preventDefault();
         }
     };
+    MouseWheelDirective.decorators = [
+        { type: Directive, args: [{ selector: '[mouseWheel]' },] },
+    ];
+    /** @nocollapse */
+    MouseWheelDirective.ctorParameters = function () { return []; };
+    MouseWheelDirective.propDecorators = {
+        'mouseWheelUp': [{ type: Output },],
+        'mouseWheelDown': [{ type: Output },],
+        'onMouseWheelChrome': [{ type: HostListener, args: ['mousewheel', ['$event'],] },],
+        'onMouseWheelFirefox': [{ type: HostListener, args: ['DOMMouseScroll', ['$event'],] },],
+        'onMouseWheelIE': [{ type: HostListener, args: ['onmousewheel', ['$event'],] },],
+    };
     return MouseWheelDirective;
 }());
 export { MouseWheelDirective };
-MouseWheelDirective.decorators = [
-    { type: Directive, args: [{ selector: '[mouseWheel]' },] },
-];
-/** @nocollapse */
-MouseWheelDirective.ctorParameters = function () { return []; };
-MouseWheelDirective.propDecorators = {
-    'mouseWheelUp': [{ type: Output },],
-    'mouseWheelDown': [{ type: Output },],
-    'onMouseWheelChrome': [{ type: HostListener, args: ['mousewheel', ['$event'],] },],
-    'onMouseWheelFirefox': [{ type: HostListener, args: ['DOMMouseScroll', ['$event'],] },],
-    'onMouseWheelIE': [{ type: HostListener, args: ['onmousewheel', ['$event'],] },],
-};
 //# sourceMappingURL=mouse-wheel.directive.js.map

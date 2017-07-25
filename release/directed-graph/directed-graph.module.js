@@ -6,22 +6,22 @@ export { DirectedGraphComponent };
 var DirectedGraphModule = (function () {
     function DirectedGraphModule() {
     }
+    DirectedGraphModule.decorators = [
+        { type: NgModule, args: [{
+                    imports: [ChartCommonModule],
+                    declarations: [
+                        DirectedGraphComponent,
+                        MouseWheelDirective
+                    ],
+                    exports: [
+                        DirectedGraphComponent,
+                        MouseWheelDirective
+                    ]
+                },] },
+    ];
+    /** @nocollapse */
+    DirectedGraphModule.ctorParameters = function () { return []; };
     return DirectedGraphModule;
 }());
 export { DirectedGraphModule };
-DirectedGraphModule.decorators = [
-    { type: NgModule, args: [{
-                imports: [ChartCommonModule],
-                declarations: [
-                    DirectedGraphComponent,
-                    MouseWheelDirective
-                ],
-                exports: [
-                    DirectedGraphComponent,
-                    MouseWheelDirective
-                ]
-            },] },
-];
-/** @nocollapse */
-DirectedGraphModule.ctorParameters = function () { return []; };
 //# sourceMappingURL=directed-graph.module.js.map

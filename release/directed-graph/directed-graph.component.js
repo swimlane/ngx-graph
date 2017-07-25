@@ -369,13 +369,13 @@ var DirectedGraphComponent = (function (_super) {
     /**
      * Node was clicked
      *
-     * @param {any} data
-     * @param {any} node
+     * @param {any} event
+     * @returns {void}
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onClick = function (data, node) {
-        this.select.emit(data);
+    DirectedGraphComponent.prototype.onClick = function (event) {
+        this.select.emit(event);
     };
     /**
      * Node was focused
@@ -502,58 +502,58 @@ var DirectedGraphComponent = (function (_super) {
         this.isDragging = true;
         this.draggingNode = node;
     };
+    DirectedGraphComponent.decorators = [
+        { type: Component, args: [{
+                    selector: 'ngx-charts-directed-graph',
+                    template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n        <defs>\n          <ng-template\n            *ngIf=\"defsTemplate\"\n            [ngTemplateOutlet]=\"defsTemplate\">\n          </ng-template>\n          <svg:path\n            class=\"text-path\"\n            *ngFor=\"let link of _links\"\n            [attr.d]=\"link.textPath\"\n            [attr.id]=\"link.id\">\n          </svg:path>\n        </defs>\n        <svg:rect\n          class=\"panning-rect\"\n          [attr.width]=\"dims.width * 100\"\n          [attr.height]=\"dims.height * 100\"\n          [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n          (mousedown)=\"isPanning = true\"\n        />\n        <svg:g class=\"links\">\n          <svg:g\n            *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n            class=\"link-group\"\n            #linkElement\n            [id]=\"link.id\">\n            <ng-template\n              *ngIf=\"linkTemplate\"\n              [ngTemplateOutlet]=\"linkTemplate\"\n              [ngOutletContext]=\"{ $implicit: link }\">\n            </ng-template>\n            <svg:path\n              *ngIf=\"!linkTemplate\"\n              class=\"edge\"\n              [attr.d]=\"link.line\"\n            />\n          </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n          <svg:g\n            *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n            class=\"node-group\"\n            #nodeElement\n            [id]=\"node.id\"\n            [style.transform]=\"node.options.transform\"\n            (click)=\"onClick(node)\"\n            (mousedown)=\"onNodeMouseDown($event, node)\">\n            <ng-template\n              *ngIf=\"nodeTemplate\"\n              [ngTemplateOutlet]=\"nodeTemplate\"\n              [ngOutletContext]=\"{ $implicit: node }\">\n            </ng-template>\n            <svg:circle\n              *ngIf=\"!nodeTemplate\"\n              r=\"10\"\n              [attr.cx]=\"node.width / 2\"\n              [attr.cy]=\"node.height / 2\"\n              [attr.fill]=\"node.options.color\"\n            />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+                    styleUrls: ['./directed-graph.component.css'],
+                    encapsulation: ViewEncapsulation.None,
+                    changeDetection: ChangeDetectionStrategy.OnPush,
+                    animations: [
+                        trigger('link', [
+                            transition('* => *', [
+                                animate(500, style({ transform: '*' }))
+                            ])
+                        ])
+                    ]
+                },] },
+    ];
+    /** @nocollapse */
+    DirectedGraphComponent.ctorParameters = function () { return []; };
+    DirectedGraphComponent.propDecorators = {
+        'legend': [{ type: Input },],
+        'nodes': [{ type: Input },],
+        'links': [{ type: Input },],
+        'activeEntries': [{ type: Input },],
+        'orientation': [{ type: Input },],
+        'curve': [{ type: Input },],
+        'draggingEnabled': [{ type: Input },],
+        'nodeHeight': [{ type: Input },],
+        'nodeMaxHeight': [{ type: Input },],
+        'nodeMinHeight': [{ type: Input },],
+        'nodeWidth': [{ type: Input },],
+        'nodeMinWidth': [{ type: Input },],
+        'nodeMaxWidth': [{ type: Input },],
+        'panOffsetX': [{ type: Input },],
+        'panOffsetY': [{ type: Input },],
+        'panningEnabled': [{ type: Input },],
+        'zoomLevel': [{ type: Input },],
+        'zoomSpeed': [{ type: Input },],
+        'minZoomLevel': [{ type: Input },],
+        'maxZoomLevel': [{ type: Input },],
+        'activate': [{ type: Output },],
+        'deactivate': [{ type: Output },],
+        'linkTemplate': [{ type: ContentChild, args: ['linkTemplate',] },],
+        'nodeTemplate': [{ type: ContentChild, args: ['nodeTemplate',] },],
+        'defsTemplate': [{ type: ContentChild, args: ['defsTemplate',] },],
+        'chart': [{ type: ViewChild, args: [ChartComponent, { read: ElementRef },] },],
+        'nodeElements': [{ type: ViewChildren, args: ['nodeElement',] },],
+        'linkElements': [{ type: ViewChildren, args: ['linkElement',] },],
+        'groupResultsBy': [{ type: Input },],
+        'onMouseMove': [{ type: HostListener, args: ['document:mousemove', ['$event'],] },],
+        'onMouseUp': [{ type: HostListener, args: ['document:mouseup',] },],
+    };
     return DirectedGraphComponent;
 }(BaseChartComponent));
 export { DirectedGraphComponent };
-DirectedGraphComponent.decorators = [
-    { type: Component, args: [{
-                selector: 'ngx-charts-directed-graph',
-                template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n        <defs>\n          <ng-template\n            *ngIf=\"defsTemplate\"\n            [ngTemplateOutlet]=\"defsTemplate\">\n          </ng-template>\n          <svg:path\n            class=\"text-path\"\n            *ngFor=\"let link of _links\"\n            [attr.d]=\"link.textPath\"\n            [attr.id]=\"link.id\">\n          </svg:path>\n        </defs>\n        <svg:rect\n          class=\"panning-rect\"\n          [attr.width]=\"dims.width * 100\"\n          [attr.height]=\"dims.height * 100\"\n          [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n          (mousedown)=\"isPanning = true\"\n        />\n        <svg:g class=\"links\">\n          <svg:g\n            *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n            class=\"link-group\"\n            #linkElement\n            [id]=\"link.id\">\n            <ng-template\n              *ngIf=\"linkTemplate\"\n              [ngTemplateOutlet]=\"linkTemplate\"\n              [ngOutletContext]=\"{ $implicit: link }\">\n            </ng-template>\n            <svg:path\n              *ngIf=\"!linkTemplate\"\n              class=\"edge\"\n              [attr.d]=\"link.line\"\n            />\n          </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n          <svg:g\n            *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n            class=\"node-group\"\n            #nodeElement\n            [id]=\"node.id\"\n            [style.transform]=\"node.options.transform\"\n            (click)=\"onClick(node)\"\n            (mousedown)=\"onNodeMouseDown($event, node)\">\n            <ng-template\n              *ngIf=\"nodeTemplate\"\n              [ngTemplateOutlet]=\"nodeTemplate\"\n              [ngOutletContext]=\"{ $implicit: node }\">\n            </ng-template>\n            <svg:circle\n              *ngIf=\"!nodeTemplate\"\n              r=\"10\"\n              [attr.cx]=\"node.width / 2\"\n              [attr.cy]=\"node.height / 2\"\n              [attr.fill]=\"node.options.color\"\n            />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
-                styleUrls: ['./directed-graph.component.css'],
-                encapsulation: ViewEncapsulation.None,
-                changeDetection: ChangeDetectionStrategy.OnPush,
-                animations: [
-                    trigger('link', [
-                        transition('* => *', [
-                            animate(500, style({ transform: '*' }))
-                        ])
-                    ])
-                ]
-            },] },
-];
-/** @nocollapse */
-DirectedGraphComponent.ctorParameters = function () { return []; };
-DirectedGraphComponent.propDecorators = {
-    'legend': [{ type: Input },],
-    'nodes': [{ type: Input },],
-    'links': [{ type: Input },],
-    'activeEntries': [{ type: Input },],
-    'orientation': [{ type: Input },],
-    'curve': [{ type: Input },],
-    'draggingEnabled': [{ type: Input },],
-    'nodeHeight': [{ type: Input },],
-    'nodeMaxHeight': [{ type: Input },],
-    'nodeMinHeight': [{ type: Input },],
-    'nodeWidth': [{ type: Input },],
-    'nodeMinWidth': [{ type: Input },],
-    'nodeMaxWidth': [{ type: Input },],
-    'panOffsetX': [{ type: Input },],
-    'panOffsetY': [{ type: Input },],
-    'panningEnabled': [{ type: Input },],
-    'zoomLevel': [{ type: Input },],
-    'zoomSpeed': [{ type: Input },],
-    'minZoomLevel': [{ type: Input },],
-    'maxZoomLevel': [{ type: Input },],
-    'activate': [{ type: Output },],
-    'deactivate': [{ type: Output },],
-    'linkTemplate': [{ type: ContentChild, args: ['linkTemplate',] },],
-    'nodeTemplate': [{ type: ContentChild, args: ['nodeTemplate',] },],
-    'defsTemplate': [{ type: ContentChild, args: ['defsTemplate',] },],
-    'chart': [{ type: ViewChild, args: [ChartComponent, { read: ElementRef },] },],
-    'nodeElements': [{ type: ViewChildren, args: ['nodeElement',] },],
-    'linkElements': [{ type: ViewChildren, args: ['linkElement',] },],
-    'groupResultsBy': [{ type: Input },],
-    'onMouseMove': [{ type: HostListener, args: ['document:mousemove', ['$event'],] },],
-    'onMouseUp': [{ type: HostListener, args: ['document:mouseup',] },],
-};
 //# sourceMappingURL=directed-graph.component.js.map
