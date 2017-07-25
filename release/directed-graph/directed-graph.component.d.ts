@@ -134,12 +134,12 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
     /**
      * Node was clicked
      *
-     * @param {any} data
-     * @param {any} node
+     * @param {any} event
+     * @returns {void}
      *
      * @memberOf DirectedGraphComponent
      */
-    onClick(data: any, node: any): void;
+    onClick(event: any): void;
     /**
      * Node was focused
      *
