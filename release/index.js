@@ -1,5 +1,5 @@
 /**
- * ngx-charts v"2.1.2" (https://github.com/swimlane/ngx-charts)
+ * ngx-charts v"2.1.3" (https://github.com/swimlane/ngx-charts)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -38379,13 +38379,6 @@ module.exports = function(module) {
 
 /***/ }),
 
-/***/ "./src/directed-graph/directed-graph.component.html":
-/***/ (function(module, exports) {
-
-module.exports = "<ngx-charts-chart [view]=\"[width, height]\" [showLegend]=\"legend\" [legendOptions]=\"legendOptions\" (legendLabelClick)=\"onClick($event)\"\n    (legendLabelActivate)=\"onActivate($event)\" (legendLabelDeactivate)=\"onDeactivate($event)\" mouseWheel (mouseWheelUp)=\"onZoom($event, 'in')\"\n    (mouseWheelDown)=\"onZoom($event, 'out')\">\n    <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n        <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path class=\"text-path\" *ngFor=\"let link of _links\" [attr.d]=\"link.textPath\" [attr.id]=\"link.id\">\n            </svg:path>\n        </defs>\n        <svg:rect class=\"panning-rect\" [attr.width]=\"dims.width * 100\" [attr.height]=\"dims.height * 100\" [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n        <svg:g class=\"links\">\n            <svg:g *ngFor=\"let link of _links; trackBy: trackLinkBy\" class=\"link-group\" #linkElement [id]=\"link.id\">\n                <ng-template *ngIf=\"linkTemplate\" [ngTemplateOutlet]=\"linkTemplate\" [ngOutletContext]=\"{ $implicit: link }\">\n                </ng-template>\n                <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n            <svg:g *ngFor=\"let node of _nodes; trackBy: trackNodeBy\" class=\"node-group\" #nodeElement [id]=\"node.id\" [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template *ngIf=\"nodeTemplate\" [ngTemplateOutlet]=\"nodeTemplate\" [ngOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle *ngIf=\"!nodeTemplate\" r=\"10\" [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\" [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n        </svg:g>\n    </svg:g>\n</ngx-charts-chart>"
-
-/***/ }),
-
 /***/ "./src/directed-graph/directed-graph.component.scss":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -39292,7 +39285,6 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
     DirectedGraphComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'ngx-charts-directed-graph',
-            template: __webpack_require__("./src/directed-graph/directed-graph.component.html"),
             styles: [__webpack_require__("./src/directed-graph/directed-graph.component.scss")],
             encapsulation: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewEncapsulation"].None,
             changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush,
@@ -39302,7 +39294,8 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
                         Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["animate"])(500, Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["style"])({ transform: '*' }))
                     ])
                 ])
-            ]
+            ],
+            template: "\n    <ngx-charts-chart \n      [view]=\"[width, height]\" \n      [showLegend]=\"legend\" \n      [legendOptions]=\"legendOptions\" \n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\" \n      (legendLabelDeactivate)=\"onDeactivate($event)\" \n      mouseWheel \n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g \n        *ngIf=\"initialized\" \n        [attr.transform]=\"transform\" \n        class=\"directed-graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path \n              class=\"text-path\" \n              *ngFor=\"let link of _links\" \n              [attr.d]=\"link.textPath\" \n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect \n            class=\"panning-rect\" \n            [attr.width]=\"dims.width * 100\" \n            [attr.height]=\"dims.height * 100\" \n            [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g \n              *ngFor=\"let link of _links; trackBy: trackLinkBy\" \n              class=\"link-group\" \n              #linkElement \n              [id]=\"link.id\">\n              <ng-template \n                *ngIf=\"linkTemplate\" \n                [ngTemplateOutlet]=\"linkTemplate\" \n                [ngOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g \n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\" \n              class=\"node-group\" \n              #nodeElement \n              [id]=\"node.id\" \n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template \n                  *ngIf=\"nodeTemplate\" \n                  [ngTemplateOutlet]=\"nodeTemplate\" \n                  [ngOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle \n                  *ngIf=\"!nodeTemplate\" \n                  r=\"10\" \n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\" \n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
         })
     ], DirectedGraphComponent);
     return DirectedGraphComponent;

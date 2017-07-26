@@ -506,7 +506,6 @@ var DirectedGraphComponent = (function (_super) {
     DirectedGraphComponent.decorators = [
         { type: Component, args: [{
                     selector: 'ngx-charts-directed-graph',
-                    templateUrl: './directed-graph.component.html',
                     styleUrls: ['./directed-graph.component.css'],
                     encapsulation: ViewEncapsulation.None,
                     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -516,7 +515,8 @@ var DirectedGraphComponent = (function (_super) {
                                 animate(500, style({ transform: '*' }))
                             ])
                         ])
-                    ]
+                    ],
+                    template: "\n    <ngx-charts-chart \n      [view]=\"[width, height]\" \n      [showLegend]=\"legend\" \n      [legendOptions]=\"legendOptions\" \n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\" \n      (legendLabelDeactivate)=\"onDeactivate($event)\" \n      mouseWheel \n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g \n        *ngIf=\"initialized\" \n        [attr.transform]=\"transform\" \n        class=\"directed-graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path \n              class=\"text-path\" \n              *ngFor=\"let link of _links\" \n              [attr.d]=\"link.textPath\" \n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect \n            class=\"panning-rect\" \n            [attr.width]=\"dims.width * 100\" \n            [attr.height]=\"dims.height * 100\" \n            [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g \n              *ngFor=\"let link of _links; trackBy: trackLinkBy\" \n              class=\"link-group\" \n              #linkElement \n              [id]=\"link.id\">\n              <ng-template \n                *ngIf=\"linkTemplate\" \n                [ngTemplateOutlet]=\"linkTemplate\" \n                [ngOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g \n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\" \n              class=\"node-group\" \n              #nodeElement \n              [id]=\"node.id\" \n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template \n                  *ngIf=\"nodeTemplate\" \n                  [ngTemplateOutlet]=\"nodeTemplate\" \n                  [ngOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle \n                  *ngIf=\"!nodeTemplate\" \n                  r=\"10\" \n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\" \n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
                 },] },
     ];
     /** @nocollapse */
