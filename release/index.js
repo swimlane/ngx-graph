@@ -1,18 +1,18 @@
 /**
- * ngx-charts v"2.1.1" (https://github.com/swimlane/ngx-charts)
+ * ngx-charts v"2.1.2" (https://github.com/swimlane/ngx-charts)
  * Copyright 2016
  * Licensed under MIT
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@angular/common"), require("d3-format"), require("d3-shape"), require("d3-selection"), require("rxjs/add/operator/debounceTime"), require("rxjs/add/observable/fromEvent"), require("rxjs/Observable"), require("d3-time-format"), require("d3-scale"), require("d3-interpolate"), require("d3-hierarchy"), require("@angular/animations"), require("d3-force"), require("d3-color"), require("d3-brush"), require("@angular/core"), require("d3-array"), require("@angular/platform-browser"));
+		module.exports = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"), require("rxjs/add/observable/fromEvent"), require("rxjs/add/operator/debounceTime"));
 	else if(typeof define === 'function' && define.amd)
-		define("ngx-charts", ["@angular/common", "d3-format", "d3-shape", "d3-selection", "rxjs/add/operator/debounceTime", "rxjs/add/observable/fromEvent", "rxjs/Observable", "d3-time-format", "d3-scale", "d3-interpolate", "d3-hierarchy", "@angular/animations", "d3-force", "d3-color", "d3-brush", "@angular/core", "d3-array", "@angular/platform-browser"], factory);
+		define("ngx-charts", ["@angular/animations", "@angular/common", "@angular/core", "@angular/platform-browser", "d3-array", "d3-brush", "d3-color", "d3-force", "d3-format", "d3-hierarchy", "d3-interpolate", "d3-scale", "d3-selection", "d3-shape", "d3-time-format", "rxjs/Observable", "rxjs/add/observable/fromEvent", "rxjs/add/operator/debounceTime"], factory);
 	else if(typeof exports === 'object')
-		exports["ngx-charts"] = factory(require("@angular/common"), require("d3-format"), require("d3-shape"), require("d3-selection"), require("rxjs/add/operator/debounceTime"), require("rxjs/add/observable/fromEvent"), require("rxjs/Observable"), require("d3-time-format"), require("d3-scale"), require("d3-interpolate"), require("d3-hierarchy"), require("@angular/animations"), require("d3-force"), require("d3-color"), require("d3-brush"), require("@angular/core"), require("d3-array"), require("@angular/platform-browser"));
+		exports["ngx-charts"] = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"), require("rxjs/add/observable/fromEvent"), require("rxjs/add/operator/debounceTime"));
 	else
-		root["ngx-charts"] = factory(root["@angular/common"], root["d3-format"], root["d3-shape"], root["d3-selection"], root["rxjs/add/operator/debounceTime"], root["rxjs/add/observable/fromEvent"], root["rxjs/Observable"], root["d3-time-format"], root["d3-scale"], root["d3-interpolate"], root["d3-hierarchy"], root["@angular/animations"], root["d3-force"], root["d3-color"], root["d3-brush"], root["@angular/core"], root["d3-array"], root["@angular/platform-browser"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_17__, __WEBPACK_EXTERNAL_MODULE_16__, __WEBPACK_EXTERNAL_MODULE_15__, __WEBPACK_EXTERNAL_MODULE_14__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_7__, __WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_5__) {
+		root["ngx-charts"] = factory(root["@angular/animations"], root["@angular/common"], root["@angular/core"], root["@angular/platform-browser"], root["d3-array"], root["d3-brush"], root["d3-color"], root["d3-force"], root["d3-format"], root["d3-hierarchy"], root["d3-interpolate"], root["d3-scale"], root["d3-selection"], root["d3-shape"], root["d3-time-format"], root["rxjs/Observable"], root["rxjs/add/observable/fromEvent"], root["rxjs/add/operator/debounceTime"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE__angular_animations__, __WEBPACK_EXTERNAL_MODULE__angular_common__, __WEBPACK_EXTERNAL_MODULE__angular_core__, __WEBPACK_EXTERNAL_MODULE__angular_platform_browser__, __WEBPACK_EXTERNAL_MODULE_d3_array__, __WEBPACK_EXTERNAL_MODULE_d3_brush__, __WEBPACK_EXTERNAL_MODULE_d3_color__, __WEBPACK_EXTERNAL_MODULE_d3_force__, __WEBPACK_EXTERNAL_MODULE_d3_format__, __WEBPACK_EXTERNAL_MODULE_d3_hierarchy__, __WEBPACK_EXTERNAL_MODULE_d3_interpolate__, __WEBPACK_EXTERNAL_MODULE_d3_scale__, __WEBPACK_EXTERNAL_MODULE_d3_selection__, __WEBPACK_EXTERNAL_MODULE_d3_shape__, __WEBPACK_EXTERNAL_MODULE_d3_time_format__, __WEBPACK_EXTERNAL_MODULE_rxjs_Observable__, __WEBPACK_EXTERNAL_MODULE_rxjs_add_observable_fromEvent__, __WEBPACK_EXTERNAL_MODULE_rxjs_add_operator_debounceTime__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -90,7 +90,7 @@ return /******/ (function(modules) { // webpackBootstrap
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(true)
-		module.exports = factory(__webpack_require__(3), __webpack_require__(4), __webpack_require__(0), __webpack_require__(5), __webpack_require__(6), __webpack_require__(7), __webpack_require__(8), __webpack_require__(9), __webpack_require__(10), __webpack_require__(11), __webpack_require__(12), __webpack_require__(13), __webpack_require__(1), __webpack_require__(2), __webpack_require__(14), __webpack_require__(15), __webpack_require__(16), __webpack_require__(17));
+		module.exports = factory(__webpack_require__("d3-format"), __webpack_require__("@angular/common"), __webpack_require__("@angular/core"), __webpack_require__("@angular/platform-browser"), __webpack_require__("d3-array"), __webpack_require__("d3-brush"), __webpack_require__("d3-color"), __webpack_require__("d3-force"), __webpack_require__("@angular/animations"), __webpack_require__("d3-hierarchy"), __webpack_require__("d3-interpolate"), __webpack_require__("d3-scale"), __webpack_require__("d3-selection"), __webpack_require__("d3-shape"), __webpack_require__("d3-time-format"), __webpack_require__("rxjs/Observable"), __webpack_require__("rxjs/add/observable/fromEvent"), __webpack_require__("rxjs/add/operator/debounceTime"));
 	else if(typeof define === 'function' && define.amd)
 		define("ngx-charts", ["d3-format", "@angular/common", "@angular/core", "@angular/platform-browser", "d3-array", "d3-brush", "d3-color", "d3-force", "@angular/animations", "d3-hierarchy", "d3-interpolate", "d3-scale", "d3-selection", "d3-shape", "d3-time-format", "rxjs/Observable", "rxjs/add/observable/fromEvent", "rxjs/add/operator/debounceTime"], factory);
 	else if(typeof exports === 'object')
@@ -38379,6 +38379,13 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./src/directed-graph/directed-graph.component.html":
+/***/ (function(module, exports) {
+
+module.exports = "<ngx-charts-chart [view]=\"[width, height]\" [showLegend]=\"legend\" [legendOptions]=\"legendOptions\" (legendLabelClick)=\"onClick($event)\"\n    (legendLabelActivate)=\"onActivate($event)\" (legendLabelDeactivate)=\"onDeactivate($event)\" mouseWheel (mouseWheelUp)=\"onZoom($event, 'in')\"\n    (mouseWheelDown)=\"onZoom($event, 'out')\">\n    <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n        <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path class=\"text-path\" *ngFor=\"let link of _links\" [attr.d]=\"link.textPath\" [attr.id]=\"link.id\">\n            </svg:path>\n        </defs>\n        <svg:rect class=\"panning-rect\" [attr.width]=\"dims.width * 100\" [attr.height]=\"dims.height * 100\" [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n        <svg:g class=\"links\">\n            <svg:g *ngFor=\"let link of _links; trackBy: trackLinkBy\" class=\"link-group\" #linkElement [id]=\"link.id\">\n                <ng-template *ngIf=\"linkTemplate\" [ngTemplateOutlet]=\"linkTemplate\" [ngOutletContext]=\"{ $implicit: link }\">\n                </ng-template>\n                <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n            <svg:g *ngFor=\"let node of _nodes; trackBy: trackNodeBy\" class=\"node-group\" #nodeElement [id]=\"node.id\" [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template *ngIf=\"nodeTemplate\" [ngTemplateOutlet]=\"nodeTemplate\" [ngOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle *ngIf=\"!nodeTemplate\" r=\"10\" [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\" [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n        </svg:g>\n    </svg:g>\n</ngx-charts-chart>"
+
+/***/ }),
+
 /***/ "./src/directed-graph/directed-graph.component.scss":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -38628,16 +38635,18 @@ function throttleable(duration, options) {
 
 
 // CONCATENATED MODULE: ./src/directed-graph/directed-graph.component.ts
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("@angular/core");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__angular_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts__ = __webpack_require__("./node_modules/@swimlane/ngx-charts/release/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_selection__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_selection___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_d3_selection__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_shape__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_shape___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_d3_shape__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_dagre__ = __webpack_require__("./node_modules/dagre/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_dagre___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_dagre__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_animations__ = __webpack_require__("@angular/animations");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_animations___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__angular_animations__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__ = __webpack_require__("./node_modules/@swimlane/ngx-charts/release/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_selection__ = __webpack_require__("d3-selection");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_selection___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_d3_selection__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_shape__ = __webpack_require__("d3-shape");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_shape___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_d3_shape__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_dagre__ = __webpack_require__("./node_modules/dagre/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_dagre___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_dagre__);
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -38657,6 +38666,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+
 
 
 
@@ -38712,7 +38722,7 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
         var _this = this;
         _super.prototype.update.call(this);
         this.zone.run(function () {
-            _this.dims = __WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts__["calculateViewDimensions"]({
+            _this.dims = Object(__WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__["calculateViewDimensions"])({
                 width: _this.width,
                 height: _this.height,
                 margins: _this.margin,
@@ -38771,14 +38781,14 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
             });
         }
         // Dagre to recalc the layout
-        __WEBPACK_IMPORTED_MODULE_4_dagre__["layout"](this.graph);
+        __WEBPACK_IMPORTED_MODULE_5_dagre__["layout"](this.graph);
         // Tranposes view options to the node
         var index = {};
         this._nodes.map(function (n) {
             index[n.id] = n;
             n.options = {
                 color: _this.colors.getColor(_this.groupResultsBy(n)),
-                transform: "translate( " + (n.x - n.width / 2) + "px, " + (n.y - n.height / 2) + "px)"
+                transform: "translate(" + (n.x - n.width / 2) + ", " + (n.y - n.height / 2) + ")"
             };
         });
         // Update the labels to the new positions
@@ -38839,13 +38849,13 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
         this.linkElements.map(function (linkEl) {
             var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
             if (l) {
-                var linkSelection = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["select"](linkEl.nativeElement).select('.line');
+                var linkSelection = Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["select"])(linkEl.nativeElement).select('.line');
                 linkSelection
                     .attr('d', l.oldLine)
                     .transition()
                     .duration(animate ? 500 : 0)
                     .attr('d', l.line);
-                var textPathSelection = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["select"](_this.chartElement.nativeElement).select("#" + l.id);
+                var textPathSelection = Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["select"])(_this.chartElement.nativeElement).select("#" + l.id);
                 textPathSelection
                     .attr('d', l.oldTextPath)
                     .transition()
@@ -38862,7 +38872,7 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
      */
     DirectedGraphComponent.prototype.createGraph = function () {
         var _this = this;
-        this.graph = new __WEBPACK_IMPORTED_MODULE_4_dagre__["graphlib"].Graph();
+        this.graph = new __WEBPACK_IMPORTED_MODULE_5_dagre__["graphlib"].Graph();
         this.graph.setGraph({
             rankdir: this.orientation,
             marginx: 20,
@@ -38894,7 +38904,7 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
             // set view options
             node.options = {
                 color: this.colors.getColor(this.groupResultsBy(node)),
-                transform: "translate( " + (node.x - node.width / 2) + "px, " + (node.y - node.height / 2) + "px)"
+                transform: "translate( " + (node.x - node.width / 2) + ", " + (node.y - node.height / 2) + ")"
             };
         }
         // update dagre
@@ -38934,7 +38944,7 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
      * @memberOf DirectedGraphComponent
      */
     DirectedGraphComponent.prototype.generateLine = function (points) {
-        var lineFunction = __WEBPACK_IMPORTED_MODULE_3_d3_shape__["line"]().x(function (d) { return d.x; }).y(function (d) { return d.y; }).curve(this.curve);
+        var lineFunction = __WEBPACK_IMPORTED_MODULE_4_d3_shape__["line"]().x(function (d) { return d.x; }).y(function (d) { return d.y; }).curve(this.curve);
         return lineFunction(points);
     };
     /**
@@ -38982,7 +38992,7 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
         // move the node
         var x = (node.x - (node.width / 2));
         var y = (node.y - (node.height / 2));
-        node.options.transform = "translate(" + x + "px, " + y + "px)";
+        node.options.transform = "translate(" + x + ", " + y + ")";
         var _loop_2 = function (link) {
             if (link.target === node.id || link.source === node.id) {
                 var sourceNode = this_2._nodes.find(function (n) { return n.id === link.source; });
@@ -39018,13 +39028,13 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
     /**
      * Node was clicked
      *
-     * @param {any} data
-     * @param {any} node
+     * @param {any} event
+     * @returns {void}
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onClick = function (data, node) {
-        this.select.emit(data);
+    DirectedGraphComponent.prototype.onClick = function (event) {
+        this.select.emit(event);
     };
     /**
      * Node was focused
@@ -39097,7 +39107,7 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
      * @memberOf DirectedGraphComponent
      */
     DirectedGraphComponent.prototype.setColors = function () {
-        this.colors = new __WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts__["ColorHelper"](this.scheme, 'ordinal', this.seriesDomain, this.customColors);
+        this.colors = new __WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__["ColorHelper"](this.scheme, 'ordinal', this.seriesDomain, this.customColors);
     };
     /**
      * Gets the legend options
@@ -39151,156 +39161,156 @@ var directed_graph_component_DirectedGraphComponent = (function (_super) {
         this.isDragging = true;
         this.draggingNode = node;
     };
-    return DirectedGraphComponent;
-}(__WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts__["BaseChartComponent"]));
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Boolean)
-], directed_graph_component_DirectedGraphComponent.prototype, "legend", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Array)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodes", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Array)
-], directed_graph_component_DirectedGraphComponent.prototype, "links", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Array)
-], directed_graph_component_DirectedGraphComponent.prototype, "activeEntries", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", String)
-], directed_graph_component_DirectedGraphComponent.prototype, "orientation", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Object)
-], directed_graph_component_DirectedGraphComponent.prototype, "curve", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Boolean)
-], directed_graph_component_DirectedGraphComponent.prototype, "draggingEnabled", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeHeight", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeMaxHeight", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeMinHeight", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeWidth", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeMinWidth", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeMaxWidth", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "panOffsetX", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "panOffsetY", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Boolean)
-], directed_graph_component_DirectedGraphComponent.prototype, "panningEnabled", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "zoomLevel", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "zoomSpeed", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "minZoomLevel", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Number)
-], directed_graph_component_DirectedGraphComponent.prototype, "maxZoomLevel", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"](),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
-], directed_graph_component_DirectedGraphComponent.prototype, "activate", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"](),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
-], directed_graph_component_DirectedGraphComponent.prototype, "deactivate", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"]('linkTemplate'),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
-], directed_graph_component_DirectedGraphComponent.prototype, "linkTemplate", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"]('nodeTemplate'),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeTemplate", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"]('defsTemplate'),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
-], directed_graph_component_DirectedGraphComponent.prototype, "defsTemplate", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"](__WEBPACK_IMPORTED_MODULE_1__swimlane_ngx_charts__["ChartComponent"], { read: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"] }),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
-], directed_graph_component_DirectedGraphComponent.prototype, "chart", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"]('nodeElement'),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["QueryList"])
-], directed_graph_component_DirectedGraphComponent.prototype, "nodeElements", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"]('linkElement'),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["QueryList"])
-], directed_graph_component_DirectedGraphComponent.prototype, "linkElements", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"](),
-    __metadata("design:type", Function)
-], directed_graph_component_DirectedGraphComponent.prototype, "groupResultsBy", void 0);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"]('document:mousemove', ['$event']),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [MouseEvent]),
-    __metadata("design:returntype", void 0)
-], directed_graph_component_DirectedGraphComponent.prototype, "onMouseMove", null);
-__decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"]('document:mouseup'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [MouseEvent]),
-    __metadata("design:returntype", void 0)
-], directed_graph_component_DirectedGraphComponent.prototype, "onMouseUp", null);
-directed_graph_component_DirectedGraphComponent = __decorate([
-    __WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"]({
-        selector: 'ngx-charts-directed-graph',
-        template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g *ngIf=\"initialized\" [attr.transform]=\"transform\" class=\"directed-graph chart\">\n        <defs>\n          <ng-template\n            *ngIf=\"defsTemplate\"\n            [ngTemplateOutlet]=\"defsTemplate\">\n          </ng-template>\n          <svg:path\n            class=\"text-path\"\n            *ngFor=\"let link of _links\"\n            [attr.d]=\"link.textPath\"\n            [attr.id]=\"link.id\">\n          </svg:path>\n        </defs>\n        <svg:rect\n          class=\"panning-rect\"\n          [attr.width]=\"dims.width * 100\"\n          [attr.height]=\"dims.height * 100\"\n          [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n          (mousedown)=\"isPanning = true\"\n        />\n        <svg:g class=\"links\">\n          <svg:g\n            *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n            class=\"link-group\"\n            #linkElement\n            [id]=\"link.id\">\n            <ng-template\n              *ngIf=\"linkTemplate\"\n              [ngTemplateOutlet]=\"linkTemplate\"\n              [ngOutletContext]=\"{ $implicit: link }\">\n            </ng-template>\n            <svg:path\n              *ngIf=\"!linkTemplate\"\n              class=\"edge\"\n              [attr.d]=\"link.line\"\n            />\n          </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n          <svg:g\n            *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n            class=\"node-group\"\n            #nodeElement\n            [id]=\"node.id\"\n            [style.transform]=\"node.options.transform\"\n            (click)=\"onClick(node)\"\n            (mousedown)=\"onNodeMouseDown($event, node)\">\n            <ng-template\n              *ngIf=\"nodeTemplate\"\n              [ngTemplateOutlet]=\"nodeTemplate\"\n              [ngOutletContext]=\"{ $implicit: node }\">\n            </ng-template>\n            <svg:circle\n              *ngIf=\"!nodeTemplate\"\n              r=\"10\"\n              [attr.cx]=\"node.width / 2\"\n              [attr.cy]=\"node.height / 2\"\n              [attr.fill]=\"node.options.color\"\n            />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
-        styles: [__webpack_require__("./src/directed-graph/directed-graph.component.scss")],
-        encapsulation: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewEncapsulation"].None,
-        changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush,
-        animations: [
-            __WEBPACK_IMPORTED_MODULE_0__angular_core__["trigger"]('link', [
-                __WEBPACK_IMPORTED_MODULE_0__angular_core__["transition"]('* => *', [
-                    __WEBPACK_IMPORTED_MODULE_0__angular_core__["animate"](500, __WEBPACK_IMPORTED_MODULE_0__angular_core__["style"]({ transform: '*' }))
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Boolean)
+    ], DirectedGraphComponent.prototype, "legend", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], DirectedGraphComponent.prototype, "nodes", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], DirectedGraphComponent.prototype, "links", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], DirectedGraphComponent.prototype, "activeEntries", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", String)
+    ], DirectedGraphComponent.prototype, "orientation", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Object)
+    ], DirectedGraphComponent.prototype, "curve", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Boolean)
+    ], DirectedGraphComponent.prototype, "draggingEnabled", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "nodeHeight", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "nodeMaxHeight", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "nodeMinHeight", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "nodeWidth", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "nodeMinWidth", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "nodeMaxWidth", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "panOffsetX", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "panOffsetY", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Boolean)
+    ], DirectedGraphComponent.prototype, "panningEnabled", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "zoomLevel", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "zoomSpeed", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "minZoomLevel", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], DirectedGraphComponent.prototype, "maxZoomLevel", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], DirectedGraphComponent.prototype, "activate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], DirectedGraphComponent.prototype, "deactivate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"])('linkTemplate'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
+    ], DirectedGraphComponent.prototype, "linkTemplate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"])('nodeTemplate'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
+    ], DirectedGraphComponent.prototype, "nodeTemplate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"])('defsTemplate'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
+    ], DirectedGraphComponent.prototype, "defsTemplate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])(__WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__["ChartComponent"], { read: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"] }),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], DirectedGraphComponent.prototype, "chart", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"])('nodeElement'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["QueryList"])
+    ], DirectedGraphComponent.prototype, "nodeElements", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"])('linkElement'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["QueryList"])
+    ], DirectedGraphComponent.prototype, "linkElements", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Function)
+    ], DirectedGraphComponent.prototype, "groupResultsBy", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])('document:mousemove', ['$event']),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [MouseEvent]),
+        __metadata("design:returntype", void 0)
+    ], DirectedGraphComponent.prototype, "onMouseMove", null);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])('document:mouseup'),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [MouseEvent]),
+        __metadata("design:returntype", void 0)
+    ], DirectedGraphComponent.prototype, "onMouseUp", null);
+    DirectedGraphComponent = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: 'ngx-charts-directed-graph',
+            template: __webpack_require__("./src/directed-graph/directed-graph.component.html"),
+            styles: [__webpack_require__("./src/directed-graph/directed-graph.component.scss")],
+            encapsulation: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewEncapsulation"].None,
+            changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush,
+            animations: [
+                Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["trigger"])('link', [
+                    Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["transition"])('* => *', [
+                        Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["animate"])(500, Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["style"])({ transform: '*' }))
+                    ])
                 ])
-            ])
-        ]
-    })
-], directed_graph_component_DirectedGraphComponent);
+            ]
+        })
+    ], DirectedGraphComponent);
+    return DirectedGraphComponent;
+}(__WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__["BaseChartComponent"]));
 
 
 // CONCATENATED MODULE: ./src/directed-graph/mouse-wheel.directive.ts
-/* harmony import */ var mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("@angular/core");
 /* harmony import */ var mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core___default = __webpack_require__.n(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__);
 var mouse_wheel_directive___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -39351,44 +39361,44 @@ var MouseWheelDirective = (function () {
             event.preventDefault();
         }
     };
+    mouse_wheel_directive___decorate([
+        Object(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        mouse_wheel_directive___metadata("design:type", Object)
+    ], MouseWheelDirective.prototype, "mouseWheelUp", void 0);
+    mouse_wheel_directive___decorate([
+        Object(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        mouse_wheel_directive___metadata("design:type", Object)
+    ], MouseWheelDirective.prototype, "mouseWheelDown", void 0);
+    mouse_wheel_directive___decorate([
+        Object(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])('mousewheel', ['$event']),
+        mouse_wheel_directive___metadata("design:type", Function),
+        mouse_wheel_directive___metadata("design:paramtypes", [Object]),
+        mouse_wheel_directive___metadata("design:returntype", void 0)
+    ], MouseWheelDirective.prototype, "onMouseWheelChrome", null);
+    mouse_wheel_directive___decorate([
+        Object(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])('DOMMouseScroll', ['$event']),
+        mouse_wheel_directive___metadata("design:type", Function),
+        mouse_wheel_directive___metadata("design:paramtypes", [Object]),
+        mouse_wheel_directive___metadata("design:returntype", void 0)
+    ], MouseWheelDirective.prototype, "onMouseWheelFirefox", null);
+    mouse_wheel_directive___decorate([
+        Object(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])('onmousewheel', ['$event']),
+        mouse_wheel_directive___metadata("design:type", Function),
+        mouse_wheel_directive___metadata("design:paramtypes", [Object]),
+        mouse_wheel_directive___metadata("design:returntype", void 0)
+    ], MouseWheelDirective.prototype, "onMouseWheelIE", null);
+    MouseWheelDirective = mouse_wheel_directive___decorate([
+        Object(mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["Directive"])({ selector: '[mouseWheel]' })
+    ], MouseWheelDirective);
     return MouseWheelDirective;
 }());
-mouse_wheel_directive___decorate([
-    mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"](),
-    mouse_wheel_directive___metadata("design:type", Object)
-], MouseWheelDirective.prototype, "mouseWheelUp", void 0);
-mouse_wheel_directive___decorate([
-    mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"](),
-    mouse_wheel_directive___metadata("design:type", Object)
-], MouseWheelDirective.prototype, "mouseWheelDown", void 0);
-mouse_wheel_directive___decorate([
-    mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"]('mousewheel', ['$event']),
-    mouse_wheel_directive___metadata("design:type", Function),
-    mouse_wheel_directive___metadata("design:paramtypes", [Object]),
-    mouse_wheel_directive___metadata("design:returntype", void 0)
-], MouseWheelDirective.prototype, "onMouseWheelChrome", null);
-mouse_wheel_directive___decorate([
-    mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"]('DOMMouseScroll', ['$event']),
-    mouse_wheel_directive___metadata("design:type", Function),
-    mouse_wheel_directive___metadata("design:paramtypes", [Object]),
-    mouse_wheel_directive___metadata("design:returntype", void 0)
-], MouseWheelDirective.prototype, "onMouseWheelFirefox", null);
-mouse_wheel_directive___decorate([
-    mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"]('onmousewheel', ['$event']),
-    mouse_wheel_directive___metadata("design:type", Function),
-    mouse_wheel_directive___metadata("design:paramtypes", [Object]),
-    mouse_wheel_directive___metadata("design:returntype", void 0)
-], MouseWheelDirective.prototype, "onMouseWheelIE", null);
-MouseWheelDirective = mouse_wheel_directive___decorate([
-    mouse_wheel_directive___WEBPACK_IMPORTED_MODULE_0__angular_core__["Directive"]({ selector: '[mouseWheel]' })
-], MouseWheelDirective);
 
 
 // CONCATENATED MODULE: ./src/directed-graph/directed-graph.module.ts
-/* harmony import */ var directed_graph_module___WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var directed_graph_module___WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("@angular/core");
 /* harmony import */ var directed_graph_module___WEBPACK_IMPORTED_MODULE_0__angular_core___default = __webpack_require__.n(directed_graph_module___WEBPACK_IMPORTED_MODULE_0__angular_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__ = __webpack_require__("./node_modules/@swimlane/ngx-charts/release/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__);
+/* harmony import */ var directed_graph_module___WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__ = __webpack_require__("./node_modules/@swimlane/ngx-charts/release/index.js");
+/* harmony import */ var directed_graph_module___WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts___default = __webpack_require__.n(directed_graph_module___WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__);
 var directed_graph_module___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -39400,28 +39410,28 @@ var directed_graph_module___decorate = (this && this.__decorate) || function (de
 
 
 
-var DirectedGraphModule = (function () {
+var directed_graph_module_DirectedGraphModule = (function () {
     function DirectedGraphModule() {
     }
+    DirectedGraphModule = directed_graph_module___decorate([
+        Object(directed_graph_module___WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
+            imports: [directed_graph_module___WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__["ChartCommonModule"]],
+            declarations: [
+                directed_graph_component_DirectedGraphComponent,
+                MouseWheelDirective
+            ],
+            exports: [
+                directed_graph_component_DirectedGraphComponent,
+                MouseWheelDirective
+            ]
+        })
+    ], DirectedGraphModule);
     return DirectedGraphModule;
 }());
-DirectedGraphModule = directed_graph_module___decorate([
-    directed_graph_module___WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"]({
-        imports: [__WEBPACK_IMPORTED_MODULE_2__swimlane_ngx_charts__["ChartCommonModule"]],
-        declarations: [
-            directed_graph_component_DirectedGraphComponent,
-            MouseWheelDirective
-        ],
-        exports: [
-            directed_graph_component_DirectedGraphComponent,
-            MouseWheelDirective
-        ]
-    })
-], DirectedGraphModule);
 
 
 // CONCATENATED MODULE: ./src/ngx-charts-dag.module.ts
-/* harmony import */ var ngx_charts_dag_module___WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
+/* harmony import */ var ngx_charts_dag_module___WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("@angular/core");
 /* harmony import */ var ngx_charts_dag_module___WEBPACK_IMPORTED_MODULE_0__angular_core___default = __webpack_require__.n(ngx_charts_dag_module___WEBPACK_IMPORTED_MODULE_0__angular_core__);
 var ngx_charts_dag_module___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -39431,150 +39441,150 @@ var ngx_charts_dag_module___decorate = (this && this.__decorate) || function (de
 };
 
 
-var NgxChartsDagModule = (function () {
+var ngx_charts_dag_module_NgxChartsDagModule = (function () {
     function NgxChartsDagModule() {
     }
+    NgxChartsDagModule = ngx_charts_dag_module___decorate([
+        Object(ngx_charts_dag_module___WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
+            exports: [
+                directed_graph_module_DirectedGraphModule
+            ]
+        })
+    ], NgxChartsDagModule);
     return NgxChartsDagModule;
 }());
-NgxChartsDagModule = ngx_charts_dag_module___decorate([
-    ngx_charts_dag_module___WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"]({
-        exports: [
-            DirectedGraphModule
-        ]
-    })
-], NgxChartsDagModule);
 
 
 // CONCATENATED MODULE: ./src/index.ts
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "NgxChartsDagModule", function() { return NgxChartsDagModule; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "NgxChartsDagModule", function() { return ngx_charts_dag_module_NgxChartsDagModule; });
 
 
 
 /***/ }),
 
-/***/ 0:
+/***/ "@angular/animations":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__angular_animations__;
 
 /***/ }),
 
-/***/ 1:
+/***/ "@angular/common":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__angular_common__;
 
 /***/ }),
 
-/***/ 10:
+/***/ "@angular/core":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_10__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__angular_core__;
 
 /***/ }),
 
-/***/ 11:
+/***/ "@angular/platform-browser":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_11__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__angular_platform_browser__;
 
 /***/ }),
 
-/***/ 12:
+/***/ "d3-array":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_array__;
 
 /***/ }),
 
-/***/ 13:
+/***/ "d3-brush":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_brush__;
 
 /***/ }),
 
-/***/ 14:
+/***/ "d3-color":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_color__;
 
 /***/ }),
 
-/***/ 15:
+/***/ "d3-force":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_15__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_force__;
 
 /***/ }),
 
-/***/ 16:
+/***/ "d3-format":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_16__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_format__;
 
 /***/ }),
 
-/***/ 17:
+/***/ "d3-hierarchy":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_17__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_hierarchy__;
 
 /***/ }),
 
-/***/ 2:
+/***/ "d3-interpolate":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_interpolate__;
 
 /***/ }),
 
-/***/ 3:
+/***/ "d3-scale":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_scale__;
 
 /***/ }),
 
-/***/ 4:
+/***/ "d3-selection":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_selection__;
 
 /***/ }),
 
-/***/ 5:
+/***/ "d3-shape":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_shape__;
 
 /***/ }),
 
-/***/ 6:
+/***/ "d3-time-format":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_d3_time_format__;
 
 /***/ }),
 
-/***/ 7:
+/***/ "rxjs/Observable":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_rxjs_Observable__;
 
 /***/ }),
 
-/***/ 8:
+/***/ "rxjs/add/observable/fromEvent":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_rxjs_add_observable_fromEvent__;
 
 /***/ }),
 
-/***/ 9:
+/***/ "rxjs/add/operator/debounceTime":
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_9__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_rxjs_add_operator_debounceTime__;
 
 /***/ })
 
