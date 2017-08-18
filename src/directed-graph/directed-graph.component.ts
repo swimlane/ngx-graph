@@ -306,7 +306,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @memberOf DirectedGraphComponent
    */
-  redrawLines(animate = true): void {
+  redrawLines(_animate = true): void {
     this.linkElements.map(linkEl => {
       const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
 
@@ -315,14 +315,14 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
         linkSelection
           .attr('d', l.oldLine)
           .transition()
-          .duration(animate ? 500 : 0)
+          .duration(_animate ? 500 : 0)
           .attr('d', l.line);
 
         const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
         textPathSelection
           .attr('d', l.oldTextPath)
           .transition()
-          .duration(animate ? 500 : 0)
+          .duration(_animate ? 500 : 0)
           .attr('d', l.textPath);
       }
     });

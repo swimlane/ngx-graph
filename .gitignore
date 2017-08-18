@@ -9,3 +9,4 @@ coverage/
 yarn.lock
 /ngx-charts.iml
 ngx-charts.iml
+package-lock.json
