@@ -74,7 +74,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @memberOf DirectedGraphComponent
      */
-    redrawLines(animate?: boolean): void;
+    redrawLines(_animate?: boolean): void;
     /**
      * Creates the dagre graph engine
      *

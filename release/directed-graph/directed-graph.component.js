@@ -185,9 +185,9 @@ var DirectedGraphComponent = (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.redrawLines = function (animate) {
+    DirectedGraphComponent.prototype.redrawLines = function (_animate) {
         var _this = this;
-        if (animate === void 0) { animate = true; }
+        if (_animate === void 0) { _animate = true; }
         this.linkElements.map(function (linkEl) {
             var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
             if (l) {
@@ -195,13 +195,13 @@ var DirectedGraphComponent = (function (_super) {
                 linkSelection
                     .attr('d', l.oldLine)
                     .transition()
-                    .duration(animate ? 500 : 0)
+                    .duration(_animate ? 500 : 0)
                     .attr('d', l.line);
                 var textPathSelection = select(_this.chartElement.nativeElement).select("#" + l.id);
                 textPathSelection
                     .attr('d', l.oldTextPath)
                     .transition()
-                    .duration(animate ? 500 : 0)
+                    .duration(_animate ? 500 : 0)
                     .attr('d', l.textPath);
             }
         });
