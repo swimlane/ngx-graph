@@ -293,8 +293,8 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
     }
 
     // Calculate the height/width total
-    this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.height));
-    this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.width));
+    this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.width));
+    this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.height));
 
     if (this.autoZoom) {
       const heightZoom = this.dims.height / this.graphDims.height;
