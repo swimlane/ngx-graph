@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
   width: number = 700;
   height: number = 300;
   fitContainer: boolean = true;
+  autoZoom: boolean = false;
 
   // options
   showLegend = false;
@@ -118,8 +119,9 @@ export class AppComponent implements OnInit {
     this.view = [this.width, this.height];
   }
 
-  toggleFitContainer(event) {
-    this.fitContainer = event;
+  toggleFitContainer(fitContainer: boolean, autoZoom: boolean): void {
+    this.fitContainer = fitContainer;
+    this.autoZoom = autoZoom;
 
     if (this.fitContainer) {
       this.view = undefined;

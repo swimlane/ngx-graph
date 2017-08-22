@@ -4,6 +4,7 @@
       <ngx-charts-directed-graph
         class="chart-container"
         [view]="view"
+        [autoZoom]="autoZoom"
         [legend]="showLegend"
         [links]="hierarchialGraph.links"
         (legendLabelClick)="onLegendLabelClick($event)"
@@ -92,7 +93,7 @@
         </h3>
         <div [hidden]="!dimVisiable" style="margin-left: 10px;">
           <label>
-            <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked)">
+            <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked, autoZoom)">
             Fit Container
           </label> <br />
           <div *ngIf="!fitContainer">
@@ -101,7 +102,11 @@
             <label>Height:</label><br />
             <input type="number" [(ngModel)]="height"><br />
             <button (click)="applyDimensions()">Apply dimensions</button>
-          </div>
+          </div> <br />
+          <label>
+            <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked)">
+            Auto Zoom
+          </label>
         </div>
       </div>
       <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
