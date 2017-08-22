@@ -123,6 +123,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
   @Input() zoomSpeed: number = 0.1;
   @Input() minZoomLevel: number = 0.1;
   @Input() maxZoomLevel: number = 4.0;
+  @Input() autoZoom: boolean = false;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -292,8 +293,18 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
     }
 
     // Calculate the height/width total
-    this.graphDims.width = Math.max(...this._nodes.map(n => n.x));
-    this.graphDims.height = Math.max(...this._nodes.map(n => n.y));
+    this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.width));
+    this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.height));
+
+    if (this.autoZoom) {
+      const heightZoom = this.dims.height / this.graphDims.height;
+      const widthZoom = this.dims.width / (this.graphDims.width);
+      const zoomLevel = Math.min(heightZoom, widthZoom, 1);
+      if (zoomLevel !== this.zoomLevel) {
+        this.zoomLevel = zoomLevel;
+        this.updateTransform();
+      }
+    }
 
     requestAnimationFrame(() => this.redrawLines());
     this.cd.markForCheck();
