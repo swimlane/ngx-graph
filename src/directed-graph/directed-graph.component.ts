@@ -382,7 +382,9 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
       // set view options
       node.options = {
         color: this.colors.getColor(this.groupResultsBy(node)),
-        transform: `translate( ${node.x - node.width / 2}, ${node.y - node.height / 2})`
+        transform: node.x && node.y
+          ? `translate( ${node.x - node.width / 2}, ${node.y - node.height / 2})`
+          : 'translate( 0, 0 )'
       };
     }
 
