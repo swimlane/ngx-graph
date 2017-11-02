@@ -67,7 +67,7 @@ import { id } from '../utils';
               <ng-template 
                 *ngIf="linkTemplate" 
                 [ngTemplateOutlet]="linkTemplate" 
-                [ngOutletContext]="{ $implicit: link }">
+                [ngTemplateOutletContext]="{ $implicit: link }">
               </ng-template>
               <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
             </svg:g>
@@ -83,7 +83,7 @@ import { id } from '../utils';
                 <ng-template 
                   *ngIf="nodeTemplate" 
                   [ngTemplateOutlet]="nodeTemplate" 
-                  [ngOutletContext]="{ $implicit: node }">
+                  [ngTemplateOutletContext]="{ $implicit: node }">
                 </ng-template>
                 <svg:circle 
                   *ngIf="!nodeTemplate" 
