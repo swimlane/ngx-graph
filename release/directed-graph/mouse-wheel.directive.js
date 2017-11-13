@@ -6,7 +6,7 @@ import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
  * @export
  * @class MouseWheelDirective
  */
-var MouseWheelDirective = (function () {
+var MouseWheelDirective = /** @class */ (function () {
     function MouseWheelDirective() {
         this.mouseWheelUp = new EventEmitter();
         this.mouseWheelDown = new EventEmitter();

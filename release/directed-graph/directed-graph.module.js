@@ -3,7 +3,7 @@ import { DirectedGraphComponent } from './directed-graph.component';
 import { ChartCommonModule } from '@swimlane/ngx-charts';
 import { MouseWheelDirective } from './mouse-wheel.directive';
 export { DirectedGraphComponent };
-var DirectedGraphModule = (function () {
+var DirectedGraphModule = /** @class */ (function () {
     function DirectedGraphModule() {
     }
     DirectedGraphModule.decorators = [

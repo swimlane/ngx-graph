@@ -21,6 +21,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
     zoomSpeed: number;
     minZoomLevel: number;
     maxZoomLevel: number;
+    autoZoom: boolean;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     linkTemplate: TemplateRef<any>;

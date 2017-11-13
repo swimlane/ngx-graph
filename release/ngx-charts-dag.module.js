@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { DirectedGraphModule } from './directed-graph/directed-graph.module';
-var NgxChartsDagModule = (function () {
+var NgxChartsDagModule = /** @class */ (function () {
     function NgxChartsDagModule() {
     }
     NgxChartsDagModule.decorators = [
