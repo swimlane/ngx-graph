@@ -56,7 +56,7 @@ import { id } from '../utils';
             class="panning-rect" 
             [attr.width]="dims.width * 100" 
             [attr.height]="dims.height * 100" 
-            [attr.transform]="'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' "
+            [attr.transform]="'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' "
             (mousedown)="isPanning = true" />
           <svg:g class="links">
             <svg:g 
@@ -243,7 +243,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
       index[n.id] = n;
       n.options = {
         color: this.colors.getColor(this.groupResultsBy(n)),
-        transform: `translate(${n.x - n.width / 2}, ${n.y - n.height / 2})`
+        transform: `translate(${(n.x - n.width / 2) || 0}, ${(n.y - n.height / 2) || 0})`
       };
     });
 
@@ -269,7 +269,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
 
       const textPos = points[Math.floor(points.length / 2)];
       if (textPos) {
-        newLink.textTransform = `translate(${textPos.x},${textPos.y})`;
+        newLink.textTransform = `translate(${(textPos.x) || 0},${(textPos.y) || 0})`;
       }
 
       newLink.textAngle = 0;
@@ -382,7 +382,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
       // set view options
       node.options = {
         color: this.colors.getColor(this.groupResultsBy(node)),
-        transform: `translate( ${node.x - node.width / 2}, ${node.y - node.height / 2})`
+        transform: `translate( ${(node.x - node.width / 2) || 0}, ${(node.y - node.height / 2) || 0})`
       };
     }
 
