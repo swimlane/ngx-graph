@@ -7,7 +7,7 @@ A Directed Acyclic Graph (DAG) visualization for angular - implemented using [ng
 
 
 ## Demo
-https://swimlane.github.io/ngx-charts-dag/
+https://swimlane.github.io/ngx-graph/
 
 ## Features
 * Custom templates for nodes and edges
