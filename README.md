@@ -1,10 +1,6 @@
-# ngx-charts-dag
+# ngx-graph
 
-A Directed Acyclic Graph (DAG) visualization for angular - implemented using [ngx-charts](https://github.com/swimlane/ngx-charts).
-
-**Note: ngx-charts-dag 2.0.0 works only with Angular 4.x. To use ngx-charts-dag with Angular 2.x, use ngx-charts-dag 1.x.**
-
-
+A Graph visualization for angular
 
 ## Demo
 https://swimlane.github.io/ngx-graph/
@@ -17,15 +13,15 @@ https://swimlane.github.io/ngx-graph/
 ### How is it different than the `ngx-charts-force-directed-graph` component which is distributed with ngx-charts?
 This visualization uses the Dagre layout, which is specialized for directed graphs, where as `ngx-charts-force-directed-graph` uses D3's force directed layout.
 
-`ngx-charts-dag` is better suited for visualizing flow diagrams which have a clear start and end.
+`ngx-graph` is better suited for visualizing flow diagrams which have a clear start and end.
 
 ## Installation
-1. `npm install @swimlane/ngx-charts-dag --save`
+1. `npm install @swimlane/ngx-graph --save`
 2. Make sure the peer dependencies are installed (d3)
-3. Import `NgxChartsDagModule` into your module
-4. Use the `ngx-charts-directed-graph` component in your components
+3. Import `NgxGraphModule` into your module
+4. Use the `ngx-graph` component in your components
 ```
-<ngx-charts-directed-graph
+<ngx-graph
   class="chart-container"
   [view]="view"
   [legend]="showLegend"
@@ -63,7 +59,7 @@ This visualization uses the Dagre layout, which is specialized for directed grap
     </svg:g>
   </template>
 
-</ngx-charts-directed-graph>
+</ngx-graph>
 ```
 
 ## Data
@@ -125,4 +121,4 @@ This visualization uses the Dagre layout, which is specialized for directed grap
 
 
 ## Credits
-`ngx-charts-dag` is a [Swimlane](http://swimlane.com) open-source project; we believe in giving back to the open-source community by sharing some of the projects we build for our application. Swimlane is an automated cyber security operations and incident response platform that enables cyber security teams to leverage threat intelligence, speed up incident response and automate security operations.
+`ngx-graph` is a [Swimlane](http://swimlane.com) open-source project; we believe in giving back to the open-source community by sharing some of the projects we build for our application. Swimlane is an automated cyber security operations and incident response platform that enables cyber security teams to leverage threat intelligence, speed up incident response and automate security operations.

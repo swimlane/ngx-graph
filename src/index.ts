@@ -1,1 +1,1 @@
-export * from './ngx-charts-dag.module';
+export * from './ngx-graph.module';

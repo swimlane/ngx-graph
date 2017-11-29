@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
-import { DirectedGraphComponent } from './directed-graph.component';
+import { GraphComponent } from './graph.component';
 import { ChartCommonModule } from '@swimlane/ngx-charts';
 import { MouseWheelDirective } from './mouse-wheel.directive';
-export { DirectedGraphComponent };
+export { GraphComponent };
 
 @NgModule({
   imports: [ChartCommonModule],
   declarations: [
-    DirectedGraphComponent,
+    GraphComponent,
     MouseWheelDirective
   ],
   exports: [
-    DirectedGraphComponent,
+    GraphComponent,
     MouseWheelDirective
   ]
 })
-export class DirectedGraphModule {}
+export class GraphModule {}

@@ -1,7 +1,7 @@
 {
-  "name": "@swimlane/ngx-charts-dag",
-  "version": "3.0.1",
-  "description": "A Directec Acyclic Graph visualization for angular!",
+  "name": "@swimlane/ngx-graph",
+  "version": "4.0.0",
+  "description": "Graph visualization for angular!",
   "main": "release/index.js",
   "typings": "release/index.d.ts",
   "scripts": {
@@ -40,7 +40,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/swimlane/ngx-charts-dag.git"
+    "url": "git+https://github.com/swimlane/ngx-graph.git"
   },
   "keywords": [
     "angular2",
@@ -59,7 +59,9 @@
     "d3js",
     "angular4",
     "dag",
-    "directed acyclic graph"
+    "directed acyclic graph",
+    "visualization",
+    "tree"
   ],
   "authors": [
     "Marjan Georgiev",
@@ -68,9 +70,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/swimlane/ngx-charts-dag/issues"
+    "url": "https://github.com/swimlane/ngx-graph/issues"
   },
-  "homepage": "https://github.com/swimlane/ngx-charts-dag#readme",
+  "homepage": "https://github.com/swimlane/ngx-graph#readme",
   "peerDependencies": {
     "@angular/animations": "^5.0.0",
     "@angular/common": "^5.0.0",
