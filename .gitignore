@@ -7,11 +7,5 @@ build/
 coverage/
 .idea
 yarn.lock
-<<<<<<< HEAD
 /ngx-charts.iml
 ngx-charts.iml
-=======
-/ngx-graph.iml
-ngx-graph.iml
-package-lock.json
->>>>>>> Rename project to ngx-graph
