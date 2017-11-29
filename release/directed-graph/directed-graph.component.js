@@ -8,9 +8,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { Component, ContentChild, ElementRef, HostListener, Input, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ContentChild, ContentChildren, ElementRef, HostListener, Input, TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, QueryList, AfterViewInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { BaseChartComponent, ChartComponent, calculateViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
+import { BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
@@ -18,31 +18,7 @@ import { id } from '../utils';
 var DirectedGraphComponent = /** @class */ (function (_super) {
     __extends(DirectedGraphComponent, _super);
     function DirectedGraphComponent() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.nodes = [];
-        _this.links = [];
-        _this.activeEntries = [];
-        _this.orientation = 'LR';
-        _this.draggingEnabled = true;
-        _this.panOffsetX = 0;
-        _this.panOffsetY = 0;
-        _this.panningEnabled = true;
-        _this.zoomLevel = 1;
-        _this.zoomSpeed = 0.1;
-        _this.minZoomLevel = 0.1;
-        _this.maxZoomLevel = 4.0;
-        _this.autoZoom = false;
-        _this.activate = new EventEmitter();
-        _this.deactivate = new EventEmitter();
-        _this.margin = [0, 0, 0, 0];
-        _this.results = [];
-        _this.isPanning = false;
-        _this.isDragging = false;
-        _this.initialized = false;
-        _this.graphDims = { width: 0, height: 0 };
-        _this._oldLinks = [];
-        _this.groupResultsBy = function (node) { return node.label; };
-        return _this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
      * Angular lifecycle event
@@ -50,7 +26,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.ngAfterViewInit = function () {
+    /**
+       * Angular lifecycle event
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.ngAfterViewInit = /**
+       * Angular lifecycle event
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         var _this = this;
         _super.prototype.ngAfterViewInit.call(this);
         setTimeout(function () { return _this.update(); });
@@ -61,7 +49,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.update = function () {
+    /**
+       * Base class update implementation for the dag graph
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.update = /**
+       * Base class update implementation for the dag graph
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         var _this = this;
         _super.prototype.update.call(this);
         this.zone.run(function () {
@@ -85,7 +85,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.draw = function () {
+    /**
+       * Draws the graph using dagre layouts
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.draw = /**
+       * Draws the graph using dagre layouts
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         var _this = this;
         // Calc view dims for the nodes
         if (this.nodeElements && this.nodeElements.length) {
@@ -131,7 +143,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
             index[n.id] = n;
             n.options = {
                 color: _this.colors.getColor(_this.groupResultsBy(n)),
-                transform: "translate(" + (n.x - n.width / 2) + ", " + (n.y - n.height / 2) + ")"
+                transform: "translate(" + ((n.x - n.width / 2) || 0) + ", " + ((n.y - n.height / 2) || 0) + ")"
             };
         });
         // Update the labels to the new positions
@@ -151,7 +163,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
             newLink.points = points;
             var textPos = points[Math.floor(points.length / 2)];
             if (textPos) {
-                newLink.textTransform = "translate(" + textPos.x + "," + textPos.y + ")";
+                newLink.textTransform = "translate(" + ((textPos.x) || 0) + "," + ((textPos.y) || 0) + ")";
             }
             newLink.textAngle = 0;
             if (!newLink.oldLine) {
@@ -195,7 +207,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.redrawLines = function (_animate) {
+    /**
+       * Redraws the lines when dragged or viewport updated
+       *
+       * @param {boolean} [animate=true]
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.redrawLines = /**
+       * Redraws the lines when dragged or viewport updated
+       *
+       * @param {boolean} [animate=true]
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (_animate) {
         var _this = this;
         if (_animate === void 0) { _animate = true; }
         this.linkElements.map(function (linkEl) {
@@ -222,7 +248,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.createGraph = function () {
+    /**
+       * Creates the dagre graph engine
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.createGraph = /**
+       * Creates the dagre graph engine
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         var _this = this;
         this.graph = new dagre.graphlib.Graph();
         this.graph.setGraph({
@@ -231,8 +269,6 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
             marginy: 20,
             edgesep: 100,
             ranksep: 100
-            // acyclicer: 'greedy',
-            // ranker: 'longest-path'
         });
         // Default to assigning a new object as a label for each new edge.
         this.graph.setDefaultEdgeLabel(function () {
@@ -256,7 +292,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
             // set view options
             node.options = {
                 color: this.colors.getColor(this.groupResultsBy(node)),
-                transform: "translate( " + (node.x - node.width / 2) + ", " + (node.y - node.height / 2) + ")"
+                transform: "translate( " + ((node.x - node.width / 2) || 0) + ", " + ((node.y - node.height / 2) || 0) + ")"
             };
         }
         // update dagre
@@ -273,7 +309,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.calcDominantBaseline = function (link) {
+    /**
+       * Calculate the text directions / flipping
+       *
+       * @param {any} link
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.calcDominantBaseline = /**
+       * Calculate the text directions / flipping
+       *
+       * @param {any} link
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (link) {
         var firstPoint = link.points[0];
         var lastPoint = link.points[link.points.length - 1];
         link.oldTextPath = link.textPath;
@@ -295,7 +345,23 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.generateLine = function (points) {
+    /**
+       * Generate the new line path
+       *
+       * @param {any} points
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.generateLine = /**
+       * Generate the new line path
+       *
+       * @param {any} points
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (points) {
         var lineFunction = shape.line().x(function (d) { return d.x; }).y(function (d) { return d.y; }).curve(this.curve);
         return lineFunction(points);
     };
@@ -307,7 +373,23 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onZoom = function ($event, direction) {
+    /**
+       * Zoom was invoked from event
+       *
+       * @param {MouseEvent} $event
+       * @param {any} direction
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onZoom = /**
+       * Zoom was invoked from event
+       *
+       * @param {MouseEvent} $event
+       * @param {any} direction
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function ($event, direction) {
         if (direction === 'in') {
             this.zoomLevel += this.zoomSpeed;
         }
@@ -325,7 +407,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onPan = function (event) {
+    /**
+       * Pan was invoked from event
+       *
+       * @param {any} event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onPan = /**
+       * Pan was invoked from event
+       *
+       * @param {any} event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (event) {
         this.panOffsetX += event.movementX;
         this.panOffsetY += event.movementY;
         this.updateTransform();
@@ -337,7 +433,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onDrag = function (event) {
+    /**
+       * Drag was invoked from an event
+       *
+       * @param {any} event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onDrag = /**
+       * Drag was invoked from an event
+       *
+       * @param {any} event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (event) {
         var node = this.draggingNode;
         node.x += event.movementX / this.zoomLevel;
         node.y += event.movementY / this.zoomLevel;
@@ -374,7 +484,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.updateTransform = function () {
+    /**
+       * Update the entire view for the new pan position
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.updateTransform = /**
+       * Update the entire view for the new pan position
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         this.transform = "\n      translate(" + this.panOffsetX + ", " + this.panOffsetY + ") scale(" + this.zoomLevel + ")\n    ";
     };
     /**
@@ -385,7 +507,23 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onClick = function (event) {
+    /**
+       * Node was clicked
+       *
+       * @param {any} event
+       * @returns {void}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onClick = /**
+       * Node was clicked
+       *
+       * @param {any} event
+       * @returns {void}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (event) {
         this.select.emit(event);
     };
     /**
@@ -396,7 +534,23 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onActivate = function (event) {
+    /**
+       * Node was focused
+       *
+       * @param {any} event
+       * @returns {void}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onActivate = /**
+       * Node was focused
+       *
+       * @param {any} event
+       * @returns {void}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (event) {
         if (this.activeEntries.indexOf(event) > -1)
             return;
         this.activeEntries = [event].concat(this.activeEntries);
@@ -409,7 +563,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onDeactivate = function (event) {
+    /**
+       * Node was defocused
+       *
+       * @param {any} event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onDeactivate = /**
+       * Node was defocused
+       *
+       * @param {any} event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (event) {
         var idx = this.activeEntries.indexOf(event);
         this.activeEntries.splice(idx, 1);
         this.activeEntries = this.activeEntries.slice();
@@ -422,7 +590,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.getSeriesDomain = function () {
+    /**
+       * Get the domain series for the nodes
+       *
+       * @returns {any[]}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.getSeriesDomain = /**
+       * Get the domain series for the nodes
+       *
+       * @returns {any[]}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         var _this = this;
         return this.nodes.map(function (d) { return _this.groupResultsBy(d); })
             .reduce(function (nodes, node) { return nodes.includes(node) ? nodes : nodes.concat([node]); }, [])
@@ -437,7 +619,25 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.trackLinkBy = function (index, link) {
+    /**
+       * Tracking for the link
+       *
+       * @param {any} index
+       * @param {any} link
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.trackLinkBy = /**
+       * Tracking for the link
+       *
+       * @param {any} index
+       * @param {any} link
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (index, link) {
         return link.id;
     };
     /**
@@ -449,7 +649,25 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.trackNodeBy = function (index, node) {
+    /**
+       * Tracking for the node
+       *
+       * @param {any} index
+       * @param {any} node
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.trackNodeBy = /**
+       * Tracking for the node
+       *
+       * @param {any} index
+       * @param {any} node
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (index, node) {
         return node.id;
     };
     /**
@@ -458,7 +676,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.setColors = function () {
+    /**
+       * Sets the colors the nodes
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.setColors = /**
+       * Sets the colors the nodes
+       *
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
     };
     /**
@@ -468,7 +698,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.getLegendOptions = function () {
+    /**
+       * Gets the legend options
+       *
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.getLegendOptions = /**
+       * Gets the legend options
+       *
+       * @returns {*}
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function () {
         return {
             scaleType: 'ordinal',
             domain: this.seriesDomain,
@@ -476,13 +720,20 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
         };
     };
     /**
-     * On mouse move event, used for panning and dragging.
-     *
-     * @param {MouseEvent} $event
-     *
-     * @memberOf DirectedGraphComponent
-     */
-    DirectedGraphComponent.prototype.onMouseMove = function ($event) {
+       * On mouse move event, used for panning and dragging.
+       *
+       * @param {MouseEvent} $event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onMouseMove = /**
+       * On mouse move event, used for panning and dragging.
+       *
+       * @param {MouseEvent} $event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function ($event) {
         if (this.isPanning && this.panningEnabled) {
             this.onPan($event);
         }
@@ -491,13 +742,20 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
         }
     };
     /**
-     * On mouse up event to disable panning/dragging.
-     *
-     * @param {MouseEvent} $event
-     *
-     * @memberOf DirectedGraphComponent
-     */
-    DirectedGraphComponent.prototype.onMouseUp = function ($event) {
+       * On mouse up event to disable panning/dragging.
+       *
+       * @param {MouseEvent} $event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onMouseUp = /**
+       * On mouse up event to disable panning/dragging.
+       *
+       * @param {MouseEvent} $event
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function ($event) {
         this.isDragging = false;
         this.isPanning = false;
     };
@@ -509,61 +767,25 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf DirectedGraphComponent
      */
-    DirectedGraphComponent.prototype.onNodeMouseDown = function (event, node) {
+    /**
+       * On node mouse down to kick off dragging
+       *
+       * @param {MouseEvent} event
+       * @param {*} node
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    DirectedGraphComponent.prototype.onNodeMouseDown = /**
+       * On node mouse down to kick off dragging
+       *
+       * @param {MouseEvent} event
+       * @param {*} node
+       *
+       * @memberOf DirectedGraphComponent
+       */
+    function (event, node) {
         this.isDragging = true;
         this.draggingNode = node;
-    };
-    DirectedGraphComponent.decorators = [
-        { type: Component, args: [{
-                    selector: 'ngx-charts-directed-graph',
-                    styleUrls: ['./directed-graph.component.css'],
-                    encapsulation: ViewEncapsulation.None,
-                    changeDetection: ChangeDetectionStrategy.OnPush,
-                    animations: [
-                        trigger('link', [
-                            transition('* => *', [
-                                animate(500, style({ transform: '*' }))
-                            ])
-                        ])
-                    ],
-                    template: "\n    <ngx-charts-chart \n      [view]=\"[width, height]\" \n      [showLegend]=\"legend\" \n      [legendOptions]=\"legendOptions\" \n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\" \n      (legendLabelDeactivate)=\"onDeactivate($event)\" \n      mouseWheel \n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g \n        *ngIf=\"initialized\" \n        [attr.transform]=\"transform\" \n        class=\"directed-graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path \n              class=\"text-path\" \n              *ngFor=\"let link of _links\" \n              [attr.d]=\"link.textPath\" \n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect \n            class=\"panning-rect\" \n            [attr.width]=\"dims.width * 100\" \n            [attr.height]=\"dims.height * 100\" \n            [attr.transform]=\"'translate(' + (-dims.width * 50) +',' + (-dims.height*50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g \n              *ngFor=\"let link of _links; trackBy: trackLinkBy\" \n              class=\"link-group\" \n              #linkElement \n              [id]=\"link.id\">\n              <ng-template \n                *ngIf=\"linkTemplate\" \n                [ngTemplateOutlet]=\"linkTemplate\" \n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g \n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\" \n              class=\"node-group\" \n              #nodeElement \n              [id]=\"node.id\" \n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template \n                  *ngIf=\"nodeTemplate\" \n                  [ngTemplateOutlet]=\"nodeTemplate\" \n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle \n                  *ngIf=\"!nodeTemplate\" \n                  r=\"10\" \n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\" \n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
-                },] },
-    ];
-    /** @nocollapse */
-    DirectedGraphComponent.ctorParameters = function () { return []; };
-    DirectedGraphComponent.propDecorators = {
-        'legend': [{ type: Input },],
-        'nodes': [{ type: Input },],
-        'links': [{ type: Input },],
-        'activeEntries': [{ type: Input },],
-        'orientation': [{ type: Input },],
-        'curve': [{ type: Input },],
-        'draggingEnabled': [{ type: Input },],
-        'nodeHeight': [{ type: Input },],
-        'nodeMaxHeight': [{ type: Input },],
-        'nodeMinHeight': [{ type: Input },],
-        'nodeWidth': [{ type: Input },],
-        'nodeMinWidth': [{ type: Input },],
-        'nodeMaxWidth': [{ type: Input },],
-        'panOffsetX': [{ type: Input },],
-        'panOffsetY': [{ type: Input },],
-        'panningEnabled': [{ type: Input },],
-        'zoomLevel': [{ type: Input },],
-        'zoomSpeed': [{ type: Input },],
-        'minZoomLevel': [{ type: Input },],
-        'maxZoomLevel': [{ type: Input },],
-        'autoZoom': [{ type: Input },],
-        'activate': [{ type: Output },],
-        'deactivate': [{ type: Output },],
-        'linkTemplate': [{ type: ContentChild, args: ['linkTemplate',] },],
-        'nodeTemplate': [{ type: ContentChild, args: ['nodeTemplate',] },],
-        'defsTemplate': [{ type: ContentChild, args: ['defsTemplate',] },],
-        'chart': [{ type: ViewChild, args: [ChartComponent, { read: ElementRef },] },],
-        'nodeElements': [{ type: ViewChildren, args: ['nodeElement',] },],
-        'linkElements': [{ type: ViewChildren, args: ['linkElement',] },],
-        'groupResultsBy': [{ type: Input },],
-        'onMouseMove': [{ type: HostListener, args: ['document:mousemove', ['$event'],] },],
-        'onMouseUp': [{ type: HostListener, args: ['document:mouseup',] },],
     };
     return DirectedGraphComponent;
 }(BaseChartComponent));

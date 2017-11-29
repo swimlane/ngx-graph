@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-charts-dag",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A Directec Acyclic Graph visualization for angular!",
   "main": "release/index.js",
   "typings": "release/index.d.ts",
@@ -75,7 +75,6 @@
     "@angular/animations": "^5.0.0",
     "@angular/common": "^5.0.0",
     "@angular/core": "^5.0.0",
-    "d3": "^4.7.4",
     "rxjs": "^5.0.3"
   },
   "devDependencies": {
@@ -89,8 +88,8 @@
     "@angular/platform-browser-dynamic": "^5.0.0",
     "@angular/platform-server": "^5.0.0",
     "@types/core-js": "^0.9.42",
-    "@types/d3-selection": "^1.1.0",
-    "@types/d3-shape": "^1.2.1",
+    "@types/d3-selection": "^1.2.0",
+    "@types/d3-shape": "^1.2.0",
     "@types/jasmine": "^2.8.2",
     "@types/node": "^8.0.53",
     "angular2-template-loader": "^0.6.0",
@@ -103,8 +102,6 @@
     "cpx": "^1.5.0",
     "cross-env": "^5.1.1",
     "css-loader": "^0.27.3",
-    "d3-selection": "^1.1.0",
-    "d3-shape": "^1.2.0",
     "extract-text-webpack-plugin": "2.0.0-beta.4",
     "file-loader": "^0.10.1",
     "fs-extra": "^3.0.1",
@@ -150,6 +147,10 @@
   },
   "dependencies": {
     "@swimlane/ngx-charts": "^7.0.1",
+    "@types/d3-transition": "^1.1.1",
+    "d3-selection": "^1.2.0",
+    "d3-shape": "^1.2.0",
+    "d3-transition": "^1.1.1",
     "dagre": "^0.7.4"
   }
 }

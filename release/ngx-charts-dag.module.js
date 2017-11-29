@@ -3,15 +3,6 @@ import { DirectedGraphModule } from './directed-graph/directed-graph.module';
 var NgxChartsDagModule = /** @class */ (function () {
     function NgxChartsDagModule() {
     }
-    NgxChartsDagModule.decorators = [
-        { type: NgModule, args: [{
-                    exports: [
-                        DirectedGraphModule
-                    ]
-                },] },
-    ];
-    /** @nocollapse */
-    NgxChartsDagModule.ctorParameters = function () { return []; };
     return NgxChartsDagModule;
 }());
 export { NgxChartsDagModule };

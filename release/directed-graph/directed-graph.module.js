@@ -6,21 +6,6 @@ export { DirectedGraphComponent };
 var DirectedGraphModule = /** @class */ (function () {
     function DirectedGraphModule() {
     }
-    DirectedGraphModule.decorators = [
-        { type: NgModule, args: [{
-                    imports: [ChartCommonModule],
-                    declarations: [
-                        DirectedGraphComponent,
-                        MouseWheelDirective
-                    ],
-                    exports: [
-                        DirectedGraphComponent,
-                        MouseWheelDirective
-                    ]
-                },] },
-    ];
-    /** @nocollapse */
-    DirectedGraphModule.ctorParameters = function () { return []; };
     return DirectedGraphModule;
 }());
 export { DirectedGraphModule };
