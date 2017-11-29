@@ -9,7 +9,7 @@ const { CheckerPlugin } = require('awesome-typescript-loader');
 
 const banner =
 `/**
- * ngx-charts v${APP_VERSION} (https://github.com/swimlane/ngx-charts)
+ * ngx-graph v${APP_VERSION} (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */`;
@@ -36,7 +36,7 @@ module.exports = function(env) {
     output: {
       path: dir('release'),
       libraryTarget: 'umd',
-      library: 'ngx-charts',
+      library: 'ngx-graph',
       umdNamedDefine: true
     },
     externals: {
@@ -81,7 +81,7 @@ module.exports = function(env) {
       new ngtools.AotPlugin({
         tsConfigPath: 'tsconfig-aot.json',
         baseDir: dir()
-        entryModule: dir('ngx-charts.ts') + '#NgxChartsModule'
+        entryModule: dir('ngx-graph.ts') + '#NgxGraphModule'
       }),
       new CleanWebpackPlugin(['release'], {
         root: dir(),

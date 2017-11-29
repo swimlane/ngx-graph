@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { APP_BASE_HREF, Location } from '@angular/common';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { AppComponent } from './app.component';
-import { NgxChartsDagModule } from '../src';
+import { NgxGraphModule } from '../src';
 
 @NgModule({
   providers: [
@@ -14,7 +14,7 @@ import { NgxChartsDagModule } from '../src';
       useFactory: getBaseLocation
     }
   ],
-  imports: [NgxChartsModule, NgxChartsDagModule, BrowserModule, BrowserAnimationsModule, FormsModule],
+  imports: [NgxChartsModule, NgxGraphModule, BrowserModule, BrowserAnimationsModule, FormsModule],
   declarations: [AppComponent],
   bootstrap: [AppComponent]
 })

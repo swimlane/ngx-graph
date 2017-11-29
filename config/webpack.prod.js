@@ -42,7 +42,7 @@ module.exports = function(env) {
       new HtmlWebpackPlugin({
         template: 'demo/index.ejs',
         chunksSortMode: 'dependency',
-        title: 'ngx-charts',
+        title: 'ngx-graph',
         googleAnalytics: {
           trackingId: 'UA-57474611-3',
           pageViewOnLoad: true

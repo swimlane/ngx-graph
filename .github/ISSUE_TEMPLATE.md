@@ -20,10 +20,10 @@
 **Please tell us about your environment:**
 <!-- Operating system, IDE, package manager, HTTP server, ... -->
 
-* **ngx-charts version:** x.x.x
-<!-- Check whether this is still an issue in the most recent ngx-charts version -->
+* **ngx-graph version:** x.x.x
+<!-- Check whether this is still an issue in the most recent ngx-graph version -->
 
-* **Angular version:** 2.x.x
+* **Angular version:** x.x.x
 <!-- Check whether this is still an issue in the most recent Angular version -->
 
 * **Browser:** [all | Chrome XX | Firefox XX | IE XX | Safari XX | Mobile Chrome XX | Android X.X Web Browser | iOS XX Safari | iOS XX UIWebView | iOS XX WKWebView ]

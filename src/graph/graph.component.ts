@@ -16,8 +16,8 @@ import * as dagre from 'dagre';
 import { id } from '../utils';
 
 @Component({
-  selector: 'ngx-charts-directed-graph',
-  styleUrls: ['./directed-graph.component.scss'],
+  selector: 'ngx-graph',
+  styleUrls: ['./graph.component.scss'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
@@ -28,67 +28,67 @@ import { id } from '../utils';
     ])
   ],
   template: `
-    <ngx-charts-chart 
-      [view]="[width, height]" 
-      [showLegend]="legend" 
-      [legendOptions]="legendOptions" 
+    <ngx-charts-chart
+      [view]="[width, height]"
+      [showLegend]="legend"
+      [legendOptions]="legendOptions"
       (legendLabelClick)="onClick($event)"
-      (legendLabelActivate)="onActivate($event)" 
-      (legendLabelDeactivate)="onDeactivate($event)" 
-      mouseWheel 
+      (legendLabelActivate)="onActivate($event)"
+      (legendLabelDeactivate)="onDeactivate($event)"
+      mouseWheel
       (mouseWheelUp)="onZoom($event, 'in')"
       (mouseWheelDown)="onZoom($event, 'out')">
-      <svg:g 
-        *ngIf="initialized" 
-        [attr.transform]="transform" 
-        class="directed-graph chart">
+      <svg:g
+        *ngIf="initialized"
+        [attr.transform]="transform"
+        class="graph chart">
           <defs>
             <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
             </ng-template>
-            <svg:path 
-              class="text-path" 
-              *ngFor="let link of _links" 
-              [attr.d]="link.textPath" 
+            <svg:path
+              class="text-path"
+              *ngFor="let link of _links"
+              [attr.d]="link.textPath"
               [attr.id]="link.id">
             </svg:path>
           </defs>
-          <svg:rect 
-            class="panning-rect" 
-            [attr.width]="dims.width * 100" 
-            [attr.height]="dims.height * 100" 
+          <svg:rect
+            class="panning-rect"
+            [attr.width]="dims.width * 100"
+            [attr.height]="dims.height * 100"
             [attr.transform]="'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' "
             (mousedown)="isPanning = true" />
           <svg:g class="links">
-            <svg:g 
-              *ngFor="let link of _links; trackBy: trackLinkBy" 
-              class="link-group" 
-              #linkElement 
+            <svg:g
+              *ngFor="let link of _links; trackBy: trackLinkBy"
+              class="link-group"
+              #linkElement
               [id]="link.id">
-              <ng-template 
-                *ngIf="linkTemplate" 
-                [ngTemplateOutlet]="linkTemplate" 
+              <ng-template
+                *ngIf="linkTemplate"
+                [ngTemplateOutlet]="linkTemplate"
                 [ngTemplateOutletContext]="{ $implicit: link }">
               </ng-template>
               <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
             </svg:g>
           </svg:g>
           <svg:g class="nodes">
-            <svg:g 
-              *ngFor="let node of _nodes; trackBy: trackNodeBy" 
-              class="node-group" 
-              #nodeElement 
-              [id]="node.id" 
+            <svg:g
+              *ngFor="let node of _nodes; trackBy: trackNodeBy"
+              class="node-group"
+              #nodeElement
+              [id]="node.id"
               [attr.transform]="node.options.transform"
                 (click)="onClick(node)" (mousedown)="onNodeMouseDown($event, node)">
-                <ng-template 
-                  *ngIf="nodeTemplate" 
-                  [ngTemplateOutlet]="nodeTemplate" 
+                <ng-template
+                  *ngIf="nodeTemplate"
+                  [ngTemplateOutlet]="nodeTemplate"
                   [ngTemplateOutletContext]="{ $implicit: node }">
                 </ng-template>
-                <svg:circle 
-                  *ngIf="!nodeTemplate" 
-                  r="10" 
-                  [attr.cx]="node.width / 2" [attr.cy]="node.height / 2" 
+                <svg:circle
+                  *ngIf="!nodeTemplate"
+                  r="10"
+                  [attr.cx]="node.width / 2" [attr.cy]="node.height / 2"
                   [attr.fill]="node.options.color"
                 />
             </svg:g>
@@ -97,7 +97,7 @@ import { id } from '../utils';
   </ngx-charts-chart>
   `
 })
-export class DirectedGraphComponent extends BaseChartComponent implements AfterViewInit {
+export class GraphComponent extends BaseChartComponent implements AfterViewInit {
 
   @Input() legend: boolean;
   @Input() nodes: any[] = [];
@@ -159,7 +159,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * Angular lifecycle event
    *
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   ngAfterViewInit(): void {
     super.ngAfterViewInit();
@@ -170,7 +170,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * Base class update implementation for the dag graph
    *
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   update(): void {
     super.update();
@@ -197,7 +197,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * Draws the graph using dagre layouts
    *
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   draw(): void {
     // Calc view dims for the nodes
@@ -315,7 +315,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {boolean} [animate=true]
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   redrawLines(_animate = true): void {
     this.linkElements.map(linkEl => {
@@ -343,7 +343,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * Creates the dagre graph engine
    *
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   createGraph(): void {
     this.graph = new dagre.graphlib.Graph();
@@ -399,7 +399,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {any} link
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   calcDominantBaseline(link): void {
     const firstPoint = link.points[0];
@@ -423,7 +423,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {any} points
    * @returns {*}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   generateLine(points): any {
     const lineFunction = shape.line<any>().x(d => d.x).y(d => d.y).curve(this.curve);
@@ -436,7 +436,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {MouseEvent} $event
    * @param {any} direction
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onZoom($event: MouseEvent, direction): void {
     if (direction === 'in') {
@@ -456,7 +456,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {any} event
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onPan(event): void {
     this.panOffsetX += event.movementX;
@@ -469,7 +469,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {any} event
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onDrag(event): void {
     const node = this.draggingNode;
@@ -507,7 +507,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * Update the entire view for the new pan position
    *
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   updateTransform(): void {
     this.transform = `
@@ -521,7 +521,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {any} event
    * @returns {void}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onClick(event): void {
     this.select.emit(event);
@@ -533,7 +533,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {any} event
    * @returns {void}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onActivate(event): void {
     if (this.activeEntries.indexOf(event) > -1) return;
@@ -546,7 +546,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {any} event
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onDeactivate(event): void {
     const idx = this.activeEntries.indexOf(event);
@@ -562,7 +562,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @returns {any[]}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   getSeriesDomain(): any[] {
     return this.nodes.map(d => this.groupResultsBy(d))
@@ -577,7 +577,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {any} link
    * @returns {*}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   trackLinkBy(index, link): any {
     return link.id;
@@ -590,7 +590,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {any} node
    * @returns {*}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   trackNodeBy(index, node): any {
     return node.id;
@@ -600,7 +600,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * Sets the colors the nodes
    *
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   setColors(): void {
     this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
@@ -611,7 +611,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @returns {*}
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   getLegendOptions(): any {
     return {
@@ -626,7 +626,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {MouseEvent} $event
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
@@ -642,7 +642,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    *
    * @param {MouseEvent} $event
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   @HostListener('document:mouseup')
   onMouseUp($event: MouseEvent): void {
@@ -656,7 +656,7 @@ export class DirectedGraphComponent extends BaseChartComponent implements AfterV
    * @param {MouseEvent} event
    * @param {*} node
    *
-   * @memberOf DirectedGraphComponent
+   * @memberOf GraphComponent
    */
   onNodeMouseDown(event: MouseEvent, node: any): void {
     this.isDragging = true;

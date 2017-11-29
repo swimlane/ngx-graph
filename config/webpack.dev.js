@@ -67,7 +67,7 @@ module.exports = function(options) {
       new HtmlWebpackPlugin({
         template: 'demo/index.ejs',
         chunksSortMode: 'dependency',
-        title: 'ngx-charts'
+        title: 'ngx-graph'
       }),
       new WebpackNotifierPlugin({
         excludeWarnings: true
