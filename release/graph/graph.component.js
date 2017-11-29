@@ -15,28 +15,28 @@ import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
 import { id } from '../utils';
-var DirectedGraphComponent = /** @class */ (function (_super) {
-    __extends(DirectedGraphComponent, _super);
-    function DirectedGraphComponent() {
+var GraphComponent = /** @class */ (function (_super) {
+    __extends(GraphComponent, _super);
+    function GraphComponent() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
      * Angular lifecycle event
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Angular lifecycle event
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.ngAfterViewInit = /**
+    GraphComponent.prototype.ngAfterViewInit = /**
        * Angular lifecycle event
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         var _this = this;
@@ -47,19 +47,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * Base class update implementation for the dag graph
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Base class update implementation for the dag graph
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.update = /**
+    GraphComponent.prototype.update = /**
        * Base class update implementation for the dag graph
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         var _this = this;
@@ -83,19 +83,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * Draws the graph using dagre layouts
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Draws the graph using dagre layouts
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.draw = /**
+    GraphComponent.prototype.draw = /**
        * Draws the graph using dagre layouts
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         var _this = this;
@@ -205,21 +205,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @param {boolean} [animate=true]
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Redraws the lines when dragged or viewport updated
        *
        * @param {boolean} [animate=true]
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.redrawLines = /**
+    GraphComponent.prototype.redrawLines = /**
        * Redraws the lines when dragged or viewport updated
        *
        * @param {boolean} [animate=true]
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (_animate) {
         var _this = this;
@@ -246,19 +246,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * Creates the dagre graph engine
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Creates the dagre graph engine
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.createGraph = /**
+    GraphComponent.prototype.createGraph = /**
        * Creates the dagre graph engine
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         var _this = this;
@@ -307,21 +307,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @param {any} link
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Calculate the text directions / flipping
        *
        * @param {any} link
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.calcDominantBaseline = /**
+    GraphComponent.prototype.calcDominantBaseline = /**
        * Calculate the text directions / flipping
        *
        * @param {any} link
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (link) {
         var firstPoint = link.points[0];
@@ -343,7 +343,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {any} points
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Generate the new line path
@@ -351,15 +351,15 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {any} points
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.generateLine = /**
+    GraphComponent.prototype.generateLine = /**
        * Generate the new line path
        *
        * @param {any} points
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (points) {
         var lineFunction = shape.line().x(function (d) { return d.x; }).y(function (d) { return d.y; }).curve(this.curve);
@@ -371,7 +371,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {MouseEvent} $event
      * @param {any} direction
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Zoom was invoked from event
@@ -379,15 +379,15 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {MouseEvent} $event
        * @param {any} direction
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onZoom = /**
+    GraphComponent.prototype.onZoom = /**
        * Zoom was invoked from event
        *
        * @param {MouseEvent} $event
        * @param {any} direction
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function ($event, direction) {
         if (direction === 'in') {
@@ -405,21 +405,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Pan was invoked from event
        *
        * @param {any} event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onPan = /**
+    GraphComponent.prototype.onPan = /**
        * Pan was invoked from event
        *
        * @param {any} event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (event) {
         this.panOffsetX += event.movementX;
@@ -431,21 +431,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Drag was invoked from an event
        *
        * @param {any} event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onDrag = /**
+    GraphComponent.prototype.onDrag = /**
        * Drag was invoked from an event
        *
        * @param {any} event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (event) {
         var node = this.draggingNode;
@@ -482,19 +482,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * Update the entire view for the new pan position
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Update the entire view for the new pan position
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.updateTransform = /**
+    GraphComponent.prototype.updateTransform = /**
        * Update the entire view for the new pan position
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         this.transform = "\n      translate(" + this.panOffsetX + ", " + this.panOffsetY + ") scale(" + this.zoomLevel + ")\n    ";
@@ -505,7 +505,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {any} event
      * @returns {void}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Node was clicked
@@ -513,15 +513,15 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {any} event
        * @returns {void}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onClick = /**
+    GraphComponent.prototype.onClick = /**
        * Node was clicked
        *
        * @param {any} event
        * @returns {void}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (event) {
         this.select.emit(event);
@@ -532,7 +532,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {any} event
      * @returns {void}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Node was focused
@@ -540,15 +540,15 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {any} event
        * @returns {void}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onActivate = /**
+    GraphComponent.prototype.onActivate = /**
        * Node was focused
        *
        * @param {any} event
        * @returns {void}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (event) {
         if (this.activeEntries.indexOf(event) > -1)
@@ -561,21 +561,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Node was defocused
        *
        * @param {any} event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onDeactivate = /**
+    GraphComponent.prototype.onDeactivate = /**
        * Node was defocused
        *
        * @param {any} event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (event) {
         var idx = this.activeEntries.indexOf(event);
@@ -588,21 +588,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @returns {any[]}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Get the domain series for the nodes
        *
        * @returns {any[]}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.getSeriesDomain = /**
+    GraphComponent.prototype.getSeriesDomain = /**
        * Get the domain series for the nodes
        *
        * @returns {any[]}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         var _this = this;
@@ -617,7 +617,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {any} link
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Tracking for the link
@@ -626,16 +626,16 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {any} link
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.trackLinkBy = /**
+    GraphComponent.prototype.trackLinkBy = /**
        * Tracking for the link
        *
        * @param {any} index
        * @param {any} link
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (index, link) {
         return link.id;
@@ -647,7 +647,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {any} node
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Tracking for the node
@@ -656,16 +656,16 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {any} node
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.trackNodeBy = /**
+    GraphComponent.prototype.trackNodeBy = /**
        * Tracking for the node
        *
        * @param {any} index
        * @param {any} node
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (index, node) {
         return node.id;
@@ -674,19 +674,19 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * Sets the colors the nodes
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Sets the colors the nodes
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.setColors = /**
+    GraphComponent.prototype.setColors = /**
        * Sets the colors the nodes
        *
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
@@ -696,21 +696,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      *
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * Gets the legend options
        *
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.getLegendOptions = /**
+    GraphComponent.prototype.getLegendOptions = /**
        * Gets the legend options
        *
        * @returns {*}
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function () {
         return {
@@ -724,14 +724,14 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        *
        * @param {MouseEvent} $event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onMouseMove = /**
+    GraphComponent.prototype.onMouseMove = /**
        * On mouse move event, used for panning and dragging.
        *
        * @param {MouseEvent} $event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function ($event) {
         if (this.isPanning && this.panningEnabled) {
@@ -746,14 +746,14 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        *
        * @param {MouseEvent} $event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onMouseUp = /**
+    GraphComponent.prototype.onMouseUp = /**
        * On mouse up event to disable panning/dragging.
        *
        * @param {MouseEvent} $event
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function ($event) {
         this.isDragging = false;
@@ -765,7 +765,7 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
      * @param {MouseEvent} event
      * @param {*} node
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     /**
        * On node mouse down to kick off dragging
@@ -773,21 +773,21 @@ var DirectedGraphComponent = /** @class */ (function (_super) {
        * @param {MouseEvent} event
        * @param {*} node
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
-    DirectedGraphComponent.prototype.onNodeMouseDown = /**
+    GraphComponent.prototype.onNodeMouseDown = /**
        * On node mouse down to kick off dragging
        *
        * @param {MouseEvent} event
        * @param {*} node
        *
-       * @memberOf DirectedGraphComponent
+       * @memberOf GraphComponent
        */
     function (event, node) {
         this.isDragging = true;
         this.draggingNode = node;
     };
-    return DirectedGraphComponent;
+    return GraphComponent;
 }(BaseChartComponent));
-export { DirectedGraphComponent };
-//# sourceMappingURL=directed-graph.component.js.map
+export { GraphComponent };
+//# sourceMappingURL=graph.component.js.map

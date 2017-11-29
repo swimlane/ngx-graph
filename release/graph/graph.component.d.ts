@@ -1,6 +1,6 @@
 import { ElementRef, TemplateRef, EventEmitter, QueryList, AfterViewInit } from '@angular/core';
 import { BaseChartComponent, ViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
-export declare class DirectedGraphComponent extends BaseChartComponent implements AfterViewInit {
+export declare class GraphComponent extends BaseChartComponent implements AfterViewInit {
     legend: boolean;
     nodes: any[];
     links: any[];
@@ -51,21 +51,21 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * Angular lifecycle event
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     ngAfterViewInit(): void;
     /**
      * Base class update implementation for the dag graph
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     update(): void;
     /**
      * Draws the graph using dagre layouts
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     draw(): void;
     /**
@@ -73,14 +73,14 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {boolean} [animate=true]
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     redrawLines(_animate?: boolean): void;
     /**
      * Creates the dagre graph engine
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     createGraph(): void;
     /**
@@ -88,7 +88,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {any} link
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     calcDominantBaseline(link: any): void;
     /**
@@ -97,7 +97,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {any} points
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     generateLine(points: any): any;
     /**
@@ -106,7 +106,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {MouseEvent} $event
      * @param {any} direction
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onZoom($event: MouseEvent, direction: any): void;
     /**
@@ -114,7 +114,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onPan(event: any): void;
     /**
@@ -122,14 +122,14 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onDrag(event: any): void;
     /**
      * Update the entire view for the new pan position
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     updateTransform(): void;
     /**
@@ -138,7 +138,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {any} event
      * @returns {void}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onClick(event: any): void;
     /**
@@ -147,7 +147,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {any} event
      * @returns {void}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onActivate(event: any): void;
     /**
@@ -155,7 +155,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onDeactivate(event: any): void;
     /**
@@ -163,7 +163,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @returns {any[]}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     getSeriesDomain(): any[];
     /**
@@ -173,7 +173,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {any} link
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     trackLinkBy(index: any, link: any): any;
     /**
@@ -183,14 +183,14 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {any} node
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     trackNodeBy(index: any, node: any): any;
     /**
      * Sets the colors the nodes
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     setColors(): void;
     /**
@@ -198,7 +198,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     getLegendOptions(): any;
     /**
@@ -206,7 +206,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {MouseEvent} $event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onMouseMove($event: MouseEvent): void;
     /**
@@ -214,7 +214,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      *
      * @param {MouseEvent} $event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onMouseUp($event: MouseEvent): void;
     /**
@@ -223,7 +223,7 @@ export declare class DirectedGraphComponent extends BaseChartComponent implement
      * @param {MouseEvent} event
      * @param {*} node
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
     onNodeMouseDown(event: MouseEvent, node: any): void;
 }

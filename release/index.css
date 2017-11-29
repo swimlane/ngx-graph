@@ -1,24 +1,24 @@
 /**
- * ngx-charts v"3.0.1" (https://github.com/swimlane/ngx-charts)
+ * ngx-graph v"4.0.0" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
-.directed-graph {
+.graph {
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
           user-select: none; }
-  .directed-graph .edge {
+  .graph .edge {
     stroke: #666;
     fill: none; }
-    .directed-graph .edge .edge-label {
+    .graph .edge .edge-label {
       stroke: none;
       font-size: 12px;
       fill: #ffffff; }
-  .directed-graph .panning-rect {
+  .graph .panning-rect {
     fill: transparent;
     cursor: move; }
-  .directed-graph .node-group .node:focus {
+  .graph .node-group .node:focus {
     outline: none; }
 
 /*# sourceMappingURL=index.map*/

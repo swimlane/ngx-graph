@@ -1,5 +1,5 @@
 /**
- * ngx-charts v"3.0.1" (https://github.com/swimlane/ngx-charts)
+ * ngx-graph v"4.0.0" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -7,11 +7,11 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"), require("rxjs/add/observable/fromEvent"), require("rxjs/add/operator/debounceTime"));
 	else if(typeof define === 'function' && define.amd)
-		define("ngx-charts", ["@angular/animations", "@angular/common", "@angular/core", "@angular/platform-browser", "d3-array", "d3-brush", "d3-color", "d3-force", "d3-format", "d3-hierarchy", "d3-interpolate", "d3-scale", "d3-selection", "d3-shape", "d3-time-format", "rxjs/Observable", "rxjs/add/observable/fromEvent", "rxjs/add/operator/debounceTime"], factory);
+		define("ngx-graph", ["@angular/animations", "@angular/common", "@angular/core", "@angular/platform-browser", "d3-array", "d3-brush", "d3-color", "d3-force", "d3-format", "d3-hierarchy", "d3-interpolate", "d3-scale", "d3-selection", "d3-shape", "d3-time-format", "rxjs/Observable", "rxjs/add/observable/fromEvent", "rxjs/add/operator/debounceTime"], factory);
 	else if(typeof exports === 'object')
-		exports["ngx-charts"] = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"), require("rxjs/add/observable/fromEvent"), require("rxjs/add/operator/debounceTime"));
+		exports["ngx-graph"] = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"), require("rxjs/add/observable/fromEvent"), require("rxjs/add/operator/debounceTime"));
 	else
-		root["ngx-charts"] = factory(root["@angular/animations"], root["@angular/common"], root["@angular/core"], root["@angular/platform-browser"], root["d3-array"], root["d3-brush"], root["d3-color"], root["d3-force"], root["d3-format"], root["d3-hierarchy"], root["d3-interpolate"], root["d3-scale"], root["d3-selection"], root["d3-shape"], root["d3-time-format"], root["rxjs/Observable"], root["rxjs/add/observable/fromEvent"], root["rxjs/add/operator/debounceTime"]);
+		root["ngx-graph"] = factory(root["@angular/animations"], root["@angular/common"], root["@angular/core"], root["@angular/platform-browser"], root["d3-array"], root["d3-brush"], root["d3-color"], root["d3-force"], root["d3-format"], root["d3-hierarchy"], root["d3-interpolate"], root["d3-scale"], root["d3-selection"], root["d3-shape"], root["d3-time-format"], root["rxjs/Observable"], root["rxjs/add/observable/fromEvent"], root["rxjs/add/operator/debounceTime"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE__angular_animations__, __WEBPACK_EXTERNAL_MODULE__angular_common__, __WEBPACK_EXTERNAL_MODULE__angular_core__, __WEBPACK_EXTERNAL_MODULE__angular_platform_browser__, __WEBPACK_EXTERNAL_MODULE_d3_array__, __WEBPACK_EXTERNAL_MODULE_d3_brush__, __WEBPACK_EXTERNAL_MODULE_d3_color__, __WEBPACK_EXTERNAL_MODULE_d3_force__, __WEBPACK_EXTERNAL_MODULE_d3_format__, __WEBPACK_EXTERNAL_MODULE_d3_hierarchy__, __WEBPACK_EXTERNAL_MODULE_d3_interpolate__, __WEBPACK_EXTERNAL_MODULE_d3_scale__, __WEBPACK_EXTERNAL_MODULE_d3_selection__, __WEBPACK_EXTERNAL_MODULE_d3_shape__, __WEBPACK_EXTERNAL_MODULE_d3_time_format__, __WEBPACK_EXTERNAL_MODULE_rxjs_Observable__, __WEBPACK_EXTERNAL_MODULE_rxjs_add_observable_fromEvent__, __WEBPACK_EXTERNAL_MODULE_rxjs_add_operator_debounceTime__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -19754,7 +19754,7 @@ function isnan (val) {
 
 /***/ }),
 
-/***/ "./node_modules/css-loader/index.js!./node_modules/postcss-loader/index.js?sourceMap!./node_modules/sass-loader/lib/loader.js?sourceMap!./src/directed-graph/directed-graph.component.scss":
+/***/ "./node_modules/css-loader/index.js!./node_modules/postcss-loader/index.js?sourceMap!./node_modules/sass-loader/lib/loader.js?sourceMap!./src/graph/graph.component.scss":
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
@@ -19762,7 +19762,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, ".directed-graph {\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none; }\n  .directed-graph .edge {\n    stroke: #666;\n    fill: none; }\n    .directed-graph .edge .edge-label {\n      stroke: none;\n      font-size: 12px;\n      fill: #ffffff; }\n  .directed-graph .panning-rect {\n    fill: transparent;\n    cursor: move; }\n  .directed-graph .node-group .node:focus {\n    outline: none; }\n", ""]);
+exports.push([module.i, ".graph {\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none; }\n  .graph .edge {\n    stroke: #666;\n    fill: none; }\n    .graph .edge .edge-label {\n      stroke: none;\n      font-size: 12px;\n      fill: #ffffff; }\n  .graph .panning-rect {\n    fill: transparent;\n    cursor: move; }\n  .graph .node-group .node:focus {\n    outline: none; }\n", ""]);
 
 // exports
 
@@ -36741,11 +36741,11 @@ module.exports = function(module) {
 
 /***/ }),
 
-/***/ "./src/directed-graph/directed-graph.component.scss":
+/***/ "./src/graph/graph.component.scss":
 /***/ (function(module, exports, __webpack_require__) {
 
 
-        var result = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/postcss-loader/index.js?sourceMap!./node_modules/sass-loader/lib/loader.js?sourceMap!./src/directed-graph/directed-graph.component.scss");
+        var result = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/postcss-loader/index.js?sourceMap!./node_modules/sass-loader/lib/loader.js?sourceMap!./src/graph/graph.component.scss");
 
         if (typeof result === "string") {
             module.exports = result;
@@ -37013,7 +37013,7 @@ function throttleable(duration, options) {
 
 
 
-// CONCATENATED MODULE: ./src/directed-graph/directed-graph.component.ts
+// CONCATENATED MODULE: ./src/graph/graph.component.ts
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -37040,9 +37040,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_super) {
-    __extends(DirectedGraphComponent, _super);
-    function DirectedGraphComponent() {
+var graph_component_GraphComponent = /** @class */ (function (_super) {
+    __extends(GraphComponent, _super);
+    function GraphComponent() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.nodes = [];
         _this.links = [];
@@ -37073,9 +37073,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * Angular lifecycle event
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.ngAfterViewInit = function () {
+    GraphComponent.prototype.ngAfterViewInit = function () {
         var _this = this;
         _super.prototype.ngAfterViewInit.call(this);
         setTimeout(function () { return _this.update(); });
@@ -37084,9 +37084,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * Base class update implementation for the dag graph
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.update = function () {
+    GraphComponent.prototype.update = function () {
         var _this = this;
         _super.prototype.update.call(this);
         this.zone.run(function () {
@@ -37108,9 +37108,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * Draws the graph using dagre layouts
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.draw = function () {
+    GraphComponent.prototype.draw = function () {
         var _this = this;
         // Calc view dims for the nodes
         if (this.nodeElements && this.nodeElements.length) {
@@ -37218,9 +37218,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {boolean} [animate=true]
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.redrawLines = function (_animate) {
+    GraphComponent.prototype.redrawLines = function (_animate) {
         var _this = this;
         if (_animate === void 0) { _animate = true; }
         this.linkElements.map(function (linkEl) {
@@ -37245,9 +37245,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * Creates the dagre graph engine
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.createGraph = function () {
+    GraphComponent.prototype.createGraph = function () {
         var _this = this;
         this.graph = new dagre["graphlib"].Graph();
         this.graph.setGraph({
@@ -37296,9 +37296,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {any} link
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.calcDominantBaseline = function (link) {
+    GraphComponent.prototype.calcDominantBaseline = function (link) {
         var firstPoint = link.points[0];
         var lastPoint = link.points[link.points.length - 1];
         link.oldTextPath = link.textPath;
@@ -37318,9 +37318,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {any} points
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.generateLine = function (points) {
+    GraphComponent.prototype.generateLine = function (points) {
         var lineFunction = external__d3_shape_["line"]().x(function (d) { return d.x; }).y(function (d) { return d.y; }).curve(this.curve);
         return lineFunction(points);
     };
@@ -37330,9 +37330,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {MouseEvent} $event
      * @param {any} direction
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onZoom = function ($event, direction) {
+    GraphComponent.prototype.onZoom = function ($event, direction) {
         if (direction === 'in') {
             this.zoomLevel += this.zoomSpeed;
         }
@@ -37348,9 +37348,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onPan = function (event) {
+    GraphComponent.prototype.onPan = function (event) {
         this.panOffsetX += event.movementX;
         this.panOffsetY += event.movementY;
         this.updateTransform();
@@ -37360,9 +37360,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onDrag = function (event) {
+    GraphComponent.prototype.onDrag = function (event) {
         var node = this.draggingNode;
         node.x += event.movementX / this.zoomLevel;
         node.y += event.movementY / this.zoomLevel;
@@ -37397,9 +37397,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * Update the entire view for the new pan position
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.updateTransform = function () {
+    GraphComponent.prototype.updateTransform = function () {
         this.transform = "\n      translate(" + this.panOffsetX + ", " + this.panOffsetY + ") scale(" + this.zoomLevel + ")\n    ";
     };
     /**
@@ -37408,9 +37408,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {any} event
      * @returns {void}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onClick = function (event) {
+    GraphComponent.prototype.onClick = function (event) {
         this.select.emit(event);
     };
     /**
@@ -37419,9 +37419,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {any} event
      * @returns {void}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onActivate = function (event) {
+    GraphComponent.prototype.onActivate = function (event) {
         if (this.activeEntries.indexOf(event) > -1)
             return;
         this.activeEntries = [event].concat(this.activeEntries);
@@ -37432,9 +37432,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {any} event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onDeactivate = function (event) {
+    GraphComponent.prototype.onDeactivate = function (event) {
         var idx = this.activeEntries.indexOf(event);
         this.activeEntries.splice(idx, 1);
         this.activeEntries = this.activeEntries.slice();
@@ -37445,9 +37445,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @returns {any[]}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.getSeriesDomain = function () {
+    GraphComponent.prototype.getSeriesDomain = function () {
         var _this = this;
         return this.nodes.map(function (d) { return _this.groupResultsBy(d); })
             .reduce(function (nodes, node) { return nodes.includes(node) ? nodes : nodes.concat([node]); }, [])
@@ -37460,9 +37460,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {any} link
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.trackLinkBy = function (index, link) {
+    GraphComponent.prototype.trackLinkBy = function (index, link) {
         return link.id;
     };
     /**
@@ -37472,18 +37472,18 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {any} node
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.trackNodeBy = function (index, node) {
+    GraphComponent.prototype.trackNodeBy = function (index, node) {
         return node.id;
     };
     /**
      * Sets the colors the nodes
      *
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.setColors = function () {
+    GraphComponent.prototype.setColors = function () {
         this.colors = new release["ColorHelper"](this.scheme, 'ordinal', this.seriesDomain, this.customColors);
     };
     /**
@@ -37491,9 +37491,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @returns {*}
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.getLegendOptions = function () {
+    GraphComponent.prototype.getLegendOptions = function () {
         return {
             scaleType: 'ordinal',
             domain: this.seriesDomain,
@@ -37505,9 +37505,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {MouseEvent} $event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onMouseMove = function ($event) {
+    GraphComponent.prototype.onMouseMove = function ($event) {
         if (this.isPanning && this.panningEnabled) {
             this.onPan($event);
         }
@@ -37520,9 +37520,9 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      *
      * @param {MouseEvent} $event
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onMouseUp = function ($event) {
+    GraphComponent.prototype.onMouseUp = function ($event) {
         this.isDragging = false;
         this.isPanning = false;
     };
@@ -37532,148 +37532,148 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
      * @param {MouseEvent} event
      * @param {*} node
      *
-     * @memberOf DirectedGraphComponent
+     * @memberOf GraphComponent
      */
-    DirectedGraphComponent.prototype.onNodeMouseDown = function (event, node) {
+    GraphComponent.prototype.onNodeMouseDown = function (event, node) {
         this.isDragging = true;
         this.draggingNode = node;
     };
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
-    ], DirectedGraphComponent.prototype, "legend", void 0);
+    ], GraphComponent.prototype, "legend", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Array)
-    ], DirectedGraphComponent.prototype, "nodes", void 0);
+    ], GraphComponent.prototype, "nodes", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Array)
-    ], DirectedGraphComponent.prototype, "links", void 0);
+    ], GraphComponent.prototype, "links", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Array)
-    ], DirectedGraphComponent.prototype, "activeEntries", void 0);
+    ], GraphComponent.prototype, "activeEntries", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", String)
-    ], DirectedGraphComponent.prototype, "orientation", void 0);
+    ], GraphComponent.prototype, "orientation", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Object)
-    ], DirectedGraphComponent.prototype, "curve", void 0);
+    ], GraphComponent.prototype, "curve", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
-    ], DirectedGraphComponent.prototype, "draggingEnabled", void 0);
+    ], GraphComponent.prototype, "draggingEnabled", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "nodeHeight", void 0);
+    ], GraphComponent.prototype, "nodeHeight", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "nodeMaxHeight", void 0);
+    ], GraphComponent.prototype, "nodeMaxHeight", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "nodeMinHeight", void 0);
+    ], GraphComponent.prototype, "nodeMinHeight", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "nodeWidth", void 0);
+    ], GraphComponent.prototype, "nodeWidth", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "nodeMinWidth", void 0);
+    ], GraphComponent.prototype, "nodeMinWidth", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "nodeMaxWidth", void 0);
+    ], GraphComponent.prototype, "nodeMaxWidth", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "panOffsetX", void 0);
+    ], GraphComponent.prototype, "panOffsetX", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "panOffsetY", void 0);
+    ], GraphComponent.prototype, "panOffsetY", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
-    ], DirectedGraphComponent.prototype, "panningEnabled", void 0);
+    ], GraphComponent.prototype, "panningEnabled", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "zoomLevel", void 0);
+    ], GraphComponent.prototype, "zoomLevel", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "zoomSpeed", void 0);
+    ], GraphComponent.prototype, "zoomSpeed", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "minZoomLevel", void 0);
+    ], GraphComponent.prototype, "minZoomLevel", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Number)
-    ], DirectedGraphComponent.prototype, "maxZoomLevel", void 0);
+    ], GraphComponent.prototype, "maxZoomLevel", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
-    ], DirectedGraphComponent.prototype, "autoZoom", void 0);
+    ], GraphComponent.prototype, "autoZoom", void 0);
     __decorate([
         Object(core_["Output"])(),
         __metadata("design:type", core_["EventEmitter"])
-    ], DirectedGraphComponent.prototype, "activate", void 0);
+    ], GraphComponent.prototype, "activate", void 0);
     __decorate([
         Object(core_["Output"])(),
         __metadata("design:type", core_["EventEmitter"])
-    ], DirectedGraphComponent.prototype, "deactivate", void 0);
+    ], GraphComponent.prototype, "deactivate", void 0);
     __decorate([
         Object(core_["ContentChild"])('linkTemplate'),
         __metadata("design:type", core_["TemplateRef"])
-    ], DirectedGraphComponent.prototype, "linkTemplate", void 0);
+    ], GraphComponent.prototype, "linkTemplate", void 0);
     __decorate([
         Object(core_["ContentChild"])('nodeTemplate'),
         __metadata("design:type", core_["TemplateRef"])
-    ], DirectedGraphComponent.prototype, "nodeTemplate", void 0);
+    ], GraphComponent.prototype, "nodeTemplate", void 0);
     __decorate([
         Object(core_["ContentChild"])('defsTemplate'),
         __metadata("design:type", core_["TemplateRef"])
-    ], DirectedGraphComponent.prototype, "defsTemplate", void 0);
+    ], GraphComponent.prototype, "defsTemplate", void 0);
     __decorate([
         Object(core_["ViewChild"])(release["ChartComponent"], { read: core_["ElementRef"] }),
         __metadata("design:type", core_["ElementRef"])
-    ], DirectedGraphComponent.prototype, "chart", void 0);
+    ], GraphComponent.prototype, "chart", void 0);
     __decorate([
         Object(core_["ViewChildren"])('nodeElement'),
         __metadata("design:type", core_["QueryList"])
-    ], DirectedGraphComponent.prototype, "nodeElements", void 0);
+    ], GraphComponent.prototype, "nodeElements", void 0);
     __decorate([
         Object(core_["ViewChildren"])('linkElement'),
         __metadata("design:type", core_["QueryList"])
-    ], DirectedGraphComponent.prototype, "linkElements", void 0);
+    ], GraphComponent.prototype, "linkElements", void 0);
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Function)
-    ], DirectedGraphComponent.prototype, "groupResultsBy", void 0);
+    ], GraphComponent.prototype, "groupResultsBy", void 0);
     __decorate([
         Object(core_["HostListener"])('document:mousemove', ['$event']),
         __metadata("design:type", Function),
         __metadata("design:paramtypes", [MouseEvent]),
         __metadata("design:returntype", void 0)
-    ], DirectedGraphComponent.prototype, "onMouseMove", null);
+    ], GraphComponent.prototype, "onMouseMove", null);
     __decorate([
         Object(core_["HostListener"])('document:mouseup'),
         __metadata("design:type", Function),
         __metadata("design:paramtypes", [MouseEvent]),
         __metadata("design:returntype", void 0)
-    ], DirectedGraphComponent.prototype, "onMouseUp", null);
-    DirectedGraphComponent = __decorate([
+    ], GraphComponent.prototype, "onMouseUp", null);
+    GraphComponent = __decorate([
         Object(core_["Component"])({
-            selector: 'ngx-charts-directed-graph',
-            styles: [__webpack_require__("./src/directed-graph/directed-graph.component.scss")],
+            selector: 'ngx-graph',
+            styles: [__webpack_require__("./src/graph/graph.component.scss")],
             encapsulation: core_["ViewEncapsulation"].None,
             changeDetection: core_["ChangeDetectionStrategy"].OnPush,
             animations: [
@@ -37683,14 +37683,14 @@ var directed_graph_component_DirectedGraphComponent = /** @class */ (function (_
                     ])
                 ])
             ],
-            template: "\n    <ngx-charts-chart \n      [view]=\"[width, height]\" \n      [showLegend]=\"legend\" \n      [legendOptions]=\"legendOptions\" \n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\" \n      (legendLabelDeactivate)=\"onDeactivate($event)\" \n      mouseWheel \n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g \n        *ngIf=\"initialized\" \n        [attr.transform]=\"transform\" \n        class=\"directed-graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path \n              class=\"text-path\" \n              *ngFor=\"let link of _links\" \n              [attr.d]=\"link.textPath\" \n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect \n            class=\"panning-rect\" \n            [attr.width]=\"dims.width * 100\" \n            [attr.height]=\"dims.height * 100\" \n            [attr.transform]=\"'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g \n              *ngFor=\"let link of _links; trackBy: trackLinkBy\" \n              class=\"link-group\" \n              #linkElement \n              [id]=\"link.id\">\n              <ng-template \n                *ngIf=\"linkTemplate\" \n                [ngTemplateOutlet]=\"linkTemplate\" \n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g \n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\" \n              class=\"node-group\" \n              #nodeElement \n              [id]=\"node.id\" \n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template \n                  *ngIf=\"nodeTemplate\" \n                  [ngTemplateOutlet]=\"nodeTemplate\" \n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle \n                  *ngIf=\"!nodeTemplate\" \n                  r=\"10\" \n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\" \n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
+            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g\n        *ngIf=\"initialized\"\n        [attr.transform]=\"transform\"\n        class=\"graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path\n              class=\"text-path\"\n              *ngFor=\"let link of _links\"\n              [attr.d]=\"link.textPath\"\n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect\n            class=\"panning-rect\"\n            [attr.width]=\"dims.width * 100\"\n            [attr.height]=\"dims.height * 100\"\n            [attr.transform]=\"'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g\n              *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n              class=\"link-group\"\n              #linkElement\n              [id]=\"link.id\">\n              <ng-template\n                *ngIf=\"linkTemplate\"\n                [ngTemplateOutlet]=\"linkTemplate\"\n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g\n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n              class=\"node-group\"\n              #nodeElement\n              [id]=\"node.id\"\n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template\n                  *ngIf=\"nodeTemplate\"\n                  [ngTemplateOutlet]=\"nodeTemplate\"\n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle\n                  *ngIf=\"!nodeTemplate\"\n                  r=\"10\"\n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\"\n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
         })
-    ], DirectedGraphComponent);
-    return DirectedGraphComponent;
+    ], GraphComponent);
+    return GraphComponent;
 }(release["BaseChartComponent"]));
 
 
-// CONCATENATED MODULE: ./src/directed-graph/mouse-wheel.directive.ts
+// CONCATENATED MODULE: ./src/graph/mouse-wheel.directive.ts
 var mouse_wheel_directive___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -37773,8 +37773,8 @@ var mouse_wheel_directive_MouseWheelDirective = /** @class */ (function () {
 }());
 
 
-// CONCATENATED MODULE: ./src/directed-graph/directed-graph.module.ts
-var directed_graph_module___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+// CONCATENATED MODULE: ./src/graph/graph.module.ts
+var graph_module___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -37785,28 +37785,28 @@ var directed_graph_module___decorate = (this && this.__decorate) || function (de
 
 
 
-var directed_graph_module_DirectedGraphModule = /** @class */ (function () {
-    function DirectedGraphModule() {
+var graph_module_GraphModule = /** @class */ (function () {
+    function GraphModule() {
     }
-    DirectedGraphModule = directed_graph_module___decorate([
+    GraphModule = graph_module___decorate([
         Object(core_["NgModule"])({
             imports: [release["ChartCommonModule"]],
             declarations: [
-                directed_graph_component_DirectedGraphComponent,
+                graph_component_GraphComponent,
                 mouse_wheel_directive_MouseWheelDirective
             ],
             exports: [
-                directed_graph_component_DirectedGraphComponent,
+                graph_component_GraphComponent,
                 mouse_wheel_directive_MouseWheelDirective
             ]
         })
-    ], DirectedGraphModule);
-    return DirectedGraphModule;
+    ], GraphModule);
+    return GraphModule;
 }());
 
 
-// CONCATENATED MODULE: ./src/ngx-charts-dag.module.ts
-var ngx_charts_dag_module___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+// CONCATENATED MODULE: ./src/ngx-graph.module.ts
+var ngx_graph_module___decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -37814,22 +37814,22 @@ var ngx_charts_dag_module___decorate = (this && this.__decorate) || function (de
 };
 
 
-var ngx_charts_dag_module_NgxChartsDagModule = /** @class */ (function () {
-    function NgxChartsDagModule() {
+var ngx_graph_module_NgxGraphModule = /** @class */ (function () {
+    function NgxGraphModule() {
     }
-    NgxChartsDagModule = ngx_charts_dag_module___decorate([
+    NgxGraphModule = ngx_graph_module___decorate([
         Object(core_["NgModule"])({
             exports: [
-                directed_graph_module_DirectedGraphModule
+                graph_module_GraphModule
             ]
         })
-    ], NgxChartsDagModule);
-    return NgxChartsDagModule;
+    ], NgxGraphModule);
+    return NgxGraphModule;
 }());
 
 
 // CONCATENATED MODULE: ./src/index.ts
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "NgxChartsDagModule", function() { return ngx_charts_dag_module_NgxChartsDagModule; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "NgxGraphModule", function() { return ngx_graph_module_NgxGraphModule; });
 
 
 
