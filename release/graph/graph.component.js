@@ -8,43 +8,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { Component, ContentChild, ElementRef, HostListener, Input, TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, QueryList } from '@angular/core';
-// rename transition due to conflict with d3 transition
-import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
-import { BaseChartComponent, ChartComponent, calculateViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
+import { Component, ContentChild, ContentChildren, ElementRef, HostListener, Input, TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, QueryList, AfterViewInit } from '@angular/core';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
-import 'd3-transition';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
 import { id } from '../utils';
-var GraphComponent = (function (_super) {
+var GraphComponent = /** @class */ (function (_super) {
     __extends(GraphComponent, _super);
     function GraphComponent() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.nodes = [];
-        _this.links = [];
-        _this.activeEntries = [];
-        _this.orientation = 'LR';
-        _this.draggingEnabled = true;
-        _this.panOffsetX = 0;
-        _this.panOffsetY = 0;
-        _this.panningEnabled = true;
-        _this.zoomLevel = 1;
-        _this.zoomSpeed = 0.1;
-        _this.minZoomLevel = 0.1;
-        _this.maxZoomLevel = 4.0;
-        _this.autoZoom = false;
-        _this.activate = new EventEmitter();
-        _this.deactivate = new EventEmitter();
-        _this.margin = [0, 0, 0, 0];
-        _this.results = [];
-        _this.isPanning = false;
-        _this.isDragging = false;
-        _this.initialized = false;
-        _this.graphDims = { width: 0, height: 0 };
-        _this._oldLinks = [];
-        _this.groupResultsBy = function (node) { return node.label; };
-        return _this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
      * Angular lifecycle event
@@ -295,8 +269,6 @@ var GraphComponent = (function (_super) {
             marginy: 20,
             edgesep: 100,
             ranksep: 100
-            // acyclicer: 'greedy',
-            // ranker: 'longest-path'
         });
         // Default to assigning a new object as a label for each new edge.
         this.graph.setDefaultEdgeLabel(function () {
@@ -814,58 +786,6 @@ var GraphComponent = (function (_super) {
     function (event, node) {
         this.isDragging = true;
         this.draggingNode = node;
-    };
-    GraphComponent.decorators = [
-        { type: Component, args: [{
-                    selector: 'ngx-graph',
-                    styleUrls: ['./graph.component.css'],
-                    encapsulation: ViewEncapsulation.None,
-                    changeDetection: ChangeDetectionStrategy.OnPush,
-                    animations: [
-                        trigger('link', [
-                            ngTransition('* => *', [
-                                animate(500, style({ transform: '*' }))
-                            ])
-                        ])
-                    ],
-                    template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g\n        *ngIf=\"initialized\"\n        [attr.transform]=\"transform\"\n        class=\"graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path\n              class=\"text-path\"\n              *ngFor=\"let link of _links\"\n              [attr.d]=\"link.textPath\"\n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect\n            class=\"panning-rect\"\n            [attr.width]=\"dims.width * 100\"\n            [attr.height]=\"dims.height * 100\"\n            [attr.transform]=\"'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g\n              *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n              class=\"link-group\"\n              #linkElement\n              [id]=\"link.id\">\n              <ng-template\n                *ngIf=\"linkTemplate\"\n                [ngTemplateOutlet]=\"linkTemplate\"\n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g\n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n              class=\"node-group\"\n              #nodeElement\n              [id]=\"node.id\"\n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template\n                  *ngIf=\"nodeTemplate\"\n                  [ngTemplateOutlet]=\"nodeTemplate\"\n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle\n                  *ngIf=\"!nodeTemplate\"\n                  r=\"10\"\n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\"\n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
-                },] },
-    ];
-    /** @nocollapse */
-    GraphComponent.ctorParameters = function () { return []; };
-    GraphComponent.propDecorators = {
-        "legend": [{ type: Input },],
-        "nodes": [{ type: Input },],
-        "links": [{ type: Input },],
-        "activeEntries": [{ type: Input },],
-        "orientation": [{ type: Input },],
-        "curve": [{ type: Input },],
-        "draggingEnabled": [{ type: Input },],
-        "nodeHeight": [{ type: Input },],
-        "nodeMaxHeight": [{ type: Input },],
-        "nodeMinHeight": [{ type: Input },],
-        "nodeWidth": [{ type: Input },],
-        "nodeMinWidth": [{ type: Input },],
-        "nodeMaxWidth": [{ type: Input },],
-        "panOffsetX": [{ type: Input },],
-        "panOffsetY": [{ type: Input },],
-        "panningEnabled": [{ type: Input },],
-        "zoomLevel": [{ type: Input },],
-        "zoomSpeed": [{ type: Input },],
-        "minZoomLevel": [{ type: Input },],
-        "maxZoomLevel": [{ type: Input },],
-        "autoZoom": [{ type: Input },],
-        "activate": [{ type: Output },],
-        "deactivate": [{ type: Output },],
-        "linkTemplate": [{ type: ContentChild, args: ['linkTemplate',] },],
-        "nodeTemplate": [{ type: ContentChild, args: ['nodeTemplate',] },],
-        "defsTemplate": [{ type: ContentChild, args: ['defsTemplate',] },],
-        "chart": [{ type: ViewChild, args: [ChartComponent, { read: ElementRef },] },],
-        "nodeElements": [{ type: ViewChildren, args: ['nodeElement',] },],
-        "linkElements": [{ type: ViewChildren, args: ['linkElement',] },],
-        "groupResultsBy": [{ type: Input },],
-        "onMouseMove": [{ type: HostListener, args: ['document:mousemove', ['$event'],] },],
-        "onMouseUp": [{ type: HostListener, args: ['document:mouseup',] },],
     };
     return GraphComponent;
 }(BaseChartComponent));
