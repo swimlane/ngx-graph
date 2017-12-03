@@ -4,13 +4,15 @@ import {
   ChangeDetectionStrategy, QueryList, AfterViewInit
 } from '@angular/core';
 
-import { animate, style, transition, trigger } from '@angular/animations';
+// rename transition due to conflict with d3 transition
+import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 
 import {
   BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper
 } from '@swimlane/ngx-charts';
 
 import { select } from 'd3-selection';
+import 'd3-transition';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
 import { id } from '../utils';
@@ -22,7 +24,7 @@ import { id } from '../utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('link', [
-      transition('* => *', [
+      ngTransition('* => *', [
         animate(500, style({ transform: '*' }))
       ])
     ])
