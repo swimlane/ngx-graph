@@ -209,7 +209,13 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
         const node = this._nodes.find(n => n.id === nativeElement.id);
 
         // calculate the height
-        const dims = nativeElement.getBBox();
+        let dims;
+        try {
+          dims = nativeElement.getBBox();
+        } catch (ex) {
+          // Skip drawing if element is not displayed - Firefox would throw an error here
+          return;
+        }
         if (this.nodeHeight) {
           node.height = this.nodeHeight;
         } else {
@@ -224,7 +230,13 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-            const textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+            let textDims;
+            try {
+              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+            } catch (ex) {
+              // Skip drawing if element is not displayed - Firefox would throw an error here
+              return;
+            }
             node.width = textDims.width + 20;
           } else {
             node.width = dims.width;
