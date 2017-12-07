@@ -131,7 +131,14 @@ var GraphComponent = (function (_super) {
                 var nativeElement = elem.nativeElement;
                 var node = _this._nodes.find(function (n) { return n.id === nativeElement.id; });
                 // calculate the height
-                var dims = nativeElement.getBBox();
+                var dims;
+                try {
+                    dims = nativeElement.getBBox();
+                }
+                catch (ex) {
+                    // Skip drawing if element is not displayed - Firefox would throw an error here
+                    return;
+                }
                 if (_this.nodeHeight) {
                     node.height = _this.nodeHeight;
                 }
@@ -148,7 +155,14 @@ var GraphComponent = (function (_super) {
                 else {
                     // calculate the width
                     if (nativeElement.getElementsByTagName('text').length) {
-                        var textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+                        var textDims = void 0;
+                        try {
+                            textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+                        }
+                        catch (ex) {
+                            // Skip drawing if element is not displayed - Firefox would throw an error here
+                            return;
+                        }
                         node.width = textDims.width + 20;
                     }
                     else {
