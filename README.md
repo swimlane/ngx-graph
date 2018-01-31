@@ -33,13 +33,13 @@ This library is focused on handling graph data (anything with nodes and edges) r
   [curve]="curve"
   (select)="select($event)">
 
-  <template #defsTemplate>
+  <ng-template #defsTemplate>
     <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
       <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
     </svg:marker>
-  </template>
+  </ng-template>
 
-  <template #nodeTemplate let-node>
+  <ng-template #nodeTemplate let-node>
     <svg:g class="node"
       ngx-tooltip
       [tooltipPlacement]="'top'"
@@ -48,16 +48,16 @@ This library is focused on handling graph data (anything with nodes and edges) r
       <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" />
       <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
     </svg:g>
-  </template>
+  </ng-template>
 
-  <template #linkTemplate let-link>
+  <ng-template #linkTemplate let-link>
     <svg:g class="edge">
       <svg:path
         stroke-width="2"
         marker-end="url(#arrow)" >
       </svg:path>
     </svg:g>
-  </template>
+  </ng-template>
 
 </ngx-graph>
 ```
