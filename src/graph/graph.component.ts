@@ -126,6 +126,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   @Input() minZoomLevel: number = 0.1;
   @Input() maxZoomLevel: number = 4.0;
   @Input() autoZoom: boolean = false;
+  @Input() panOnZoom: boolean = true;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -461,6 +462,12 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
     this.zoomLevel = Math.max(this.zoomLevel, this.minZoomLevel);
     this.zoomLevel = Math.min(this.zoomLevel, this.maxZoomLevel);
+
+    if (this.panOnZoom === true && $event) {
+      const scaleChange = direction === 'in' ? this.zoomSpeed : -this.zoomSpeed;
+      this.panOffsetX = this.panOffsetX + -(($event.offsetX) * scaleChange);
+      this.panOffsetY = this.panOffsetY + -(($event.offsetY) * scaleChange);
+    }
 
     this.updateTransform();
   }

@@ -5,6 +5,7 @@
         class="chart-container"
         [view]="view"
         [autoZoom]="autoZoom"
+        [panOnZoom]="panOnZoom"
         [legend]="showLegend"
         [links]="hierarchialGraph.links"
         (legendLabelClick)="onLegendLabelClick($event)"
@@ -146,6 +147,12 @@
           </option>
         </select>
 
+        <label>Pan on zoom</label>
+        <select
+          [(ngModel)]="panOnZoom">
+          <option [value]="true">True</option>
+          <option [value]="false">False</option>
+        </select>
       </div>
     </div>
   </div>
