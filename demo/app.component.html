@@ -11,6 +11,7 @@
         [panOffsetX]="panOffsetX"
         [panOffsetY]="panOffsetY"
         [zoomLevel]="zoomLevel"
+        [autoCenter]="autoCenter"
         [legend]="showLegend"
         [links]="hierarchialGraph.links"
         (legendLabelClick)="onLegendLabelClick($event)"
@@ -99,7 +100,7 @@
         </h3>
         <div [hidden]="!dimVisiable" style="margin-left: 10px;">
           <label>
-            <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked, autoZoom)">
+            <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked, autoZoom, autoCenter)">
             Fit Container
           </label> <br />
           <div *ngIf="!fitContainer">
@@ -114,8 +115,12 @@
             Enable Zoom
           </label> <br />
           <label>
-            <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked)">
+            <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked, autoCenter)">
             Auto Zoom
+          </label> <br />
+          <label>
+            <input type="checkbox" [checked]="autoCenter" (change)="toggleFitContainer(fitContainer, autoZoom, $event.target.checked)">
+            Auto Center
           </label>
         </div>
       </div>
