@@ -2,9 +2,14 @@
   <div class="chart-col">
     <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
       <ngx-graph
+        #graph
         class="chart-container"
         [view]="view"
         [autoZoom]="autoZoom"
+        [panOnZoom]="panOnZoom"
+        [panOffsetX]="panOffsetX"
+        [panOffsetY]="panOffsetY"
+        [zoomLevel]="zoomLevel"
         [legend]="showLegend"
         [links]="hierarchialGraph.links"
         (legendLabelClick)="onLegendLabelClick($event)"
@@ -109,6 +114,27 @@
           </label>
         </div>
       </div>
+
+      <h3 (click)="positionVisible = !positionVisible" style="cursor: pointer">
+        <span
+          [class.arrow-down]="positionVisible"
+          [class.arrow-right]="!positionVisible">
+        </span>
+        <strong>Position and zoom</strong>
+      </h3>
+      <div [hidden]="!positionVisible" style="margin-left: 10px;">
+        <label>X:</label>
+        <input [(ngModel)]="graph.panOffsetX" />
+        <br />
+
+        <label>Y:</label>
+        <input [(ngModel)]="graph.panOffsetY" />
+        <br />
+        
+        <label>Zoom level:</label>
+        <input [(ngModel)]="graph.zoomLevel" />
+      </div>
+
       <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
         <span
           [class.arrow-down]="colorVisible"
@@ -146,6 +172,12 @@
           </option>
         </select>
 
+        <label>Pan on zoom</label>
+        <select
+          [(ngModel)]="panOnZoom">
+          <option [ngValue]="true">True</option>
+          <option [ngValue]="false">False</option>
+        </select>
       </div>
     </div>
   </div>

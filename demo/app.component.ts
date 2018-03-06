@@ -29,6 +29,7 @@ export class AppComponent implements OnInit {
   height: number = 300;
   fitContainer: boolean = true;
   autoZoom: boolean = false;
+  panOnZoom: boolean = true;
 
   // options
   showLegend = false;

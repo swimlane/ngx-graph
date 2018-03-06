@@ -16,6 +16,7 @@ import 'd3-transition';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
 import { id } from '../utils';
+import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 
 @Component({
   selector: 'ngx-graph',
@@ -117,15 +118,13 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   @Input() nodeMinWidth: number;
   @Input() nodeMaxWidth: number;
 
-  @Input() panOffsetX: number = 0;
-  @Input() panOffsetY: number = 0;
   @Input() panningEnabled: boolean = true;
 
-  @Input() zoomLevel: number = 1;
   @Input() zoomSpeed: number = 0.1;
   @Input() minZoomLevel: number = 0.1;
   @Input() maxZoomLevel: number = 4.0;
   @Input() autoZoom: boolean = false;
+  @Input() panOnZoom: boolean = true;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -154,8 +153,54 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   _nodes: any[];
   _links: any[];
   _oldLinks: any[] = [];
+  transformationMatrix = identity();
 
   @Input() groupResultsBy: (node: any) => string = node => node.label;
+
+  /**
+   * Get the current zoom level
+   */
+  get zoomLevel() {
+    return this.transformationMatrix.a;
+  }
+
+  /**
+   * Set the current zoom level
+   */
+  @Input('zoomLevel')
+  set zoomLevel(level) {
+    this.zoomTo(Number(level));
+  }
+
+  /**
+   * Get the current `x` position of the graph
+   */
+  get panOffsetX() {
+    return this.transformationMatrix.e;
+  }
+
+  /**
+   * Set the current `x` position of the graph
+   */
+  @Input('panOffsetX')
+  set panOffsetX(x) {
+    this.panTo(Number(x), null);
+  }
+
+  /**
+   * Get the current `y` position of the graph
+   */
+  get panOffsetY() {
+    return this.transformationMatrix.f;
+  }
+
+  /**
+   * Set the current `y` position of the graph
+   */
+  @Input('panOffsetY')
+  set panOffsetY(y) {
+    this.panTo(null, Number(y));
+  }
 
   /**
    * Angular lifecycle event
@@ -453,15 +498,88 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   onZoom($event: MouseEvent, direction): void {
-    if (direction === 'in') {
-      this.zoomLevel += this.zoomSpeed;
-    } else {
-      this.zoomLevel -= this.zoomSpeed;
+    const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
+
+    // Check that zooming wouldn't put us out of bounds
+    const newZoomLevel = this.zoomLevel * zoomFactor;
+    if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
+      return;
     }
+    
+    if (this.panOnZoom === true && $event) {
+      // Absolute mouse X/Y on the screen
+      const mouseX = $event.clientX;
+      const mouseY = $event.clientY;
 
-    this.zoomLevel = Math.max(this.zoomLevel, this.minZoomLevel);
-    this.zoomLevel = Math.min(this.zoomLevel, this.maxZoomLevel);
+      // Transform the mouse X/Y into a SVG X/Y
+      const svg = this.chart.nativeElement.querySelector('svg');
+      const svgGroup = svg.querySelector('g.chart');
 
+      const point = svg.createSVGPoint();
+      point.x = mouseX;
+      point.y = mouseY;
+      const svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
+      
+      // Panzoom
+      this.pan(svgPoint.x, svgPoint.y);
+      this.zoom(zoomFactor);
+      this.pan(-svgPoint.x, -svgPoint.y);
+    } else {
+      this.zoom(zoomFactor);
+    }
+  }
+
+  /**
+   * Pan by x/y
+   * 
+   * @param x 
+   * @param y 
+   */
+  pan(x: number, y: number): void {
+    this.transformationMatrix = transform(
+      this.transformationMatrix,
+      translate(x, y)
+    );
+
+    this.updateTransform();
+  }
+
+  /**
+   * Pan to a fixed x/y
+   * 
+   * @param x 
+   * @param y 
+   */
+  panTo(x: number, y: number): void {
+    this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
+    this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
+    
+    this.updateTransform();
+  }
+
+  /**
+   * Zoom by a factor
+   * 
+   * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
+   */
+  zoom(factor: number): void {
+    this.transformationMatrix = transform(
+      this.transformationMatrix,
+      scale(factor, factor)
+    );
+
+    this.updateTransform();
+  }
+
+  /**
+   * Zoom to a fixed level
+   * 
+   * @param level 
+   */
+  zoomTo(level: number): void {
+    this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
+    this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
+    
     this.updateTransform();
   }
 
@@ -473,9 +591,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   onPan(event): void {
-    this.panOffsetX += event.movementX;
-    this.panOffsetY += event.movementY;
-    this.updateTransform();
+    this.pan(event.movementX, event.movementY);
   }
 
   /**
@@ -524,9 +640,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   updateTransform(): void {
-    this.transform = `
-      translate(${this.panOffsetX}, ${this.panOffsetY}) scale(${this.zoomLevel})
-    `;
+    this.transform = toSVG(this.transformationMatrix);
   }
 
   /**
