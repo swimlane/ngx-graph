@@ -31,10 +31,6 @@ export class AppComponent implements OnInit {
   autoZoom: boolean = false;
   panOnZoom: boolean = true;
 
-  panOffsetX = 0;
-  panOffsetY = 0;
-  zoomLevel = 1;
-
   // options
   showLegend = false;
   orientation: string = 'LR'; // LR, RL, TB, BT

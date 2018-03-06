@@ -551,8 +551,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @param y 
    */
   panTo(x: number, y: number): void {
-    this.transformationMatrix.e = x === null || x === undefined ? this.transformationMatrix.e : Number(x);
-    this.transformationMatrix.f = y === null || y === undefined ? this.transformationMatrix.f : Number(y);
+    this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
+    this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
     
     this.updateTransform();
   }
@@ -577,8 +577,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @param level 
    */
   zoomTo(level: number): void {
-    this.transformationMatrix.a = Number(level);
-    this.transformationMatrix.d = Number(level);
+    this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
+    this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
     
     this.updateTransform();
   }

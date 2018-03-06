@@ -120,31 +120,21 @@
           [class.arrow-down]="positionVisible"
           [class.arrow-right]="!positionVisible">
         </span>
-        <strong>Position</strong>
+        <strong>Position and zoom</strong>
       </h3>
       <div [hidden]="!positionVisible" style="margin-left: 10px;">
-        Current values:
-        <br />
-        X: {{graph.panOffsetX}}<br />
-        Y: {{graph.panOffsetY}}<br />
-        Zoom level: {{graph.zoomLevel}}
-
-        <br /><br />
-
-        Update values:
-        <br />
         <label>X:</label>
-        <input [(ngModel)]="panOffsetX" />
+        <input [(ngModel)]="graph.panOffsetX" />
         <br />
 
         <label>Y:</label>
-        <input [(ngModel)]="panOffsetY" />
+        <input [(ngModel)]="graph.panOffsetY" />
         <br />
         
         <label>Zoom level:</label>
-        <input [(ngModel)]="zoomLevel" />
+        <input [(ngModel)]="graph.zoomLevel" />
       </div>
-      
+
       <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
         <span
           [class.arrow-down]="colorVisible"
