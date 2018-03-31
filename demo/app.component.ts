@@ -30,6 +30,7 @@ export class AppComponent implements OnInit {
   fitContainer: boolean = true;
   autoZoom: boolean = false;
   panOnZoom: boolean = true;
+  enableZoom: boolean = true;
 
   // options
   showLegend = false;
@@ -118,6 +119,10 @@ export class AppComponent implements OnInit {
 
   applyDimensions() {
     this.view = [this.width, this.height];
+  }
+
+  toggleEnableZoom(enableZoom: boolean) {
+    this.enableZoom = enableZoom;
   }
 
   toggleFitContainer(fitContainer: boolean, autoZoom: boolean): void {

@@ -5,6 +5,7 @@
         #graph
         class="chart-container"
         [view]="view"
+        [enableZoom]="enableZoom"
         [autoZoom]="autoZoom"
         [panOnZoom]="panOnZoom"
         [panOffsetX]="panOffsetX"
@@ -108,6 +109,10 @@
             <input type="number" [(ngModel)]="height"><br />
             <button (click)="applyDimensions()">Apply dimensions</button>
           </div> <br />
+          <label>
+            <input type="checkbox" [checked]="enableZoom" (change)="toggleEnableZoom($event.target.checked)">
+            Enable Zoom
+          </label> <br />
           <label>
             <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked)">
             Auto Zoom
