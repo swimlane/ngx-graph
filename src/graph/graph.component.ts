@@ -120,6 +120,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
   @Input() panningEnabled: boolean = true;
 
+  @Input() enableZoom: boolean = true;
   @Input() zoomSpeed: number = 0.1;
   @Input() minZoomLevel: number = 0.1;
   @Input() maxZoomLevel: number = 4.0;
@@ -505,7 +506,12 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
       return;
     }
-    
+
+    // Check if zooming is enabled or not
+    if (!this.enableZoom) {
+      return;
+    }
+
     if (this.panOnZoom === true && $event) {
       // Absolute mouse X/Y on the screen
       const mouseX = $event.clientX;
