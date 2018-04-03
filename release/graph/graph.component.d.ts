@@ -15,14 +15,13 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
     nodeWidth: number;
     nodeMinWidth: number;
     nodeMaxWidth: number;
-    panOffsetX: number;
-    panOffsetY: number;
     panningEnabled: boolean;
-    zoomLevel: number;
+    enableZoom: boolean;
     zoomSpeed: number;
     minZoomLevel: number;
     maxZoomLevel: number;
     autoZoom: boolean;
+    panOnZoom: boolean;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     linkTemplate: TemplateRef<any>;
@@ -47,7 +46,29 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
     _nodes: any[];
     _links: any[];
     _oldLinks: any[];
+    transformationMatrix: Matrix;
     groupResultsBy: (node: any) => string;
+    /**
+     * Get the current zoom level
+     */
+    /**
+     * Set the current zoom level
+     */
+    zoomLevel: number;
+    /**
+     * Get the current `x` position of the graph
+     */
+    /**
+     * Set the current `x` position of the graph
+     */
+    panOffsetX: number;
+    /**
+     * Get the current `y` position of the graph
+     */
+    /**
+     * Set the current `y` position of the graph
+     */
+    panOffsetY: number;
     /**
      * Angular lifecycle event
      *
@@ -110,6 +131,32 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
      * @memberOf GraphComponent
      */
     onZoom($event: MouseEvent, direction: any): void;
+    /**
+     * Pan by x/y
+     *
+     * @param x
+     * @param y
+     */
+    pan(x: number, y: number): void;
+    /**
+     * Pan to a fixed x/y
+     *
+     * @param x
+     * @param y
+     */
+    panTo(x: number, y: number): void;
+    /**
+     * Zoom by a factor
+     *
+     * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
+     */
+    zoom(factor: number): void;
+    /**
+     * Zoom to a fixed level
+     *
+     * @param level
+     */
+    zoomTo(level: number): void;
     /**
      * Pan was invoked from event
      *

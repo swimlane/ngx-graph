@@ -9,7 +9,6 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import { Component, ContentChild, ElementRef, HostListener, Input, TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, QueryList } from '@angular/core';
-// rename transition due to conflict with d3 transition
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import { BaseChartComponent, ChartComponent, calculateViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
@@ -17,6 +16,7 @@ import 'd3-transition';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
 import { id } from '../utils';
+import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 var GraphComponent = (function (_super) {
     __extends(GraphComponent, _super);
     function GraphComponent() {
@@ -26,14 +26,13 @@ var GraphComponent = (function (_super) {
         _this.activeEntries = [];
         _this.orientation = 'LR';
         _this.draggingEnabled = true;
-        _this.panOffsetX = 0;
-        _this.panOffsetY = 0;
         _this.panningEnabled = true;
-        _this.zoomLevel = 1;
+        _this.enableZoom = true;
         _this.zoomSpeed = 0.1;
         _this.minZoomLevel = 0.1;
         _this.maxZoomLevel = 4.0;
         _this.autoZoom = false;
+        _this.panOnZoom = true;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
         _this.margin = [0, 0, 0, 0];
@@ -43,9 +42,67 @@ var GraphComponent = (function (_super) {
         _this.initialized = false;
         _this.graphDims = { width: 0, height: 0 };
         _this._oldLinks = [];
+        _this.transformationMatrix = identity();
         _this.groupResultsBy = function (node) { return node.label; };
         return _this;
     }
+    Object.defineProperty(GraphComponent.prototype, "zoomLevel", {
+        /**
+         * Get the current zoom level
+         */
+        get: /**
+           * Get the current zoom level
+           */
+        function () {
+            return this.transformationMatrix.a;
+        },
+        set: /**
+           * Set the current zoom level
+           */
+        function (level) {
+            this.zoomTo(Number(level));
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphComponent.prototype, "panOffsetX", {
+        /**
+         * Get the current `x` position of the graph
+         */
+        get: /**
+           * Get the current `x` position of the graph
+           */
+        function () {
+            return this.transformationMatrix.e;
+        },
+        set: /**
+           * Set the current `x` position of the graph
+           */
+        function (x) {
+            this.panTo(Number(x), null);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphComponent.prototype, "panOffsetY", {
+        /**
+         * Get the current `y` position of the graph
+         */
+        get: /**
+           * Get the current `y` position of the graph
+           */
+        function () {
+            return this.transformationMatrix.f;
+        },
+        set: /**
+           * Set the current `y` position of the graph
+           */
+        function (y) {
+            this.panTo(null, Number(y));
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Angular lifecycle event
      *
@@ -432,14 +489,118 @@ var GraphComponent = (function (_super) {
        * @memberOf GraphComponent
        */
     function ($event, direction) {
-        if (direction === 'in') {
-            this.zoomLevel += this.zoomSpeed;
+        var zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
+        // Check that zooming wouldn't put us out of bounds
+        var newZoomLevel = this.zoomLevel * zoomFactor;
+        if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
+            return;
+        }
+        // Check if zooming is enabled or not
+        if (!this.enableZoom) {
+            return;
+        }
+        if (this.panOnZoom === true && $event) {
+            // Absolute mouse X/Y on the screen
+            var mouseX = $event.clientX;
+            var mouseY = $event.clientY;
+            // Transform the mouse X/Y into a SVG X/Y
+            var svg = this.chart.nativeElement.querySelector('svg');
+            var svgGroup = svg.querySelector('g.chart');
+            var point = svg.createSVGPoint();
+            point.x = mouseX;
+            point.y = mouseY;
+            var svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
+            // Panzoom
+            this.pan(svgPoint.x, svgPoint.y);
+            this.zoom(zoomFactor);
+            this.pan(-svgPoint.x, -svgPoint.y);
         }
         else {
-            this.zoomLevel -= this.zoomSpeed;
+            this.zoom(zoomFactor);
         }
-        this.zoomLevel = Math.max(this.zoomLevel, this.minZoomLevel);
-        this.zoomLevel = Math.min(this.zoomLevel, this.maxZoomLevel);
+    };
+    /**
+     * Pan by x/y
+     *
+     * @param x
+     * @param y
+     */
+    /**
+       * Pan by x/y
+       *
+       * @param x
+       * @param y
+       */
+    GraphComponent.prototype.pan = /**
+       * Pan by x/y
+       *
+       * @param x
+       * @param y
+       */
+    function (x, y) {
+        this.transformationMatrix = transform(this.transformationMatrix, translate(x, y));
+        this.updateTransform();
+    };
+    /**
+     * Pan to a fixed x/y
+     *
+     * @param x
+     * @param y
+     */
+    /**
+       * Pan to a fixed x/y
+       *
+       * @param x
+       * @param y
+       */
+    GraphComponent.prototype.panTo = /**
+       * Pan to a fixed x/y
+       *
+       * @param x
+       * @param y
+       */
+    function (x, y) {
+        this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
+        this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
+        this.updateTransform();
+    };
+    /**
+     * Zoom by a factor
+     *
+     * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
+     */
+    /**
+       * Zoom by a factor
+       *
+       * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
+       */
+    GraphComponent.prototype.zoom = /**
+       * Zoom by a factor
+       *
+       * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
+       */
+    function (factor) {
+        this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
+        this.updateTransform();
+    };
+    /**
+     * Zoom to a fixed level
+     *
+     * @param level
+     */
+    /**
+       * Zoom to a fixed level
+       *
+       * @param level
+       */
+    GraphComponent.prototype.zoomTo = /**
+       * Zoom to a fixed level
+       *
+       * @param level
+       */
+    function (level) {
+        this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
+        this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
         this.updateTransform();
     };
     /**
@@ -464,9 +625,7 @@ var GraphComponent = (function (_super) {
        * @memberOf GraphComponent
        */
     function (event) {
-        this.panOffsetX += event.movementX;
-        this.panOffsetY += event.movementY;
-        this.updateTransform();
+        this.pan(event.movementX, event.movementY);
     };
     /**
      * Drag was invoked from an event
@@ -539,7 +698,7 @@ var GraphComponent = (function (_super) {
        * @memberOf GraphComponent
        */
     function () {
-        this.transform = "\n      translate(" + this.panOffsetX + ", " + this.panOffsetY + ") scale(" + this.zoomLevel + ")\n    ";
+        this.transform = toSVG(this.transformationMatrix);
     };
     /**
      * Node was clicked
@@ -861,14 +1020,13 @@ var GraphComponent = (function (_super) {
         "nodeWidth": [{ type: Input },],
         "nodeMinWidth": [{ type: Input },],
         "nodeMaxWidth": [{ type: Input },],
-        "panOffsetX": [{ type: Input },],
-        "panOffsetY": [{ type: Input },],
         "panningEnabled": [{ type: Input },],
-        "zoomLevel": [{ type: Input },],
+        "enableZoom": [{ type: Input },],
         "zoomSpeed": [{ type: Input },],
         "minZoomLevel": [{ type: Input },],
         "maxZoomLevel": [{ type: Input },],
         "autoZoom": [{ type: Input },],
+        "panOnZoom": [{ type: Input },],
         "activate": [{ type: Output },],
         "deactivate": [{ type: Output },],
         "linkTemplate": [{ type: ContentChild, args: ['linkTemplate',] },],
@@ -878,6 +1036,9 @@ var GraphComponent = (function (_super) {
         "nodeElements": [{ type: ViewChildren, args: ['nodeElement',] },],
         "linkElements": [{ type: ViewChildren, args: ['linkElement',] },],
         "groupResultsBy": [{ type: Input },],
+        "zoomLevel": [{ type: Input, args: ['zoomLevel',] },],
+        "panOffsetX": [{ type: Input, args: ['panOffsetX',] },],
+        "panOffsetY": [{ type: Input, args: ['panOffsetY',] },],
         "onMouseMove": [{ type: HostListener, args: ['document:mousemove', ['$event'],] },],
         "onMouseUp": [{ type: HostListener, args: ['document:mouseup',] },],
     };

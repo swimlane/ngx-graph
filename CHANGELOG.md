@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.0
+- Feature; Allow enable/disable zooming (#64)
+- Feature: Pan to cursor on zoom (#53)
+- Docs: Use ng-template instead of template (#48)
+
 ## 4.0.2
 - Fix: Error in Firefox when trying to render diagram when it is hidden
 
