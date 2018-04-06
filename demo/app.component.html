@@ -109,19 +109,7 @@
             <label>Height:</label><br />
             <input type="number" [(ngModel)]="height"><br />
             <button (click)="applyDimensions()">Apply dimensions</button>
-          </div> <br />
-          <label>
-            <input type="checkbox" [checked]="enableZoom" (change)="toggleEnableZoom($event.target.checked)">
-            Enable Zoom
-          </label> <br />
-          <label>
-            <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked, autoCenter)">
-            Auto Zoom
-          </label> <br />
-          <label>
-            <input type="checkbox" [checked]="autoCenter" (change)="toggleFitContainer(fitContainer, autoZoom, $event.target.checked)">
-            Auto Center
-          </label>
+          </div>
         </div>
       </div>
 
@@ -143,6 +131,19 @@
         
         <label>Zoom level:</label>
         <input [(ngModel)]="graph.zoomLevel" />
+        <br />
+        <label>
+          <input type="checkbox" [checked]="enableZoom" (change)="toggleEnableZoom($event.target.checked)">
+          Enable Zoom
+        </label> <br />
+        <label>
+          <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked, autoCenter)">
+          Auto Zoom
+        </label> <br />
+        <label>
+          <input type="checkbox" [checked]="autoCenter" (change)="toggleFitContainer(fitContainer, autoZoom, $event.target.checked)">
+          Auto Center
+        </label>
       </div>
 
       <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
