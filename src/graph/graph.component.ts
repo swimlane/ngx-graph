@@ -18,6 +18,18 @@ import * as dagre from 'dagre';
 import { id } from '../utils';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 
+/**
+ * Matrix
+ */
+export interface Matrix {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+}
+
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
@@ -154,7 +166,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   _nodes: any[];
   _links: any[];
   _oldLinks: any[] = [];
-  transformationMatrix = identity();
+  transformationMatrix: Matrix = identity();
 
   @Input() groupResultsBy: (node: any) => string = node => node.label;
 
