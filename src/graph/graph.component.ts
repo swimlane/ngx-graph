@@ -807,7 +807,9 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * Center the graph in the viewport
    */
   center(): void {
-    this.panOffsetX = (this.dims.width / 2) - (this.graphDims.width / 2);
-    this.panOffsetY = (this.dims.height / 2) - (this.graphDims.height / 2);
+    this.panTo(
+      (this.dims.width / 2) - ((this.graphDims.width * this.zoomLevel) / 2),
+      (this.dims.height / 2) - ((this.graphDims.height * this.zoomLevel) / 2)
+    );
   }
 }
