@@ -1,6 +1,17 @@
 import { ElementRef, TemplateRef, EventEmitter, QueryList, AfterViewInit } from '@angular/core';
 import { BaseChartComponent, ViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
 import 'd3-transition';
+/**
+ * Matrix
+ */
+export interface Matrix {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    e: number;
+    f: number;
+}
 export declare class GraphComponent extends BaseChartComponent implements AfterViewInit {
     legend: boolean;
     nodes: any[];

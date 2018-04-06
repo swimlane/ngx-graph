@@ -9,6 +9,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import { Component, ContentChild, ElementRef, HostListener, Input, TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, QueryList } from '@angular/core';
+// rename transition due to conflict with d3 transition
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import { BaseChartComponent, ChartComponent, calculateViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';

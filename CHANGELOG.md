@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.1
+- Fix: Add Matrix interface (#67)
+
 ## 4.1.0
 - Feature; Allow enable/disable zooming (#64)
 - Feature: Pan to cursor on zoom (#53)
