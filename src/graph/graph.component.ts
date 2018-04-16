@@ -141,6 +141,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() zoomChange: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
@@ -368,6 +369,9 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.width));
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.height));
 
+    // Output the current zoomLevel
+    this.zoomChange.emit(this.zoomLevel);
+
     if (this.autoZoom) {
       const heightZoom = this.dims.height / this.graphDims.height;
       const widthZoom = this.dims.width / (this.graphDims.width);
@@ -512,15 +516,13 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    */
   onZoom($event: MouseEvent, direction): void {
     const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
-
-    // Check that zooming wouldn't put us out of bounds
     const newZoomLevel = this.zoomLevel * zoomFactor;
-    if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
-      return;
-    }
-
-    // Check if zooming is enabled or not
-    if (!this.enableZoom) {
+    const isZoomInbounds = (newZoomLevel >= this.minZoomLevel && newZoomLevel <= this.maxZoomLevel);
+    
+    // Check that zooming wouldn't put us out of bounds and zoom is enabaled 
+    if (isZoomInbounds && this.enableZoom) {
+      this.zoomChange.emit(this.zoomLevel);
+    } else {
       return;
     }
 
