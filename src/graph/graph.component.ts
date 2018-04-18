@@ -287,19 +287,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
         if (this.nodeWidth) {
           node.width = this.nodeWidth;
         } else {
-          // calculate the width
-          if (nativeElement.getElementsByTagName('text').length) {
-            let textDims;
-            try {
-              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
-            } catch (ex) {
-              // Skip drawing if element is not displayed - Firefox would throw an error here
-              return;
-            }
-            node.width = textDims.width + 20;
-          } else {
-            node.width = dims.width;
-          }
+          node.width = dims.width
         }
 
         if (this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
