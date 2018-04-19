@@ -33,6 +33,7 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
     maxZoomLevel: number;
     autoZoom: boolean;
     panOnZoom: boolean;
+    autoCenter: boolean;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     zoomChange: EventEmitter<any>;
@@ -286,4 +287,8 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
      * @memberOf GraphComponent
      */
     onNodeMouseDown(event: MouseEvent, node: any): void;
+    /**
+     * Center the graph in the viewport
+     */
+    center(): void;
 }

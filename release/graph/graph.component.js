@@ -33,6 +33,7 @@ var GraphComponent = (function (_super) {
         _this.maxZoomLevel = 4.0;
         _this.autoZoom = false;
         _this.panOnZoom = true;
+        _this.autoCenter = false;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
         _this.zoomChange = new EventEmitter();
@@ -274,6 +275,10 @@ var GraphComponent = (function (_super) {
         this.graphDims.height = Math.max.apply(Math, this._nodes.map(function (n) { return n.y + n.height; }));
         // Output the current zoomLevel
         this.zoomChange.emit(this.zoomLevel);
+        if (this.autoCenter) {
+            // Auto-center when rendering
+            this.center();
+        }
         if (this.autoZoom) {
             var heightZoom = this.dims.height / this.graphDims.height;
             var widthZoom = this.dims.width / (this.graphDims.width);
@@ -977,6 +982,18 @@ var GraphComponent = (function (_super) {
         this.isDragging = true;
         this.draggingNode = node;
     };
+    /**
+     * Center the graph in the viewport
+     */
+    /**
+       * Center the graph in the viewport
+       */
+    GraphComponent.prototype.center = /**
+       * Center the graph in the viewport
+       */
+    function () {
+        this.panTo((this.dims.width / 2) - ((this.graphDims.width * this.zoomLevel) / 2), (this.dims.height / 2) - ((this.graphDims.height * this.zoomLevel) / 2));
+    };
     GraphComponent.decorators = [
         { type: Component, args: [{
                     selector: 'ngx-graph',
@@ -1016,6 +1033,7 @@ var GraphComponent = (function (_super) {
         "maxZoomLevel": [{ type: Input },],
         "autoZoom": [{ type: Input },],
         "panOnZoom": [{ type: Input },],
+        "autoCenter": [{ type: Input },],
         "activate": [{ type: Output },],
         "deactivate": [{ type: Output },],
         "zoomChange": [{ type: Output },],

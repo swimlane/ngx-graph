@@ -40369,6 +40369,7 @@ var graph_component_GraphComponent = (function (_super) {
         _this.maxZoomLevel = 4.0;
         _this.autoZoom = false;
         _this.panOnZoom = true;
+        _this.autoCenter = false;
         _this.activate = new core_["EventEmitter"]();
         _this.deactivate = new core_["EventEmitter"]();
         _this.zoomChange = new core_["EventEmitter"]();
@@ -40565,6 +40566,10 @@ var graph_component_GraphComponent = (function (_super) {
         this.graphDims.height = Math.max.apply(Math, this._nodes.map(function (n) { return n.y + n.height; }));
         // Output the current zoomLevel
         this.zoomChange.emit(this.zoomLevel);
+        if (this.autoCenter) {
+            // Auto-center when rendering
+            this.center();
+        }
         if (this.autoZoom) {
             var heightZoom = this.dims.height / this.graphDims.height;
             var widthZoom = this.dims.width / (this.graphDims.width);
@@ -40960,6 +40965,12 @@ var graph_component_GraphComponent = (function (_super) {
         this.isDragging = true;
         this.draggingNode = node;
     };
+    /**
+     * Center the graph in the viewport
+     */
+    GraphComponent.prototype.center = function () {
+        this.panTo((this.dims.width / 2) - ((this.graphDims.width * this.zoomLevel) / 2), (this.dims.height / 2) - ((this.graphDims.height * this.zoomLevel) / 2));
+    };
     __decorate([
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
@@ -41040,6 +41051,10 @@ var graph_component_GraphComponent = (function (_super) {
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
     ], GraphComponent.prototype, "panOnZoom", void 0);
+    __decorate([
+        Object(core_["Input"])(),
+        __metadata("design:type", Boolean)
+    ], GraphComponent.prototype, "autoCenter", void 0);
     __decorate([
         Object(core_["Output"])(),
         __metadata("design:type", core_["EventEmitter"])
