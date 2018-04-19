@@ -35,6 +35,7 @@ var GraphComponent = (function (_super) {
         _this.panOnZoom = true;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
+        _this.zoomChange = new EventEmitter();
         _this.margin = [0, 0, 0, 0];
         _this.results = [];
         _this.isPanning = false;
@@ -210,21 +211,7 @@ var GraphComponent = (function (_super) {
                     node.width = _this.nodeWidth;
                 }
                 else {
-                    // calculate the width
-                    if (nativeElement.getElementsByTagName('text').length) {
-                        var textDims = void 0;
-                        try {
-                            textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
-                        }
-                        catch (ex) {
-                            // Skip drawing if element is not displayed - Firefox would throw an error here
-                            return;
-                        }
-                        node.width = textDims.width + 20;
-                    }
-                    else {
-                        node.width = dims.width;
-                    }
+                    node.width = dims.width;
                 }
                 if (_this.nodeMaxWidth)
                     node.width = Math.max(node.width, _this.nodeMaxWidth);
@@ -285,6 +272,8 @@ var GraphComponent = (function (_super) {
         // Calculate the height/width total
         this.graphDims.width = Math.max.apply(Math, this._nodes.map(function (n) { return n.x + n.width; }));
         this.graphDims.height = Math.max.apply(Math, this._nodes.map(function (n) { return n.y + n.height; }));
+        // Output the current zoomLevel
+        this.zoomChange.emit(this.zoomLevel);
         if (this.autoZoom) {
             var heightZoom = this.dims.height / this.graphDims.height;
             var widthZoom = this.dims.width / (this.graphDims.width);
@@ -490,13 +479,13 @@ var GraphComponent = (function (_super) {
        */
     function ($event, direction) {
         var zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
-        // Check that zooming wouldn't put us out of bounds
         var newZoomLevel = this.zoomLevel * zoomFactor;
-        if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
-            return;
+        var isZoomInbounds = (newZoomLevel >= this.minZoomLevel && newZoomLevel <= this.maxZoomLevel);
+        // Check that zooming wouldn't put us out of bounds and zoom is enabaled
+        if (isZoomInbounds && this.enableZoom) {
+            this.zoomChange.emit(this.zoomLevel);
         }
-        // Check if zooming is enabled or not
-        if (!this.enableZoom) {
+        else {
             return;
         }
         if (this.panOnZoom === true && $event) {
@@ -1029,6 +1018,7 @@ var GraphComponent = (function (_super) {
         "panOnZoom": [{ type: Input },],
         "activate": [{ type: Output },],
         "deactivate": [{ type: Output },],
+        "zoomChange": [{ type: Output },],
         "linkTemplate": [{ type: ContentChild, args: ['linkTemplate',] },],
         "nodeTemplate": [{ type: ContentChild, args: ['nodeTemplate',] },],
         "defsTemplate": [{ type: ContentChild, args: ['defsTemplate',] },],
