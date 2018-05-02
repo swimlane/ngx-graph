@@ -1,22 +1,49 @@
 import {
-  Component, ContentChild, ContentChildren, ElementRef, HostListener, Input,
-  TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter,
-  ChangeDetectionStrategy, QueryList, AfterViewInit
-} from '@angular/core';
+  Component,
+  ContentChild,
+  ContentChildren,
+  ElementRef,
+  HostListener,
+  Input,
+  TemplateRef,
+  ViewChild,
+  ViewChildren,
+  Output,
+  ViewEncapsulation,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  QueryList,
+  AfterViewInit
+} from "@angular/core";
 
 // rename transition due to conflict with d3 transition
-import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
+import {
+  animate,
+  style,
+  transition as ngTransition,
+  trigger
+} from "@angular/animations";
 
 import {
-  BaseChartComponent, ChartComponent, calculateViewDimensions, ViewDimensions, ColorHelper
-} from '@swimlane/ngx-charts';
+  BaseChartComponent,
+  ChartComponent,
+  calculateViewDimensions,
+  ViewDimensions,
+  ColorHelper
+} from "@swimlane/ngx-charts";
 
-import { select } from 'd3-selection';
-import 'd3-transition';
-import * as shape from 'd3-shape';
-import * as dagre from 'dagre';
-import { id } from '../utils';
-import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
+import { select } from "d3-selection";
+import "d3-transition";
+import * as shape from "d3-shape";
+import * as dagre from "dagre";
+import { id } from "../utils";
+import {
+  identity,
+  scale,
+  toSVG,
+  transform,
+  translate
+} from "transformation-matrix";
 
 /**
  * Matrix
@@ -31,15 +58,13 @@ export interface Matrix {
 }
 
 @Component({
-  selector: 'ngx-graph',
-  styleUrls: ['./graph.component.scss'],
+  selector: "ngx-graph",
+  styleUrls: ["./graph.component.scss"],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
-    trigger('link', [
-      ngTransition('* => *', [
-        animate(500, style({ transform: '*' }))
-      ])
+    trigger("link", [
+      ngTransition("* => *", [animate(500, style({ transform: "*" }))])
     ])
   ],
   template: `
@@ -112,13 +137,13 @@ export interface Matrix {
   </ngx-charts-chart>
   `
 })
-export class GraphComponent extends BaseChartComponent implements AfterViewInit {
-
+export class GraphComponent extends BaseChartComponent
+  implements AfterViewInit {
   @Input() legend: boolean;
   @Input() nodes: any[] = [];
   @Input() links: any[] = [];
   @Input() activeEntries: any[] = [];
-  @Input() orientation: string = 'LR';
+  @Input() orientation: string = "LR";
   @Input() curve: any;
   @Input() draggingEnabled: boolean = true;
 
@@ -143,13 +168,14 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
 
-  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
-  @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
+  @ContentChild("linkTemplate") linkTemplate: TemplateRef<any>;
+  @ContentChild("nodeTemplate") nodeTemplate: TemplateRef<any>;
+  @ContentChild("defsTemplate") defsTemplate: TemplateRef<any>;
+  @ViewChild(ChartComponent, { read: ElementRef })
+  chart: ElementRef;
 
-  @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
-  @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+  @ViewChildren("nodeElement") nodeElements: QueryList<ElementRef>;
+  @ViewChildren("linkElement") linkElements: QueryList<ElementRef>;
 
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -181,7 +207,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   /**
    * Set the current zoom level
    */
-  @Input('zoomLevel')
+  @Input("zoomLevel")
   set zoomLevel(level) {
     this.zoomTo(Number(level));
   }
@@ -196,7 +222,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   /**
    * Set the current `x` position of the graph
    */
-  @Input('panOffsetX')
+  @Input("panOffsetX")
   set panOffsetX(x) {
     this.panTo(Number(x), null);
   }
@@ -211,7 +237,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   /**
    * Set the current `y` position of the graph
    */
-  @Input('panOffsetY')
+  @Input("panOffsetY")
   set panOffsetY(y) {
     this.panTo(null, Number(y));
   }
@@ -241,7 +267,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
         width: this.width,
         height: this.height,
         margins: this.margin,
-        showLegend: this.legend,
+        showLegend: this.legend
       });
 
       this.seriesDomain = this.getSeriesDomain();
@@ -281,17 +307,21 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
           node.height = dims.height;
         }
 
-        if (this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
-        if (this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
+        if (this.nodeMaxHeight)
+          node.height = Math.max(node.height, this.nodeMaxHeight);
+        if (this.nodeMinHeight)
+          node.height = Math.min(node.height, this.nodeMinHeight);
 
         if (this.nodeWidth) {
           node.width = this.nodeWidth;
         } else {
           // calculate the width
-          if (nativeElement.getElementsByTagName('text').length) {
+          if (nativeElement.getElementsByTagName("text").length) {
             let textDims;
             try {
-              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+              textDims = nativeElement
+                .getElementsByTagName("text")[0]
+                .getBBox();
             } catch (ex) {
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
@@ -302,8 +332,10 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
           }
         }
 
-        if (this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
-        if (this.nodeMinWidth) node.width = Math.min(node.width, this.nodeMinWidth);
+        if (this.nodeMaxWidth)
+          node.width = Math.max(node.width, this.nodeMaxWidth);
+        if (this.nodeMinWidth)
+          node.width = Math.min(node.width, this.nodeMinWidth);
       });
     }
 
@@ -316,7 +348,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
       index[n.id] = n;
       n.options = {
         color: this.colors.getColor(this.groupResultsBy(n)),
-        transform: `translate(${(n.x - n.width / 2) || 0}, ${(n.y - n.height / 2) || 0})`
+        transform: `translate(${n.x - n.width / 2 || 0}, ${n.y - n.height / 2 ||
+          0})`
       };
     });
 
@@ -325,10 +358,14 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     for (const k in this.graph._edgeLabels) {
       const l = this.graph._edgeLabels[k];
 
-      const normKey = k.replace(/[^\w]*/g, '');
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+      const normKey = k.replace(/[^\w]*/g, "");
+      let oldLink = this._oldLinks.find(
+        ol => `${ol.source}${ol.target}` === normKey
+      );
       if (!oldLink) {
-        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
+        oldLink = this._links.find(
+          nl => `${nl.source}${nl.target}` === normKey
+        );
       }
 
       oldLink.oldLine = oldLink.line;
@@ -342,7 +379,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
       const textPos = points[Math.floor(points.length / 2)];
       if (textPos) {
-        newLink.textTransform = `translate(${(textPos.x) || 0},${(textPos.y) || 0})`;
+        newLink.textTransform = `translate(${textPos.x || 0},${textPos.y ||
+          0})`;
       }
 
       newLink.textAngle = 0;
@@ -369,19 +407,19 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.width));
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.height));
 
-    if (this.autoCenter) {
-      // Auto-center when rendering
-      this.center();
-    }
-
     if (this.autoZoom) {
       const heightZoom = this.dims.height / this.graphDims.height;
-      const widthZoom = this.dims.width / (this.graphDims.width);
+      const widthZoom = this.dims.width / this.graphDims.width;
       const zoomLevel = Math.min(heightZoom, widthZoom, 1);
       if (zoomLevel !== this.zoomLevel) {
         this.zoomLevel = zoomLevel;
         this.updateTransform();
       }
+    }
+
+    if (this.autoCenter) {
+      // Auto-center when rendering
+      this.center();
     }
 
     requestAnimationFrame(() => this.redrawLines());
@@ -400,19 +438,21 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
       const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (l) {
-        const linkSelection = select(linkEl.nativeElement).select('.line');
+        const linkSelection = select(linkEl.nativeElement).select(".line");
         linkSelection
-          .attr('d', l.oldLine)
+          .attr("d", l.oldLine)
           .transition()
           .duration(_animate ? 500 : 0)
-          .attr('d', l.line);
+          .attr("d", l.line);
 
-        const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
+        const textPathSelection = select(
+          this.chartElement.nativeElement
+        ).select(`#${l.id}`);
         textPathSelection
-          .attr('d', l.oldTextPath)
+          .attr("d", l.oldTextPath)
           .transition()
           .duration(_animate ? 500 : 0)
-          .attr('d', l.textPath);
+          .attr("d", l.textPath);
       }
     });
   }
@@ -437,7 +477,9 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
     // Default to assigning a new object as a label for each new edge.
     this.graph.setDefaultEdgeLabel(() => {
-      return { /* empty */ };
+      return {
+        /* empty */
+      };
     });
 
     this._nodes = this.nodes.map(n => {
@@ -460,7 +502,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
       // set view options
       node.options = {
         color: this.colors.getColor(this.groupResultsBy(node)),
-        transform: `translate( ${(node.x - node.width / 2) || 0}, ${(node.y - node.height / 2) || 0})`
+        transform: `translate( ${node.x - node.width / 2 || 0}, ${node.y -
+          node.height / 2 || 0})`
       };
     }
 
@@ -485,12 +528,12 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     link.oldTextPath = link.textPath;
 
     if (lastPoint.x < firstPoint.x) {
-      link.dominantBaseline = 'text-before-edge';
+      link.dominantBaseline = "text-before-edge";
 
       // reverse text path for when its flipped upside down
       link.textPath = this.generateLine([...link.points].reverse());
     } else {
-      link.dominantBaseline = 'text-after-edge';
+      link.dominantBaseline = "text-after-edge";
       link.textPath = link.line;
     }
   }
@@ -504,7 +547,11 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   generateLine(points): any {
-    const lineFunction = shape.line<any>().x(d => d.x).y(d => d.y).curve(this.curve);
+    const lineFunction = shape
+      .line<any>()
+      .x(d => d.x)
+      .y(d => d.y)
+      .curve(this.curve);
     return lineFunction(points);
   }
 
@@ -517,11 +564,15 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   onZoom($event: MouseEvent, direction): void {
-    const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
+    const zoomFactor =
+      1 + (direction === "in" ? this.zoomSpeed : -this.zoomSpeed);
 
     // Check that zooming wouldn't put us out of bounds
     const newZoomLevel = this.zoomLevel * zoomFactor;
-    if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
+    if (
+      newZoomLevel <= this.minZoomLevel ||
+      newZoomLevel >= this.maxZoomLevel
+    ) {
       return;
     }
 
@@ -536,14 +587,14 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
       const mouseY = $event.clientY;
 
       // Transform the mouse X/Y into a SVG X/Y
-      const svg = this.chart.nativeElement.querySelector('svg');
-      const svgGroup = svg.querySelector('g.chart');
+      const svg = this.chart.nativeElement.querySelector("svg");
+      const svgGroup = svg.querySelector("g.chart");
 
       const point = svg.createSVGPoint();
       point.x = mouseX;
       point.y = mouseY;
       const svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
-      
+
       // Panzoom
       this.pan(svgPoint.x, svgPoint.y);
       this.zoom(zoomFactor);
@@ -555,9 +606,9 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
   /**
    * Pan by x/y
-   * 
-   * @param x 
-   * @param y 
+   *
+   * @param x
+   * @param y
    */
   pan(x: number, y: number): void {
     this.transformationMatrix = transform(
@@ -570,20 +621,26 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
   /**
    * Pan to a fixed x/y
-   * 
-   * @param x 
-   * @param y 
+   *
+   * @param x
+   * @param y
    */
   panTo(x: number, y: number): void {
-    this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
-    this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
-    
+    this.transformationMatrix.e =
+      x === null || x === undefined || isNaN(x)
+        ? this.transformationMatrix.e
+        : Number(x);
+    this.transformationMatrix.f =
+      y === null || y === undefined || isNaN(y)
+        ? this.transformationMatrix.f
+        : Number(y);
+
     this.updateTransform();
   }
 
   /**
    * Zoom by a factor
-   * 
+   *
    * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
    */
   zoom(factor: number): void {
@@ -597,13 +654,17 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
   /**
    * Zoom to a fixed level
-   * 
-   * @param level 
+   *
+   * @param level
    */
   zoomTo(level: number): void {
-    this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
-    this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
-    
+    this.transformationMatrix.a = isNaN(level)
+      ? this.transformationMatrix.a
+      : Number(level);
+    this.transformationMatrix.d = isNaN(level)
+      ? this.transformationMatrix.d
+      : Number(level);
+
     this.updateTransform();
   }
 
@@ -631,8 +692,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     node.y += event.movementY / this.zoomLevel;
 
     // move the node
-    const x = (node.x - (node.width / 2));
-    const y = (node.y - (node.height / 2));
+    const x = node.x - node.width / 2;
+    const y = node.y - node.height / 2;
     node.options.transform = `translate(${x}, ${y})`;
 
     for (const link of this._links) {
@@ -642,8 +703,14 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
 
         // determine new arrow position
         const dir = sourceNode.y <= targetNode.y ? -1 : 1;
-        const startingPoint = { x: sourceNode.x, y: (sourceNode.y - dir * (sourceNode.height / 2)) };
-        const endingPoint = { x: targetNode.x, y: (targetNode.y + dir * (targetNode.height / 2)) };
+        const startingPoint = {
+          x: sourceNode.x,
+          y: sourceNode.y - dir * (sourceNode.height / 2)
+        };
+        const endingPoint = {
+          x: targetNode.x,
+          y: targetNode.y + dir * (targetNode.height / 2)
+        };
 
         // generate new points
         link.points = [startingPoint, endingPoint];
@@ -717,8 +784,13 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   getSeriesDomain(): any[] {
-    return this.nodes.map(d => this.groupResultsBy(d))
-      .reduce((nodes: any[], node): any[] => nodes.includes(node) ? nodes : nodes.concat([node]), [])
+    return this.nodes
+      .map(d => this.groupResultsBy(d))
+      .reduce(
+        (nodes: any[], node): any[] =>
+          nodes.includes(node) ? nodes : nodes.concat([node]),
+        []
+      )
       .sort();
   }
 
@@ -755,7 +827,12 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
+    this.colors = new ColorHelper(
+      this.scheme,
+      "ordinal",
+      this.seriesDomain,
+      this.customColors
+    );
   }
 
   /**
@@ -767,7 +844,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    */
   getLegendOptions(): any {
     return {
-      scaleType: 'ordinal',
+      scaleType: "ordinal",
       domain: this.seriesDomain,
       colors: this.colors
     };
@@ -780,7 +857,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    *
    * @memberOf GraphComponent
    */
-  @HostListener('document:mousemove', ['$event'])
+  @HostListener("document:mousemove", ["$event"])
   onMouseMove($event: MouseEvent): void {
     if (this.isPanning && this.panningEnabled) {
       this.onPan($event);
@@ -796,7 +873,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    *
    * @memberOf GraphComponent
    */
-  @HostListener('document:mouseup')
+  @HostListener("document:mouseup")
   onMouseUp($event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
@@ -820,8 +897,8 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    */
   center(): void {
     this.panTo(
-      (this.dims.width / 2) - ((this.graphDims.width * this.zoomLevel) / 2),
-      (this.dims.height / 2) - ((this.graphDims.height * this.zoomLevel) / 2)
+      this.dims.width / 2 - this.graphDims.width * this.zoomLevel / 2,
+      this.dims.height / 2 - this.graphDims.height * this.zoomLevel / 2
     );
   }
 }
