@@ -31,6 +31,7 @@ export class AppComponent implements OnInit {
   autoZoom: boolean = false;
   panOnZoom: boolean = true;
   enableZoom: boolean = true;
+  autoCenter: boolean = false;
 
   // options
   showLegend = false;
@@ -125,9 +126,10 @@ export class AppComponent implements OnInit {
     this.enableZoom = enableZoom;
   }
 
-  toggleFitContainer(fitContainer: boolean, autoZoom: boolean): void {
+  toggleFitContainer(fitContainer: boolean, autoZoom: boolean, autoCenter: boolean): void {
     this.fitContainer = fitContainer;
     this.autoZoom = autoZoom;
+    this.autoCenter = autoCenter;
 
     if (this.fitContainer) {
       this.view = undefined;

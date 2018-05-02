@@ -138,6 +138,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
   @Input() maxZoomLevel: number = 4.0;
   @Input() autoZoom: boolean = false;
   @Input() panOnZoom: boolean = true;
+  @Input() autoCenter: boolean = false;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -367,6 +368,11 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     // Calculate the height/width total
     this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.width));
     this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.height));
+
+    if (this.autoCenter) {
+      // Auto-center when rendering
+      this.center();
+    }
 
     if (this.autoZoom) {
       const heightZoom = this.dims.height / this.graphDims.height;
@@ -809,4 +815,13 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     this.draggingNode = node;
   }
 
+  /**
+   * Center the graph in the viewport
+   */
+  center(): void {
+    this.panTo(
+      (this.dims.width / 2) - ((this.graphDims.width * this.zoomLevel) / 2),
+      (this.dims.height / 2) - ((this.graphDims.height * this.zoomLevel) / 2)
+    );
+  }
 }
