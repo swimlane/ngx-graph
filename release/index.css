@@ -1,5 +1,5 @@
 /**
- * ngx-graph v"4.1.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"4.2.0" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -16,7 +16,7 @@
       font-size: 12px;
       fill: #ffffff; }
   .graph .panning-rect {
-    fill: transparent;
+    fill: rgba(0, 0, 0, 0);
     cursor: move; }
   .graph .node-group .node:focus {
     outline: none; }

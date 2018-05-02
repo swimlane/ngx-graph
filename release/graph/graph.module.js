@@ -19,8 +19,6 @@ var GraphModule = (function () {
                     ]
                 },] },
     ];
-    /** @nocollapse */
-    GraphModule.ctorParameters = function () { return []; };
     return GraphModule;
 }());
 export { GraphModule };

@@ -10,8 +10,6 @@ var NgxGraphModule = (function () {
                     ]
                 },] },
     ];
-    /** @nocollapse */
-    NgxGraphModule.ctorParameters = function () { return []; };
     return NgxGraphModule;
 }());
 export { NgxGraphModule };

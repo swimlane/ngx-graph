@@ -1,6 +1,17 @@
-import { ElementRef, TemplateRef, EventEmitter, QueryList, AfterViewInit } from '@angular/core';
-import { BaseChartComponent, ViewDimensions, ColorHelper } from '@swimlane/ngx-charts';
-import 'd3-transition';
+import { ElementRef, TemplateRef, EventEmitter, QueryList, AfterViewInit } from "@angular/core";
+import { BaseChartComponent, ViewDimensions, ColorHelper } from "@swimlane/ngx-charts";
+import "d3-transition";
+/**
+ * Matrix
+ */
+export interface Matrix {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    e: number;
+    f: number;
+}
 export declare class GraphComponent extends BaseChartComponent implements AfterViewInit {
     legend: boolean;
     nodes: any[];
@@ -22,6 +33,7 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
     maxZoomLevel: number;
     autoZoom: boolean;
     panOnZoom: boolean;
+    autoCenter: boolean;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     linkTemplate: TemplateRef<any>;
@@ -274,4 +286,8 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
      * @memberOf GraphComponent
      */
     onNodeMouseDown(event: MouseEvent, node: any): void;
+    /**
+     * Center the graph in the viewport
+     */
+    center(): void;
 }

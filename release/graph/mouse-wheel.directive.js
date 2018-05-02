@@ -42,7 +42,6 @@ var MouseWheelDirective = (function () {
         { type: Directive, args: [{ selector: '[mouseWheel]' },] },
     ];
     /** @nocollapse */
-    MouseWheelDirective.ctorParameters = function () { return []; };
     MouseWheelDirective.propDecorators = {
         "mouseWheelUp": [{ type: Output },],
         "mouseWheelDown": [{ type: Output },],
