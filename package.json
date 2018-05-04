@@ -31,13 +31,11 @@
     "start": "webpack-dev-server",
     "start:hmr": "webpack-dev-server --env.HMR",
     "release": "npm-run-all build:release",
-    "package":
-      "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
+    "package": "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
     "package:ts": "tsc --outDir release",
     "package:aot": "ngc -p tsconfig-aot.json",
     "package:replace-scss": "node ./config/replace-scss.js",
-    "package:minify":
-      "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
+    "package:minify": "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
     "deploy": "node ./config/deploy.js",
     "profile": "NODE_ENV=production webpack --profile --json > dist/stats.json"
   },
@@ -66,7 +64,11 @@
     "visualization",
     "tree"
   ],
-  "authors": ["Marjan Georgiev", "Austin McDaniel", "Jayson Harshbarger"],
+  "authors": [
+    "Marjan Georgiev",
+    "Austin McDaniel",
+    "Jayson Harshbarger"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/swimlane/ngx-graph/issues"
@@ -88,6 +90,7 @@
     "@angular/platform-browser": "^5.0.0",
     "@angular/platform-browser-dynamic": "^5.0.0",
     "@angular/platform-server": "^5.0.0",
+    "@swimlane/prettier-config-swimlane": "^0.1.1",
     "@types/core-js": "^0.9.42",
     "@types/d3-selection": "^1.2.0",
     "@types/d3-shape": "^1.2.0",
@@ -123,6 +126,7 @@
     "npm-run-all": "^4.1.2",
     "postcss": "^5.2.18",
     "postcss-loader": "^1.2.2",
+    "prettier": "^1.12.1",
     "raw-loader": "^0.5.1",
     "replace": "^0.3.0",
     "rimraf": "^2.5.2",
@@ -134,6 +138,7 @@
     "ts-helpers": "1.1.2",
     "tslib": "^1.8.0",
     "tslint": "^5.8.0",
+    "tslint-config-prettier": "^1.12.0",
     "tslint-config-swimlane": "^3.0.4",
     "tslint-loader": "^3.5.3",
     "typescript": "~2.4.2",

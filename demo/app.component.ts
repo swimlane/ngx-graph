@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import * as shape from 'd3-shape';
+import { Subject } from 'rxjs/Subject';
 import { colorSets } from '../src/utils/color-sets';
-import { countries, generateHierarchialGraph, getTurbineData } from './data';
-import chartGroups from './chartTypes';
 import { id } from '../src/utils/id';
+import chartGroups from './chartTypes';
+import { countries, getTurbineData } from './data';
 
 @Component({
   selector: 'app',
@@ -12,17 +13,16 @@ import { id } from '../src/utils/id';
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
-
   version = APP_VERSION;
 
   theme = 'dark';
   chartType = 'directed-graph';
-  chartGroups: any;
+  chartTypeGroups: any;
   chart: any;
   realTimeData: boolean = false;
-  countries: any[];
-  graph: { links: any[], nodes: any[] };
-  hierarchialGraph: { links: any[], nodes: any[] };
+  countrySet: any[];
+  graph: { links: any[]; nodes: any[] };
+  hierarchialGraph: { links: any[]; nodes: any[] };
 
   view: any[];
   width: number = 700;
@@ -33,6 +33,11 @@ export class AppComponent implements OnInit {
   enableZoom: boolean = true;
   autoCenter: boolean = false;
 
+  // observables
+  update$: Subject<any> = new Subject();
+  center$: Subject<any> = new Subject();
+  zoomToFit$: Subject<any> = new Subject();
+
   // options
   showLegend = false;
   orientation: string = 'LR'; // LR, RL, TB, BT
@@ -41,13 +46,16 @@ export class AppComponent implements OnInit {
     {
       label: 'Left to Right',
       value: 'LR'
-    }, {
+    },
+    {
       label: 'Right to Left',
       value: 'RL'
-    }, {
+    },
+    {
       label: 'Top to Bottom',
       value: 'TB'
-    }, {
+    },
+    {
       label: 'Bottom to Top',
       value: 'BT'
     }
@@ -57,21 +65,29 @@ export class AppComponent implements OnInit {
   curveType: string = 'Linear';
   curve: any = shape.curveLinear;
   interpolationTypes = [
-    'Bundle', 'Cardinal', 'Catmull Rom', 'Linear', 'Monotone X',
-    'Monotone Y', 'Natural', 'Step', 'Step After', 'Step Before'
+    'Bundle',
+    'Cardinal',
+    'Catmull Rom',
+    'Linear',
+    'Monotone X',
+    'Monotone Y',
+    'Natural',
+    'Step',
+    'Step After',
+    'Step Before'
   ];
 
-  colorSets: any;
+  colorSchemes: any;
   colorScheme: any;
   schemeType: string = 'ordinal';
   selectedColorScheme: string;
 
   constructor() {
     Object.assign(this, {
-      countries,
-      colorSets,
-      chartGroups,
-      hierarchialGraph: getTurbineData(),
+      countrySet: countries,
+      colorSchemes: colorSets,
+      chartTypeGroups: chartGroups,
+      hierarchialGraph: getTurbineData()
     });
 
     this.setColorScheme('picnic');
@@ -93,7 +109,7 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    const country = this.countries[Math.floor(Math.random() * this.countries.length)];
+    const country = this.countrySet[Math.floor(Math.random() * this.countrySet.length)];
     const add = Math.random() < 0.7;
     const remove = Math.random() < 0.5;
 
@@ -141,7 +157,7 @@ export class AppComponent implements OnInit {
   selectChart(chartSelector) {
     this.chartType = chartSelector;
 
-    for (const group of this.chartGroups) {
+    for (const group of this.chartTypeGroups) {
       for (const chart of group.charts) {
         if (chart.selector === chartSelector) {
           this.chart = chart;
@@ -157,7 +173,7 @@ export class AppComponent implements OnInit {
 
   setColorScheme(name) {
     this.selectedColorScheme = name;
-    this.colorScheme = this.colorSets.find(s => s.name === name);
+    this.colorScheme = this.colorSchemes.find(s => s.name === name);
   }
 
   setInterpolationType(curveType) {
@@ -202,4 +218,15 @@ export class AppComponent implements OnInit {
     console.log('toggle expand', node);
   }
 
+  updateChart() {
+    this.update$.next(true);
+  }
+
+  zoomToFit() {
+    this.zoomToFit$.next(true);
+  }
+
+  center() {
+    this.center$.next(true);
+  }
 }
