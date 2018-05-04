@@ -1,18 +1,18 @@
 /**
- * ngx-graph v"4.2.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"4.3.0" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"));
+		module.exports = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"));
 	else if(typeof define === 'function' && define.amd)
-		define("ngx-graph", ["@angular/animations", "@angular/common", "@angular/core", "@angular/platform-browser", "d3-array", "d3-brush", "d3-color", "d3-force", "d3-format", "d3-hierarchy", "d3-interpolate", "d3-scale", "d3-selection", "d3-shape", "d3-time-format"], factory);
+		define("ngx-graph", ["@angular/animations", "@angular/common", "@angular/core", "@angular/platform-browser", "d3-array", "d3-brush", "d3-color", "d3-force", "d3-format", "d3-hierarchy", "d3-interpolate", "d3-scale", "d3-selection", "d3-shape", "d3-time-format", "rxjs/Observable"], factory);
 	else if(typeof exports === 'object')
-		exports["ngx-graph"] = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"));
+		exports["ngx-graph"] = factory(require("@angular/animations"), require("@angular/common"), require("@angular/core"), require("@angular/platform-browser"), require("d3-array"), require("d3-brush"), require("d3-color"), require("d3-force"), require("d3-format"), require("d3-hierarchy"), require("d3-interpolate"), require("d3-scale"), require("d3-selection"), require("d3-shape"), require("d3-time-format"), require("rxjs/Observable"));
 	else
-		root["ngx-graph"] = factory(root["@angular/animations"], root["@angular/common"], root["@angular/core"], root["@angular/platform-browser"], root["d3-array"], root["d3-brush"], root["d3-color"], root["d3-force"], root["d3-format"], root["d3-hierarchy"], root["d3-interpolate"], root["d3-scale"], root["d3-selection"], root["d3-shape"], root["d3-time-format"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE__angular_animations__, __WEBPACK_EXTERNAL_MODULE__angular_common__, __WEBPACK_EXTERNAL_MODULE__angular_core__, __WEBPACK_EXTERNAL_MODULE__angular_platform_browser__, __WEBPACK_EXTERNAL_MODULE_d3_array__, __WEBPACK_EXTERNAL_MODULE_d3_brush__, __WEBPACK_EXTERNAL_MODULE_d3_color__, __WEBPACK_EXTERNAL_MODULE_d3_force__, __WEBPACK_EXTERNAL_MODULE_d3_format__, __WEBPACK_EXTERNAL_MODULE_d3_hierarchy__, __WEBPACK_EXTERNAL_MODULE_d3_interpolate__, __WEBPACK_EXTERNAL_MODULE_d3_scale__, __WEBPACK_EXTERNAL_MODULE_d3_selection__, __WEBPACK_EXTERNAL_MODULE_d3_shape__, __WEBPACK_EXTERNAL_MODULE_d3_time_format__) {
+		root["ngx-graph"] = factory(root["@angular/animations"], root["@angular/common"], root["@angular/core"], root["@angular/platform-browser"], root["d3-array"], root["d3-brush"], root["d3-color"], root["d3-force"], root["d3-format"], root["d3-hierarchy"], root["d3-interpolate"], root["d3-scale"], root["d3-selection"], root["d3-shape"], root["d3-time-format"], root["rxjs/Observable"]);
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE__angular_animations__, __WEBPACK_EXTERNAL_MODULE__angular_common__, __WEBPACK_EXTERNAL_MODULE__angular_core__, __WEBPACK_EXTERNAL_MODULE__angular_platform_browser__, __WEBPACK_EXTERNAL_MODULE_d3_array__, __WEBPACK_EXTERNAL_MODULE_d3_brush__, __WEBPACK_EXTERNAL_MODULE_d3_color__, __WEBPACK_EXTERNAL_MODULE_d3_force__, __WEBPACK_EXTERNAL_MODULE_d3_format__, __WEBPACK_EXTERNAL_MODULE_d3_hierarchy__, __WEBPACK_EXTERNAL_MODULE_d3_interpolate__, __WEBPACK_EXTERNAL_MODULE_d3_scale__, __WEBPACK_EXTERNAL_MODULE_d3_selection__, __WEBPACK_EXTERNAL_MODULE_d3_shape__, __WEBPACK_EXTERNAL_MODULE_d3_time_format__, __WEBPACK_EXTERNAL_MODULE_rxjs_Observable__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -38898,6 +38898,10 @@ var release_default = /*#__PURE__*/__webpack_require__.n(release);
 var external__d3_selection_ = __webpack_require__("d3-selection");
 var external__d3_selection__default = /*#__PURE__*/__webpack_require__.n(external__d3_selection_);
 
+// EXTERNAL MODULE: external "d3-shape"
+var external__d3_shape_ = __webpack_require__("d3-shape");
+var external__d3_shape__default = /*#__PURE__*/__webpack_require__.n(external__d3_shape_);
+
 // CONCATENATED MODULE: ./node_modules/d3-dispatch/src/dispatch.js
 var noop = {value: function() {}};
 
@@ -40271,13 +40275,17 @@ var root = [null];
 
 
 
-// EXTERNAL MODULE: external "d3-shape"
-var external__d3_shape_ = __webpack_require__("d3-shape");
-var external__d3_shape__default = /*#__PURE__*/__webpack_require__.n(external__d3_shape_);
-
 // EXTERNAL MODULE: ./node_modules/dagre/index.js
 var dagre = __webpack_require__("./node_modules/dagre/index.js");
 var dagre_default = /*#__PURE__*/__webpack_require__.n(dagre);
+
+// EXTERNAL MODULE: external "rxjs/Observable"
+var Observable_ = __webpack_require__("rxjs/Observable");
+var Observable__default = /*#__PURE__*/__webpack_require__.n(Observable_);
+
+// EXTERNAL MODULE: ./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js
+var transformation_matrix_min = __webpack_require__("./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js");
+var transformation_matrix_min_default = /*#__PURE__*/__webpack_require__.n(transformation_matrix_min);
 
 // CONCATENATED MODULE: ./src/utils/id.ts
 var cache = {};
@@ -40506,10 +40514,6 @@ function throttleable(duration, options) {
 
 
 
-// EXTERNAL MODULE: ./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js
-var transformation_matrix_min = __webpack_require__("./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js");
-var transformation_matrix_min_default = /*#__PURE__*/__webpack_require__.n(transformation_matrix_min);
-
 // CONCATENATED MODULE: ./src/graph/graph.component.ts
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -40530,8 +40534,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-
 // rename transition due to conflict with d3 transition
+
+
 
 
 
@@ -40547,7 +40552,7 @@ var graph_component_GraphComponent = (function (_super) {
         _this.nodes = [];
         _this.links = [];
         _this.activeEntries = [];
-        _this.orientation = "LR";
+        _this.orientation = 'LR';
         _this.draggingEnabled = true;
         _this.panningEnabled = true;
         _this.enableZoom = true;
@@ -40559,6 +40564,7 @@ var graph_component_GraphComponent = (function (_super) {
         _this.autoCenter = false;
         _this.activate = new core_["EventEmitter"]();
         _this.deactivate = new core_["EventEmitter"]();
+        _this.subscriptions = [];
         _this.margin = [0, 0, 0, 0];
         _this.results = [];
         _this.isPanning = false;
@@ -40618,6 +40624,44 @@ var graph_component_GraphComponent = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf GraphComponent
+     */
+    GraphComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        if (this.update$) {
+            this.subscriptions.push(this.update$.subscribe(function () {
+                _this.update();
+            }));
+        }
+        if (this.center$) {
+            this.subscriptions.push(this.center$.subscribe(function () {
+                _this.center();
+            }));
+        }
+        if (this.zoomToFit$) {
+            this.subscriptions.push(this.zoomToFit$.subscribe(function () {
+                _this.zoomToFit();
+            }));
+        }
+    };
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf GraphComponent
+     */
+    GraphComponent.prototype.ngOnDestroy = function () {
+        _super.prototype.ngOnDestroy.call(this);
+        for (var _i = 0, _a = this.subscriptions; _i < _a.length; _i++) {
+            var sub = _a[_i];
+            sub.unsubscribe();
+        }
+        this.subscriptions = null;
+    };
     /**
      * Angular lifecycle event
      *
@@ -40690,12 +40734,10 @@ var graph_component_GraphComponent = (function (_super) {
                 }
                 else {
                     // calculate the width
-                    if (nativeElement.getElementsByTagName("text").length) {
+                    if (nativeElement.getElementsByTagName('text').length) {
                         var textDims = void 0;
                         try {
-                            textDims = nativeElement
-                                .getElementsByTagName("text")[0]
-                                .getBBox();
+                            textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
                         }
                         catch (ex) {
                             // Skip drawing if element is not displayed - Firefox would throw an error here
@@ -40721,15 +40763,14 @@ var graph_component_GraphComponent = (function (_super) {
             index[n.id] = n;
             n.options = {
                 color: _this.colors.getColor(_this.groupResultsBy(n)),
-                transform: "translate(" + (n.x - n.width / 2 || 0) + ", " + (n.y - n.height / 2 ||
-                    0) + ")"
+                transform: "translate(" + (n.x - n.width / 2 || 0) + ", " + (n.y - n.height / 2 || 0) + ")"
             };
         });
         // Update the labels to the new positions
         var newLinks = [];
         var _loop_1 = function (k) {
             var l = this_1.graph._edgeLabels[k];
-            var normKey = k.replace(/[^\w]*/g, "");
+            var normKey = k.replace(/[^\w]*/g, '');
             var oldLink = this_1._oldLinks.find(function (ol) { return "" + ol.source + ol.target === normKey; });
             if (!oldLink) {
                 oldLink = this_1._links.find(function (nl) { return "" + nl.source + nl.target === normKey; });
@@ -40742,8 +40783,7 @@ var graph_component_GraphComponent = (function (_super) {
             newLink.points = points;
             var textPos = points[Math.floor(points.length / 2)];
             if (textPos) {
-                newLink.textTransform = "translate(" + (textPos.x || 0) + "," + (textPos.y ||
-                    0) + ")";
+                newLink.textTransform = "translate(" + (textPos.x || 0) + "," + (textPos.y || 0) + ")";
             }
             newLink.textAngle = 0;
             if (!newLink.oldLine) {
@@ -40769,13 +40809,7 @@ var graph_component_GraphComponent = (function (_super) {
         this.graphDims.width = Math.max.apply(Math, this._nodes.map(function (n) { return n.x + n.width; }));
         this.graphDims.height = Math.max.apply(Math, this._nodes.map(function (n) { return n.y + n.height; }));
         if (this.autoZoom) {
-            var heightZoom = this.dims.height / this.graphDims.height;
-            var widthZoom = this.dims.width / this.graphDims.width;
-            var zoomLevel = Math.min(heightZoom, widthZoom, 1);
-            if (zoomLevel !== this.zoomLevel) {
-                this.zoomLevel = zoomLevel;
-                this.updateTransform();
-            }
+            this.zoomToFit();
         }
         if (this.autoCenter) {
             // Auto-center when rendering
@@ -40797,18 +40831,18 @@ var graph_component_GraphComponent = (function (_super) {
         this.linkElements.map(function (linkEl) {
             var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
             if (l) {
-                var linkSelection = Object(external__d3_selection_["select"])(linkEl.nativeElement).select(".line");
+                var linkSelection = Object(external__d3_selection_["select"])(linkEl.nativeElement).select('.line');
                 linkSelection
-                    .attr("d", l.oldLine)
+                    .attr('d', l.oldLine)
                     .transition()
                     .duration(_animate ? 500 : 0)
-                    .attr("d", l.line);
+                    .attr('d', l.line);
                 var textPathSelection = Object(external__d3_selection_["select"])(_this.chartElement.nativeElement).select("#" + l.id);
                 textPathSelection
-                    .attr("d", l.oldTextPath)
+                    .attr('d', l.oldTextPath)
                     .transition()
                     .duration(_animate ? 500 : 0)
-                    .attr("d", l.textPath);
+                    .attr('d', l.textPath);
             }
         });
     };
@@ -40852,8 +40886,7 @@ var graph_component_GraphComponent = (function (_super) {
             // set view options
             node.options = {
                 color: this.colors.getColor(this.groupResultsBy(node)),
-                transform: "translate( " + (node.x - node.width / 2 || 0) + ", " + (node.y -
-                    node.height / 2 || 0) + ")"
+                transform: "translate( " + (node.x - node.width / 2 || 0) + ", " + (node.y - node.height / 2 || 0) + ")"
             };
         }
         // update dagre
@@ -40875,12 +40908,12 @@ var graph_component_GraphComponent = (function (_super) {
         var lastPoint = link.points[link.points.length - 1];
         link.oldTextPath = link.textPath;
         if (lastPoint.x < firstPoint.x) {
-            link.dominantBaseline = "text-before-edge";
+            link.dominantBaseline = 'text-before-edge';
             // reverse text path for when its flipped upside down
             link.textPath = this.generateLine(link.points.slice().reverse());
         }
         else {
-            link.dominantBaseline = "text-after-edge";
+            link.dominantBaseline = 'text-after-edge';
             link.textPath = link.line;
         }
     };
@@ -40908,11 +40941,10 @@ var graph_component_GraphComponent = (function (_super) {
      * @memberOf GraphComponent
      */
     GraphComponent.prototype.onZoom = function ($event, direction) {
-        var zoomFactor = 1 + (direction === "in" ? this.zoomSpeed : -this.zoomSpeed);
+        var zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
         // Check that zooming wouldn't put us out of bounds
         var newZoomLevel = this.zoomLevel * zoomFactor;
-        if (newZoomLevel <= this.minZoomLevel ||
-            newZoomLevel >= this.maxZoomLevel) {
+        if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
             return;
         }
         // Check if zooming is enabled or not
@@ -40924,8 +40956,8 @@ var graph_component_GraphComponent = (function (_super) {
             var mouseX = $event.clientX;
             var mouseY = $event.clientY;
             // Transform the mouse X/Y into a SVG X/Y
-            var svg = this.chart.nativeElement.querySelector("svg");
-            var svgGroup = svg.querySelector("g.chart");
+            var svg = this.chart.nativeElement.querySelector('svg');
+            var svgGroup = svg.querySelector('g.chart');
             var point = svg.createSVGPoint();
             point.x = mouseX;
             point.y = mouseY;
@@ -40956,14 +40988,8 @@ var graph_component_GraphComponent = (function (_super) {
      * @param y
      */
     GraphComponent.prototype.panTo = function (x, y) {
-        this.transformationMatrix.e =
-            x === null || x === undefined || isNaN(x)
-                ? this.transformationMatrix.e
-                : Number(x);
-        this.transformationMatrix.f =
-            y === null || y === undefined || isNaN(y)
-                ? this.transformationMatrix.f
-                : Number(y);
+        this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
+        this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
         this.updateTransform();
     };
     /**
@@ -40981,12 +41007,8 @@ var graph_component_GraphComponent = (function (_super) {
      * @param level
      */
     GraphComponent.prototype.zoomTo = function (level) {
-        this.transformationMatrix.a = isNaN(level)
-            ? this.transformationMatrix.a
-            : Number(level);
-        this.transformationMatrix.d = isNaN(level)
-            ? this.transformationMatrix.d
-            : Number(level);
+        this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
+        this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
         this.updateTransform();
     };
     /**
@@ -41101,9 +41123,7 @@ var graph_component_GraphComponent = (function (_super) {
         var _this = this;
         return this.nodes
             .map(function (d) { return _this.groupResultsBy(d); })
-            .reduce(function (nodes, node) {
-            return nodes.includes(node) ? nodes : nodes.concat([node]);
-        }, [])
+            .reduce(function (nodes, node) { return (nodes.includes(node) ? nodes : nodes.concat([node])); }, [])
             .sort();
     };
     /**
@@ -41137,7 +41157,7 @@ var graph_component_GraphComponent = (function (_super) {
      * @memberOf GraphComponent
      */
     GraphComponent.prototype.setColors = function () {
-        this.colors = new release["ColorHelper"](this.scheme, "ordinal", this.seriesDomain, this.customColors);
+        this.colors = new release["ColorHelper"](this.scheme, 'ordinal', this.seriesDomain, this.customColors);
     };
     /**
      * Gets the legend options
@@ -41148,7 +41168,7 @@ var graph_component_GraphComponent = (function (_super) {
      */
     GraphComponent.prototype.getLegendOptions = function () {
         return {
-            scaleType: "ordinal",
+            scaleType: 'ordinal',
             domain: this.seriesDomain,
             colors: this.colors
         };
@@ -41196,6 +41216,18 @@ var graph_component_GraphComponent = (function (_super) {
      */
     GraphComponent.prototype.center = function () {
         this.panTo(this.dims.width / 2 - this.graphDims.width * this.zoomLevel / 2, this.dims.height / 2 - this.graphDims.height * this.zoomLevel / 2);
+    };
+    /**
+     * Zooms to fit the entier graph
+     */
+    GraphComponent.prototype.zoomToFit = function () {
+        var heightZoom = this.dims.height / this.graphDims.height;
+        var widthZoom = this.dims.width / this.graphDims.width;
+        var zoomLevel = Math.min(heightZoom, widthZoom, 1);
+        if (zoomLevel !== this.zoomLevel) {
+            this.zoomLevel = zoomLevel;
+            this.updateTransform();
+        }
     };
     __decorate([
         Object(core_["Input"])(),
@@ -41282,6 +41314,18 @@ var graph_component_GraphComponent = (function (_super) {
         __metadata("design:type", Boolean)
     ], GraphComponent.prototype, "autoCenter", void 0);
     __decorate([
+        Object(core_["Input"])(),
+        __metadata("design:type", Observable_["Observable"])
+    ], GraphComponent.prototype, "update$", void 0);
+    __decorate([
+        Object(core_["Input"])(),
+        __metadata("design:type", Observable_["Observable"])
+    ], GraphComponent.prototype, "center$", void 0);
+    __decorate([
+        Object(core_["Input"])(),
+        __metadata("design:type", Observable_["Observable"])
+    ], GraphComponent.prototype, "zoomToFit$", void 0);
+    __decorate([
         Object(core_["Output"])(),
         __metadata("design:type", core_["EventEmitter"])
     ], GraphComponent.prototype, "activate", void 0);
@@ -41290,15 +41334,15 @@ var graph_component_GraphComponent = (function (_super) {
         __metadata("design:type", core_["EventEmitter"])
     ], GraphComponent.prototype, "deactivate", void 0);
     __decorate([
-        Object(core_["ContentChild"])("linkTemplate"),
+        Object(core_["ContentChild"])('linkTemplate'),
         __metadata("design:type", core_["TemplateRef"])
     ], GraphComponent.prototype, "linkTemplate", void 0);
     __decorate([
-        Object(core_["ContentChild"])("nodeTemplate"),
+        Object(core_["ContentChild"])('nodeTemplate'),
         __metadata("design:type", core_["TemplateRef"])
     ], GraphComponent.prototype, "nodeTemplate", void 0);
     __decorate([
-        Object(core_["ContentChild"])("defsTemplate"),
+        Object(core_["ContentChild"])('defsTemplate'),
         __metadata("design:type", core_["TemplateRef"])
     ], GraphComponent.prototype, "defsTemplate", void 0);
     __decorate([
@@ -41306,11 +41350,11 @@ var graph_component_GraphComponent = (function (_super) {
         __metadata("design:type", core_["ElementRef"])
     ], GraphComponent.prototype, "chart", void 0);
     __decorate([
-        Object(core_["ViewChildren"])("nodeElement"),
+        Object(core_["ViewChildren"])('nodeElement'),
         __metadata("design:type", core_["QueryList"])
     ], GraphComponent.prototype, "nodeElements", void 0);
     __decorate([
-        Object(core_["ViewChildren"])("linkElement"),
+        Object(core_["ViewChildren"])('linkElement'),
         __metadata("design:type", core_["QueryList"])
     ], GraphComponent.prototype, "linkElements", void 0);
     __decorate([
@@ -41318,43 +41362,39 @@ var graph_component_GraphComponent = (function (_super) {
         __metadata("design:type", Function)
     ], GraphComponent.prototype, "groupResultsBy", void 0);
     __decorate([
-        Object(core_["Input"])("zoomLevel"),
+        Object(core_["Input"])('zoomLevel'),
         __metadata("design:type", Object),
         __metadata("design:paramtypes", [Object])
     ], GraphComponent.prototype, "zoomLevel", null);
     __decorate([
-        Object(core_["Input"])("panOffsetX"),
+        Object(core_["Input"])('panOffsetX'),
         __metadata("design:type", Object),
         __metadata("design:paramtypes", [Object])
     ], GraphComponent.prototype, "panOffsetX", null);
     __decorate([
-        Object(core_["Input"])("panOffsetY"),
+        Object(core_["Input"])('panOffsetY'),
         __metadata("design:type", Object),
         __metadata("design:paramtypes", [Object])
     ], GraphComponent.prototype, "panOffsetY", null);
     __decorate([
-        Object(core_["HostListener"])("document:mousemove", ["$event"]),
+        Object(core_["HostListener"])('document:mousemove', ['$event']),
         __metadata("design:type", Function),
         __metadata("design:paramtypes", [MouseEvent]),
         __metadata("design:returntype", void 0)
     ], GraphComponent.prototype, "onMouseMove", null);
     __decorate([
-        Object(core_["HostListener"])("document:mouseup"),
+        Object(core_["HostListener"])('document:mouseup'),
         __metadata("design:type", Function),
         __metadata("design:paramtypes", [MouseEvent]),
         __metadata("design:returntype", void 0)
     ], GraphComponent.prototype, "onMouseUp", null);
     GraphComponent = __decorate([
         Object(core_["Component"])({
-            selector: "ngx-graph",
+            selector: 'ngx-graph',
             styles: [__webpack_require__("./src/graph/graph.component.scss")],
             encapsulation: core_["ViewEncapsulation"].None,
             changeDetection: core_["ChangeDetectionStrategy"].OnPush,
-            animations: [
-                Object(animations_["trigger"])("link", [
-                    Object(animations_["transition"])("* => *", [Object(animations_["animate"])(500, Object(animations_["style"])({ transform: "*" }))])
-                ])
-            ],
+            animations: [Object(animations_["trigger"])('link', [Object(animations_["transition"])('* => *', [Object(animations_["animate"])(500, Object(animations_["style"])({ transform: '*' }))])])],
             template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g\n        *ngIf=\"initialized\"\n        [attr.transform]=\"transform\"\n        class=\"graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path\n              class=\"text-path\"\n              *ngFor=\"let link of _links\"\n              [attr.d]=\"link.textPath\"\n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect\n            class=\"panning-rect\"\n            [attr.width]=\"dims.width * 100\"\n            [attr.height]=\"dims.height * 100\"\n            [attr.transform]=\"'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g\n              *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n              class=\"link-group\"\n              #linkElement\n              [id]=\"link.id\">\n              <ng-template\n                *ngIf=\"linkTemplate\"\n                [ngTemplateOutlet]=\"linkTemplate\"\n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g\n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n              class=\"node-group\"\n              #nodeElement\n              [id]=\"node.id\"\n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template\n                  *ngIf=\"nodeTemplate\"\n                  [ngTemplateOutlet]=\"nodeTemplate\"\n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle\n                  *ngIf=\"!nodeTemplate\"\n                  r=\"10\"\n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\"\n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
         })
     ], GraphComponent);
@@ -41609,6 +41649,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_d3_shape__;
 /***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_d3_time_format__;
+
+/***/ }),
+
+/***/ "rxjs/Observable":
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_rxjs_Observable__;
 
 /***/ })
 

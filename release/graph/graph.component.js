@@ -8,15 +8,16 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { Component, ContentChild, ElementRef, HostListener, Input, TemplateRef, ViewChild, ViewChildren, Output, ViewEncapsulation, EventEmitter, ChangeDetectionStrategy, QueryList } from "@angular/core";
-import { animate, style, transition as ngTransition, trigger } from "@angular/animations";
-import { BaseChartComponent, ChartComponent, calculateViewDimensions, ColorHelper } from "@swimlane/ngx-charts";
-import { select } from "d3-selection";
-import "d3-transition";
-import * as shape from "d3-shape";
-import * as dagre from "dagre";
-import { id } from "../utils";
-import { identity, scale, toSVG, transform, translate } from "transformation-matrix";
+import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
+import { ChangeDetectionStrategy, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
+import { BaseChartComponent, ChartComponent, ColorHelper, calculateViewDimensions } from '@swimlane/ngx-charts';
+import { select } from 'd3-selection';
+import * as shape from 'd3-shape';
+import 'd3-transition';
+import * as dagre from 'dagre';
+import { Observable } from 'rxjs/Observable';
+import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
+import { id } from '../utils';
 var GraphComponent = (function (_super) {
     __extends(GraphComponent, _super);
     function GraphComponent() {
@@ -24,7 +25,7 @@ var GraphComponent = (function (_super) {
         _this.nodes = [];
         _this.links = [];
         _this.activeEntries = [];
-        _this.orientation = "LR";
+        _this.orientation = 'LR';
         _this.draggingEnabled = true;
         _this.panningEnabled = true;
         _this.enableZoom = true;
@@ -36,6 +37,7 @@ var GraphComponent = (function (_super) {
         _this.autoCenter = false;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
+        _this.subscriptions = [];
         _this.margin = [0, 0, 0, 0];
         _this.results = [];
         _this.isPanning = false;
@@ -104,6 +106,68 @@ var GraphComponent = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf GraphComponent
+     */
+    /**
+       * Angular lifecycle event
+       *
+       *
+       * @memberOf GraphComponent
+       */
+    GraphComponent.prototype.ngOnInit = /**
+       * Angular lifecycle event
+       *
+       *
+       * @memberOf GraphComponent
+       */
+    function () {
+        var _this = this;
+        if (this.update$) {
+            this.subscriptions.push(this.update$.subscribe(function () {
+                _this.update();
+            }));
+        }
+        if (this.center$) {
+            this.subscriptions.push(this.center$.subscribe(function () {
+                _this.center();
+            }));
+        }
+        if (this.zoomToFit$) {
+            this.subscriptions.push(this.zoomToFit$.subscribe(function () {
+                _this.zoomToFit();
+            }));
+        }
+    };
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf GraphComponent
+     */
+    /**
+       * Angular lifecycle event
+       *
+       *
+       * @memberOf GraphComponent
+       */
+    GraphComponent.prototype.ngOnDestroy = /**
+       * Angular lifecycle event
+       *
+       *
+       * @memberOf GraphComponent
+       */
+    function () {
+        _super.prototype.ngOnDestroy.call(this);
+        for (var _i = 0, _a = this.subscriptions; _i < _a.length; _i++) {
+            var sub = _a[_i];
+            sub.unsubscribe();
+        }
+        this.subscriptions = null;
+    };
     /**
      * Angular lifecycle event
      *
@@ -212,12 +276,10 @@ var GraphComponent = (function (_super) {
                 }
                 else {
                     // calculate the width
-                    if (nativeElement.getElementsByTagName("text").length) {
+                    if (nativeElement.getElementsByTagName('text').length) {
                         var textDims = void 0;
                         try {
-                            textDims = nativeElement
-                                .getElementsByTagName("text")[0]
-                                .getBBox();
+                            textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
                         }
                         catch (ex) {
                             // Skip drawing if element is not displayed - Firefox would throw an error here
@@ -243,15 +305,14 @@ var GraphComponent = (function (_super) {
             index[n.id] = n;
             n.options = {
                 color: _this.colors.getColor(_this.groupResultsBy(n)),
-                transform: "translate(" + (n.x - n.width / 2 || 0) + ", " + (n.y - n.height / 2 ||
-                    0) + ")"
+                transform: "translate(" + (n.x - n.width / 2 || 0) + ", " + (n.y - n.height / 2 || 0) + ")"
             };
         });
         // Update the labels to the new positions
         var newLinks = [];
         var _loop_1 = function (k) {
             var l = this_1.graph._edgeLabels[k];
-            var normKey = k.replace(/[^\w]*/g, "");
+            var normKey = k.replace(/[^\w]*/g, '');
             var oldLink = this_1._oldLinks.find(function (ol) { return "" + ol.source + ol.target === normKey; });
             if (!oldLink) {
                 oldLink = this_1._links.find(function (nl) { return "" + nl.source + nl.target === normKey; });
@@ -264,8 +325,7 @@ var GraphComponent = (function (_super) {
             newLink.points = points;
             var textPos = points[Math.floor(points.length / 2)];
             if (textPos) {
-                newLink.textTransform = "translate(" + (textPos.x || 0) + "," + (textPos.y ||
-                    0) + ")";
+                newLink.textTransform = "translate(" + (textPos.x || 0) + "," + (textPos.y || 0) + ")";
             }
             newLink.textAngle = 0;
             if (!newLink.oldLine) {
@@ -291,13 +351,7 @@ var GraphComponent = (function (_super) {
         this.graphDims.width = Math.max.apply(Math, this._nodes.map(function (n) { return n.x + n.width; }));
         this.graphDims.height = Math.max.apply(Math, this._nodes.map(function (n) { return n.y + n.height; }));
         if (this.autoZoom) {
-            var heightZoom = this.dims.height / this.graphDims.height;
-            var widthZoom = this.dims.width / this.graphDims.width;
-            var zoomLevel = Math.min(heightZoom, widthZoom, 1);
-            if (zoomLevel !== this.zoomLevel) {
-                this.zoomLevel = zoomLevel;
-                this.updateTransform();
-            }
+            this.zoomToFit();
         }
         if (this.autoCenter) {
             // Auto-center when rendering
@@ -333,18 +387,18 @@ var GraphComponent = (function (_super) {
         this.linkElements.map(function (linkEl) {
             var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
             if (l) {
-                var linkSelection = select(linkEl.nativeElement).select(".line");
+                var linkSelection = select(linkEl.nativeElement).select('.line');
                 linkSelection
-                    .attr("d", l.oldLine)
+                    .attr('d', l.oldLine)
                     .transition()
                     .duration(_animate ? 500 : 0)
-                    .attr("d", l.line);
+                    .attr('d', l.line);
                 var textPathSelection = select(_this.chartElement.nativeElement).select("#" + l.id);
                 textPathSelection
-                    .attr("d", l.oldTextPath)
+                    .attr('d', l.oldTextPath)
                     .transition()
                     .duration(_animate ? 500 : 0)
-                    .attr("d", l.textPath);
+                    .attr('d', l.textPath);
             }
         });
     };
@@ -400,8 +454,7 @@ var GraphComponent = (function (_super) {
             // set view options
             node.options = {
                 color: this.colors.getColor(this.groupResultsBy(node)),
-                transform: "translate( " + (node.x - node.width / 2 || 0) + ", " + (node.y -
-                    node.height / 2 || 0) + ")"
+                transform: "translate( " + (node.x - node.width / 2 || 0) + ", " + (node.y - node.height / 2 || 0) + ")"
             };
         }
         // update dagre
@@ -437,12 +490,12 @@ var GraphComponent = (function (_super) {
         var lastPoint = link.points[link.points.length - 1];
         link.oldTextPath = link.textPath;
         if (lastPoint.x < firstPoint.x) {
-            link.dominantBaseline = "text-before-edge";
+            link.dominantBaseline = 'text-before-edge';
             // reverse text path for when its flipped upside down
             link.textPath = this.generateLine(link.points.slice().reverse());
         }
         else {
-            link.dominantBaseline = "text-after-edge";
+            link.dominantBaseline = 'text-after-edge';
             link.textPath = link.line;
         }
     };
@@ -503,11 +556,10 @@ var GraphComponent = (function (_super) {
        * @memberOf GraphComponent
        */
     function ($event, direction) {
-        var zoomFactor = 1 + (direction === "in" ? this.zoomSpeed : -this.zoomSpeed);
+        var zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
         // Check that zooming wouldn't put us out of bounds
         var newZoomLevel = this.zoomLevel * zoomFactor;
-        if (newZoomLevel <= this.minZoomLevel ||
-            newZoomLevel >= this.maxZoomLevel) {
+        if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
             return;
         }
         // Check if zooming is enabled or not
@@ -519,8 +571,8 @@ var GraphComponent = (function (_super) {
             var mouseX = $event.clientX;
             var mouseY = $event.clientY;
             // Transform the mouse X/Y into a SVG X/Y
-            var svg = this.chart.nativeElement.querySelector("svg");
-            var svgGroup = svg.querySelector("g.chart");
+            var svg = this.chart.nativeElement.querySelector('svg');
+            var svgGroup = svg.querySelector('g.chart');
             var point = svg.createSVGPoint();
             point.x = mouseX;
             point.y = mouseY;
@@ -575,14 +627,8 @@ var GraphComponent = (function (_super) {
        * @param y
        */
     function (x, y) {
-        this.transformationMatrix.e =
-            x === null || x === undefined || isNaN(x)
-                ? this.transformationMatrix.e
-                : Number(x);
-        this.transformationMatrix.f =
-            y === null || y === undefined || isNaN(y)
-                ? this.transformationMatrix.f
-                : Number(y);
+        this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
+        this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
         this.updateTransform();
     };
     /**
@@ -620,12 +666,8 @@ var GraphComponent = (function (_super) {
        * @param level
        */
     function (level) {
-        this.transformationMatrix.a = isNaN(level)
-            ? this.transformationMatrix.a
-            : Number(level);
-        this.transformationMatrix.d = isNaN(level)
-            ? this.transformationMatrix.d
-            : Number(level);
+        this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
+        this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
         this.updateTransform();
     };
     /**
@@ -840,9 +882,7 @@ var GraphComponent = (function (_super) {
         var _this = this;
         return this.nodes
             .map(function (d) { return _this.groupResultsBy(d); })
-            .reduce(function (nodes, node) {
-            return nodes.includes(node) ? nodes : nodes.concat([node]);
-        }, [])
+            .reduce(function (nodes, node) { return (nodes.includes(node) ? nodes : nodes.concat([node])); }, [])
             .sort();
     };
     /**
@@ -924,7 +964,7 @@ var GraphComponent = (function (_super) {
        * @memberOf GraphComponent
        */
     function () {
-        this.colors = new ColorHelper(this.scheme, "ordinal", this.seriesDomain, this.customColors);
+        this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
     };
     /**
      * Gets the legend options
@@ -949,7 +989,7 @@ var GraphComponent = (function (_super) {
        */
     function () {
         return {
-            scaleType: "ordinal",
+            scaleType: 'ordinal',
             domain: this.seriesDomain,
             colors: this.colors
         };
@@ -1034,17 +1074,31 @@ var GraphComponent = (function (_super) {
     function () {
         this.panTo(this.dims.width / 2 - this.graphDims.width * this.zoomLevel / 2, this.dims.height / 2 - this.graphDims.height * this.zoomLevel / 2);
     };
+    /**
+     * Zooms to fit the entier graph
+     */
+    /**
+       * Zooms to fit the entier graph
+       */
+    GraphComponent.prototype.zoomToFit = /**
+       * Zooms to fit the entier graph
+       */
+    function () {
+        var heightZoom = this.dims.height / this.graphDims.height;
+        var widthZoom = this.dims.width / this.graphDims.width;
+        var zoomLevel = Math.min(heightZoom, widthZoom, 1);
+        if (zoomLevel !== this.zoomLevel) {
+            this.zoomLevel = zoomLevel;
+            this.updateTransform();
+        }
+    };
     GraphComponent.decorators = [
         { type: Component, args: [{
-                    selector: "ngx-graph",
-                    styleUrls: ["./graph.component.css"],
+                    selector: 'ngx-graph',
+                    styleUrls: ['./graph.component.css'],
                     encapsulation: ViewEncapsulation.None,
                     changeDetection: ChangeDetectionStrategy.OnPush,
-                    animations: [
-                        trigger("link", [
-                            ngTransition("* => *", [animate(500, style({ transform: "*" }))])
-                        ])
-                    ],
+                    animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])],
                     template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g\n        *ngIf=\"initialized\"\n        [attr.transform]=\"transform\"\n        class=\"graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path\n              class=\"text-path\"\n              *ngFor=\"let link of _links\"\n              [attr.d]=\"link.textPath\"\n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect\n            class=\"panning-rect\"\n            [attr.width]=\"dims.width * 100\"\n            [attr.height]=\"dims.height * 100\"\n            [attr.transform]=\"'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g\n              *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n              class=\"link-group\"\n              #linkElement\n              [id]=\"link.id\">\n              <ng-template\n                *ngIf=\"linkTemplate\"\n                [ngTemplateOutlet]=\"linkTemplate\"\n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g\n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n              class=\"node-group\"\n              #nodeElement\n              [id]=\"node.id\"\n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template\n                  *ngIf=\"nodeTemplate\"\n                  [ngTemplateOutlet]=\"nodeTemplate\"\n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle\n                  *ngIf=\"!nodeTemplate\"\n                  r=\"10\"\n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\"\n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
                 },] },
     ];
@@ -1071,20 +1125,23 @@ var GraphComponent = (function (_super) {
         "autoZoom": [{ type: Input },],
         "panOnZoom": [{ type: Input },],
         "autoCenter": [{ type: Input },],
+        "update$": [{ type: Input },],
+        "center$": [{ type: Input },],
+        "zoomToFit$": [{ type: Input },],
         "activate": [{ type: Output },],
         "deactivate": [{ type: Output },],
-        "linkTemplate": [{ type: ContentChild, args: ["linkTemplate",] },],
-        "nodeTemplate": [{ type: ContentChild, args: ["nodeTemplate",] },],
-        "defsTemplate": [{ type: ContentChild, args: ["defsTemplate",] },],
+        "linkTemplate": [{ type: ContentChild, args: ['linkTemplate',] },],
+        "nodeTemplate": [{ type: ContentChild, args: ['nodeTemplate',] },],
+        "defsTemplate": [{ type: ContentChild, args: ['defsTemplate',] },],
         "chart": [{ type: ViewChild, args: [ChartComponent, { read: ElementRef },] },],
-        "nodeElements": [{ type: ViewChildren, args: ["nodeElement",] },],
-        "linkElements": [{ type: ViewChildren, args: ["linkElement",] },],
+        "nodeElements": [{ type: ViewChildren, args: ['nodeElement',] },],
+        "linkElements": [{ type: ViewChildren, args: ['linkElement',] },],
         "groupResultsBy": [{ type: Input },],
-        "zoomLevel": [{ type: Input, args: ["zoomLevel",] },],
-        "panOffsetX": [{ type: Input, args: ["panOffsetX",] },],
-        "panOffsetY": [{ type: Input, args: ["panOffsetY",] },],
-        "onMouseMove": [{ type: HostListener, args: ["document:mousemove", ["$event"],] },],
-        "onMouseUp": [{ type: HostListener, args: ["document:mouseup",] },],
+        "zoomLevel": [{ type: Input, args: ['zoomLevel',] },],
+        "panOffsetX": [{ type: Input, args: ['panOffsetX',] },],
+        "panOffsetY": [{ type: Input, args: ['panOffsetY',] },],
+        "onMouseMove": [{ type: HostListener, args: ['document:mousemove', ['$event'],] },],
+        "onMouseUp": [{ type: HostListener, args: ['document:mouseup',] },],
     };
     return GraphComponent;
 }(BaseChartComponent));

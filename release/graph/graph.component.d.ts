@@ -1,6 +1,8 @@
-import { ElementRef, TemplateRef, EventEmitter, QueryList, AfterViewInit } from "@angular/core";
-import { BaseChartComponent, ViewDimensions, ColorHelper } from "@swimlane/ngx-charts";
-import "d3-transition";
+import { AfterViewInit, ElementRef, EventEmitter, OnDestroy, OnInit, QueryList, TemplateRef } from '@angular/core';
+import { BaseChartComponent, ColorHelper, ViewDimensions } from '@swimlane/ngx-charts';
+import 'd3-transition';
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 /**
  * Matrix
  */
@@ -12,7 +14,7 @@ export interface Matrix {
     e: number;
     f: number;
 }
-export declare class GraphComponent extends BaseChartComponent implements AfterViewInit {
+export declare class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
     legend: boolean;
     nodes: any[];
     links: any[];
@@ -34,6 +36,9 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
     autoZoom: boolean;
     panOnZoom: boolean;
     autoCenter: boolean;
+    update$: Observable<any>;
+    center$: Observable<any>;
+    zoomToFit$: Observable<any>;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     linkTemplate: TemplateRef<any>;
@@ -42,6 +47,7 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
     chart: ElementRef;
     nodeElements: QueryList<ElementRef>;
     linkElements: QueryList<ElementRef>;
+    subscriptions: Subscription[];
     colors: ColorHelper;
     dims: ViewDimensions;
     margin: number[];
@@ -81,6 +87,20 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
      * Set the current `y` position of the graph
      */
     panOffsetY: number;
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf GraphComponent
+     */
+    ngOnInit(): void;
+    /**
+     * Angular lifecycle event
+     *
+     *
+     * @memberOf GraphComponent
+     */
+    ngOnDestroy(): void;
     /**
      * Angular lifecycle event
      *
@@ -290,4 +310,8 @@ export declare class GraphComponent extends BaseChartComponent implements AfterV
      * Center the graph in the viewport
      */
     center(): void;
+    /**
+     * Zooms to fit the entier graph
+     */
+    zoomToFit(): void;
 }
