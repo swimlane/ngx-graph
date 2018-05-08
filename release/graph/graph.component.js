@@ -15,10 +15,10 @@ import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import 'd3-transition';
 import * as dagre from 'dagre';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 import { id } from '../utils';
-var GraphComponent = (function (_super) {
+var GraphComponent = /** @class */ (function (_super) {
     __extends(GraphComponent, _super);
     function GraphComponent() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -429,8 +429,6 @@ var GraphComponent = (function (_super) {
             marginy: 20,
             edgesep: 100,
             ranksep: 100
-            // acyclicer: 'greedy',
-            // ranker: 'longest-path'
         });
         // Default to assigning a new object as a label for each new edge.
         this.graph.setDefaultEdgeLabel(function () {

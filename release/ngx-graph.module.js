@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { GraphModule } from './graph/graph.module';
-var NgxGraphModule = (function () {
+var NgxGraphModule = /** @class */ (function () {
     function NgxGraphModule() {
     }
     NgxGraphModule.decorators = [
