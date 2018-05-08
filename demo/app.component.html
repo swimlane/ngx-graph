@@ -121,7 +121,7 @@
         <strong>Color Scheme</strong>
       </h3>
       <select [hidden]="!colorVisible" style="margin-left: 10px;" [ngModel]="selectedColorScheme" (ngModelChange)="setColorScheme($event)">
-        <option *ngFor="let scheme of colorSets" [value]="scheme.name">{{scheme.name}}</option>
+        <option *ngFor="let scheme of colorSchemes" [value]="scheme.name">{{scheme.name}}</option>
       </select>
 
       <h3 (click)="optsVisible = !optsVisible" style="cursor: pointer">
