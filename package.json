@@ -31,11 +31,13 @@
     "start": "webpack-dev-server",
     "start:hmr": "webpack-dev-server --env.HMR",
     "release": "npm-run-all build:release",
-    "package": "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
+    "package":
+      "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
     "package:ts": "tsc --outDir release",
     "package:aot": "ngc -p tsconfig-aot.json",
     "package:replace-scss": "node ./config/replace-scss.js",
-    "package:minify": "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
+    "package:minify":
+      "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
     "deploy": "node ./config/deploy.js",
     "profile": "NODE_ENV=production webpack --profile --json > dist/stats.json"
   },
@@ -64,21 +66,17 @@
     "visualization",
     "tree"
   ],
-  "authors": [
-    "Marjan Georgiev",
-    "Austin McDaniel",
-    "Jayson Harshbarger"
-  ],
+  "authors": ["Marjan Georgiev", "Austin McDaniel", "Jayson Harshbarger"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/swimlane/ngx-graph/issues"
   },
   "homepage": "https://github.com/swimlane/ngx-graph#readme",
   "peerDependencies": {
-    "@angular/animations": "^5.0.0",
-    "@angular/common": "^5.0.0",
-    "@angular/core": "^5.0.0",
-    "rxjs": "^5.0.3"
+    "@angular/animations": ">= 6.0.0",
+    "@angular/common": ">= 6.0.0",
+    "@angular/core": ">= 6.0.0",
+    "rxjs": ">= 6.0.0"
   },
   "devDependencies": {
     "@angular/animations": "^6.0.0",
