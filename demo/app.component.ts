@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import * as shape from 'd3-shape';
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 import { colorSets } from '../src/utils/color-sets';
 import { id } from '../src/utils/id';
 import chartGroups from './chartTypes';
