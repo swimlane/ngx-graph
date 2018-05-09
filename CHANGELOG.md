@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.0
+
+* Chore: Upgrade to Angular 6
+
 ## 4.3.0
 
 * Feature: Add update$, center$, and zoomToFit$ inputs

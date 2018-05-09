@@ -29,8 +29,7 @@ import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import 'd3-transition';
 import * as dagre from 'dagre';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable, Subscription } from 'rxjs';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 import { id } from '../utils';
 

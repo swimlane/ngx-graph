@@ -1,8 +1,7 @@
 import { AfterViewInit, ElementRef, EventEmitter, OnDestroy, OnInit, QueryList, TemplateRef } from '@angular/core';
 import { BaseChartComponent, ColorHelper, ViewDimensions } from '@swimlane/ngx-charts';
 import 'd3-transition';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable, Subscription } from 'rxjs';
 /**
  * Matrix
  */

@@ -3,7 +3,7 @@ import { GraphComponent } from './graph.component';
 import { ChartCommonModule } from '@swimlane/ngx-charts';
 import { MouseWheelDirective } from './mouse-wheel.directive';
 export { GraphComponent };
-var GraphModule = (function () {
+var GraphModule = /** @class */ (function () {
     function GraphModule() {
     }
     GraphModule.decorators = [
