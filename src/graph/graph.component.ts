@@ -267,7 +267,6 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
       this.nodeElements.map(elem => {
         const nativeElement = elem.nativeElement;
         const node = this._nodes.find(n => n.id === nativeElement.id);
-
         // calculate the height
         let dims;
         try {
@@ -279,7 +278,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
         if (this.nodeHeight) {
           node.height = this.nodeHeight;
         } else {
-          node.height = dims.height;
+          node.height = dims.height + dims.y;
         }
 
         if (this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
@@ -288,7 +287,7 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
         if (this.nodeWidth) {
           node.width = this.nodeWidth;
         } else {
-          node.width = dims.width
+          node.width = dims.width + dims.x;
         }
 
         if (this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
