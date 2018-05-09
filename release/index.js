@@ -40493,7 +40493,7 @@ var graph_component_GraphComponent = (function (_super) {
                     node.height = _this.nodeHeight;
                 }
                 else {
-                    node.height = dims.height;
+                    node.height = dims.height + dims.y;
                 }
                 if (_this.nodeMaxHeight)
                     node.height = Math.max(node.height, _this.nodeMaxHeight);
@@ -40503,7 +40503,7 @@ var graph_component_GraphComponent = (function (_super) {
                     node.width = _this.nodeWidth;
                 }
                 else {
-                    node.width = dims.width;
+                    node.width = dims.width + dims.x;
                 }
                 if (_this.nodeMaxWidth)
                     node.width = Math.max(node.width, _this.nodeMaxWidth);
@@ -40618,15 +40618,17 @@ var graph_component_GraphComponent = (function (_super) {
      */
     GraphComponent.prototype.createGraph = function () {
         var _this = this;
-        this.graph = new dagre["graphlib"].Graph();
+        this.graph = new dagre["graphlib"].Graph({ multigraph: true });
         this.graph.setGraph({
             rankdir: this.orientation,
-            marginx: 20,
-            marginy: 20,
-            edgesep: 100,
-            ranksep: 100
-            // acyclicer: 'greedy',
-            // ranker: 'longest-path'
+            //align: 'UR',
+            nodesep: 60,
+            ranksep: 100,
+            marginx: 0,
+            marginy: 0,
+            edgesep: 0,
+            acyclicer: 'greedy',
+            ranker: 'tight-tree'
         });
         // Default to assigning a new object as a label for each new edge.
         this.graph.setDefaultEdgeLabel(function () {

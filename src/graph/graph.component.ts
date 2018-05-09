@@ -415,15 +415,16 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
    * @memberOf GraphComponent
    */
   createGraph(): void {
-    this.graph = new dagre.graphlib.Graph();
+    this.graph = new dagre.graphlib.Graph({ multigraph: true });
     this.graph.setGraph({
       rankdir: this.orientation,
-      marginx: 20,
-      marginy: 20,
-      edgesep: 100,
-      ranksep: 100
-      // acyclicer: 'greedy',
-      // ranker: 'longest-path'
+      nodesep: 60,
+      ranksep: 100,
+      marginx: 0,
+      marginy: 0,
+      edgesep: 0,
+      acyclicer: 'greedy',
+      ranker: 'tight-tree'
     });
 
     // Default to assigning a new object as a label for each new edge.
