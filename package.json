@@ -143,7 +143,7 @@
     "tslint-config-prettier": "^1.12.0",
     "tslint-config-swimlane": "^3.0.4",
     "tslint-loader": "^3.5.3",
-    "typescript": "^2.7.2",
+    "typescript": "~2.7.2",
     "uglify-js": "^3.1.10",
     "url-loader": "^0.5.7",
     "webpack": "^3.8.1",
@@ -151,7 +151,7 @@
     "webpack-dev-server": "^2.9.4",
     "webpack-merge": "^4.1.1",
     "webpack-notifier": "^1.5.0",
-    "zone.js": "^0.8.4"
+    "zone.js": "^0.8.25"
   },
   "dependencies": {
     "@swimlane/ngx-charts": "^8.0.0",
