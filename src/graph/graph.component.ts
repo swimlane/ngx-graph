@@ -313,7 +313,26 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
     for (const k in this.graph._edgeLabels) {
       const l = this.graph._edgeLabels[k];
 
+      // Added to make the edges intersect node at orthognal coordinates
+      let this_1 = this;
+      const sourceNode = this_1._nodes.find(n => n.id === this_1.graph._edgeObjs[k].v);
+      const targetNode = this_1._nodes.find(n => n.id === this_1.graph._edgeObjs[k].w);
+      const dir = sourceNode.x <= targetNode.x ? -1 : 1;
+      const startingPoint = { x: (sourceNode.x - dir * (sourceNode.width / 2)), y: sourceNode.y };
+      const endingPoint = { x: (targetNode.x + dir * (targetNode.width / 2)), y: targetNode.y };
+
+      l.points[0] = startingPoint;
+      l.points[l.points.length - 1] = endingPoint;
+
+      if(l.points.length == 3){
+        if( (Math.abs(l.points[0].y - l.points[1].y) > 2) && (Math.abs(l.points[1].y - l.points[2].y) > 2) )
+            { 
+              l.points.splice(1, 1);
+            }
+        }
+      // End Ortho
       const normKey = k.replace(/[^\w]*/g, '');
+
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
         oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
@@ -420,10 +439,10 @@ export class GraphComponent extends BaseChartComponent implements AfterViewInit 
       rankdir: this.orientation,
       nodesep: 60,
       ranksep: 100,
+      edgesep: 100,
       marginx: 0,
       marginy: 0,
-      edgesep: 0,
-      acyclicer: 'greedy',
+      //acyclicer: 'greedy',
       ranker: 'tight-tree'
     });
 

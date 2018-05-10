@@ -40525,15 +40525,30 @@ var graph_component_GraphComponent = (function (_super) {
         // Update the labels to the new positions
         var newLinks = [];
         var _loop_1 = function (k) {
-            var l = this_1.graph._edgeLabels[k];
+            var l = this_2.graph._edgeLabels[k];
+            // Added to make the edges intersect node at orthognal coordinates
+            var this_1 = this_2;
+            var sourceNode = this_1._nodes.find(function (n) { return n.id === this_1.graph._edgeObjs[k].v; });
+            var targetNode = this_1._nodes.find(function (n) { return n.id === this_1.graph._edgeObjs[k].w; });
+            var dir = sourceNode.x <= targetNode.x ? -1 : 1;
+            var startingPoint = { x: (sourceNode.x - dir * (sourceNode.width / 2)), y: sourceNode.y };
+            var endingPoint = { x: (targetNode.x + dir * (targetNode.width / 2)), y: targetNode.y };
+            l.points[0] = startingPoint;
+            l.points[l.points.length - 1] = endingPoint;
+            if (l.points.length == 3) {
+                if ((Math.abs(l.points[0].y - l.points[1].y) > 2) && (Math.abs(l.points[1].y - l.points[2].y) > 2)) {
+                    l.points.splice(1, 1);
+                }
+            }
+            // End Ortho
             var normKey = k.replace(/[^\w]*/g, '');
-            var oldLink = this_1._oldLinks.find(function (ol) { return "" + ol.source + ol.target === normKey; });
+            var oldLink = this_2._oldLinks.find(function (ol) { return "" + ol.source + ol.target === normKey; });
             if (!oldLink) {
-                oldLink = this_1._links.find(function (nl) { return "" + nl.source + nl.target === normKey; });
+                oldLink = this_2._links.find(function (nl) { return "" + nl.source + nl.target === normKey; });
             }
             oldLink.oldLine = oldLink.line;
             var points = l.points;
-            var line = this_1.generateLine(points);
+            var line = this_2.generateLine(points);
             var newLink = Object.assign({}, oldLink);
             newLink.line = line;
             newLink.points = points;
@@ -40545,10 +40560,10 @@ var graph_component_GraphComponent = (function (_super) {
             if (!newLink.oldLine) {
                 newLink.oldLine = newLink.line;
             }
-            this_1.calcDominantBaseline(newLink);
+            this_2.calcDominantBaseline(newLink);
             newLinks.push(newLink);
         };
-        var this_1 = this;
+        var this_2 = this;
         for (var k in this.graph._edgeLabels) {
             _loop_1(k);
         }
@@ -40621,13 +40636,12 @@ var graph_component_GraphComponent = (function (_super) {
         this.graph = new dagre["graphlib"].Graph({ multigraph: true });
         this.graph.setGraph({
             rankdir: this.orientation,
-            //align: 'UR',
             nodesep: 60,
             ranksep: 100,
+            edgesep: 100,
             marginx: 0,
             marginy: 0,
-            edgesep: 0,
-            acyclicer: 'greedy',
+            //acyclicer: 'greedy',
             ranker: 'tight-tree'
         });
         // Default to assigning a new object as a label for each new edge.
@@ -40801,21 +40815,21 @@ var graph_component_GraphComponent = (function (_super) {
         node.options.transform = "translate(" + x + ", " + y + ")";
         var _loop_2 = function (link) {
             if (link.target === node.id || link.source === node.id) {
-                var sourceNode = this_2._nodes.find(function (n) { return n.id === link.source; });
-                var targetNode = this_2._nodes.find(function (n) { return n.id === link.target; });
+                var sourceNode = this_3._nodes.find(function (n) { return n.id === link.source; });
+                var targetNode = this_3._nodes.find(function (n) { return n.id === link.target; });
                 // determine new arrow position
                 var dir = sourceNode.y <= targetNode.y ? -1 : 1;
                 var startingPoint = { x: sourceNode.x, y: (sourceNode.y - dir * (sourceNode.height / 2)) };
                 var endingPoint = { x: targetNode.x, y: (targetNode.y + dir * (targetNode.height / 2)) };
                 // generate new points
                 link.points = [startingPoint, endingPoint];
-                var line = this_2.generateLine(link.points);
-                this_2.calcDominantBaseline(link);
+                var line = this_3.generateLine(link.points);
+                this_3.calcDominantBaseline(link);
                 link.oldLine = link.line;
                 link.line = line;
             }
         };
-        var this_2 = this;
+        var this_3 = this;
         for (var _i = 0, _a = this._links; _i < _a.length; _i++) {
             var link = _a[_i];
             _loop_2(link);
