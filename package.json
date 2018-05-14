@@ -31,13 +31,11 @@
     "start": "webpack-dev-server",
     "start:hmr": "webpack-dev-server --env.HMR",
     "release": "npm-run-all build:release",
-    "package":
-      "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
+    "package": "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
     "package:ts": "tsc --outDir release",
     "package:aot": "ngc -p tsconfig-aot.json",
     "package:replace-scss": "node ./config/replace-scss.js",
-    "package:minify":
-      "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
+    "package:minify": "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
     "deploy": "node ./config/deploy.js",
     "profile": "NODE_ENV=production webpack --profile --json > dist/stats.json"
   },
@@ -66,7 +64,11 @@
     "visualization",
     "tree"
   ],
-  "authors": ["Marjan Georgiev", "Austin McDaniel", "Jayson Harshbarger"],
+  "authors": [
+    "Marjan Georgiev",
+    "Austin McDaniel",
+    "Jayson Harshbarger"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/swimlane/ngx-graph/issues"
@@ -157,7 +159,7 @@
     "d3-selection": "^1.2.0",
     "d3-shape": "^1.2.0",
     "d3-transition": "^1.1.1",
-    "dagre": "^0.7.4",
+    "dagre": "^0.8.2",
     "transformation-matrix": "^1.7.0"
   }
 }
