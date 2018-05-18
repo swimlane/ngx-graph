@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.1
+
+* Chore: Update dagre version
+
 ## 5.0.0
 
 * Chore: Upgrade to Angular 6
