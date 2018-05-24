@@ -884,7 +884,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       this._touchLastX = clientX;
       this._touchLastY = clientY;
 
-      this.pan(movementX * 2, movementY * 2);
+      this.pan(movementX, movementY);
     }
   }
 
