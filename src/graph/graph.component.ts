@@ -384,7 +384,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     for (const k in this.graph._edgeLabels) {
       const l = this.graph._edgeLabels[k];
 
-      const normKey = k.replace(/[^\w]*/g, '');
+      const normKey = k.replace(/[^\w-]*/g, '');
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
         oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
