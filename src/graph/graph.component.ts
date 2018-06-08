@@ -66,6 +66,8 @@ export interface Matrix {
       <svg:g
         *ngIf="initialized"
         [attr.transform]="transform"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)"
         class="graph chart">
           <defs>
             <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
@@ -183,6 +185,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   _links: any[];
   _oldLinks: any[] = [];
   transformationMatrix: Matrix = identity();
+  _touchLastX = null;
+  _touchLastY = null;
 
   @Input() groupResultsBy: (node: any) => string = node => node.label;
 
@@ -848,6 +852,52 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
+  }
+
+  /**
+   * On touch start event to enable panning.
+   *
+   * @param {TouchEvent} $event
+   *
+   * @memberOf GraphComponent
+   */
+  onTouchStart(event) {
+    this._touchLastX = event.changedTouches[0].clientX;
+    this._touchLastY = event.changedTouches[0].clientY;
+
+    this.isPanning = true;
+  }
+
+  /**
+   * On touch move event, used for panning.
+   *
+   * @param {TouchEvent} $event
+   *
+   * @memberOf GraphComponent
+   */
+  @HostListener('document:touchmove', ['$event'])
+  onTouchMove($event: TouchEvent): void {
+    if (this.isPanning && this.panningEnabled) {
+      const clientX = $event.changedTouches[0].clientX;
+      const clientY = $event.changedTouches[0].clientY;
+      const movementX = clientX - this._touchLastX;
+      const movementY = clientY - this._touchLastY;
+      this._touchLastX = clientX;
+      this._touchLastY = clientY;
+
+      this.pan(movementX, movementY);
+    }
+  }
+
+  /**
+   * On touch end event to disable panning.
+   *
+   * @param {TouchEvent} $event
+   *
+   * @memberOf GraphComponent
+   */
+  onTouchEnd(event) {
+    this.isPanning = false;
   }
 
   /**
