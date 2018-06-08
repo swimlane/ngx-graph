@@ -64,6 +64,8 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     _links: any[];
     _oldLinks: any[];
     transformationMatrix: Matrix;
+    _touchLastX: any;
+    _touchLastY: any;
     groupResultsBy: (node: any) => string;
     /**
      * Get the current zoom level
@@ -288,6 +290,30 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @memberOf GraphComponent
      */
     onMouseMove($event: MouseEvent): void;
+    /**
+     * On touch start event to enable panning.
+     *
+     * @param {TouchEvent} $event
+     *
+     * @memberOf GraphComponent
+     */
+    onTouchStart(event: any): void;
+    /**
+     * On touch move event, used for panning.
+     *
+     * @param {TouchEvent} $event
+     *
+     * @memberOf GraphComponent
+     */
+    onTouchMove($event: TouchEvent): void;
+    /**
+     * On touch end event to disable panning.
+     *
+     * @param {TouchEvent} $event
+     *
+     * @memberOf GraphComponent
+     */
+    onTouchEnd(event: any): void;
     /**
      * On mouse up event to disable panning/dragging.
      *

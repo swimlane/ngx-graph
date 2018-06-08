@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.1.0
+
+* Feature: Allow panning on touch events (#86)
+* Bug: Fix panning speed (#88)
+
 ## 5.0.1
 
 * Chore: Update dagre version
