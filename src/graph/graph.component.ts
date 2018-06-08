@@ -619,7 +619,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @param y
    */
   pan(x: number, y: number): void {
-    this.transformationMatrix = transform(this.transformationMatrix, translate(x, y));
+    const zoomLevel = this.zoomLevel;
+    this.transformationMatrix = transform(
+      this.transformationMatrix,
+      translate(x / zoomLevel, y / zoomLevel)
+    );
 
     this.updateTransform();
   }
