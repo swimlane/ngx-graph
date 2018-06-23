@@ -608,9 +608,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
 
       // Panzoom
-      this.pan(svgPoint.x, svgPoint.y);
+      this.pan(svgPoint.x, svgPoint.y, true);
       this.zoom(zoomFactor);
-      this.pan(-svgPoint.x, -svgPoint.y);
+      this.pan(-svgPoint.x, -svgPoint.y, true);
     } else {
       this.zoom(zoomFactor);
     }
@@ -622,8 +622,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @param x
    * @param y
    */
-  pan(x: number, y: number): void {
-    const zoomLevel = this.zoomLevel;
+  pan(x: number, y: number, zooming: boolean = false): void {
+    const zoomLevel = zooming ? 1 : this.zoomLevel; // skip coordinates scaling in case of zooming
     this.transformationMatrix = transform(
       this.transformationMatrix,
       translate(x / zoomLevel, y / zoomLevel)
