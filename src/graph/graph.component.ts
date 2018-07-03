@@ -690,38 +690,42 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     const node = this.draggingNode;
     node.x += event.movementX / this.zoomLevel;
     node.y += event.movementY / this.zoomLevel;
+    node.forcex = node.forcex ? node.forcex + event.movementX / this.zoomLevel : node.x;
+    node.forcey = node.forcey ? node.forcey + event.movementY / this.zoomLevel : node.x;
 
-    // move the node
-    const x = node.x - node.width / 2;
-    const y = node.y - node.height / 2;
-    node.options.transform = `translate(${x}, ${y})`;
+    this.draw();
 
-    for (const link of this._links) {
-      if (link.target === node.id || link.source === node.id) {
-        const sourceNode = this._nodes.find(n => n.id === link.source);
-        const targetNode = this._nodes.find(n => n.id === link.target);
+    // // move the node
+    // const x = node.x - node.width / 2;
+    // const y = node.y - node.height / 2;
+    // node.options.transform = `translate(${x}, ${y})`;
 
-        // determine new arrow position
-        const dir = sourceNode.y <= targetNode.y ? -1 : 1;
-        const startingPoint = {
-          x: sourceNode.x,
-          y: sourceNode.y - dir * (sourceNode.height / 2)
-        };
-        const endingPoint = {
-          x: targetNode.x,
-          y: targetNode.y + dir * (targetNode.height / 2)
-        };
+    // for (const link of this._links) {
+    //   if (link.target === node.id || link.source === node.id) {
+    //     const sourceNode = this._nodes.find(n => n.id === link.source);
+    //     const targetNode = this._nodes.find(n => n.id === link.target);
 
-        // generate new points
-        link.points = [startingPoint, endingPoint];
-        const line = this.generateLine(link.points);
-        this.calcDominantBaseline(link);
-        link.oldLine = link.line;
-        link.line = line;
-      }
-    }
+    //     // determine new arrow position
+    //     const dir = sourceNode.y <= targetNode.y ? -1 : 1;
+    //     const startingPoint = {
+    //       x: sourceNode.x,
+    //       y: sourceNode.y - dir * (sourceNode.height / 2)
+    //     };
+    //     const endingPoint = {
+    //       x: targetNode.x,
+    //       y: targetNode.y + dir * (targetNode.height / 2)
+    //     };
 
-    this.redrawLines(false);
+    //     // generate new points
+    //     link.points = [startingPoint, endingPoint];
+    //     const line = this.generateLine(link.points);
+    //     this.calcDominantBaseline(link);
+    //     link.oldLine = link.line;
+    //     link.line = line;
+    //   }
+    // }
+
+    // this.redrawLines(false);
   }
 
   /**
