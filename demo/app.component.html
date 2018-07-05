@@ -1,9 +1,9 @@
 <main [class]="theme">
   <div class="chart-col">
     <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
-      <ngx-graph #graph class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
+      <ngx-graph *ngIf="graph" #graphEl class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
         [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
-        [links]="hierarchialGraph.links" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="hierarchialGraph.nodes" [scheme]="colorScheme"
+        [links]="graph.edges" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="graph.nodes" [scheme]="colorScheme"
         [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
 
         <ng-template #defsTemplate>
@@ -14,8 +14,8 @@
 
         <ng-template #nodeTemplate let-node>
           <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
-            <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" />
-            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
+            <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data.color" />
+            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">{{node.label}}</svg:text>
           </svg:g>
         </ng-template>
 

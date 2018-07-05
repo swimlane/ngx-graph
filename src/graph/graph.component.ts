@@ -16,7 +16,9 @@ import {
   TemplateRef,
   ViewChild,
   ViewChildren,
-  ViewEncapsulation
+  ViewEncapsulation,
+  NgZone,
+  ChangeDetectorRef
 } from '@angular/core';
 import {
   BaseChartComponent,
@@ -28,9 +30,13 @@ import {
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import 'd3-transition';
-import * as dagre from 'dagre';
 import { Observable, Subscription } from 'rxjs';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
+import { Layout } from '../models/layout.model';
+import { LayoutService } from './layouts/layout.service';
+import { Edge } from '../models/edge.model';
+import { Node } from '../models/node.model';
+import { Graph } from '../models/graph.model';
 import { id } from '../utils';
 
 /**
@@ -48,85 +54,15 @@ export interface Matrix {
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
+  templateUrl: './graph.component.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])],
-  template: `
-    <ngx-charts-chart
-      [view]="[width, height]"
-      [showLegend]="legend"
-      [legendOptions]="legendOptions"
-      (legendLabelClick)="onClick($event)"
-      (legendLabelActivate)="onActivate($event)"
-      (legendLabelDeactivate)="onDeactivate($event)"
-      mouseWheel
-      (mouseWheelUp)="onZoom($event, 'in')"
-      (mouseWheelDown)="onZoom($event, 'out')">
-      <svg:g
-        *ngIf="initialized"
-        [attr.transform]="transform"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event)"
-        class="graph chart">
-          <defs>
-            <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
-            </ng-template>
-            <svg:path
-              class="text-path"
-              *ngFor="let link of _links"
-              [attr.d]="link.textPath"
-              [attr.id]="link.id">
-            </svg:path>
-          </defs>
-          <svg:rect
-            class="panning-rect"
-            [attr.width]="dims.width * 100"
-            [attr.height]="dims.height * 100"
-            [attr.transform]="'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' "
-            (mousedown)="isPanning = true" />
-          <svg:g class="links">
-            <svg:g
-              *ngFor="let link of _links; trackBy: trackLinkBy"
-              class="link-group"
-              #linkElement
-              [id]="link.id">
-              <ng-template
-                *ngIf="linkTemplate"
-                [ngTemplateOutlet]="linkTemplate"
-                [ngTemplateOutletContext]="{ $implicit: link }">
-              </ng-template>
-              <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
-            </svg:g>
-          </svg:g>
-          <svg:g class="nodes">
-            <svg:g
-              *ngFor="let node of _nodes; trackBy: trackNodeBy"
-              class="node-group"
-              #nodeElement
-              [id]="node.id"
-              [attr.transform]="node.options.transform"
-                (click)="onClick(node)" (mousedown)="onNodeMouseDown($event, node)">
-                <ng-template
-                  *ngIf="nodeTemplate"
-                  [ngTemplateOutlet]="nodeTemplate"
-                  [ngTemplateOutletContext]="{ $implicit: node }">
-                </ng-template>
-                <svg:circle
-                  *ngIf="!nodeTemplate"
-                  r="10"
-                  [attr.cx]="node.width / 2" [attr.cy]="node.height / 2"
-                  [attr.fill]="node.options.color"
-                />
-            </svg:g>
-          </svg:g>
-      </svg:g>
-  </ngx-charts-chart>
-  `
+  animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() legend: boolean;
-  @Input() nodes: any[] = [];
-  @Input() links: any[] = [];
+  @Input() nodes: Node[] = [];
+  @Input() links: Edge[] = [];
   @Input() activeEntries: any[] = [];
   @Input() orientation: string = 'LR';
   @Input() curve: any;
@@ -154,6 +90,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
 
+  @Input() layout: string | Layout = 'dagre';
+
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
 
@@ -176,16 +114,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   legendOptions: any;
   isPanning: boolean = false;
   isDragging: boolean = false;
-  draggingNode: any;
+  draggingNode: Node;
   initialized: boolean = false;
-  graph: any;
+  graph: Graph;
   graphDims: any = { width: 0, height: 0 };
-  _nodes: any[];
-  _links: any[];
-  _oldLinks: any[] = [];
+  _oldLinks: Edge[] = [];
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
+
+  constructor(
+    private el: ElementRef,
+    public zone: NgZone,
+    public cd: ChangeDetectorRef,
+    private layoutService: LayoutService
+  ) {
+    super(el, zone, cd);
+  }
 
   @Input() groupResultsBy: (node: any) => string = node => node.label;
 
@@ -263,6 +208,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         })
       );
     }
+
+    if (this.layout && typeof this.layout === 'string') {
+      this.layout = this.layoutService.getLayout(this.layout);
+    }
   }
 
   /**
@@ -325,78 +274,37 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   draw(): void {
     // Calc view dims for the nodes
-    if (this.nodeElements && this.nodeElements.length) {
-      this.nodeElements.map(elem => {
-        const nativeElement = elem.nativeElement;
-        const node = this._nodes.find(n => n.id === nativeElement.id);
-
-        // calculate the height
-        let dims;
-        try {
-          dims = nativeElement.getBBox();
-        } catch (ex) {
-          // Skip drawing if element is not displayed - Firefox would throw an error here
-          return;
-        }
-        if (this.nodeHeight) {
-          node.height = this.nodeHeight;
-        } else {
-          node.height = dims.height;
-        }
-
-        if (this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
-        if (this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
-
-        if (this.nodeWidth) {
-          node.width = this.nodeWidth;
-        } else {
-          // calculate the width
-          if (nativeElement.getElementsByTagName('text').length) {
-            let textDims;
-            try {
-              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
-            } catch (ex) {
-              // Skip drawing if element is not displayed - Firefox would throw an error here
-              return;
-            }
-            node.width = textDims.width + 20;
-          } else {
-            node.width = dims.width;
-          }
-        }
-
-        if (this.nodeMaxWidth) node.width = Math.max(node.width, this.nodeMaxWidth);
-        if (this.nodeMinWidth) node.width = Math.min(node.width, this.nodeMinWidth);
-      });
-    }
+    this.applyNodeDimensions();
 
     // Dagre to recalc the layout
-    dagre.layout(this.graph);
+    (this.layout as Layout).run(this.graph);
 
-    // Tranposes view options to the node
-    const index = {};
-    this._nodes.map(n => {
-      index[n.id] = n;
-      n.options = {
-        color: this.colors.getColor(this.groupResultsBy(n)),
-        transform: `translate(${n.x - n.width / 2 || 0}, ${n.y - n.height / 2 || 0})`
+    // Transposes view options to the node
+    this.graph.nodes.map(n => {
+      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
+        0})`;
+      if (!n.data) {
+        n.data = {};
+      }
+      n.data = {
+        color: this.colors.getColor(this.groupResultsBy(n))
       };
     });
 
     // Update the labels to the new positions
     const newLinks = [];
-    for (const k in this.graph._edgeLabels) {
-      const l = this.graph._edgeLabels[k];
+    for (const edgeLabelId in this.graph.edgeLabels) {
+      const edgeLabel = this.graph.edgeLabels[edgeLabelId];
 
-      const normKey = k.replace(/[^\w-]*/g, '');
+      const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
-        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
+        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
       }
 
       oldLink.oldLine = oldLink.line;
 
-      const points = l.points;
+      const points = edgeLabel.points;
       const line = this.generateLine(points);
 
       const newLink = Object.assign({}, oldLink);
@@ -417,11 +325,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       newLinks.push(newLink);
     }
 
-    this._links = newLinks;
+    this.graph.edges = newLinks;
 
     // Map the old links for animations
-    if (this._links) {
-      this._oldLinks = this._links.map(l => {
+    if (this.graph.edges) {
+      this._oldLinks = this.graph.edges.map(l => {
         const newL = Object.assign({}, l);
         newL.oldLine = l.line;
         return newL;
@@ -429,8 +337,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     // Calculate the height/width total
-    this.graphDims.width = Math.max(...this._nodes.map(n => n.x + n.width));
-    this.graphDims.height = Math.max(...this._nodes.map(n => n.y + n.height));
+    this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
+    this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
 
     if (this.autoZoom) {
       this.zoomToFit();
@@ -446,6 +354,58 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   }
 
   /**
+   * Measures the node element and applies the dimensions
+   *
+   * @memberOf GraphComponent
+   */
+  applyNodeDimensions(): void {
+    if (this.nodeElements && this.nodeElements.length) {
+      this.nodeElements.map(elem => {
+        const nativeElement = elem.nativeElement;
+        const node = this.graph.nodes.find(n => n.id === nativeElement.id);
+
+        // calculate the height
+        let dims;
+        try {
+          dims = nativeElement.getBoundingClientRect();
+        } catch (ex) {
+          // Skip drawing if element is not displayed - Firefox would throw an error here
+          return;
+        }
+        if (this.nodeHeight) {
+          node.dimension.height = this.nodeHeight;
+        } else {
+          node.dimension.height = dims.height;
+        }
+
+        if (this.nodeMaxHeight) node.dimension.height = Math.max(node.dimension.height, this.nodeMaxHeight);
+        if (this.nodeMinHeight) node.dimension.height = Math.min(node.dimension.height, this.nodeMinHeight);
+
+        if (this.nodeWidth) {
+          node.dimension.width = this.nodeWidth;
+        } else {
+          // calculate the width
+          if (nativeElement.getElementsByTagName('text').length) {
+            let textDims;
+            try {
+              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+            } catch (ex) {
+              // Skip drawing if element is not displayed - Firefox would throw an error here
+              return;
+            }
+            node.dimension.width = textDims.width + 20;
+          } else {
+            node.dimension.width = dims.width;
+          }
+        }
+
+        if (this.nodeMaxWidth) node.dimension.width = Math.max(node.dimension.width, this.nodeMaxWidth);
+        if (this.nodeMinWidth) node.dimension.width = Math.min(node.dimension.width, this.nodeMinWidth);
+      });
+    }
+  }
+
+  /**
    * Redraws the lines when dragged or viewport updated
    *
    * @param {boolean} [animate=true]
@@ -454,22 +414,22 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   redrawLines(_animate = true): void {
     this.linkElements.map(linkEl => {
-      const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
+      const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
-      if (l) {
+      if (edge) {
         const linkSelection = select(linkEl.nativeElement).select('.line');
         linkSelection
-          .attr('d', l.oldLine)
+          .attr('d', edge.oldLine)
           .transition()
           .duration(_animate ? 500 : 0)
-          .attr('d', l.line);
+          .attr('d', edge.line);
 
-        const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
+        const textPathSelection = select(this.chartElement.nativeElement).select(`#${edge.id}`);
         textPathSelection
-          .attr('d', l.oldTextPath)
+          .attr('d', edge.oldTextPath)
           .transition()
           .duration(_animate ? 500 : 0)
-          .attr('d', l.textPath);
+          .attr('d', edge.textPath);
       }
     });
   }
@@ -481,52 +441,29 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   createGraph(): void {
-    this.graph = new dagre.graphlib.Graph();
-    this.graph.setGraph({
-      rankdir: this.orientation,
-      marginx: 20,
-      marginy: 20,
-      edgesep: 100,
-      ranksep: 100
-      // acyclicer: 'greedy',
-      // ranker: 'longest-path'
-    });
-
-    // Default to assigning a new object as a label for each new edge.
-    this.graph.setDefaultEdgeLabel(() => {
-      return {
-        /* empty */
-      };
-    });
-
-    this._nodes = this.nodes.map(n => {
-      return Object.assign({}, n);
-    });
-
-    this._links = this.links.map(l => {
-      const newLink = Object.assign({}, l);
-      if (!newLink.id) newLink.id = id();
-      return newLink;
-    });
-
-    for (const node of this._nodes) {
-      node.width = 20;
-      node.height = 30;
-
-      // update dagre
-      this.graph.setNode(node.id, node);
-
-      // set view options
-      node.options = {
-        color: this.colors.getColor(this.groupResultsBy(node)),
-        transform: `translate( ${node.x - node.width / 2 || 0}, ${node.y - node.height / 2 || 0})`
-      };
-    }
-
-    // update dagre
-    for (const edge of this._links) {
-      this.graph.setEdge(edge.source, edge.target);
-    }
+    this.graph = {
+      nodes: [...this.nodes].map(n => {
+        if (!n.id) {
+          n.id = id();
+        }
+        n.dimension = {
+          width: 30,
+          height: 30
+        };
+        n.position = {
+          x: 0,
+          y: 0
+        };
+        n.data = n.data ? n.data : {};
+        return n;
+      }),
+      edges: [...this.links].map(e => {
+        if (!e.id) {
+          e.id = id();
+        }
+        return e;
+      })
+    };
 
     requestAnimationFrame(() => this.draw());
   }
@@ -624,10 +561,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   pan(x: number, y: number): void {
     const zoomLevel = this.zoomLevel;
-    this.transformationMatrix = transform(
-      this.transformationMatrix,
-      translate(x / zoomLevel, y / zoomLevel)
-    );
+    this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
   }
@@ -688,28 +622,28 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   onDrag(event): void {
     const node = this.draggingNode;
-    node.x += event.movementX / this.zoomLevel;
-    node.y += event.movementY / this.zoomLevel;
+    node.position.x += event.movementX / this.zoomLevel;
+    node.position.y += event.movementY / this.zoomLevel;
 
     // move the node
-    const x = node.x - node.width / 2;
-    const y = node.y - node.height / 2;
-    node.options.transform = `translate(${x}, ${y})`;
+    const x = node.position.x - node.dimension.width / 2;
+    const y = node.position.y - node.dimension.height / 2;
+    node.transform = `translate(${x}, ${y})`;
 
-    for (const link of this._links) {
+    for (const link of this.graph.edges) {
       if (link.target === node.id || link.source === node.id) {
-        const sourceNode = this._nodes.find(n => n.id === link.source);
-        const targetNode = this._nodes.find(n => n.id === link.target);
+        const sourceNode = this.graph.nodes.find(n => n.id === link.source);
+        const targetNode = this.graph.nodes.find(n => n.id === link.target);
 
         // determine new arrow position
-        const dir = sourceNode.y <= targetNode.y ? -1 : 1;
+        const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
         const startingPoint = {
-          x: sourceNode.x,
-          y: sourceNode.y - dir * (sourceNode.height / 2)
+          x: sourceNode.position.x,
+          y: sourceNode.position.y - dir * (sourceNode.dimension.height / 2)
         };
         const endingPoint = {
-          x: targetNode.x,
-          y: targetNode.y + dir * (targetNode.height / 2)
+          x: targetNode.position.x,
+          y: targetNode.position.y + dir * (targetNode.dimension.height / 2)
         };
 
         // generate new points

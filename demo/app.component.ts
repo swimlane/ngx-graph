@@ -4,7 +4,8 @@ import { Subject } from 'rxjs';
 import { colorSets } from '../src/utils/color-sets';
 import { id } from '../src/utils/id';
 import chartGroups from './chartTypes';
-import { countries, getTurbineData } from './data';
+import { countries, generateGraph } from './data';
+import { Graph, Node, Edge } from '../src/ngx-graph.module';
 
 @Component({
   selector: 'app',
@@ -21,8 +22,7 @@ export class AppComponent implements OnInit {
   chart: any;
   realTimeData: boolean = false;
   countrySet: any[];
-  graph: { links: any[]; nodes: any[] };
-  hierarchialGraph: { links: any[]; nodes: any[] };
+  graph: Graph;
 
   view: any[];
   width: number = 700;
@@ -87,7 +87,7 @@ export class AppComponent implements OnInit {
       countrySet: countries,
       colorSchemes: colorSets,
       chartTypeGroups: chartGroups,
-      hierarchialGraph: getTurbineData()
+      graph: generateGraph(6)
     });
 
     this.setColorScheme('picnic');
@@ -121,16 +121,16 @@ export class AppComponent implements OnInit {
         label: country
       };
 
-      this.hierarchialGraph.nodes.push(hNode);
+      this.graph.nodes.push(hNode);
 
-      this.hierarchialGraph.links.push({
-        source: this.hierarchialGraph.nodes[Math.floor(Math.random() * (this.hierarchialGraph.nodes.length - 1))].id,
+      this.graph.edges.push({
+        source: this.graph.nodes[Math.floor(Math.random() * (this.graph.nodes.length - 1))].id,
         target: hNode.id,
         label: 'on success'
       });
 
-      this.hierarchialGraph.links = [...this.hierarchialGraph.links];
-      this.hierarchialGraph.nodes = [...this.hierarchialGraph.nodes];
+      this.graph.edges = [...this.graph.edges];
+      this.graph.nodes = [...this.graph.nodes];
     }
   }
 
