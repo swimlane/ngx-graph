@@ -53,6 +53,7 @@ This library is focused on handling graph data (anything with nodes and edges) r
   <ng-template #linkTemplate let-link>
     <svg:g class="edge">
       <svg:path
+        class="line"
         stroke-width="2"
         marker-end="url(#arrow)" >
       </svg:path>
