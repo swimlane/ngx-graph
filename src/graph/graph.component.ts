@@ -396,7 +396,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
       oldLink.oldLine = oldLink.line;
 
-      const points = l.points;
+      const points = this.calculatePoints(oldLink);
       const line = this.generateLine(points);
 
       const newLink = Object.assign({}, oldLink);
@@ -698,22 +698,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
     for (const link of this._links) {
       if (link.target === node.id || link.source === node.id) {
-        const sourceNode = this._nodes.find(n => n.id === link.source);
-        const targetNode = this._nodes.find(n => n.id === link.target);
-
-        // determine new arrow position
-        const dir = sourceNode.y <= targetNode.y ? -1 : 1;
-        const startingPoint = {
-          x: sourceNode.x,
-          y: sourceNode.y - dir * (sourceNode.height / 2)
-        };
-        const endingPoint = {
-          x: targetNode.x,
-          y: targetNode.y + dir * (targetNode.height / 2)
-        };
-
-        // generate new points
-        link.points = [startingPoint, endingPoint];
+        link.points = this.calculatePoints(link);
         const line = this.generateLine(link.points);
         this.calcDominantBaseline(link);
         link.oldLine = link.line;
@@ -722,6 +707,35 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     this.redrawLines(false);
+  }
+
+  calculatePoints(link: { source?: string, target?: string} = {}): Array<{ x: number, y: number}> {
+    const sourceNode = this._nodes.find(n => n.id === link.source);
+    const targetNode = this._nodes.find(n => n.id === link.target);
+
+    const rankAxis: 'x' | 'y' = (this.orientation === 'BT' || this.orientation === 'TB') ? 'y' : 'x';
+    const orderAxis: 'x' | 'y' = rankAxis === 'y' ? 'x' : 'y';
+    const rankDimension = rankAxis === 'y' ? 'height' : 'width';
+
+    // determine new arrow position
+    const dir = sourceNode[rankAxis] <= targetNode[rankAxis] ? -1 : 1;
+    const startingPoint = {
+      [orderAxis]: sourceNode[orderAxis],
+      [rankAxis]: sourceNode[rankAxis] - dir * (sourceNode[rankDimension] / 2)
+    };
+    const endingPoint = {
+      [orderAxis]: targetNode[orderAxis],
+      [rankAxis]: targetNode[rankAxis] + dir * (targetNode[rankDimension] / 2)
+    };
+    const curvingDistance = 20;
+
+    // generate new points
+    return <any>[
+      startingPoint,
+      { [orderAxis]: startingPoint[orderAxis], [rankAxis]: startingPoint[rankAxis] - dir * curvingDistance },
+      { [orderAxis]: endingPoint[orderAxis], [rankAxis]: endingPoint[rankAxis] + dir * curvingDistance },
+      endingPoint,
+    ];
   }
 
   /**
