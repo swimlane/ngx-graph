@@ -89,6 +89,8 @@ export class AppComponent implements OnInit {
       chartTypeGroups: chartGroups,
       hierarchialGraph: getTurbineData()
     });
+    this.hierarchialGraph.nodes[0].forcex = 50;
+    this.hierarchialGraph.nodes[0].forcey = 700;
 
     this.setColorScheme('picnic');
     this.setInterpolationType('Bundle');
