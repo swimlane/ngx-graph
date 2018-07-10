@@ -4,7 +4,7 @@
       <ngx-graph *ngIf="graph" #graphEl class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
         [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
         [links]="graph.edges" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="graph.nodes" [scheme]="colorScheme"
-        [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
+        [layout]="layout" [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
 
         <ng-template #defsTemplate>
           <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
@@ -130,6 +130,11 @@
         <strong>Options</strong>
       </h3>
       <div [hidden]="!optsVisible" style="margin-left: 10px;">
+        <label>Layout</label>
+        <select [(ngModel)]="layout">
+          <option *ngFor="let layoutOption of layouts" [value]="layoutOption.value">{{layoutOption.label}}</option>
+        </select>
+
         <label>Orientation</label>
         <select [(ngModel)]="orientation">
           <option *ngFor="let orient of orientations" [value]="orient.value">{{orient.label}}</option>

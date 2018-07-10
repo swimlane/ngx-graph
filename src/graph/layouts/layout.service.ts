@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Layout } from '../../models/layout.model';
 import { DagreLayout } from './dagre';
+import { DagreNodesOnlyLayout } from './dagreNodesOnly';
 
 const layouts = {
-  dagre: DagreLayout
+  dagre: DagreLayout,
+  dagreNodesOnly: DagreNodesOnlyLayout,
 };
 
 @Injectable()

@@ -18,7 +18,9 @@ import {
   ViewChildren,
   ViewEncapsulation,
   NgZone,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 import {
   BaseChartComponent,
@@ -59,7 +61,7 @@ export interface Matrix {
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
 })
-export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
+export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() legend: boolean;
   @Input() nodes: Node[] = [];
   @Input() links: Edge[] = [];
@@ -90,7 +92,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
 
-  @Input() layout: string | Layout = 'dagre';
+  @Input() layout: string | Layout = 'dagreNodesOnly';
+  @Input() layoutSettings: any;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -208,9 +211,40 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         })
       );
     }
+  }
 
-    if (this.layout && typeof this.layout === 'string') {
-      this.layout = this.layoutService.getLayout(this.layout);
+  ngOnChanges(changes: SimpleChanges): void {
+    const { orientation, layout, layoutSettings, nodes, edges } = changes;
+    if (orientation) {
+      this.layoutSettings = {
+        ...this.layoutSettings,
+        orientation: this.orientation,
+      };
+      this.setLayoutSettings(this.layoutSettings);
+    }
+    if (layout) {
+      this.setLayout(this.layout);
+    }
+    if (layoutSettings) {
+      this.setLayoutSettings(this.layoutSettings);
+    }
+    if (nodes || edges) {
+      this.update();
+    }
+  }
+
+  setLayout(layout: string | Layout): void {
+    this.initialized = false;
+    if (layout && typeof layout === 'string') {
+      this.layout = this.layoutService.getLayout(layout);
+      this.setLayoutSettings(this.layoutSettings);
+    }
+  }
+
+  setLayoutSettings(settings: any): void {
+    if (this.layout && typeof this.layout !== 'string') {
+      this.layout.settings = settings;
+      this.update();
     }
   }
 
@@ -273,11 +307,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   draw(): void {
+    if (typeof this.layout === 'string') {
+      return;
+    }
     // Calc view dims for the nodes
     this.applyNodeDimensions();
 
-    // Dagre to recalc the layout
-    (this.layout as Layout).run(this.graph);
+    // Recalc the layout
+    this.graph = this.layout.run(this.graph);
 
     // Transposes view options to the node
     this.graph.nodes.map(n => {
@@ -545,9 +582,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
 
       // Panzoom
-      this.pan(svgPoint.x, svgPoint.y);
+      const NO_ZOOM_LEVEL = 1;
+      this.pan(svgPoint.x, svgPoint.y, NO_ZOOM_LEVEL);
       this.zoom(zoomFactor);
-      this.pan(-svgPoint.x, -svgPoint.y);
+      this.pan(-svgPoint.x, -svgPoint.y, NO_ZOOM_LEVEL);
     } else {
       this.zoom(zoomFactor);
     }
@@ -559,8 +597,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @param x
    * @param y
    */
-  pan(x: number, y: number): void {
-    const zoomLevel = this.zoomLevel;
+  pan(x: number, y: number, zoomLevel: number = this.zoomLevel): void {
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
@@ -632,26 +669,13 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
     for (const link of this.graph.edges) {
       if (link.target === node.id || link.source === node.id) {
-        const sourceNode = this.graph.nodes.find(n => n.id === link.source);
-        const targetNode = this.graph.nodes.find(n => n.id === link.target);
-
-        // determine new arrow position
-        const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
-        const startingPoint = {
-          x: sourceNode.position.x,
-          y: sourceNode.position.y - dir * (sourceNode.dimension.height / 2)
-        };
-        const endingPoint = {
-          x: targetNode.position.x,
-          y: targetNode.position.y + dir * (targetNode.dimension.height / 2)
-        };
-
-        // generate new points
-        link.points = [startingPoint, endingPoint];
-        const line = this.generateLine(link.points);
-        this.calcDominantBaseline(link);
-        link.oldLine = link.line;
-        link.line = line;
+        if (typeof this.layout !== 'string') {
+          this.graph = this.layout.updateEdge(this.graph, link);
+          const line = this.generateLine(link.points);
+          this.calcDominantBaseline(link);
+          link.oldLine = link.line;
+          link.line = line;
+        }
       }
     }
 

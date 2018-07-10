@@ -61,6 +61,18 @@ export class AppComponent implements OnInit {
     }
   ];
 
+  layout: string = 'dagre';
+  layouts: any[] = [
+    {
+      label: 'Dagre',
+      value: 'dagre',
+    },
+    {
+      label: 'Dagre Nodes Only',
+      value: 'dagreNodesOnly',
+    },
+  ];
+
   // line interpolation
   curveType: string = 'Linear';
   curve: any = shape.curveLinear;
