@@ -134,11 +134,6 @@ export class DagreLayout implements Layout {
 
       // update dagre
       this.dagreGraph.setNode(node.id, node);
-
-      // set view options
-      node.options = {
-        transform: `translate( ${node.x - node.width / 2 || 0}, ${node.y - node.height / 2 || 0})`
-      };
     }
 
     // update dagre

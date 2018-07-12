@@ -71,6 +71,10 @@ export class AppComponent implements OnInit {
       label: 'Dagre Nodes Only',
       value: 'dagreNodesOnly',
     },
+    {
+      label: 'D3 Force Directed',
+      value: 'd3ForceDirected',
+    },
   ];
 
   // line interpolation

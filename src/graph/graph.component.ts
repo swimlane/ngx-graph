@@ -32,7 +32,8 @@ import {
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import 'd3-transition';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, of } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -107,6 +108,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
+  graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -314,12 +316,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.applyNodeDimensions();
 
     // Recalc the layout
-    this.graph = this.layout.run(this.graph);
+    const result = this.layout.run(this.graph);
+    const result$ = result instanceof Observable ? result : of(result);
+    this.graphSubscription.add(result$.subscribe(graph => {
+      this.graph = graph;
+      this.tick();
+    }));
+    result$
+      .pipe(first(graph => graph.nodes.length > 0))
+      .subscribe(() => this.applyNodeDimensions());
+  }
 
+  tick() {
     // Transposes view options to the node
     this.graph.nodes.map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
-        0})`;
+      n.transform = `translate(${
+        n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
+      })`;
       if (!n.data) {
         n.data = {};
       }
@@ -336,7 +349,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
-        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
+        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey) || edgeLabel;
       }
 
       oldLink.oldLine = oldLink.line;
@@ -361,7 +374,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.calcDominantBaseline(newLink);
       newLinks.push(newLink);
     }
-
+    
     this.graph.edges = newLinks;
 
     // Map the old links for animations
@@ -478,6 +491,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   createGraph(): void {
+    this.graphSubscription.unsubscribe();
+    this.graphSubscription = new Subscription();
     this.graph = {
       nodes: [...this.nodes].map(n => {
         if (!n.id) {
@@ -659,6 +674,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   onDrag(event): void {
     const node = this.draggingNode;
+    if (typeof this.layout !== 'string' && this.layout.onDrag) {
+      this.layout.onDrag(node, event);
+    }
+
     node.position.x += event.movementX / this.zoomLevel;
     node.position.y += event.movementY / this.zoomLevel;
 
@@ -668,18 +687,29 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     node.transform = `translate(${x}, ${y})`;
 
     for (const link of this.graph.edges) {
-      if (link.target === node.id || link.source === node.id) {
+      if (
+        link.target === node.id || link.source === node.id ||
+        (link.target as any).id === node.id || (link.source as any).id === node.id
+      ) {
         if (typeof this.layout !== 'string') {
-          this.graph = this.layout.updateEdge(this.graph, link);
-          const line = this.generateLine(link.points);
-          this.calcDominantBaseline(link);
-          link.oldLine = link.line;
-          link.line = line;
+          const result = this.layout.updateEdge(this.graph, link);
+          const result$ = result instanceof Observable ? result : of(result);
+          this.graphSubscription.add(result$.subscribe(graph => {
+            this.graph = graph;
+            this.redrawEdge(link);
+          }));
         }
       }
     }
 
     this.redrawLines(false);
+  }
+
+  redrawEdge(edge: Edge) {
+    const line = this.generateLine(edge.points);
+    this.calcDominantBaseline(edge);
+    edge.oldLine = edge.line;
+    edge.line = line;
   }
 
   /**
@@ -864,14 +894,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   /**
    * On mouse up event to disable panning/dragging.
    *
-   * @param {MouseEvent} $event
+   * @param {MouseEvent} event
    *
    * @memberOf GraphComponent
    */
   @HostListener('document:mouseup')
-  onMouseUp($event: MouseEvent): void {
+  onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
+    if (typeof this.layout !== 'string' && this.layout.onDragEnd) {
+      this.layout.onDragEnd(this.draggingNode, event);
+    }
   }
 
   /**
@@ -885,6 +918,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   onNodeMouseDown(event: MouseEvent, node: any): void {
     this.isDragging = true;
     this.draggingNode = node;
+
+    if (typeof this.layout !== 'string' && this.layout.onDragStart) {
+      this.layout.onDragStart(node, event);
+    }
   }
 
   /**
