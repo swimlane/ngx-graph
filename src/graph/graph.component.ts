@@ -94,7 +94,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
 
-  @Input() layout: string | Layout = 'dagreNodesOnly';
+  @Input() layout: string | Layout;
   @Input() layoutSettings: any;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
@@ -239,7 +239,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   setLayout(layout: string | Layout): void {
     this.initialized = false;
-    if (layout && typeof layout === 'string') {
+    if (!layout) {
+      layout = 'dagre';
+    }
+    if (typeof layout === 'string') {
       this.layout = this.layoutService.getLayout(layout);
       this.setLayoutSettings(this.layoutSettings);
     }
@@ -311,7 +314,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   draw(): void {
-    if (typeof this.layout === 'string') {
+    if (!this.layout || typeof this.layout === 'string') {
       return;
     }
     // Calc view dims for the nodes
@@ -689,7 +692,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   onDrag(event): void {
     const node = this.draggingNode;
-    if (typeof this.layout !== 'string' && this.layout.onDrag) {
+    if (this.layout && typeof this.layout !== 'string' && this.layout.onDrag) {
       this.layout.onDrag(node, event);
     }
 
@@ -706,7 +709,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         link.target === node.id || link.source === node.id ||
         (link.target as any).id === node.id || (link.source as any).id === node.id
       ) {
-        if (typeof this.layout !== 'string') {
+        if (this.layout && typeof this.layout !== 'string') {
           const result = this.layout.updateEdge(this.graph, link);
           const result$ = result instanceof Observable ? result : of(result);
           this.graphSubscription.add(result$.subscribe(graph => {
@@ -917,7 +920,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
-    if (typeof this.layout !== 'string' && this.layout.onDragEnd) {
+    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragEnd) {
       this.layout.onDragEnd(this.draggingNode, event);
     }
   }
@@ -934,7 +937,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.isDragging = true;
     this.draggingNode = node;
 
-    if (typeof this.layout !== 'string' && this.layout.onDragStart) {
+    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragStart) {
       this.layout.onDragStart(node, event);
     }
   }

@@ -61,7 +61,7 @@ export class AppComponent implements OnInit {
     }
   ];
 
-  layout: string = 'dagre';
+  layout: string;
   layouts: any[] = [
     {
       label: 'Dagre',
