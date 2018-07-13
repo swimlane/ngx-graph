@@ -68,7 +68,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() clusters: ClusterNode[] = [];
   @Input() links: Edge[] = [];
   @Input() activeEntries: any[] = [];
-  @Input() orientation: string = 'LR';
   @Input() curve: any;
   @Input() draggingEnabled: boolean = true;
 
@@ -218,14 +217,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const { orientation, layout, layoutSettings, nodes, clusters, edges } = changes;
-    if (orientation) {
-      this.layoutSettings = {
-        ...this.layoutSettings,
-        orientation: this.orientation,
-      };
-      this.setLayoutSettings(this.layoutSettings);
-    }
+    const { layout, layoutSettings, nodes, clusters, edges } = changes;
     if (layout) {
       this.setLayout(this.layout);
     }

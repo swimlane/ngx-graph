@@ -3,7 +3,7 @@ import { Graph } from '../../models/graph.model';
 import { Node, ClusterNode } from '../../models/node.model';
 import { id } from '../../utils';
 import {
-  d3adaptor, ID3StyleLayoutAdaptor, Layout as ColaLayout, Group, InputNode, Link, GraphNode, Rectangle,
+  d3adaptor, ID3StyleLayoutAdaptor, Layout as ColaLayout, Group, InputNode, Link, GraphNode, Rectangle, Constraint,
 } from 'webcola';
 import * as d3Dispatch from 'd3-dispatch';
 import * as d3Force from 'd3-force';
@@ -14,6 +14,7 @@ import { ViewDimensions } from '@swimlane/ngx-charts';
 
 export interface ColaForceDirectedSettings {
   force?: ColaLayout & ID3StyleLayoutAdaptor;
+  forceModifierFn?: (force: ColaLayout & ID3StyleLayoutAdaptor) => ColaLayout & ID3StyleLayoutAdaptor;
   viewDimensions?: ViewDimensions;
 }
 export interface ColaGraph {
@@ -53,7 +54,6 @@ export class ColaForceDirectedLayout implements Layout {
   draggingStart: { x: number, y: number };
 
   run(graph: Graph): Observable<Graph> {
-    console.log(graph);
     this.inputGraph = graph;
     if (!this.inputGraph.clusters) {
       this.inputGraph.clusters = [];
@@ -95,6 +95,9 @@ export class ColaForceDirectedLayout implements Layout {
           this.settings.viewDimensions.width,
           this.settings.viewDimensions.height,
         ]);
+      }
+      if (this.settings.forceModifierFn) {
+        this.settings.force = this.settings.forceModifierFn(this.settings.force);
       }
       this.settings.force.start();
     }
