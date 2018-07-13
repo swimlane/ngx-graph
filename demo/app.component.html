@@ -48,6 +48,11 @@
         <option [value]="'light'">Light</option>
       </select>
 
+      <h3>Layout</h3>
+      <select [(ngModel)]="layout" (ngModelChange)="onLayoutChange($event)">
+        <option *ngFor="let layoutOption of layouts" [value]="layoutOption.value">{{layoutOption.label}}</option>
+      </select>
+
       <h3 (click)="dataVisable = !dataVisable" style="cursor: pointer">
         <span [class.arrow-down]="dataVisable" [class.arrow-right]="!dataVisable">
         </span>
@@ -130,11 +135,6 @@
         <strong>Options</strong>
       </h3>
       <div [hidden]="!optsVisible" style="margin-left: 10px;">
-        <label>Layout</label>
-        <select [(ngModel)]="layout" (ngModelChange)="onLayoutChange($event)">
-          <option *ngFor="let layoutOption of layouts" [value]="layoutOption.value">{{layoutOption.label}}</option>
-        </select>
-
         <label>Orientation</label>
         <select [(ngModel)]="orientation">
           <option *ngFor="let orient of orientations" [value]="orient.value">{{orient.label}}</option>

@@ -523,7 +523,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     };
     this.graph = {
       nodes: [...this.nodes].map(initializeNode),
-      clusters: [...this.clusters].map(initializeNode),
+      clusters: [...(this.clusters || [])].map(initializeNode),
       edges: [...this.links].map(e => {
         if (!e.id) {
           e.id = id();
