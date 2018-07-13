@@ -38,7 +38,7 @@ import { identity, scale, toSVG, transform, translate } from 'transformation-mat
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
 import { Edge } from '../models/edge.model';
-import { Node } from '../models/node.model';
+import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils';
 
@@ -65,6 +65,7 @@ export interface Matrix {
 export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() legend: boolean;
   @Input() nodes: Node[] = [];
+  @Input() clusters: ClusterNode[] = [];
   @Input() links: Edge[] = [];
   @Input() activeEntries: any[] = [];
   @Input() orientation: string = 'LR';
@@ -101,6 +102,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
   @ViewChild(ChartComponent, { read: ElementRef })
   chart: ElementRef;
@@ -216,7 +218,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const { orientation, layout, layoutSettings, nodes, edges } = changes;
+    const { orientation, layout, layoutSettings, nodes, clusters, edges } = changes;
     if (orientation) {
       this.layoutSettings = {
         ...this.layoutSettings,
@@ -230,7 +232,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
     }
-    if (nodes || edges) {
+    if (nodes || clusters || edges) {
       this.update();
     }
   }
@@ -330,6 +332,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   tick() {
     // Transposes view options to the node
     this.graph.nodes.map(n => {
+      n.transform = `translate(${
+        n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
+      })`;
+      if (!n.data) {
+        n.data = {};
+      }
+      n.data = {
+        color: this.colors.getColor(this.groupResultsBy(n))
+      };
+    });
+    (this.graph.clusters || []).map(n => {
       n.transform = `translate(${
         n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
       })`;
@@ -493,22 +506,24 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   createGraph(): void {
     this.graphSubscription.unsubscribe();
     this.graphSubscription = new Subscription();
+    const initializeNode = (n) => {
+      if (!n.id) {
+        n.id = id();
+      }
+      n.dimension = {
+        width: 30,
+        height: 30
+      };
+      n.position = {
+        x: 0,
+        y: 0
+      };
+      n.data = n.data ? n.data : {};
+      return n;
+    };
     this.graph = {
-      nodes: [...this.nodes].map(n => {
-        if (!n.id) {
-          n.id = id();
-        }
-        n.dimension = {
-          width: 30,
-          height: 30
-        };
-        n.position = {
-          x: 0,
-          y: 0
-        };
-        n.data = n.data ? n.data : {};
-        return n;
-      }),
+      nodes: [...this.nodes].map(initializeNode),
+      clusters: [...this.clusters].map(initializeNode),
       edges: [...this.links].map(e => {
         if (!e.id) {
           e.id = id();

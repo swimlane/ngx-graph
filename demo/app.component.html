@@ -3,7 +3,7 @@
     <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
       <ngx-graph *ngIf="graph" #graphEl class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
         [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
-        [links]="graph.edges" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="graph.nodes" [scheme]="colorScheme"
+        [links]="graph.edges" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="graph.nodes" [clusters]="graph.clusters" [scheme]="colorScheme"
         [layout]="layout" [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
 
         <ng-template #defsTemplate>
@@ -131,7 +131,7 @@
       </h3>
       <div [hidden]="!optsVisible" style="margin-left: 10px;">
         <label>Layout</label>
-        <select [(ngModel)]="layout">
+        <select [(ngModel)]="layout" (ngModelChange)="onLayoutChange($event)">
           <option *ngFor="let layoutOption of layouts" [value]="layoutOption.value">{{layoutOption.label}}</option>
         </select>
 

@@ -156,11 +156,14 @@
   "dependencies": {
     "@swimlane/ngx-charts": "^8.0.0",
     "@types/d3-transition": "^1.1.1",
+    "d3-dispatch": "^1.0.3",
     "d3-force": "^1.1.0",
     "d3-selection": "^1.2.0",
     "d3-shape": "^1.2.0",
+    "d3-timer": "^1.0.7",
     "d3-transition": "^1.1.1",
     "dagre": "^0.8.2",
-    "transformation-matrix": "^1.7.0"
+    "transformation-matrix": "^1.7.0",
+    "webcola": "^3.3.8"
   }
 }

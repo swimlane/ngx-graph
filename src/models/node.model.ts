@@ -16,3 +16,7 @@ export interface Node {
   label?: string;
   data?: any;
 }
+
+export interface ClusterNode extends Node {
+  childNodeIds: string[];
+}

@@ -72,6 +72,16 @@ export class AppComponent implements OnInit {
       value: 'dagreNodesOnly',
     },
     {
+      label: 'Dagre Cluster',
+      value: 'dagreCluster',
+      isClustered: true,
+    },
+    {
+      label: 'Cola Force Directed',
+      value: 'colaForceDirected',
+      isClustered: true,
+    },
+    {
       label: 'D3 Force Directed',
       value: 'd3ForceDirected',
     },
@@ -224,6 +234,23 @@ export class AppComponent implements OnInit {
     if (curveType === 'Step Before') {
       this.curve = shape.curveStepBefore;
     }
+  }
+
+  onLayoutChange(layoutId: string) {
+    const layout = this.layouts.find(layoutRef => layoutRef.value === layoutId);
+    if (layout && layout.isClustered) {
+      this.addCluster();
+    } else {
+      this.graph.clusters = [];
+    }
+  }
+
+  addCluster() {
+    this.graph.clusters = [{
+      id: id(),
+      label: 'Cluster',
+      childNodeIds: [this.graph.nodes[0].id, this.graph.nodes[3].id],
+    }];
   }
 
   onLegendLabelClick(entry) {
