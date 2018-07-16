@@ -5,7 +5,8 @@ import { colorSets } from '../src/utils/color-sets';
 import { id } from '../src/utils/id';
 import chartGroups from './chartTypes';
 import { countries, generateGraph } from './data';
-import { Graph, Node, Edge } from '../src/ngx-graph.module';
+import { Graph, Node, Edge, Layout } from '../src/ngx-graph.module';
+import { ColaForceDirectedLayout, D3ForceDirectedLayout } from '../src';
 
 @Component({
   selector: 'app',
@@ -61,7 +62,8 @@ export class AppComponent implements OnInit {
     }
   ];
 
-  layout: string = 'dagre';
+  layoutId: string = 'dagre';
+  customLayout: Layout;
   layouts: any[] = [
     {
       label: 'Dagre',
@@ -79,11 +81,13 @@ export class AppComponent implements OnInit {
     {
       label: 'Cola Force Directed',
       value: 'colaForceDirected',
+      customLayout: new ColaForceDirectedLayout(),
       isClustered: true,
     },
     {
       label: 'D3 Force Directed',
       value: 'd3ForceDirected',
+      customLayout: new D3ForceDirectedLayout(),
     },
   ];
 
@@ -242,6 +246,9 @@ export class AppComponent implements OnInit {
       this.addCluster();
     } else {
       this.graph.clusters = [];
+    }
+    if (layout) {
+      this.customLayout = layout.customLayout;
     }
   }
 

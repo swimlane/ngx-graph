@@ -4,7 +4,7 @@
       <ngx-graph *ngIf="graph" #graphEl class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
         [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
         [links]="graph.edges" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="graph.nodes" [clusters]="graph.clusters" [scheme]="colorScheme"
-        [layout]="layout" [layoutSettings]="{orientation: orientation}" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
+        [layout]="customLayout || layoutId" [layoutSettings]="{orientation: orientation}" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
 
         <ng-template #defsTemplate>
           <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
@@ -55,7 +55,7 @@
       </select>
 
       <h3>Layout</h3>
-      <select [(ngModel)]="layout" (ngModelChange)="onLayoutChange($event)">
+      <select [(ngModel)]="layoutId" (ngModelChange)="onLayoutChange($event)">
         <option *ngFor="let layoutOption of layouts" [value]="layoutOption.value">{{layoutOption.label}}</option>
       </select>
 
