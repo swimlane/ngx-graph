@@ -1,7 +1,7 @@
 import { Graph } from './graph.model';
 import { Edge } from './edge.model';
 import { Node } from './node.model';
-import { Observable } from '../../node_modules/rxjs';
+import { Observable } from 'rxjs';
 
 export interface Layout {
   settings?: any;
