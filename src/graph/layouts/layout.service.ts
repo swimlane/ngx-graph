@@ -1,14 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Layout } from '../../models/layout.model';
-import { ColaForceDirectedLayout } from './colaForceDirected';
-import { D3ForceDirectedLayout } from './d3ForceDirected';
 import { DagreLayout } from './dagre';
 import { DagreClusterLayout } from './dagreCluster';
 import { DagreNodesOnlyLayout } from './dagreNodesOnly';
 
 const layouts = {
-  colaForceDirected: ColaForceDirectedLayout,
-  d3ForceDirected: D3ForceDirectedLayout,
   dagre: DagreLayout,
   dagreCluster: DagreClusterLayout,
   dagreNodesOnly: DagreNodesOnlyLayout,

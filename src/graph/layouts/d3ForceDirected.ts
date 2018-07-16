@@ -11,7 +11,7 @@ import {
   forceY
 } from 'd3-force';
 import { Edge } from '../..';
-import { Observable, Subject } from '../../../node_modules/rxjs';
+import { Observable, Subject } from 'rxjs';
 
 export interface D3ForceDirectedSettings {
   force?: any;
