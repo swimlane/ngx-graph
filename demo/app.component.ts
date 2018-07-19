@@ -5,7 +5,8 @@ import { colorSets } from '../src/utils/color-sets';
 import { id } from '../src/utils/id';
 import chartGroups from './chartTypes';
 import { countries, generateGraph } from './data';
-import { Graph, Node, Edge } from '../src/ngx-graph.module';
+import { Graph, Node, Edge, Layout } from '../src/ngx-graph.module';
+import { ColaForceDirectedLayout, D3ForceDirectedLayout } from '../src';
 
 @Component({
   selector: 'app',
@@ -59,6 +60,35 @@ export class AppComponent implements OnInit {
       label: 'Bottom to Top',
       value: 'BT'
     }
+  ];
+
+  layoutId: string = 'dagre';
+  customLayout: Layout;
+  layouts: any[] = [
+    {
+      label: 'Dagre',
+      value: 'dagre',
+    },
+    {
+      label: 'Dagre Nodes Only',
+      value: 'dagreNodesOnly',
+    },
+    {
+      label: 'Dagre Cluster',
+      value: 'dagreCluster',
+      isClustered: true,
+    },
+    {
+      label: 'Cola Force Directed',
+      value: 'colaForceDirected',
+      customLayout: new ColaForceDirectedLayout(),
+      isClustered: true,
+    },
+    {
+      label: 'D3 Force Directed',
+      value: 'd3ForceDirected',
+      customLayout: new D3ForceDirectedLayout(),
+    },
   ];
 
   // line interpolation
@@ -208,6 +238,35 @@ export class AppComponent implements OnInit {
     if (curveType === 'Step Before') {
       this.curve = shape.curveStepBefore;
     }
+  }
+
+  onLayoutChange(layoutId: string) {
+    const layout = this.layouts.find(layoutRef => layoutRef.value === layoutId);
+    if (layout && layout.isClustered) {
+      this.addClusters();
+    } else {
+      this.removeClusters();
+    }
+    if (layout) {
+      this.customLayout = layout.customLayout;
+    }
+  }
+
+  addClusters() {
+    const subGroup = {
+      id: id(),
+      label: 'Subgroup',
+      childNodeIds: [this.graph.nodes[2].id, this.graph.nodes[4].id],
+    };
+    this.graph.clusters = [{
+      id: id(),
+      label: 'Cluster',
+      childNodeIds: [this.graph.nodes[0].id, subGroup.id],
+    }, subGroup];
+  }
+
+  removeClusters() {
+    this.graph.clusters = [];
   }
 
   onLegendLabelClick(entry) {

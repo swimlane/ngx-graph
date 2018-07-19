@@ -18,7 +18,9 @@ import {
   ViewChildren,
   ViewEncapsulation,
   NgZone,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 import {
   BaseChartComponent,
@@ -30,12 +32,13 @@ import {
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import 'd3-transition';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, of } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
 import { Edge } from '../models/edge.model';
-import { Node } from '../models/node.model';
+import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils';
 
@@ -54,17 +57,60 @@ export interface Matrix {
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
-  templateUrl: './graph.component.html',
+  template: `
+  <ngx-charts-chart [view]="[width, height]" [showLegend]="legend" [legendOptions]="legendOptions" (legendLabelClick)="onClick($event)"
+  (legendLabelActivate)="onActivate($event)" (legendLabelDeactivate)="onDeactivate($event)" mouseWheel (mouseWheelUp)="onZoom($event, 'in')"
+  (mouseWheelDown)="onZoom($event, 'out')">
+  <svg:g *ngIf="initialized && graph" [attr.transform]="transform" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
+    class="graph chart">
+    <defs>
+      <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
+      </ng-template>
+      <svg:path class="text-path" *ngFor="let link of graph.edges" [attr.d]="link.textPath" [attr.id]="link.id">
+      </svg:path>
+    </defs>
+    <svg:rect class="panning-rect" [attr.width]="dims.width * 100" [attr.height]="dims.height * 100" [attr.transform]="'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' "
+      (mousedown)="isPanning = true" />
+      <svg:g class="clusters">
+        <svg:g #clusterElement *ngFor="let node of graph.clusters; trackBy: trackNodeBy" class="node-group" [id]="node.id" [attr.transform]="node.transform"
+          (click)="onClick(node)">
+          <ng-template *ngIf="clusterTemplate" [ngTemplateOutlet]="clusterTemplate" [ngTemplateOutletContext]="{ $implicit: node }">
+          </ng-template>
+          <svg:g *ngIf="!clusterTemplate" class="node cluster">
+            <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data?.color" />
+            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">{{node.label}}</svg:text>
+          </svg:g>
+        </svg:g>
+      </svg:g>
+      <svg:g class="links">
+      <svg:g #linkElement *ngFor="let link of graph.edges; trackBy: trackLinkBy" class="link-group" [id]="link.id">
+        <ng-template *ngIf="linkTemplate" [ngTemplateOutlet]="linkTemplate" [ngTemplateOutletContext]="{ $implicit: link }">
+        </ng-template>
+        <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
+      </svg:g>
+    </svg:g>
+    <svg:g class="nodes">
+      <svg:g #nodeElement *ngFor="let node of graph.nodes; trackBy: trackNodeBy" class="node-group" [id]="node.id" [attr.transform]="node.transform"
+        (click)="onClick(node)" (mousedown)="onNodeMouseDown($event, node)">
+        <ng-template *ngIf="nodeTemplate" [ngTemplateOutlet]="nodeTemplate" [ngTemplateOutletContext]="{ $implicit: node }">
+        </ng-template>
+        <svg:circle *ngIf="!nodeTemplate" r="10" [attr.cx]="node.dimension.width / 2" [attr.cy]="node.dimension.height / 2" [attr.fill]="node.data?.color"
+        />
+      </svg:g>
+    </svg:g>
+  </svg:g>
+</ngx-charts-chart>
+  `,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
 })
-export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
+export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() legend: boolean;
   @Input() nodes: Node[] = [];
+  @Input() clusters: ClusterNode[] = [];
   @Input() links: Edge[] = [];
   @Input() activeEntries: any[] = [];
-  @Input() orientation: string = 'LR';
   @Input() curve: any;
   @Input() draggingEnabled: boolean = true;
 
@@ -90,13 +136,15 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
 
-  @Input() layout: string | Layout = 'dagre';
+  @Input() layout: string | Layout;
+  @Input() layoutSettings: any;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
   @ViewChild(ChartComponent, { read: ElementRef })
   chart: ElementRef;
@@ -104,6 +152,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
+  graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -208,9 +257,36 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         })
       );
     }
+  }
 
-    if (this.layout && typeof this.layout === 'string') {
-      this.layout = this.layoutService.getLayout(this.layout);
+  ngOnChanges(changes: SimpleChanges): void {
+    const { layout, layoutSettings, nodes, clusters, edges } = changes;
+    if (layout) {
+      this.setLayout(this.layout);
+    }
+    if (layoutSettings) {
+      this.setLayoutSettings(this.layoutSettings);
+    }
+    if (nodes || clusters || edges) {
+      this.update();
+    }
+  }
+
+  setLayout(layout: string | Layout): void {
+    this.initialized = false;
+    if (!layout) {
+      layout = 'dagre';
+    }
+    if (typeof layout === 'string') {
+      this.layout = this.layoutService.getLayout(layout);
+      this.setLayoutSettings(this.layoutSettings);
+    }
+  }
+
+  setLayoutSettings(settings: any): void {
+    if (this.layout && typeof this.layout !== 'string') {
+      this.layout.settings = settings;
+      this.update();
     }
   }
 
@@ -273,16 +349,41 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   draw(): void {
+    if (!this.layout || typeof this.layout === 'string') {
+      return;
+    }
     // Calc view dims for the nodes
     this.applyNodeDimensions();
 
-    // Dagre to recalc the layout
-    (this.layout as Layout).run(this.graph);
+    // Recalc the layout
+    const result = this.layout.run(this.graph);
+    const result$ = result instanceof Observable ? result : of(result);
+    this.graphSubscription.add(result$.subscribe(graph => {
+      this.graph = graph;
+      this.tick();
+    }));
+    result$
+      .pipe(first(graph => graph.nodes.length > 0))
+      .subscribe(() => this.applyNodeDimensions());
+  }
 
+  tick() {
     // Transposes view options to the node
     this.graph.nodes.map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
-        0})`;
+      n.transform = `translate(${
+        n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
+      })`;
+      if (!n.data) {
+        n.data = {};
+      }
+      n.data = {
+        color: this.colors.getColor(this.groupResultsBy(n))
+      };
+    });
+    (this.graph.clusters || []).map(n => {
+      n.transform = `translate(${
+        n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 || 0
+      })`;
       if (!n.data) {
         n.data = {};
       }
@@ -299,7 +400,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
       let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
       if (!oldLink) {
-        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
+        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey) || edgeLabel;
       }
 
       oldLink.oldLine = oldLink.line;
@@ -324,7 +425,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       this.calcDominantBaseline(newLink);
       newLinks.push(newLink);
     }
-
+    
     this.graph.edges = newLinks;
 
     // Map the old links for animations
@@ -441,22 +542,26 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   createGraph(): void {
+    this.graphSubscription.unsubscribe();
+    this.graphSubscription = new Subscription();
+    const initializeNode = (n) => {
+      if (!n.id) {
+        n.id = id();
+      }
+      n.dimension = {
+        width: 30,
+        height: 30
+      };
+      n.position = {
+        x: 0,
+        y: 0
+      };
+      n.data = n.data ? n.data : {};
+      return n;
+    };
     this.graph = {
-      nodes: [...this.nodes].map(n => {
-        if (!n.id) {
-          n.id = id();
-        }
-        n.dimension = {
-          width: 30,
-          height: 30
-        };
-        n.position = {
-          x: 0,
-          y: 0
-        };
-        n.data = n.data ? n.data : {};
-        return n;
-      }),
+      nodes: [...this.nodes].map(initializeNode),
+      clusters: [...(this.clusters || [])].map(initializeNode),
       edges: [...this.links].map(e => {
         if (!e.id) {
           e.id = id();
@@ -545,9 +650,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
 
       // Panzoom
-      this.pan(svgPoint.x, svgPoint.y);
+      const NO_ZOOM_LEVEL = 1;
+      this.pan(svgPoint.x, svgPoint.y, NO_ZOOM_LEVEL);
       this.zoom(zoomFactor);
-      this.pan(-svgPoint.x, -svgPoint.y);
+      this.pan(-svgPoint.x, -svgPoint.y, NO_ZOOM_LEVEL);
     } else {
       this.zoom(zoomFactor);
     }
@@ -559,8 +665,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @param x
    * @param y
    */
-  pan(x: number, y: number): void {
-    const zoomLevel = this.zoomLevel;
+  pan(x: number, y: number, zoomLevel: number = this.zoomLevel): void {
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
@@ -622,6 +727,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   onDrag(event): void {
     const node = this.draggingNode;
+    if (this.layout && typeof this.layout !== 'string' && this.layout.onDrag) {
+      this.layout.onDrag(node, event);
+    }
+
     node.position.x += event.movementX / this.zoomLevel;
     node.position.y += event.movementY / this.zoomLevel;
 
@@ -631,31 +740,29 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     node.transform = `translate(${x}, ${y})`;
 
     for (const link of this.graph.edges) {
-      if (link.target === node.id || link.source === node.id) {
-        const sourceNode = this.graph.nodes.find(n => n.id === link.source);
-        const targetNode = this.graph.nodes.find(n => n.id === link.target);
-
-        // determine new arrow position
-        const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
-        const startingPoint = {
-          x: sourceNode.position.x,
-          y: sourceNode.position.y - dir * (sourceNode.dimension.height / 2)
-        };
-        const endingPoint = {
-          x: targetNode.position.x,
-          y: targetNode.position.y + dir * (targetNode.dimension.height / 2)
-        };
-
-        // generate new points
-        link.points = [startingPoint, endingPoint];
-        const line = this.generateLine(link.points);
-        this.calcDominantBaseline(link);
-        link.oldLine = link.line;
-        link.line = line;
+      if (
+        link.target === node.id || link.source === node.id ||
+        (link.target as any).id === node.id || (link.source as any).id === node.id
+      ) {
+        if (this.layout && typeof this.layout !== 'string') {
+          const result = this.layout.updateEdge(this.graph, link);
+          const result$ = result instanceof Observable ? result : of(result);
+          this.graphSubscription.add(result$.subscribe(graph => {
+            this.graph = graph;
+            this.redrawEdge(link);
+          }));
+        }
       }
     }
 
     this.redrawLines(false);
+  }
+
+  redrawEdge(edge: Edge) {
+    const line = this.generateLine(edge.points);
+    this.calcDominantBaseline(edge);
+    edge.oldLine = edge.line;
+    edge.line = line;
   }
 
   /**
@@ -840,14 +947,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   /**
    * On mouse up event to disable panning/dragging.
    *
-   * @param {MouseEvent} $event
+   * @param {MouseEvent} event
    *
    * @memberOf GraphComponent
    */
   @HostListener('document:mouseup')
-  onMouseUp($event: MouseEvent): void {
+  onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
+    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragEnd) {
+      this.layout.onDragEnd(this.draggingNode, event);
+    }
   }
 
   /**
@@ -861,6 +971,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   onNodeMouseDown(event: MouseEvent, node: any): void {
     this.isDragging = true;
     this.draggingNode = node;
+
+    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragStart) {
+      this.layout.onDragStart(node, event);
+    }
   }
 
   /**

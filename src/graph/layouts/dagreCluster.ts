@@ -2,35 +2,10 @@ import { Layout } from '../../models/layout.model';
 import { Graph } from '../../models/graph.model';
 import { id } from '../../utils';
 import * as dagre from 'dagre';
-import { Edge } from '../..';
+import { Edge, Node, ClusterNode } from '../..';
+import { DagreSettings, Orientation } from './dagre';
 
-export enum Orientation {
-  LEFT_TO_RIGHT = 'LR',
-  RIGHT_TO_LEFT = 'RL',
-  TOP_TO_BOTTOM = 'TB',
-  BOTTOM_TO_TOM = 'BT'
-}
-export enum Alignment {
-  CENTER = 'C',
-  UP_LEFT = 'UL',
-  UP_RIGHT = 'UR',
-  DOWN_LEFT = 'DL',
-  DOWN_RIGHT = 'DR',
-}
-
-export interface DagreSettings {
-  orientation?: Orientation;
-  marginX?: number;
-  marginY?: number;
-  edgePadding?: number;
-  rankPadding?: number;
-  nodePadding?: number;
-  align?: Alignment;
-  acyclicer?: 'greedy' | undefined;
-  ranker?: 'network-simplex' | 'tight-tree' | 'longest-path';
-}
-
-export class DagreLayout implements Layout {
+export class DagreClusterLayout implements Layout {
   defaultSettings: DagreSettings = {
     orientation: Orientation.LEFT_TO_RIGHT,
     marginX: 20,
@@ -42,7 +17,8 @@ export class DagreLayout implements Layout {
   settings: DagreSettings = {};
 
   dagreGraph: any;
-  dagreNodes: any;
+  dagreNodes: Node[];
+  dagreClusters: ClusterNode[];
   dagreEdges: any;
 
   run(graph: Graph): Graph {
@@ -51,18 +27,22 @@ export class DagreLayout implements Layout {
 
     graph.edgeLabels = this.dagreGraph._edgeLabels;
 
-    for (const dagreNodeId in this.dagreGraph._nodes) {
-      const dagreNode = this.dagreGraph._nodes[dagreNodeId];
-      const node = graph.nodes.find(n => n.id === dagreNode.id);
-      node.position = {
-        x: dagreNode.x,
-        y: dagreNode.y
+    const dagreToOutput = (node) => {
+      const dagreNode = this.dagreGraph._nodes[node.id];
+      return {
+        ...node,
+        position: {
+          x: dagreNode.x,
+          y: dagreNode.y
+        },
+        dimension: {
+          width: dagreNode.width,
+          height: dagreNode.height
+        }
       };
-      node.dimension = {
-        width: dagreNode.width,
-        height: dagreNode.height
-      };
-    }
+    };
+    graph.clusters = (graph.clusters || []).map(dagreToOutput);
+    graph.nodes = graph.nodes.map(dagreToOutput);
 
     return graph;
   }
@@ -88,7 +68,7 @@ export class DagreLayout implements Layout {
   }
 
   createDagreGraph(graph: Graph): any {
-    this.dagreGraph = new dagre.graphlib.Graph();
+    this.dagreGraph = new dagre.graphlib.Graph({ compound: true });
     const settings = Object.assign({}, this.defaultSettings, this.settings);
     this.dagreGraph.setGraph({
       rankdir: settings.orientation,
@@ -109,7 +89,7 @@ export class DagreLayout implements Layout {
       };
     });
 
-    this.dagreNodes = graph.nodes.map(n => {
+    this.dagreNodes = graph.nodes.map((n: Node) => {
       const node: any = Object.assign({}, n);
       node.width = n.dimension.width;
       node.height = n.dimension.height;
@@ -118,6 +98,8 @@ export class DagreLayout implements Layout {
       return node;
     });
 
+    this.dagreClusters = graph.clusters || [];
+
     this.dagreEdges = graph.edges.map(l => {
       const newLink: any = Object.assign({}, l);
       if (!newLink.id) newLink.id = id();
@@ -125,15 +107,14 @@ export class DagreLayout implements Layout {
     });
 
     for (const node of this.dagreNodes) {
-      if (!node.width) {
-        node.width = 20;
-      }
-      if (!node.height) {
-        node.height = 30;
-      }
-
-      // update dagre
       this.dagreGraph.setNode(node.id, node);
+    }
+
+    for (const cluster of this.dagreClusters) {
+      this.dagreGraph.setNode(cluster.id, cluster);
+      cluster.childNodeIds.forEach(childNodeId => {
+        this.dagreGraph.setParent(childNodeId, cluster.id);
+      });
     }
 
     // update dagre
