@@ -65,14 +65,35 @@ export class ColaForceDirectedLayout implements Layout {
         height: n.dimension ? n.dimension.height : 20,
       }))] as any,
       groups: [...this.inputGraph.clusters.map((cluster): Group => ({
+        id: cluster.id,
         padding: 5,
-        leaves: cluster.childNodeIds.map(nodeId => <any>this.inputGraph.nodes.findIndex(node => node.id === nodeId)),
+        groups: cluster.childNodeIds
+          .map(nodeId => <any>this.inputGraph.clusters.findIndex(node => node.id === nodeId))
+          .filter(x => x >= 0),
+        leaves: cluster.childNodeIds
+          .map(nodeId => <any>this.inputGraph.nodes.findIndex(node => node.id === nodeId))
+          .filter(x => x >= 0),
       }))],
-      links: [...this.inputGraph.edges.map(e => ({
-        ...e,
-        source: this.inputGraph.nodes.findIndex(node => e.source === node.id),
-        target: this.inputGraph.nodes.findIndex(node => e.target === node.id),
-      }))] as any,
+      links: [...this.inputGraph.edges.map(e => {
+        const sourceNodeIndex = this.inputGraph.nodes.findIndex(node => e.source === node.id);
+        const targetNodeIndex = this.inputGraph.nodes.findIndex(node => e.target === node.id);
+        if (sourceNodeIndex === -1 || targetNodeIndex === -1) {
+          return undefined;
+        }
+        return {
+          ...e,
+          source: sourceNodeIndex,
+          target: targetNodeIndex,
+        };
+      }).filter(x => !!x)] as any,
+      groupLinks: [...this.inputGraph.edges.map(e => {
+        const sourceNodeIndex = this.inputGraph.nodes.findIndex(node => e.source === node.id);
+        const targetNodeIndex = this.inputGraph.nodes.findIndex(node => e.target === node.id);
+        if (sourceNodeIndex >= 0 && targetNodeIndex >= 0) {
+          return undefined;
+        }
+        return e;
+      }).filter(x => !!x)]
     };
     this.outputGraph = {
       nodes: [],
@@ -133,23 +154,35 @@ export class ColaForceDirectedLayout implements Layout {
       })`,
     }));
 
-    this.outputGraph.edges = internalGraph.links.map((edge) => ({
-      ...edge,
-      source: (toNode(internalGraph.nodes, edge.source) as any).id,
-      target: (toNode(internalGraph.nodes, edge.target) as any).id,
-      points: [
-        {
-          x: toNode(internalGraph.nodes, edge.source).x,
-          y: toNode(internalGraph.nodes, edge.source).y,
-        },
-        {
-          x: toNode(internalGraph.nodes, edge.target).x,
-          y: toNode(internalGraph.nodes, edge.target).y,
-        },
-      ]
+    this.outputGraph.edges = internalGraph.links.map((edge) => {
+      const source: any = toNode(internalGraph.nodes, edge.source);
+      const target: any = toNode(internalGraph.nodes, edge.target);
+      return {
+        ...edge,
+        source: source.id,
+        target: target.id,
+        points: [
+          (source.bounds as Rectangle).rayIntersection(target.bounds.cx(), target.bounds.cy()),
+          (target.bounds as Rectangle).rayIntersection(source.bounds.cx(), source.bounds.cy()),
+        ]
+      };
+    }).concat(internalGraph.groupLinks.map(groupLink => {
+      const sourceNode = internalGraph.nodes.find(foundNode => (foundNode as any).id === groupLink.source);
+      const targetNode = internalGraph.nodes.find(foundNode => (foundNode as any).id === groupLink.target);
+      const source = sourceNode || internalGraph.groups.find(foundGroup => (foundGroup as any).id === groupLink.source);
+      const target = targetNode || internalGraph.groups.find(foundGroup => (foundGroup as any).id === groupLink.target);
+      return {
+        ...groupLink,
+        source: source.id,
+        target: target.id,
+        points: [
+          (source.bounds as Rectangle).rayIntersection(target.bounds.cx(), target.bounds.cy()),
+          (target.bounds as Rectangle).rayIntersection(source.bounds.cx(), source.bounds.cy()),
+        ]
+      };
     }));
 
-    this.outputGraph.clusters = this.internalGraph.groups.map((group, index): ClusterNode => {
+    this.outputGraph.clusters = internalGraph.groups.map((group, index): ClusterNode => {
       const inputGroup = this.inputGraph.clusters[index];
       return {
         ...inputGroup,
@@ -197,7 +230,6 @@ export class ColaForceDirectedLayout implements Layout {
       return;
     }
 
-    this.settings.force.start();
     node.fixed = 0;
   }
 }

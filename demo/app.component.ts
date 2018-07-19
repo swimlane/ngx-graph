@@ -243,21 +243,30 @@ export class AppComponent implements OnInit {
   onLayoutChange(layoutId: string) {
     const layout = this.layouts.find(layoutRef => layoutRef.value === layoutId);
     if (layout && layout.isClustered) {
-      this.addCluster();
+      this.addClusters();
     } else {
-      this.graph.clusters = [];
+      this.removeClusters();
     }
     if (layout) {
       this.customLayout = layout.customLayout;
     }
   }
 
-  addCluster() {
+  addClusters() {
+    const subGroup = {
+      id: id(),
+      label: 'Subgroup',
+      childNodeIds: [this.graph.nodes[2].id, this.graph.nodes[4].id],
+    };
     this.graph.clusters = [{
       id: id(),
       label: 'Cluster',
-      childNodeIds: [this.graph.nodes[0].id, this.graph.nodes[3].id],
-    }];
+      childNodeIds: [this.graph.nodes[0].id, subGroup.id],
+    }, subGroup];
+  }
+
+  removeClusters() {
+    this.graph.clusters = [];
   }
 
   onLegendLabelClick(entry) {
