@@ -15,6 +15,7 @@ import { ViewDimensions } from '@swimlane/ngx-charts';
 export interface ColaForceDirectedSettings {
   force?: ColaLayout & ID3StyleLayoutAdaptor;
   forceModifierFn?: (force: ColaLayout & ID3StyleLayoutAdaptor) => ColaLayout & ID3StyleLayoutAdaptor;
+  onTickListener?: (internalGraph: ColaGraph) => void;
   viewDimensions?: ViewDimensions;
 }
 export interface ColaGraph {
@@ -48,7 +49,7 @@ export class ColaForceDirectedLayout implements Layout {
 
   inputGraph: Graph;
   outputGraph: Graph;
-  internalGraph: ColaGraph;
+  internalGraph: ColaGraph & { groupLinks?: Edge[] };
   outputGraph$: Subject<Graph> = new Subject();
 
   draggingStart: { x: number, y: number };
@@ -105,10 +106,13 @@ export class ColaForceDirectedLayout implements Layout {
     this.settings = Object.assign({}, this.defaultSettings, this.settings);
     if(this.settings.force) {
       this.settings.force = this.settings.force.nodes(this.internalGraph.nodes)
-      .groups(this.internalGraph.groups)
-      .links(this.internalGraph.links)
-      .alpha(0.5)
+        .groups(this.internalGraph.groups)
+        .links(this.internalGraph.links)
+        .alpha(0.5)
         .on('tick', () => {
+          if(this.settings.onTickListener) {
+            this.settings.onTickListener(this.internalGraph);
+          }
           this.outputGraph$.next(this.internalGraphToOutputGraph(this.internalGraph));
         });
       if (this.settings.viewDimensions) {
