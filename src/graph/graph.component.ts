@@ -726,6 +726,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   onDrag(event): void {
+    if (!this.draggingEnabled) {
+      return;
+    }
     const node = this.draggingNode;
     if (this.layout && typeof this.layout !== 'string' && this.layout.onDrag) {
       this.layout.onDrag(node, event);
@@ -969,6 +972,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   onNodeMouseDown(event: MouseEvent, node: any): void {
+    if (!this.draggingEnabled) {
+      return;
+    }
     this.isDragging = true;
     this.draggingNode = node;
 
