@@ -1,7 +1,8 @@
 # ngx-graph
 
 [![Join the chat at https://gitter.im/swimlane/ngx-graph](https://badges.gitter.im/swimlane/ngx-graph.svg)](https://gitter.im/swimlane/ngx-graph?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
+[![npm version](https://badge.fury.io/js/%40swimlane%2Fngx-graph.svg)](https://badge.fury.io/js/%40swimlane%2Fngx-graph)
+[![npm downloads](https://img.shields.io/npm/dm/@swimlane/ngx-graph.svg)](https://npmjs.org/@swimlane/ngx-gra[h)
 A Graph visualization for angular
 
 ## Demo
