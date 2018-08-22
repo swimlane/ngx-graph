@@ -398,9 +398,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       const edgeLabel = this.graph.edgeLabels[edgeLabelId];
 
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+      const _link = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
+      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey && ol.label === _link.label);
       if (!oldLink) {
-        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey) || edgeLabel;
+        oldLink = _link || edgeLabel;
       }
 
       oldLink.oldLine = oldLink.line;
