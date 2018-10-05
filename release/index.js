@@ -1,5 +1,5 @@
 /**
- * ngx-graph v"5.1.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"5.1.1" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -72422,21 +72422,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 var core_ = __webpack_require__("@angular/core");
 var core__default = /*#__PURE__*/__webpack_require__.n(core_);
 
-// EXTERNAL MODULE: external "@angular/animations"
-var animations_ = __webpack_require__("@angular/animations");
-var animations__default = /*#__PURE__*/__webpack_require__.n(animations_);
-
-// EXTERNAL MODULE: ./node_modules/@swimlane/ngx-charts/release/index.js
-var release = __webpack_require__("./node_modules/@swimlane/ngx-charts/release/index.js");
-var release_default = /*#__PURE__*/__webpack_require__.n(release);
-
 // EXTERNAL MODULE: external "d3-selection"
 var external__d3_selection_ = __webpack_require__("d3-selection");
 var external__d3_selection__default = /*#__PURE__*/__webpack_require__.n(external__d3_selection_);
-
-// EXTERNAL MODULE: external "d3-shape"
-var external__d3_shape_ = __webpack_require__("d3-shape");
-var external__d3_shape__default = /*#__PURE__*/__webpack_require__.n(external__d3_shape_);
 
 // CONCATENATED MODULE: ./node_modules/d3-dispatch/src/dispatch.js
 var noop = {value: function() {}};
@@ -73811,6 +73799,18 @@ var root = [null];
 
 
 
+// EXTERNAL MODULE: external "@angular/animations"
+var animations_ = __webpack_require__("@angular/animations");
+var animations__default = /*#__PURE__*/__webpack_require__.n(animations_);
+
+// EXTERNAL MODULE: ./node_modules/@swimlane/ngx-charts/release/index.js
+var release = __webpack_require__("./node_modules/@swimlane/ngx-charts/release/index.js");
+var release_default = /*#__PURE__*/__webpack_require__.n(release);
+
+// EXTERNAL MODULE: external "d3-shape"
+var external__d3_shape_ = __webpack_require__("d3-shape");
+var external__d3_shape__default = /*#__PURE__*/__webpack_require__.n(external__d3_shape_);
+
 // EXTERNAL MODULE: ./node_modules/dagre/index.js
 var dagre = __webpack_require__("./node_modules/dagre/index.js");
 var dagre_default = /*#__PURE__*/__webpack_require__.n(dagre);
@@ -74746,7 +74746,8 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
      *
      * @memberOf GraphComponent
      */
-    GraphComponent.prototype.onTouchMove = function ($event) {
+    GraphComponent.prototype.onTouchMove = function (event) {
+        var $event = event;
         if (this.isPanning && this.panningEnabled) {
             var clientX = $event.changedTouches[0].clientX;
             var clientY = $event.changedTouches[0].clientY;
@@ -74964,7 +74965,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
     __decorate([
         Object(core_["HostListener"])('document:touchmove', ['$event']),
         __metadata("design:type", Function),
-        __metadata("design:paramtypes", [TouchEvent]),
+        __metadata("design:paramtypes", [Object]),
         __metadata("design:returntype", void 0)
     ], GraphComponent.prototype, "onTouchMove", null);
     __decorate([

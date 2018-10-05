@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.1.1
+
+* Bug: TouchEvent not defined in dev mode for non-Chrome browsers (#99)
+
 ## 5.1.0
 
 * Feature: Allow panning on touch events (#86)
