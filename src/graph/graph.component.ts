@@ -1,4 +1,6 @@
 // rename transition due to conflict with d3 transition
+import 'd3-transition';
+
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
@@ -16,21 +18,21 @@ import {
   TemplateRef,
   ViewChild,
   ViewChildren,
-  ViewEncapsulation
+  ViewEncapsulation,
 } from '@angular/core';
 import {
   BaseChartComponent,
+  calculateViewDimensions,
   ChartComponent,
   ColorHelper,
   ViewDimensions,
-  calculateViewDimensions
 } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
-import 'd3-transition';
 import * as dagre from 'dagre';
 import { Observable, Subscription } from 'rxjs';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
+
 import { id } from '../utils';
 
 /**
@@ -624,10 +626,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   pan(x: number, y: number): void {
     const zoomLevel = this.zoomLevel;
-    this.transformationMatrix = transform(
-      this.transformationMatrix,
-      translate(x / zoomLevel, y / zoomLevel)
-    );
+    this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
   }
@@ -879,7 +878,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   @HostListener('document:touchmove', ['$event'])
-  onTouchMove($event: TouchEvent): void {
+  onTouchMove(event): void {
+    const $event: TouchEvent = event;
     if (this.isPanning && this.panningEnabled) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
