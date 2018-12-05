@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-graph",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "Graph visualization for angular!",
   "main": "release/index.js",
   "module": "release/index.js",
@@ -31,13 +31,11 @@
     "start": "webpack-dev-server",
     "start:hmr": "webpack-dev-server --env.HMR",
     "release": "npm-run-all build:release",
-    "package":
-      "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
+    "package": "npm-run-all -s clean copy:build build:sass package:replace-scss package:aot build:package package:minify copy:styles clean:build",
     "package:ts": "tsc --outDir release",
     "package:aot": "ngc -p tsconfig-aot.json",
     "package:replace-scss": "node ./config/replace-scss.js",
-    "package:minify":
-      "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
+    "package:minify": "uglifyjs release/index.js --source-map --compress --mangle --screw-ie8 --output release/index.min.js",
     "deploy": "node ./config/deploy.js",
     "profile": "NODE_ENV=production webpack --profile --json > dist/stats.json"
   },
@@ -66,7 +64,11 @@
     "visualization",
     "tree"
   ],
-  "authors": ["Marjan Georgiev", "Austin McDaniel", "Jayson Harshbarger"],
+  "authors": [
+    "Marjan Georgiev",
+    "Austin McDaniel",
+    "Jayson Harshbarger"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/swimlane/ngx-graph/issues"
@@ -94,7 +96,7 @@
     "@types/core-js": "^0.9.42",
     "@types/d3-selection": "^1.2.0",
     "@types/d3-shape": "^1.2.0",
-    "@types/jasmine": "^2.8.2",
+    "@types/jasmine": "2.8.7",
     "@types/node": "^8.0.53",
     "angular2-template-loader": "^0.6.0",
     "autoprefixer": "^6.7.0",
@@ -113,7 +115,7 @@
     "html-loader": "^0.4.4",
     "html-webpack-plugin": "^2.30.1",
     "istanbul-instrumenter-loader": "^2.0.0",
-    "jasmine-core": "^2.7.0",
+    "jasmine-core": "2.99.1",
     "karma": "^2.0.2",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",
