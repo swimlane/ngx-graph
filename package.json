@@ -122,7 +122,7 @@
     "karma-remap-coverage": "^0.1.4",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.6",
-    "node-sass": "^4.7.1",
+    "node-sass": "^4.9.2",
     "npm-run-all": "^4.1.2",
     "postcss": "^5.2.18",
     "postcss-loader": "^1.2.2",
@@ -154,10 +154,14 @@
   "dependencies": {
     "@swimlane/ngx-charts": "^8.0.0",
     "@types/d3-transition": "^1.1.1",
+    "d3-dispatch": "^1.0.3",
+    "d3-force": "^1.1.0",
     "d3-selection": "^1.2.0",
     "d3-shape": "^1.2.0",
+    "d3-timer": "^1.0.7",
     "d3-transition": "^1.1.1",
     "dagre": "^0.8.2",
-    "transformation-matrix": "^1.7.0"
+    "transformation-matrix": "^1.7.0",
+    "webcola": "^3.3.8"
   }
 }
