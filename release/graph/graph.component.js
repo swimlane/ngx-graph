@@ -8,12 +8,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import 'd3-transition';
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
-import { ChangeDetectionStrategy, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation, } from '@angular/core';
-import { BaseChartComponent, calculateViewDimensions, ChartComponent, ColorHelper, } from '@swimlane/ngx-charts';
+import { ChangeDetectionStrategy, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
+import { BaseChartComponent, ChartComponent, ColorHelper, calculateViewDimensions } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
+import 'd3-transition';
 import * as dagre from 'dagre';
 import { Observable } from 'rxjs';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
@@ -1057,8 +1057,7 @@ var GraphComponent = /** @class */ (function (_super) {
        *
        * @memberOf GraphComponent
        */
-    function (event) {
-        var $event = event;
+    function ($event) {
         if (this.isPanning && this.panningEnabled) {
             var clientX = $event.changedTouches[0].clientX;
             var clientY = $event.changedTouches[0].clientY;
