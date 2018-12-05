@@ -41,13 +41,12 @@ var MouseWheelDirective = /** @class */ (function () {
     MouseWheelDirective.decorators = [
         { type: Directive, args: [{ selector: '[mouseWheel]' },] },
     ];
-    /** @nocollapse */
     MouseWheelDirective.propDecorators = {
-        "mouseWheelUp": [{ type: Output },],
-        "mouseWheelDown": [{ type: Output },],
-        "onMouseWheelChrome": [{ type: HostListener, args: ['mousewheel', ['$event'],] },],
-        "onMouseWheelFirefox": [{ type: HostListener, args: ['DOMMouseScroll', ['$event'],] },],
-        "onMouseWheelIE": [{ type: HostListener, args: ['onmousewheel', ['$event'],] },],
+        mouseWheelUp: [{ type: Output }],
+        mouseWheelDown: [{ type: Output }],
+        onMouseWheelChrome: [{ type: HostListener, args: ['mousewheel', ['$event'],] }],
+        onMouseWheelFirefox: [{ type: HostListener, args: ['DOMMouseScroll', ['$event'],] }],
+        onMouseWheelIE: [{ type: HostListener, args: ['onmousewheel', ['$event'],] }]
     };
     return MouseWheelDirective;
 }());
