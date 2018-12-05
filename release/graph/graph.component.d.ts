@@ -1,6 +1,6 @@
+import 'd3-transition';
 import { AfterViewInit, ElementRef, EventEmitter, OnDestroy, OnInit, QueryList, TemplateRef } from '@angular/core';
 import { BaseChartComponent, ColorHelper, ViewDimensions } from '@swimlane/ngx-charts';
-import 'd3-transition';
 import { Observable, Subscription } from 'rxjs';
 /**
  * Matrix
@@ -305,7 +305,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      *
      * @memberOf GraphComponent
      */
-    onTouchMove($event: TouchEvent): void;
+    onTouchMove(event: any): void;
     /**
      * On touch end event to disable panning.
      *
