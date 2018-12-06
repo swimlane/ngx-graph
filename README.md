@@ -18,11 +18,24 @@ https://swimlane.github.io/ngx-graph/
 This library is focused on handling graph data (anything with nodes and edges) rather than chart data.  Currently the only visualization uses the Dagre layout, which is specialized for directed graphs.  The plan is to implement multiple visualisations for graph data within this same library.  Eventually, `ngx-charts-force-directed-graph` may be imported into this library as another option to visualize your graph data.
 
 ## Installation
-1. `npm install @swimlane/ngx-graph --save`
-2. Make sure the peer dependencies are installed (d3)
-3. Import `NgxGraphModule` into your module
-4. Use the `ngx-graph` component in your components
+1. `npm install @swimlane/ngx-graph @swimlane/ngx-charts d3 --save`
+2. Import `NgxGraphModule` and `NgxChartsModule` into your module
+```typescript
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
+// ...
+@NgModule({
+  // ...
+  imports: [
+    NgxChartsModule,
+    NgxGraphModule
+  ],
+  // ...
+})
+export class AppModule { }
 ```
+3. Use the `ngx-graph` component in your component template
+```xml
 <ngx-graph
   class="chart-container"
   [view]="view"
@@ -64,12 +77,30 @@ This library is focused on handling graph data (anything with nodes and edges) r
 
 </ngx-graph>
 ```
-
-## Data
-
-### Nodes
+4. Add imports and graph input variables to your component definition ([see full example file here](https://github.com/swimlane/ngx-graph/blob/master/demo/app.component.ts))
+```typescript
+// dont need to import d3 in your app.module,
+// but you need to import it in your component for link line shape
+import * as shape from 'd3-shape';
+// ...
+export class AppComponent implements OnInit {
+  curve: any = shape.curveLinear;
+  view: any[];
+  autoZoom: boolean = false;
+  panOnZoom: boolean = true;
+  enableZoom: boolean = true;
+  autoCenter: boolean = false;
+  showLegend: boolean = false;
+  colorScheme: any = {
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+  };
+  // ...
+}
 ```
-[
+
+5. Add data for nodes and links
+```typescript
+nodes: any[] = [
   {
     id: 'start',
     label: 'start'
@@ -93,11 +124,7 @@ This library is focused on handling graph data (anything with nodes and edges) r
     label: 'Email Results'
   }
 ]
-```
-
-### Links
-```
-[
+links: any[] = [
   {
     source: 'start',
     target: '1',
