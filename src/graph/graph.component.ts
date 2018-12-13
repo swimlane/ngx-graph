@@ -18,14 +18,14 @@ import {
   TemplateRef,
   ViewChild,
   ViewChildren,
-  ViewEncapsulation,
+  ViewEncapsulation
 } from '@angular/core';
 import {
   BaseChartComponent,
   calculateViewDimensions,
   ChartComponent,
   ColorHelper,
-  ViewDimensions,
+  ViewDimensions
 } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
@@ -63,66 +63,67 @@ export interface Matrix {
       (legendLabelDeactivate)="onDeactivate($event)"
       mouseWheel
       (mouseWheelUp)="onZoom($event, 'in')"
-      (mouseWheelDown)="onZoom($event, 'out')">
+      (mouseWheelDown)="onZoom($event, 'out')"
+    >
       <svg:g
         *ngIf="initialized"
         [attr.transform]="transform"
         (touchstart)="onTouchStart($event)"
         (touchend)="onTouchEnd($event)"
-        class="graph chart">
-          <defs>
-            <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
-            </ng-template>
-            <svg:path
-              class="text-path"
-              *ngFor="let link of _links"
-              [attr.d]="link.textPath"
-              [attr.id]="link.id">
-            </svg:path>
-          </defs>
-          <svg:rect
-            class="panning-rect"
-            [attr.width]="dims.width * 100"
-            [attr.height]="dims.height * 100"
-            [attr.transform]="'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' "
-            (mousedown)="isPanning = true" />
-          <svg:g class="links">
-            <svg:g
-              *ngFor="let link of _links; trackBy: trackLinkBy"
-              class="link-group"
-              #linkElement
-              [id]="link.id">
-              <ng-template
-                *ngIf="linkTemplate"
-                [ngTemplateOutlet]="linkTemplate"
-                [ngTemplateOutletContext]="{ $implicit: link }">
-              </ng-template>
-              <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
-            </svg:g>
+        class="graph chart"
+      >
+        <defs>
+          <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-template>
+          <svg:path
+            class="text-path"
+            *ngFor="let link of _links"
+            [attr.d]="link.textPath"
+            [attr.id]="link.id"
+          ></svg:path>
+        </defs>
+        <svg:rect
+          class="panning-rect"
+          [attr.width]="dims.width * 100"
+          [attr.height]="dims.height * 100"
+          [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
+          (mousedown)="isPanning = true"
+        />
+        <svg:g class="links">
+          <svg:g *ngFor="let link of _links; trackBy: trackLinkBy" class="link-group" #linkElement [id]="link.id">
+            <ng-template
+              *ngIf="linkTemplate"
+              [ngTemplateOutlet]="linkTemplate"
+              [ngTemplateOutletContext]="{ $implicit: link }"
+            ></ng-template>
+            <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
           </svg:g>
-          <svg:g class="nodes">
-            <svg:g
-              *ngFor="let node of _nodes; trackBy: trackNodeBy"
-              class="node-group"
-              #nodeElement
-              [id]="node.id"
-              [attr.transform]="node.options.transform"
-                (click)="onClick(node)" (mousedown)="onNodeMouseDown($event, node)">
-                <ng-template
-                  *ngIf="nodeTemplate"
-                  [ngTemplateOutlet]="nodeTemplate"
-                  [ngTemplateOutletContext]="{ $implicit: node }">
-                </ng-template>
-                <svg:circle
-                  *ngIf="!nodeTemplate"
-                  r="10"
-                  [attr.cx]="node.width / 2" [attr.cy]="node.height / 2"
-                  [attr.fill]="node.options.color"
-                />
-            </svg:g>
+        </svg:g>
+        <svg:g class="nodes">
+          <svg:g
+            *ngFor="let node of _nodes; trackBy: trackNodeBy"
+            class="node-group"
+            #nodeElement
+            [id]="node.id"
+            [attr.transform]="node.options.transform"
+            (click)="onClick(node)"
+            (mousedown)="onNodeMouseDown($event, node)"
+          >
+            <ng-template
+              *ngIf="nodeTemplate"
+              [ngTemplateOutlet]="nodeTemplate"
+              [ngTemplateOutletContext]="{ $implicit: node }"
+            ></ng-template>
+            <svg:circle
+              *ngIf="!nodeTemplate"
+              r="10"
+              [attr.cx]="node.width / 2"
+              [attr.cy]="node.height / 2"
+              [attr.fill]="node.options.color"
+            />
           </svg:g>
+        </svg:g>
       </svg:g>
-  </ngx-charts-chart>
+    </ngx-charts-chart>
   `
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -638,9 +639,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @param y
    */
   panTo(x: number, y: number): void {
-    this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
-    this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
+    if (x === null || x === undefined || isNaN(x) || y === null || y === undefined || isNaN(y)) {
+      return;
+    }
 
+    const panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
+    const panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
+
+    this.transformationMatrix = transform(
+      this.transformationMatrix,
+      translate(panX / this.zoomLevel, panY / this.zoomLevel)
+    );
     this.updateTransform();
   }
 
@@ -933,10 +942,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * Center the graph in the viewport
    */
   center(): void {
-    this.panTo(
-      this.dims.width / 2 - this.graphDims.width * this.zoomLevel / 2,
-      this.dims.height / 2 - this.graphDims.height * this.zoomLevel / 2
-    );
+    this.panTo(this.graphDims.width / 2, this.graphDims.height / 2);
   }
 
   /**
