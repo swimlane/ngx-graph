@@ -4,7 +4,7 @@
       <ngx-graph #graph class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
         [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
         [links]="hierarchialGraph.links" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="hierarchialGraph.nodes" [scheme]="colorScheme"
-        [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [center$]="center$" (select)="select($event)">
+        [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [zoomToNode$]="zoomToNode$" [center$]="center$" (select)="select($event)">
 
         <ng-template #defsTemplate>
           <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
@@ -101,6 +101,12 @@
 
         <label>Zoom level:</label>
         <input [(ngModel)]="graph.zoomLevel" />
+        <br />
+
+        <label>Zoom to node:</label>
+        <select class="zoomToNode" [(ngModel)]="nodeIdForZoom" (change)="zoomToNode(nodeIdForZoom)">
+          <option *ngFor="let node of hierarchialGraph.nodes" [value]="node.id">{{node.label}}</option>
+        </select>
         <br />
         <label>
           <input type="checkbox" [checked]="enableZoom" (change)="toggleEnableZoom($event.target.checked)"> Enable Zoom
