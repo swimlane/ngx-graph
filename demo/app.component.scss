@@ -167,6 +167,11 @@ main {
     input[type=text],
     select {
       width: 100%;
+      
+      &.zoomToNode {
+        width: 150px;
+        height: 22px;
+      }
     }
 
     h3 {

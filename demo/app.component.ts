@@ -37,6 +37,7 @@ export class AppComponent implements OnInit {
   update$: Subject<any> = new Subject();
   center$: Subject<any> = new Subject();
   zoomToFit$: Subject<any> = new Subject();
+  zoomToNode$: Subject<any> = new Subject();
 
   // options
   showLegend = false;
@@ -81,6 +82,7 @@ export class AppComponent implements OnInit {
   colorScheme: any;
   schemeType: string = 'ordinal';
   selectedColorScheme: string;
+  nodeIdForZoom: string;
 
   constructor() {
     Object.assign(this, {
@@ -224,6 +226,10 @@ export class AppComponent implements OnInit {
 
   zoomToFit() {
     this.zoomToFit$.next(true);
+  }
+
+  zoomToNode(nodeId: string) {
+    this.zoomToNode$.next(nodeId);
   }
 
   center() {

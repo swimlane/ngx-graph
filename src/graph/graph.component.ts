@@ -53,78 +53,7 @@ export interface Matrix {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])],
-  template: `
-    <ngx-charts-chart
-      [view]="[width, height]"
-      [showLegend]="legend"
-      [legendOptions]="legendOptions"
-      (legendLabelClick)="onClick($event)"
-      (legendLabelActivate)="onActivate($event)"
-      (legendLabelDeactivate)="onDeactivate($event)"
-      mouseWheel
-      (mouseWheelUp)="onZoom($event, 'in')"
-      (mouseWheelDown)="onZoom($event, 'out')"
-    >
-      <svg:g
-        *ngIf="initialized"
-        [attr.transform]="transform"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event)"
-        class="graph chart"
-      >
-        <defs>
-          <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-template>
-          <svg:path
-            class="text-path"
-            *ngFor="let link of _links"
-            [attr.d]="link.textPath"
-            [attr.id]="link.id"
-          ></svg:path>
-        </defs>
-        <svg:rect
-          class="panning-rect"
-          [attr.width]="dims.width * 100"
-          [attr.height]="dims.height * 100"
-          [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
-          (mousedown)="isPanning = true"
-        />
-        <svg:g class="links">
-          <svg:g *ngFor="let link of _links; trackBy: trackLinkBy" class="link-group" #linkElement [id]="link.id">
-            <ng-template
-              *ngIf="linkTemplate"
-              [ngTemplateOutlet]="linkTemplate"
-              [ngTemplateOutletContext]="{ $implicit: link }"
-            ></ng-template>
-            <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
-          </svg:g>
-        </svg:g>
-        <svg:g class="nodes">
-          <svg:g
-            *ngFor="let node of _nodes; trackBy: trackNodeBy"
-            class="node-group"
-            #nodeElement
-            [id]="node.id"
-            [attr.transform]="node.options.transform"
-            (click)="onClick(node)"
-            (mousedown)="onNodeMouseDown($event, node)"
-          >
-            <ng-template
-              *ngIf="nodeTemplate"
-              [ngTemplateOutlet]="nodeTemplate"
-              [ngTemplateOutletContext]="{ $implicit: node }"
-            ></ng-template>
-            <svg:circle
-              *ngIf="!nodeTemplate"
-              r="10"
-              [attr.cx]="node.width / 2"
-              [attr.cy]="node.height / 2"
-              [attr.fill]="node.options.color"
-            />
-          </svg:g>
-        </svg:g>
-      </svg:g>
-    </ngx-charts-chart>
-  `
+  templateUrl: './graph.component.html'
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() legend: boolean;
@@ -156,6 +85,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
+  @Input() zoomToNode$: Observable<any>;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -244,28 +174,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   ngOnInit(): void {
-    if (this.update$) {
-      this.subscriptions.push(
-        this.update$.subscribe(() => {
-          this.update();
-        })
-      );
-    }
+    if (this.update$)
+      this.subscriptions.push(this.update$.subscribe(() => { this.update(); }));
 
-    if (this.center$) {
-      this.subscriptions.push(
-        this.center$.subscribe(() => {
-          this.center();
-        })
-      );
-    }
-    if (this.zoomToFit$) {
-      this.subscriptions.push(
-        this.zoomToFit$.subscribe(() => {
-          this.zoomToFit();
-        })
-      );
-    }
+    if (this.center$)
+      this.subscriptions.push(this.center$.subscribe(() => { this.center(); }));
+
+    if (this.zoomToFit$)
+      this.subscriptions.push(this.zoomToFit$.subscribe(() => { this.zoomToFit(); }));
+
+    if (this.zoomToNode$)
+      this.subscriptions.push(this.zoomToNode$.subscribe((nodeId: string) => { this.panToNodeId(nodeId); }));
   }
 
   /**
@@ -956,5 +875,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       this.zoomLevel = zoomLevel;
       this.updateTransform();
     }
+  }
+
+  panToNodeId(nodeId: string): void {
+    const node = this._nodes.find(n => n.id === nodeId);
+    if (!node) {
+      return;
+    }
+
+    this.panTo(node.x, node.y);
   }
 }
