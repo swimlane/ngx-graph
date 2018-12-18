@@ -32,6 +32,7 @@ export class AppComponent implements OnInit {
   panOnZoom: boolean = true;
   enableZoom: boolean = true;
   autoCenter: boolean = false;
+  linkCenterUI: boolean = false;
 
   // observables
   update$: Subject<any> = new Subject();
@@ -154,6 +155,10 @@ export class AppComponent implements OnInit {
     } else {
       this.applyDimensions();
     }
+  }
+
+  showLinkCenterUI(): void {
+    this.updateChart();
   }
 
   selectChart(chartSelector) {

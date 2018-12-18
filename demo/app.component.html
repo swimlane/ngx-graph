@@ -23,11 +23,13 @@
           <svg:g class="edge">
             <svg:path class="line" stroke-width="2" marker-end="url(#arrow)">
             </svg:path>
-            <svg:text class="edge-label" text-anchor="middle">
-              <textPath class="text-path" [attr.href]="'#' + link.id" [style.dominant-baseline]="link.dominantBaseline" startOffset="50%">
-                {{link.label}}
-              </textPath>
-            </svg:text>
+          </svg:g>
+        </ng-template>
+
+        <ng-template #linkCenterTemplate let-linkCenter *ngIf="linkCenterUI">
+          <svg:g class="linkCenter">
+            <ellipse rx="20" ry="10" />
+            <svg:text alignment-baseline="central">✉</svg:text>
           </svg:g>
         </ng-template>
 
@@ -153,6 +155,11 @@
           <option [ngValue]="true">True</option>
           <option [ngValue]="false">False</option>
         </select>
+        <br />
+        <label>
+          <input type="checkbox" [checked]="linkCenterUI" [(ngModel)]="linkCenterUI" (change)="showLinkCenterUI()">
+          Show link additonal data
+        </label>
         <br />
         <br />
         <button class="btn btn-default" (click)="center()">Center</button>

@@ -1,6 +1,5 @@
 // rename transition due to conflict with d3 transition
 import 'd3-transition';
-
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
@@ -93,6 +92,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
+  @ContentChild('linkCenterTemplate') linkCenterTemplate: TemplateRef<any>;
   @ViewChild(ChartComponent, { read: ElementRef })
   chart: ElementRef;
 
@@ -377,22 +377,24 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   redrawLines(_animate = true): void {
     this.linkElements.map(linkEl => {
       const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
+      if (!l)
+        return; 
+        
+      const linkSelection = select(linkEl.nativeElement).select('.line');
+      linkSelection
+        .attr('d', l.oldLine)
+        .transition()
+        .duration(_animate ? 500 : 0)
+        .attr('d', l.line);
 
-      if (l) {
-        const linkSelection = select(linkEl.nativeElement).select('.line');
-        linkSelection
-          .attr('d', l.oldLine)
-          .transition()
-          .duration(_animate ? 500 : 0)
-          .attr('d', l.line);
-
-        const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
-        textPathSelection
-          .attr('d', l.oldTextPath)
-          .transition()
-          .duration(_animate ? 500 : 0)
-          .attr('d', l.textPath);
-      }
+      this.handleLinkCenterUIRedraw(linkEl, l);
+  
+      const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
+      textPathSelection
+        .attr('d', l.oldTextPath)
+        .transition()
+        .duration(_animate ? 500 : 0)
+        .attr('d', l.textPath);
     });
   }
 
@@ -884,5 +886,25 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     this.panTo(node.x, node.y);
+  }
+
+  handleLinkCenterUIRedraw(linkEl, l): void {
+    const linkCenter = select(linkEl.nativeElement).select('.linkCenter');
+    if (!linkCenter || !linkEl || !l) { 
+      return;
+    }
+
+    switch(l.points.length) {
+      case 1:
+        break;
+      case 2: 
+        const xValue = (l.points[0].x + l.points[1].x) / 2;
+        const yValue = (l.points[0].y + l.points[1].y) / 2;
+        linkCenter.attr('transform', `translate(${xValue}, ${yValue})`); 
+        break;
+      default:
+        const middlePointIndex = Math.floor(l.points.length / 2);
+        linkCenter.attr('transform', `translate(${l.points[middlePointIndex].x}, ${l.points[middlePointIndex].y})`);
+    }
   }
 }
