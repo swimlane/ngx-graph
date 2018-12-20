@@ -39,6 +39,11 @@ mouseWheel
         [ngTemplateOutlet]="linkTemplate"
         [ngTemplateOutletContext]="{ $implicit: link }"
       ></ng-template>
+      <ng-template
+      *ngIf="linkDataTemplate"
+      [ngTemplateOutlet]="linkDataTemplate"
+      [ngTemplateOutletContext]="{ $implicit: link }"
+      ></ng-template>
       <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
     </svg:g>
   </svg:g>

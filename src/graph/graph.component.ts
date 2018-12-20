@@ -93,6 +93,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
+  @ContentChild('linkDataTemplate') linkDataTemplate: TemplateRef<any>;
   @ViewChild(ChartComponent, { read: ElementRef })
   chart: ElementRef;
 
@@ -377,22 +378,24 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   redrawLines(_animate = true): void {
     this.linkElements.map(linkEl => {
       const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
+      if (!l)
+        return; 
+        
+      const linkSelection = select(linkEl.nativeElement).select('.line');
+      linkSelection
+        .attr('d', l.oldLine)
+        .transition()
+        .duration(_animate ? 500 : 0)
+        .attr('d', l.line);
 
-      if (l) {
-        const linkSelection = select(linkEl.nativeElement).select('.line');
-        linkSelection
-          .attr('d', l.oldLine)
-          .transition()
-          .duration(_animate ? 500 : 0)
-          .attr('d', l.line);
-
-        const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
-        textPathSelection
-          .attr('d', l.oldTextPath)
-          .transition()
-          .duration(_animate ? 500 : 0)
-          .attr('d', l.textPath);
-      }
+      this.handleLinkDataUIRedraw(linkEl, l);
+  
+      const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
+      textPathSelection
+        .attr('d', l.oldTextPath)
+        .transition()
+        .duration(_animate ? 500 : 0)
+        .attr('d', l.textPath);
     });
   }
 
@@ -884,5 +887,27 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     this.panTo(node.x, node.y);
+  }
+
+  handleLinkDataUIRedraw(linkEl, l): void {
+    const linkCenter = select(linkEl.nativeElement).select('.linkDataUI');
+    if (!linkCenter || !linkEl || !l || !l.points) { 
+      return;
+    }
+
+    switch(l.points.length) {
+      case 1:
+        break;
+      case 2: 
+        // Placing the link data template in the middle point between the start point and the end.
+        const middleX = (l.points[0].x + l.points[1].x) / 2;
+        const middleY = (l.points[0].y + l.points[1].y) / 2;
+        linkCenter.attr('transform', `translate(${middleX}, ${middleY})`); 
+        break;
+      default:
+        // Placing the link data template in the middle point
+        const middlePointIndex = Math.floor(l.points.length / 2);
+        linkCenter.attr('transform', `translate(${l.points[middlePointIndex].x}, ${l.points[middlePointIndex].y})`);
+    }
   }
 }
