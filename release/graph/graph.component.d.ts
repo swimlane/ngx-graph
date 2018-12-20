@@ -38,11 +38,13 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     update$: Observable<any>;
     center$: Observable<any>;
     zoomToFit$: Observable<any>;
+    zoomToNode$: Observable<any>;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     linkTemplate: TemplateRef<any>;
     nodeTemplate: TemplateRef<any>;
     defsTemplate: TemplateRef<any>;
+    linkDataTemplate: TemplateRef<any>;
     chart: ElementRef;
     nodeElements: QueryList<ElementRef>;
     linkElements: QueryList<ElementRef>;
@@ -339,4 +341,6 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * Zooms to fit the entier graph
      */
     zoomToFit(): void;
+    panToNodeId(nodeId: string): void;
+    handleLinkDataUIRedraw(linkEl: any, l: any): void;
 }

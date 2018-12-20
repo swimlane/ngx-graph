@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.2.0
+
+- Add new user template in order to show UI data on the link (#138)
+- Featuren: Adds zoom to node functionality (#133)
+- Bug: Fixes panning to a location and centering the graph
+
 ## 5.1.2
 
 - Chore: Update dependencies

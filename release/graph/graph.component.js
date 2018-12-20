@@ -11,8 +11,8 @@ var __extends = (this && this.__extends) || (function () {
 // rename transition due to conflict with d3 transition
 import 'd3-transition';
 import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
-import { ChangeDetectionStrategy, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation, } from '@angular/core';
-import { BaseChartComponent, calculateViewDimensions, ChartComponent, ColorHelper, } from '@swimlane/ngx-charts';
+import { ChangeDetectionStrategy, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
+import { BaseChartComponent, calculateViewDimensions, ChartComponent, ColorHelper } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as dagre from 'dagre';
@@ -108,21 +108,14 @@ var GraphComponent = /** @class */ (function (_super) {
      */
     GraphComponent.prototype.ngOnInit = function () {
         var _this = this;
-        if (this.update$) {
-            this.subscriptions.push(this.update$.subscribe(function () {
-                _this.update();
-            }));
-        }
-        if (this.center$) {
-            this.subscriptions.push(this.center$.subscribe(function () {
-                _this.center();
-            }));
-        }
-        if (this.zoomToFit$) {
-            this.subscriptions.push(this.zoomToFit$.subscribe(function () {
-                _this.zoomToFit();
-            }));
-        }
+        if (this.update$)
+            this.subscriptions.push(this.update$.subscribe(function () { _this.update(); }));
+        if (this.center$)
+            this.subscriptions.push(this.center$.subscribe(function () { _this.center(); }));
+        if (this.zoomToFit$)
+            this.subscriptions.push(this.zoomToFit$.subscribe(function () { _this.zoomToFit(); }));
+        if (this.zoomToNode$)
+            this.subscriptions.push(this.zoomToNode$.subscribe(function (nodeId) { _this.panToNodeId(nodeId); }));
     };
     /**
      * Angular lifecycle event
@@ -306,20 +299,21 @@ var GraphComponent = /** @class */ (function (_super) {
         if (_animate === void 0) { _animate = true; }
         this.linkElements.map(function (linkEl) {
             var l = _this._links.find(function (lin) { return lin.id === linkEl.nativeElement.id; });
-            if (l) {
-                var linkSelection = select(linkEl.nativeElement).select('.line');
-                linkSelection
-                    .attr('d', l.oldLine)
-                    .transition()
-                    .duration(_animate ? 500 : 0)
-                    .attr('d', l.line);
-                var textPathSelection = select(_this.chartElement.nativeElement).select("#" + l.id);
-                textPathSelection
-                    .attr('d', l.oldTextPath)
-                    .transition()
-                    .duration(_animate ? 500 : 0)
-                    .attr('d', l.textPath);
-            }
+            if (!l)
+                return;
+            var linkSelection = select(linkEl.nativeElement).select('.line');
+            linkSelection
+                .attr('d', l.oldLine)
+                .transition()
+                .duration(_animate ? 500 : 0)
+                .attr('d', l.line);
+            _this.handleLinkDataUIRedraw(linkEl, l);
+            var textPathSelection = select(_this.chartElement.nativeElement).select("#" + l.id);
+            textPathSelection
+                .attr('d', l.oldTextPath)
+                .transition()
+                .duration(_animate ? 500 : 0)
+                .attr('d', l.textPath);
         });
     };
     /**
@@ -466,8 +460,12 @@ var GraphComponent = /** @class */ (function (_super) {
      * @param y
      */
     GraphComponent.prototype.panTo = function (x, y) {
-        this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
-        this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
+        if (x === null || x === undefined || isNaN(x) || y === null || y === undefined || isNaN(y)) {
+            return;
+        }
+        var panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
+        var panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
+        this.transformationMatrix = transform(this.transformationMatrix, translate(panX / this.zoomLevel, panY / this.zoomLevel));
         this.updateTransform();
     };
     /**
@@ -734,7 +732,7 @@ var GraphComponent = /** @class */ (function (_super) {
      * Center the graph in the viewport
      */
     GraphComponent.prototype.center = function () {
-        this.panTo(this.dims.width / 2 - this.graphDims.width * this.zoomLevel / 2, this.dims.height / 2 - this.graphDims.height * this.zoomLevel / 2);
+        this.panTo(this.graphDims.width / 2, this.graphDims.height / 2);
     };
     /**
      * Zooms to fit the entier graph
@@ -748,6 +746,33 @@ var GraphComponent = /** @class */ (function (_super) {
             this.updateTransform();
         }
     };
+    GraphComponent.prototype.panToNodeId = function (nodeId) {
+        var node = this._nodes.find(function (n) { return n.id === nodeId; });
+        if (!node) {
+            return;
+        }
+        this.panTo(node.x, node.y);
+    };
+    GraphComponent.prototype.handleLinkDataUIRedraw = function (linkEl, l) {
+        var linkCenter = select(linkEl.nativeElement).select('.linkDataUI');
+        if (!linkCenter || !linkEl || !l || !l.points) {
+            return;
+        }
+        switch (l.points.length) {
+            case 1:
+                break;
+            case 2:
+                // Placing the link data template in the middle point between the start point and the end.
+                var middleX = (l.points[0].x + l.points[1].x) / 2;
+                var middleY = (l.points[0].y + l.points[1].y) / 2;
+                linkCenter.attr('transform', "translate(" + middleX + ", " + middleY + ")");
+                break;
+            default:
+                // Placing the link data template in the middle point
+                var middlePointIndex = Math.floor(l.points.length / 2);
+                linkCenter.attr('transform', "translate(" + l.points[middlePointIndex].x + ", " + l.points[middlePointIndex].y + ")");
+        }
+    };
     GraphComponent.decorators = [
         { type: Component, args: [{
                     selector: 'ngx-graph',
@@ -755,7 +780,7 @@ var GraphComponent = /** @class */ (function (_super) {
                     encapsulation: ViewEncapsulation.None,
                     changeDetection: ChangeDetectionStrategy.OnPush,
                     animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])],
-                    template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\">\n      <svg:g\n        *ngIf=\"initialized\"\n        [attr.transform]=\"transform\"\n        (touchstart)=\"onTouchStart($event)\"\n        (touchend)=\"onTouchEnd($event)\"\n        class=\"graph chart\">\n          <defs>\n            <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\">\n            </ng-template>\n            <svg:path\n              class=\"text-path\"\n              *ngFor=\"let link of _links\"\n              [attr.d]=\"link.textPath\"\n              [attr.id]=\"link.id\">\n            </svg:path>\n          </defs>\n          <svg:rect\n            class=\"panning-rect\"\n            [attr.width]=\"dims.width * 100\"\n            [attr.height]=\"dims.height * 100\"\n            [attr.transform]=\"'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' \"\n            (mousedown)=\"isPanning = true\" />\n          <svg:g class=\"links\">\n            <svg:g\n              *ngFor=\"let link of _links; trackBy: trackLinkBy\"\n              class=\"link-group\"\n              #linkElement\n              [id]=\"link.id\">\n              <ng-template\n                *ngIf=\"linkTemplate\"\n                [ngTemplateOutlet]=\"linkTemplate\"\n                [ngTemplateOutletContext]=\"{ $implicit: link }\">\n              </ng-template>\n              <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n            </svg:g>\n          </svg:g>\n          <svg:g class=\"nodes\">\n            <svg:g\n              *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n              class=\"node-group\"\n              #nodeElement\n              [id]=\"node.id\"\n              [attr.transform]=\"node.options.transform\"\n                (click)=\"onClick(node)\" (mousedown)=\"onNodeMouseDown($event, node)\">\n                <ng-template\n                  *ngIf=\"nodeTemplate\"\n                  [ngTemplateOutlet]=\"nodeTemplate\"\n                  [ngTemplateOutletContext]=\"{ $implicit: node }\">\n                </ng-template>\n                <svg:circle\n                  *ngIf=\"!nodeTemplate\"\n                  r=\"10\"\n                  [attr.cx]=\"node.width / 2\" [attr.cy]=\"node.height / 2\"\n                  [attr.fill]=\"node.options.color\"\n                />\n            </svg:g>\n          </svg:g>\n      </svg:g>\n  </ngx-charts-chart>\n  "
+                    templateUrl: './graph.component.html'
                 },] },
     ];
     GraphComponent.propDecorators = {
@@ -783,11 +808,13 @@ var GraphComponent = /** @class */ (function (_super) {
         update$: [{ type: Input }],
         center$: [{ type: Input }],
         zoomToFit$: [{ type: Input }],
+        zoomToNode$: [{ type: Input }],
         activate: [{ type: Output }],
         deactivate: [{ type: Output }],
         linkTemplate: [{ type: ContentChild, args: ['linkTemplate',] }],
         nodeTemplate: [{ type: ContentChild, args: ['nodeTemplate',] }],
         defsTemplate: [{ type: ContentChild, args: ['defsTemplate',] }],
+        linkDataTemplate: [{ type: ContentChild, args: ['linkDataTemplate',] }],
         chart: [{ type: ViewChild, args: [ChartComponent, { read: ElementRef },] }],
         nodeElements: [{ type: ViewChildren, args: ['nodeElement',] }],
         linkElements: [{ type: ViewChildren, args: ['linkElement',] }],
