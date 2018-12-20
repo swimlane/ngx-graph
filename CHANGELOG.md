@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.1
+
+- Fix: Restore the HTML content inside the component (#140)
+
 ## 5.2.0
 
 - Add new user template in order to show UI data on the link (#138)
