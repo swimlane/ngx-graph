@@ -351,14 +351,26 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-            let textDims;
-            try {
-              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
-            } catch (ex) {
+          let maxTextDims;
+          try {
+            for (let textElem of nativeElement.getElementsByTagName('text')) {
+              let currentBBox = textElem.getBBox();
+              if (!maxTextDims) {
+                maxTextDims = currentBBox;
+              } else {
+                if (currentBBox.width > maxTextDims.width) {
+                  maxTextDims.width = currentBBox.width;
+                }
+                if (currentBBox.height > maxTextDims.height) {
+                  maxTextDims.height = currentBBox.height;
+                }
+              }
+            }
+          } catch (ex) {
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
-            node.width = textDims.width + 20;
+            node.width = maxTextDims.width + 20;
           } else {
             node.width = dims.width;
           }
