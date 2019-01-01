@@ -54,81 +54,81 @@ export interface Matrix {
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])],
   template: `
-  <ngx-charts-chart
-  [view]="[width, height]"
-  [showLegend]="legend"
-  [legendOptions]="legendOptions"
-  (legendLabelClick)="onClick($event)"
-  (legendLabelActivate)="onActivate($event)"
-  (legendLabelDeactivate)="onDeactivate($event)"
-  mouseWheel
-  (mouseWheelUp)="onZoom($event, 'in')"
-  (mouseWheelDown)="onZoom($event, 'out')"
-  >
-  <svg:g
-    *ngIf="initialized"
-    [attr.transform]="transform"
-    (touchstart)="onTouchStart($event)"
-    (touchend)="onTouchEnd($event)"
-    class="graph chart"
-  >
-    <defs>
-      <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-template>
-      <svg:path
-        class="text-path"
-        *ngFor="let link of _links"
-        [attr.d]="link.textPath"
-        [attr.id]="link.id"
-      ></svg:path>
-    </defs>
-    <svg:rect
-      class="panning-rect"
-      [attr.width]="dims.width * 100"
-      [attr.height]="dims.height * 100"
-      [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
-      (mousedown)="isPanning = true"
-    />
-    <svg:g class="links">
-      <svg:g *ngFor="let link of _links; trackBy: trackLinkBy" class="link-group" #linkElement [id]="link.id">
-        <ng-template
-          *ngIf="linkTemplate"
-          [ngTemplateOutlet]="linkTemplate"
-          [ngTemplateOutletContext]="{ $implicit: link }"
-        ></ng-template>
-        <ng-template
-        *ngIf="linkDataTemplate"
-        [ngTemplateOutlet]="linkDataTemplate"
-        [ngTemplateOutletContext]="{ $implicit: link }"
-        ></ng-template>
-        <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
-      </svg:g>
-    </svg:g>
-    <svg:g class="nodes">
+    <ngx-charts-chart
+      [view]="[width, height]"
+      [showLegend]="legend"
+      [legendOptions]="legendOptions"
+      (legendLabelClick)="onClick($event)"
+      (legendLabelActivate)="onActivate($event)"
+      (legendLabelDeactivate)="onDeactivate($event)"
+      mouseWheel
+      (mouseWheelUp)="onZoom($event, 'in')"
+      (mouseWheelDown)="onZoom($event, 'out')"
+    >
       <svg:g
-        *ngFor="let node of _nodes; trackBy: trackNodeBy"
-        class="node-group"
-        #nodeElement
-        [id]="node.id"
-        [attr.transform]="node.options.transform"
-        (click)="onClick(node)"
-        (mousedown)="onNodeMouseDown($event, node)"
+        *ngIf="initialized"
+        [attr.transform]="transform"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)"
+        class="graph chart"
       >
-        <ng-template
-          *ngIf="nodeTemplate"
-          [ngTemplateOutlet]="nodeTemplate"
-          [ngTemplateOutletContext]="{ $implicit: node }"
-        ></ng-template>
-        <svg:circle
-          *ngIf="!nodeTemplate"
-          r="10"
-          [attr.cx]="node.width / 2"
-          [attr.cy]="node.height / 2"
-          [attr.fill]="node.options.color"
+        <defs>
+          <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-template>
+          <svg:path
+            class="text-path"
+            *ngFor="let link of _links"
+            [attr.d]="link.textPath"
+            [attr.id]="link.id"
+          ></svg:path>
+        </defs>
+        <svg:rect
+          class="panning-rect"
+          [attr.width]="dims.width * 100"
+          [attr.height]="dims.height * 100"
+          [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
+          (mousedown)="isPanning = true"
         />
+        <svg:g class="links">
+          <svg:g *ngFor="let link of _links; trackBy: trackLinkBy" class="link-group" #linkElement [id]="link.id">
+            <ng-template
+              *ngIf="linkTemplate"
+              [ngTemplateOutlet]="linkTemplate"
+              [ngTemplateOutletContext]="{ $implicit: link }"
+            ></ng-template>
+            <ng-template
+              *ngIf="linkDataTemplate"
+              [ngTemplateOutlet]="linkDataTemplate"
+              [ngTemplateOutletContext]="{ $implicit: link }"
+            ></ng-template>
+            <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
+          </svg:g>
+        </svg:g>
+        <svg:g class="nodes">
+          <svg:g
+            *ngFor="let node of _nodes; trackBy: trackNodeBy"
+            class="node-group"
+            #nodeElement
+            [id]="node.id"
+            [attr.transform]="node.options.transform"
+            (click)="onClick(node)"
+            (mousedown)="onNodeMouseDown($event, node)"
+          >
+            <ng-template
+              *ngIf="nodeTemplate"
+              [ngTemplateOutlet]="nodeTemplate"
+              [ngTemplateOutletContext]="{ $implicit: node }"
+            ></ng-template>
+            <svg:circle
+              *ngIf="!nodeTemplate"
+              r="10"
+              [attr.cx]="node.width / 2"
+              [attr.cy]="node.height / 2"
+              [attr.fill]="node.options.color"
+            />
+          </svg:g>
+        </svg:g>
       </svg:g>
-    </svg:g>
-  </svg:g>
-  </ngx-charts-chart>
+    </ngx-charts-chart>
   `
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -165,6 +165,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() zoomChange: EventEmitter<number> = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
@@ -252,16 +253,32 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   ngOnInit(): void {
     if (this.update$)
-      this.subscriptions.push(this.update$.subscribe(() => { this.update(); }));
+      this.subscriptions.push(
+        this.update$.subscribe(() => {
+          this.update();
+        })
+      );
 
     if (this.center$)
-      this.subscriptions.push(this.center$.subscribe(() => { this.center(); }));
+      this.subscriptions.push(
+        this.center$.subscribe(() => {
+          this.center();
+        })
+      );
 
     if (this.zoomToFit$)
-      this.subscriptions.push(this.zoomToFit$.subscribe(() => { this.zoomToFit(); }));
+      this.subscriptions.push(
+        this.zoomToFit$.subscribe(() => {
+          this.zoomToFit();
+        })
+      );
 
     if (this.zoomToNode$)
-      this.subscriptions.push(this.zoomToNode$.subscribe((nodeId: string) => { this.panToNodeId(nodeId); }));
+      this.subscriptions.push(
+        this.zoomToNode$.subscribe((nodeId: string) => {
+          this.panToNodeId(nodeId);
+        })
+      );
   }
 
   /**
@@ -351,22 +368,22 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-          let maxTextDims;
-          try {
-            for (let textElem of nativeElement.getElementsByTagName('text')) {
-              let currentBBox = textElem.getBBox();
-              if (!maxTextDims) {
-                maxTextDims = currentBBox;
-              } else {
-                if (currentBBox.width > maxTextDims.width) {
-                  maxTextDims.width = currentBBox.width;
-                }
-                if (currentBBox.height > maxTextDims.height) {
-                  maxTextDims.height = currentBBox.height;
+            let maxTextDims;
+            try {
+              for (const textElem of nativeElement.getElementsByTagName('text')) {
+                const currentBBox = textElem.getBBox();
+                if (!maxTextDims) {
+                  maxTextDims = currentBBox;
+                } else {
+                  if (currentBBox.width > maxTextDims.width) {
+                    maxTextDims.width = currentBBox.width;
+                  }
+                  if (currentBBox.height > maxTextDims.height) {
+                    maxTextDims.height = currentBBox.height;
+                  }
                 }
               }
-            }
-          } catch (ex) {
+            } catch (ex) {
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
@@ -466,9 +483,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   redrawLines(_animate = true): void {
     this.linkElements.map(linkEl => {
       const l = this._links.find(lin => lin.id === linkEl.nativeElement.id);
-      if (!l)
-        return; 
-        
+      if (!l) return;
+
       const linkSelection = select(linkEl.nativeElement).select('.line');
       linkSelection
         .attr('d', l.oldLine)
@@ -477,7 +493,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         .attr('d', l.line);
 
       this.handleLinkDataUIRedraw(linkEl, l);
-  
+
       const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
       textPathSelection
         .attr('d', l.oldTextPath)
@@ -670,7 +686,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    */
   zoom(factor: number): void {
     this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
-
+    this.zoomChange.emit(this.zoomLevel);
     this.updateTransform();
   }
 
@@ -682,7 +698,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   zoomTo(level: number): void {
     this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
     this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
-
+    this.zoomChange.emit(this.zoomLevel);
     this.updateTransform();
   }
 
@@ -956,7 +972,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   }
 
   /**
-   * Zooms to fit the entier graph
+   * Zooms to fit the entire graph
    */
   zoomToFit(): void {
     const heightZoom = this.dims.height / this.graphDims.height;
@@ -965,6 +981,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     if (zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
       this.updateTransform();
+      this.zoomChange.emit(this.zoomLevel);
     }
   }
 
@@ -979,18 +996,18 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
   handleLinkDataUIRedraw(linkEl, l): void {
     const linkCenter = select(linkEl.nativeElement).select('.linkDataUI');
-    if (!linkCenter || !linkEl || !l || !l.points) { 
+    if (!linkCenter || !linkEl || !l || !l.points) {
       return;
     }
 
-    switch(l.points.length) {
+    switch (l.points.length) {
       case 1:
         break;
-      case 2: 
+      case 2:
         // Placing the link data template in the middle point between the start point and the end.
         const middleX = (l.points[0].x + l.points[1].x) / 2;
         const middleY = (l.points[0].y + l.points[1].y) / 2;
-        linkCenter.attr('transform', `translate(${middleX}, ${middleY})`); 
+        linkCenter.attr('transform', `translate(${middleX}, ${middleY})`);
         break;
       default:
         // Placing the link data template in the middle point
