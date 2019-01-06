@@ -47,6 +47,24 @@ export interface Matrix {
   f: number;
 }
 
+export interface DagreLayout {
+  nodesep?: number;
+  edgesep?: number;
+  ranksep?: number;
+  acyclicer?: string;
+  ranker?: string;
+  align?: string;
+}
+
+const defaultDagreLayout: DagreLayout = {
+  nodesep: 50,
+  edgesep: 100,
+  ranksep: 100,
+  acyclicer: undefined,
+  ranker: 'network-simplex',
+  align: undefined,
+};
+
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
@@ -162,6 +180,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
   @Input() zoomToNode$: Observable<any>;
+
+  @Input() dagreLayout: DagreLayout = defaultDagreLayout;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -351,24 +371,24 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-          let maxTextDims;
-          try {
-            for (let textElem of nativeElement.getElementsByTagName('text')) {
-              let currentBBox = textElem.getBBox();
-              if (!maxTextDims) {
-                maxTextDims = currentBBox;
-              } else {
-                if (currentBBox.width > maxTextDims.width) {
-                  maxTextDims.width = currentBBox.width;
-                }
-                if (currentBBox.height > maxTextDims.height) {
-                  maxTextDims.height = currentBBox.height;
+            let maxTextDims;
+            try {
+              for (const textElem of nativeElement.getElementsByTagName('text')) {
+                const currentBBox = textElem.getBBox();
+                if (!maxTextDims) {
+                  maxTextDims = currentBBox;
+                } else {
+                  if (currentBBox.width > maxTextDims.width) {
+                    maxTextDims.width = currentBBox.width;
+                  }
+                  if (currentBBox.height > maxTextDims.height) {
+                    maxTextDims.height = currentBBox.height;
+                  }
                 }
               }
-            }
-          } catch (ex) {
-              // Skip drawing if element is not displayed - Firefox would throw an error here
-              return;
+            } catch (ex) {
+                // Skip drawing if element is not displayed - Firefox would throw an error here
+                return;
             }
             node.width = maxTextDims.width + 20;
           } else {
@@ -497,10 +517,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     this.graph = new dagre.graphlib.Graph();
     this.graph.setGraph({
       rankdir: this.orientation,
+      nodesep: this.dagreLayout.nodesep ? this.dagreLayout.nodesep : defaultDagreLayout.nodesep,
+      edgesep: this.dagreLayout.edgesep ? this.dagreLayout.edgesep : defaultDagreLayout.edgesep,
+      ranksep: this.dagreLayout.ranksep ? this.dagreLayout.ranksep : defaultDagreLayout.ranksep,
+      acyclicer: this.dagreLayout.acyclicer ? this.dagreLayout.acyclicer : defaultDagreLayout.acyclicer,
+      align: this.dagreLayout.align ? this.dagreLayout.align : defaultDagreLayout.align,
+      ranker: this.dagreLayout.ranker ? this.dagreLayout.ranker : defaultDagreLayout.ranker,
       marginx: 20,
       marginy: 20,
-      edgesep: 100,
-      ranksep: 100
       // acyclicer: 'greedy',
       // ranker: 'longest-path'
     });
@@ -962,6 +986,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
     const zoomLevel = Math.min(heightZoom, widthZoom, 1);
+
+    if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
+      return;
+    }
+    
     if (zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
       this.updateTransform();
