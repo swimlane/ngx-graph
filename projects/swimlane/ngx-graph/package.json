@@ -1,0 +1,50 @@
+{
+  "name": "@swimlane/ngx-graph",
+  "version": "6.0.0",
+  "description": "Graph visualization for angular",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swimlane/ngx-graph.git"
+  },
+  "keywords": [
+    "angular",
+    "graph",
+    "viz",
+    "svg",
+    "dataviz",
+    "visualization",
+    "tree",
+    "force-directed",
+    "directed acyclic graph",
+    "dag"
+  ],
+  "Contributors": [
+    "Marjan Georgiev",
+    "Assaf Shemesh",
+    "Isaac Mann"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swimlane/ngx-graph/issues"
+  },
+  "homepage": "https://github.com/swimlane/ngx-graph#readme",
+  "peerDependencies": {
+    "@angular/animations": ">= 6.0.0",
+    "@angular/common": ">= 6.0.0",
+    "@angular/core": ">= 6.0.0",
+    "@angular/cdk": ">= 6.0.0",
+    "rxjs": ">= 6.0.0"
+  },
+  "dependencies": {
+    "@swimlane/ngx-charts": "^8.0.0",
+    "d3-dispatch": "^1.0.3",
+    "d3-force": "^1.1.0",
+    "d3-selection": "^1.2.0",
+    "d3-shape": "^1.2.0",
+    "d3-timer": "^1.0.7",
+    "d3-transition": "^1.1.1",
+    "dagre": "^0.8.2",
+    "transformation-matrix": "^1.7.0",
+    "webcola": "^3.3.8"
+  }
+}

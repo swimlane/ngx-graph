@@ -1,10 +1,8 @@
 # ngx-graph
+
 [![Join the chat at https://gitter.im/swimlane/ngx-graph](https://badges.gitter.im/swimlane/ngx-graph.svg)](https://gitter.im/swimlane/ngx-graph?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![npm version](https://badge.fury.io/js/%40swimlane%2Fngx-graph.svg)](https://badge.fury.io/js/%40swimlane%2Fngx-graph)
-[![npm downloads](https://img.shields.io/npm/dm/@swimlane/ngx-graph.svg)](https://npmjs.org/@swimlane/ngx-graph)
 
-
-#### A Graph visualization component for angular
+A Graph visualization for angular
 
 ## Demo
 https://swimlane.github.io/ngx-graph/
@@ -18,24 +16,11 @@ https://swimlane.github.io/ngx-graph/
 This library is focused on handling graph data (anything with nodes and edges) rather than chart data.  Currently the only visualization uses the Dagre layout, which is specialized for directed graphs.  The plan is to implement multiple visualisations for graph data within this same library.  Eventually, `ngx-charts-force-directed-graph` may be imported into this library as another option to visualize your graph data.
 
 ## Installation
-1. `npm install @swimlane/ngx-graph @swimlane/ngx-charts d3 --save`
-2. Import `NgxGraphModule` and `NgxChartsModule` into your module
-```typescript
-import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { NgxGraphModule } from '@swimlane/ngx-graph';
-// ...
-@NgModule({
-  // ...
-  imports: [
-    NgxChartsModule,
-    NgxGraphModule
-  ],
-  // ...
-})
-export class AppModule { }
+1. `npm install @swimlane/ngx-graph --save`
+2. Make sure the peer dependencies are installed (d3)
+3. Import `NgxGraphModule` into your module
+4. Use the `ngx-graph` component in your components
 ```
-3. Use the `ngx-graph` component in your component template
-```xml
 <ngx-graph
   class="chart-container"
   [view]="view"
@@ -68,7 +53,6 @@ export class AppModule { }
   <ng-template #linkTemplate let-link>
     <svg:g class="edge">
       <svg:path
-        class="line"
         stroke-width="2"
         marker-end="url(#arrow)" >
       </svg:path>
@@ -77,30 +61,12 @@ export class AppModule { }
 
 </ngx-graph>
 ```
-4. Add imports and graph input variables to your component definition ([see full example file here](https://github.com/swimlane/ngx-graph/blob/master/demo/app.component.ts))
-```typescript
-// dont need to import d3 in your app.module,
-// but you need to import it in your component for link line shape
-import * as shape from 'd3-shape';
-// ...
-export class AppComponent implements OnInit {
-  curve: any = shape.curveLinear;
-  view: any[];
-  autoZoom: boolean = false;
-  panOnZoom: boolean = true;
-  enableZoom: boolean = true;
-  autoCenter: boolean = false;
-  showLegend: boolean = false;
-  colorScheme: any = {
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
-  };
-  // ...
-}
-```
 
-5. Add data for nodes and links
-```typescript
-nodes: any[] = [
+## Data
+
+### Nodes
+```
+[
   {
     id: 'start',
     label: 'start'
@@ -124,7 +90,11 @@ nodes: any[] = [
     label: 'Email Results'
   }
 ]
-links: any[] = [
+```
+
+### Links
+```
+[
   {
     source: 'start',
     target: '1',
