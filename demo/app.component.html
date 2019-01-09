@@ -1,11 +1,31 @@
 <main [class]="theme">
   <div class="chart-col">
     <div style="position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;">
-      <ngx-graph #graph class="chart-container" [view]="view" [enableZoom]="enableZoom" [autoZoom]="autoZoom" [panOnZoom]="panOnZoom"
-        [panOffsetX]="panOffsetX" [panOffsetY]="panOffsetY" [zoomLevel]="zoomLevel" [autoCenter]="autoCenter" [legend]="showLegend"
-        [links]="hierarchialGraph.links" (legendLabelClick)="onLegendLabelClick($event)" [nodes]="hierarchialGraph.nodes" [scheme]="colorScheme"
-        [orientation]="orientation" [curve]="curve" [update$]="update$" [zoomToFit$]="zoomToFit$" [zoomToNode$]="zoomToNode$" [center$]="center$" (select)="select($event)">
-
+      <ngx-graph
+        #graph
+        class="chart-container"
+        [view]="view"
+        [enableZoom]="enableZoom"
+        [autoZoom]="autoZoom"
+        [panOnZoom]="panOnZoom"
+        [panOffsetX]="panOffsetX"
+        [panOffsetY]="panOffsetY"
+        [zoomLevel]="zoomLevel"
+        [autoCenter]="autoCenter"
+        [legend]="showLegend"
+        [links]="hierarchialGraph.links"
+        (legendLabelClick)="onLegendLabelClick($event)"
+        [nodes]="hierarchialGraph.nodes"
+        [scheme]="colorScheme"
+        [orientation]="orientation"
+        [curve]="curve"
+        [update$]="update$"
+        [zoomToFit$]="zoomToFit$"
+        [zoomToNode$]="zoomToNode$"
+        [center$]="center$"
+        (zoomChange)="onZoom($event)"
+        (select)="select($event)"
+      >
         <ng-template #defsTemplate>
           <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
             <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
@@ -13,140 +33,141 @@
         </ng-template>
 
         <ng-template #nodeTemplate let-node>
-          <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
+          <svg:g
+            class="node"
+            ngx-tooltip
+            [tooltipPlacement]="'top'"
+            [tooltipType]="'tooltip'"
+            [tooltipTitle]="node.label"
+          >
             <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" />
-            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
+            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{ node.label }}</svg:text>
           </svg:g>
         </ng-template>
 
         <ng-template #linkTemplate let-link>
-          <svg:g class="edge">
-            <svg:path class="line" stroke-width="2" marker-end="url(#arrow)">
-            </svg:path>
-          </svg:g>
+          <svg:g class="edge"><svg:path class="line" stroke-width="2" marker-end="url(#arrow)"></svg:path></svg:g>
         </ng-template>
 
         <ng-template #linkDataTemplate let-link *ngIf="linkDataUI">
           <svg:g class="linkDataUI">
             <ellipse rx="30" ry="10" />
-            <svg:text alignment-baseline="central">{{link.label}}</svg:text>
+            <svg:text alignment-baseline="central">{{ link.label }}</svg:text>
           </svg:g>
         </ng-template>
-
       </ngx-graph>
     </div>
   </div>
   <div class="sidebar">
-    <h1>
-      NGX-
-      <strong>Graph</strong>
-      <small class="subtitle">Graph Visualization for Angular</small>
-    </h1>
+    <h1>NGX- <strong>Graph</strong> <small class="subtitle">Graph Visualization for Angular</small></h1>
 
     <div class="sidebar-body">
       <h3>Theme</h3>
-      <select [ngModel]="theme" (ngModelChange)="theme = $event">>
+      <select [ngModel]="theme" (ngModelChange)="theme = $event">
         <option [value]="'dark'">Dark</option>
         <option [value]="'light'">Light</option>
       </select>
 
       <h3 (click)="dataVisable = !dataVisable" style="cursor: pointer">
-        <span [class.arrow-down]="dataVisable" [class.arrow-right]="!dataVisable">
-        </span>
-        <strong>Data</strong>
+        <span [class.arrow-down]="dataVisable" [class.arrow-right]="!dataVisable"> </span> <strong>Data</strong>
       </h3>
       <div [hidden]="!dataVisable" style="margin-left: 10px;">
         <div>
           <label>
-            <input type="checkbox" [checked]="realTimeData" (change)="realTimeData = $event.target.checked"> Real-time
+            <input type="checkbox" [checked]="realTimeData" (change)="realTimeData = $event.target.checked" /> Real-time
           </label>
         </div>
       </div>
       <div>
         <h3 (click)="dimVisiable = !dimVisiable" style="cursor: pointer">
-          <span [class.arrow-down]="dimVisiable" [class.arrow-right]="!dimVisiable">
-          </span>
-          <strong>Dimensions</strong>
+          <span [class.arrow-down]="dimVisiable" [class.arrow-right]="!dimVisiable"> </span> <strong>Dimensions</strong>
         </h3>
         <div [hidden]="!dimVisiable" style="margin-left: 10px;">
           <label>
-            <input type="checkbox" [checked]="fitContainer" (change)="toggleFitContainer($event.target.checked, autoZoom, autoCenter)"> Fit Container
+            <input
+              type="checkbox"
+              [checked]="fitContainer"
+              (change)="toggleFitContainer($event.target.checked, autoZoom, autoCenter)"
+            />
+            Fit Container
           </label>
           <br />
           <div *ngIf="!fitContainer">
-            <label>Width:</label>
-            <br />
-            <input type="number" [(ngModel)]="width">
-            <br />
-            <label>Height:</label>
-            <br />
-            <input type="number" [(ngModel)]="height">
-            <br />
+            <label>Width:</label> <br />
+            <input type="number" [(ngModel)]="width" /> <br />
+            <label>Height:</label> <br />
+            <input type="number" [(ngModel)]="height" /> <br />
             <button (click)="applyDimensions()">Apply dimensions</button>
           </div>
         </div>
       </div>
 
       <h3 (click)="positionVisible = !positionVisible" style="cursor: pointer">
-        <span [class.arrow-down]="positionVisible" [class.arrow-right]="!positionVisible">
-        </span>
+        <span [class.arrow-down]="positionVisible" [class.arrow-right]="!positionVisible"> </span>
         <strong>Position and zoom</strong>
       </h3>
       <div [hidden]="!positionVisible" style="margin-left: 10px;">
-        <label>X:</label>
-        <input [(ngModel)]="graph.panOffsetX" />
-        <br />
+        <label>X:</label> <input [(ngModel)]="graph.panOffsetX" /> <br />
 
-        <label>Y:</label>
-        <input [(ngModel)]="graph.panOffsetY" />
-        <br />
+        <label>Y:</label> <input [(ngModel)]="graph.panOffsetY" /> <br />
 
-        <label>Zoom level:</label>
-        <input [(ngModel)]="graph.zoomLevel" />
-        <br />
+        <label>Zoom level:</label> <input [(ngModel)]="graph.zoomLevel" /> <br />
 
         <label>Zoom to node:</label>
         <select class="zoomToNode" [(ngModel)]="nodeIdForZoom" (change)="zoomToNode(nodeIdForZoom)">
-          <option *ngFor="let node of hierarchialGraph.nodes" [value]="node.id">{{node.label}}</option>
+          <option *ngFor="let node of hierarchialGraph.nodes" [value]="node.id">{{ node.label }}</option>
         </select>
         <br />
         <label>
-          <input type="checkbox" [checked]="enableZoom" (change)="toggleEnableZoom($event.target.checked)"> Enable Zoom
+          <input type="checkbox" [checked]="enableZoom" (change)="toggleEnableZoom($event.target.checked)" /> Enable
+          Zoom
         </label>
         <br />
         <label>
-          <input type="checkbox" [checked]="autoZoom" (change)="toggleFitContainer(fitContainer, $event.target.checked, autoCenter)"> Auto Zoom
+          <input
+            type="checkbox"
+            [checked]="autoZoom"
+            (change)="toggleFitContainer(fitContainer, $event.target.checked, autoCenter)"
+          />
+          Auto Zoom
         </label>
         <br />
         <label>
-          <input type="checkbox" [checked]="autoCenter" (change)="toggleFitContainer(fitContainer, autoZoom, $event.target.checked)"> Auto Center
+          <input
+            type="checkbox"
+            [checked]="autoCenter"
+            (change)="toggleFitContainer(fitContainer, autoZoom, $event.target.checked)"
+          />
+          Auto Center
         </label>
       </div>
 
       <h3 (click)="colorVisible = !colorVisible" style="cursor: pointer">
-        <span [class.arrow-down]="colorVisible" [class.arrow-right]="!colorVisible">
-        </span>
+        <span [class.arrow-down]="colorVisible" [class.arrow-right]="!colorVisible"> </span>
         <strong>Color Scheme</strong>
       </h3>
-      <select [hidden]="!colorVisible" style="margin-left: 10px;" [ngModel]="selectedColorScheme" (ngModelChange)="setColorScheme($event)">
-        <option *ngFor="let scheme of colorSchemes" [value]="scheme.name">{{scheme.name}}</option>
+      <select
+        [hidden]="!colorVisible"
+        style="margin-left: 10px;"
+        [ngModel]="selectedColorScheme"
+        (ngModelChange)="setColorScheme($event)"
+      >
+        <option *ngFor="let scheme of colorSchemes" [value]="scheme.name">{{ scheme.name }}</option>
       </select>
 
       <h3 (click)="optsVisible = !optsVisible" style="cursor: pointer">
-        <span [class.arrow-down]="optsVisible" [class.arrow-right]="!optsVisible">
-        </span>
-        <strong>Options</strong>
+        <span [class.arrow-down]="optsVisible" [class.arrow-right]="!optsVisible"> </span> <strong>Options</strong>
       </h3>
       <div [hidden]="!optsVisible" style="margin-left: 10px;">
         <label>Orientation</label>
         <select [(ngModel)]="orientation">
-          <option *ngFor="let orient of orientations" [value]="orient.value">{{orient.label}}</option>
+          <option *ngFor="let orient of orientations" [value]="orient.value">{{ orient.label }}</option>
         </select>
 
         <label>Line Interpolation</label>
         <select [ngModel]="curveType" (ngModelChange)="setInterpolationType($event)">
           <option *ngFor="let interpolationType of interpolationTypes" [value]="interpolationType">
-            {{interpolationType}}
+            {{ interpolationType }}
           </option>
         </select>
 
@@ -157,8 +178,8 @@
         </select>
         <br />
         <label>
-          <input type="checkbox" [checked]="linkDataUI" [(ngModel)]="linkDataUI" (change)="showlinkDataUI()">
-          Show additonal link  data
+          <input type="checkbox" [checked]="linkDataUI" [(ngModel)]="linkDataUI" (change)="showlinkDataUI()" /> Show
+          additonal link data
         </label>
         <br />
         <br />
@@ -167,6 +188,5 @@
         <button class="btn btn-default" (click)="updateChart()">Update</button>
       </div>
     </div>
-
   </div>
 </main>
