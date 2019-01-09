@@ -109,7 +109,7 @@ export interface Matrix {
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input()
-  legend: boolean;
+  legend: boolean = false;
 
   @Input()
   nodes: Node[] = [];
