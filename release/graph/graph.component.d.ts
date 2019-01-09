@@ -13,6 +13,14 @@ export interface Matrix {
     e: number;
     f: number;
 }
+export interface DagreLayout {
+    nodesep?: number;
+    edgesep?: number;
+    ranksep?: number;
+    acyclicer?: string;
+    ranker?: string;
+    align?: string;
+}
 export declare class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
     legend: boolean;
     nodes: any[];
@@ -39,8 +47,10 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     center$: Observable<any>;
     zoomToFit$: Observable<any>;
     zoomToNode$: Observable<any>;
+    dagreLayout: DagreLayout;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
+    zoomChange: EventEmitter<number>;
     linkTemplate: TemplateRef<any>;
     nodeTemplate: TemplateRef<any>;
     defsTemplate: TemplateRef<any>;
@@ -338,7 +348,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      */
     center(): void;
     /**
-     * Zooms to fit the entier graph
+     * Zooms to fit the entire graph
      */
     zoomToFit(): void;
     panToNodeId(nodeId: string): void;

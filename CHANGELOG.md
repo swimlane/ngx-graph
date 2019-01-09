@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.3.0
+
+- Feature: Adds zoomChange output (#141)
+- Feature: Adds dagre layout options input (#146)
+- Enhancement: Calculates biggest bounding box of tall text fields in node (#84)
+- Bug: Fixes issue not being able to zoom if the current zoom goes out of the min/max zoom range (#146)
+
 ## 5.2.1
 
 - Fix: Restore the HTML content inside the component (#140)
@@ -7,7 +14,7 @@
 ## 5.2.0
 
 - Add new user template in order to show UI data on the link (#138)
-- Featuren: Adds zoom to node functionality (#133)
+- Feature: Adds zoom to node functionality (#133)
 - Bug: Fixes panning to a location and centering the graph
 
 ## 5.1.2

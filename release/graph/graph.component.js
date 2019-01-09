@@ -19,6 +19,14 @@ import * as dagre from 'dagre';
 import { Observable } from 'rxjs';
 import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
 import { id } from '../utils';
+var defaultDagreLayout = {
+    nodesep: 50,
+    edgesep: 100,
+    ranksep: 100,
+    acyclicer: undefined,
+    ranker: 'network-simplex',
+    align: undefined,
+};
 var GraphComponent = /** @class */ (function (_super) {
     __extends(GraphComponent, _super);
     function GraphComponent() {
@@ -36,8 +44,10 @@ var GraphComponent = /** @class */ (function (_super) {
         _this.autoZoom = false;
         _this.panOnZoom = true;
         _this.autoCenter = false;
+        _this.dagreLayout = defaultDagreLayout;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
+        _this.zoomChange = new EventEmitter();
         _this.subscriptions = [];
         _this.margin = [0, 0, 0, 0];
         _this.results = [];
@@ -109,13 +119,21 @@ var GraphComponent = /** @class */ (function (_super) {
     GraphComponent.prototype.ngOnInit = function () {
         var _this = this;
         if (this.update$)
-            this.subscriptions.push(this.update$.subscribe(function () { _this.update(); }));
+            this.subscriptions.push(this.update$.subscribe(function () {
+                _this.update();
+            }));
         if (this.center$)
-            this.subscriptions.push(this.center$.subscribe(function () { _this.center(); }));
+            this.subscriptions.push(this.center$.subscribe(function () {
+                _this.center();
+            }));
         if (this.zoomToFit$)
-            this.subscriptions.push(this.zoomToFit$.subscribe(function () { _this.zoomToFit(); }));
+            this.subscriptions.push(this.zoomToFit$.subscribe(function () {
+                _this.zoomToFit();
+            }));
         if (this.zoomToNode$)
-            this.subscriptions.push(this.zoomToNode$.subscribe(function (nodeId) { _this.panToNodeId(nodeId); }));
+            this.subscriptions.push(this.zoomToNode$.subscribe(function (nodeId) {
+                _this.panToNodeId(nodeId);
+            }));
     };
     /**
      * Angular lifecycle event
@@ -204,15 +222,29 @@ var GraphComponent = /** @class */ (function (_super) {
                 else {
                     // calculate the width
                     if (nativeElement.getElementsByTagName('text').length) {
-                        var textDims = void 0;
+                        var maxTextDims = void 0;
                         try {
-                            textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+                            for (var _i = 0, _a = nativeElement.getElementsByTagName('text'); _i < _a.length; _i++) {
+                                var textElem = _a[_i];
+                                var currentBBox = textElem.getBBox();
+                                if (!maxTextDims) {
+                                    maxTextDims = currentBBox;
+                                }
+                                else {
+                                    if (currentBBox.width > maxTextDims.width) {
+                                        maxTextDims.width = currentBBox.width;
+                                    }
+                                    if (currentBBox.height > maxTextDims.height) {
+                                        maxTextDims.height = currentBBox.height;
+                                    }
+                                }
+                            }
                         }
                         catch (ex) {
                             // Skip drawing if element is not displayed - Firefox would throw an error here
                             return;
                         }
-                        node.width = textDims.width + 20;
+                        node.width = maxTextDims.width + 20;
                     }
                     else {
                         node.width = dims.width;
@@ -327,12 +359,14 @@ var GraphComponent = /** @class */ (function (_super) {
         this.graph = new dagre.graphlib.Graph();
         this.graph.setGraph({
             rankdir: this.orientation,
+            nodesep: this.dagreLayout.nodesep ? this.dagreLayout.nodesep : defaultDagreLayout.nodesep,
+            edgesep: this.dagreLayout.edgesep ? this.dagreLayout.edgesep : defaultDagreLayout.edgesep,
+            ranksep: this.dagreLayout.ranksep ? this.dagreLayout.ranksep : defaultDagreLayout.ranksep,
+            acyclicer: this.dagreLayout.acyclicer ? this.dagreLayout.acyclicer : defaultDagreLayout.acyclicer,
+            align: this.dagreLayout.align ? this.dagreLayout.align : defaultDagreLayout.align,
+            ranker: this.dagreLayout.ranker ? this.dagreLayout.ranker : defaultDagreLayout.ranker,
             marginx: 20,
             marginy: 20,
-            edgesep: 100,
-            ranksep: 100
-            // acyclicer: 'greedy',
-            // ranker: 'longest-path'
         });
         // Default to assigning a new object as a label for each new edge.
         this.graph.setDefaultEdgeLabel(function () {
@@ -475,6 +509,7 @@ var GraphComponent = /** @class */ (function (_super) {
      */
     GraphComponent.prototype.zoom = function (factor) {
         this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
+        this.zoomChange.emit(this.zoomLevel);
         this.updateTransform();
     };
     /**
@@ -485,6 +520,7 @@ var GraphComponent = /** @class */ (function (_super) {
     GraphComponent.prototype.zoomTo = function (level) {
         this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
         this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
+        this.zoomChange.emit(this.zoomLevel);
         this.updateTransform();
     };
     /**
@@ -735,15 +771,19 @@ var GraphComponent = /** @class */ (function (_super) {
         this.panTo(this.graphDims.width / 2, this.graphDims.height / 2);
     };
     /**
-     * Zooms to fit the entier graph
+     * Zooms to fit the entire graph
      */
     GraphComponent.prototype.zoomToFit = function () {
         var heightZoom = this.dims.height / this.graphDims.height;
         var widthZoom = this.dims.width / this.graphDims.width;
         var zoomLevel = Math.min(heightZoom, widthZoom, 1);
+        if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
+            return;
+        }
         if (zoomLevel !== this.zoomLevel) {
             this.zoomLevel = zoomLevel;
             this.updateTransform();
+            this.zoomChange.emit(this.zoomLevel);
         }
     };
     GraphComponent.prototype.panToNodeId = function (nodeId) {
@@ -780,7 +820,7 @@ var GraphComponent = /** @class */ (function (_super) {
                     encapsulation: ViewEncapsulation.None,
                     changeDetection: ChangeDetectionStrategy.OnPush,
                     animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])],
-                    template: "\n  <ngx-charts-chart\n  [view]=\"[width, height]\"\n  [showLegend]=\"legend\"\n  [legendOptions]=\"legendOptions\"\n  (legendLabelClick)=\"onClick($event)\"\n  (legendLabelActivate)=\"onActivate($event)\"\n  (legendLabelDeactivate)=\"onDeactivate($event)\"\n  mouseWheel\n  (mouseWheelUp)=\"onZoom($event, 'in')\"\n  (mouseWheelDown)=\"onZoom($event, 'out')\"\n  >\n  <svg:g\n    *ngIf=\"initialized\"\n    [attr.transform]=\"transform\"\n    (touchstart)=\"onTouchStart($event)\"\n    (touchend)=\"onTouchEnd($event)\"\n    class=\"graph chart\"\n  >\n    <defs>\n      <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\"></ng-template>\n      <svg:path\n        class=\"text-path\"\n        *ngFor=\"let link of _links\"\n        [attr.d]=\"link.textPath\"\n        [attr.id]=\"link.id\"\n      ></svg:path>\n    </defs>\n    <svg:rect\n      class=\"panning-rect\"\n      [attr.width]=\"dims.width * 100\"\n      [attr.height]=\"dims.height * 100\"\n      [attr.transform]=\"'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'\"\n      (mousedown)=\"isPanning = true\"\n    />\n    <svg:g class=\"links\">\n      <svg:g *ngFor=\"let link of _links; trackBy: trackLinkBy\" class=\"link-group\" #linkElement [id]=\"link.id\">\n        <ng-template\n          *ngIf=\"linkTemplate\"\n          [ngTemplateOutlet]=\"linkTemplate\"\n          [ngTemplateOutletContext]=\"{ $implicit: link }\"\n        ></ng-template>\n        <ng-template\n        *ngIf=\"linkDataTemplate\"\n        [ngTemplateOutlet]=\"linkDataTemplate\"\n        [ngTemplateOutletContext]=\"{ $implicit: link }\"\n        ></ng-template>\n        <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n      </svg:g>\n    </svg:g>\n    <svg:g class=\"nodes\">\n      <svg:g\n        *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n        class=\"node-group\"\n        #nodeElement\n        [id]=\"node.id\"\n        [attr.transform]=\"node.options.transform\"\n        (click)=\"onClick(node)\"\n        (mousedown)=\"onNodeMouseDown($event, node)\"\n      >\n        <ng-template\n          *ngIf=\"nodeTemplate\"\n          [ngTemplateOutlet]=\"nodeTemplate\"\n          [ngTemplateOutletContext]=\"{ $implicit: node }\"\n        ></ng-template>\n        <svg:circle\n          *ngIf=\"!nodeTemplate\"\n          r=\"10\"\n          [attr.cx]=\"node.width / 2\"\n          [attr.cy]=\"node.height / 2\"\n          [attr.fill]=\"node.options.color\"\n        />\n      </svg:g>\n    </svg:g>\n  </svg:g>\n  </ngx-charts-chart>\n  "
+                    template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      mouseWheel\n      (mouseWheelUp)=\"onZoom($event, 'in')\"\n      (mouseWheelDown)=\"onZoom($event, 'out')\"\n    >\n      <svg:g\n        *ngIf=\"initialized\"\n        [attr.transform]=\"transform\"\n        (touchstart)=\"onTouchStart($event)\"\n        (touchend)=\"onTouchEnd($event)\"\n        class=\"graph chart\"\n      >\n        <defs>\n          <ng-template *ngIf=\"defsTemplate\" [ngTemplateOutlet]=\"defsTemplate\"></ng-template>\n          <svg:path\n            class=\"text-path\"\n            *ngFor=\"let link of _links\"\n            [attr.d]=\"link.textPath\"\n            [attr.id]=\"link.id\"\n          ></svg:path>\n        </defs>\n        <svg:rect\n          class=\"panning-rect\"\n          [attr.width]=\"dims.width * 100\"\n          [attr.height]=\"dims.height * 100\"\n          [attr.transform]=\"'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'\"\n          (mousedown)=\"isPanning = true\"\n        />\n        <svg:g class=\"links\">\n          <svg:g *ngFor=\"let link of _links; trackBy: trackLinkBy\" class=\"link-group\" #linkElement [id]=\"link.id\">\n            <ng-template\n              *ngIf=\"linkTemplate\"\n              [ngTemplateOutlet]=\"linkTemplate\"\n              [ngTemplateOutletContext]=\"{ $implicit: link }\"\n            ></ng-template>\n            <ng-template\n              *ngIf=\"linkDataTemplate\"\n              [ngTemplateOutlet]=\"linkDataTemplate\"\n              [ngTemplateOutletContext]=\"{ $implicit: link }\"\n            ></ng-template>\n            <svg:path *ngIf=\"!linkTemplate\" class=\"edge\" [attr.d]=\"link.line\" />\n          </svg:g>\n        </svg:g>\n        <svg:g class=\"nodes\">\n          <svg:g\n            *ngFor=\"let node of _nodes; trackBy: trackNodeBy\"\n            class=\"node-group\"\n            #nodeElement\n            [id]=\"node.id\"\n            [attr.transform]=\"node.options.transform\"\n            (click)=\"onClick(node)\"\n            (mousedown)=\"onNodeMouseDown($event, node)\"\n          >\n            <ng-template\n              *ngIf=\"nodeTemplate\"\n              [ngTemplateOutlet]=\"nodeTemplate\"\n              [ngTemplateOutletContext]=\"{ $implicit: node }\"\n            ></ng-template>\n            <svg:circle\n              *ngIf=\"!nodeTemplate\"\n              r=\"10\"\n              [attr.cx]=\"node.width / 2\"\n              [attr.cy]=\"node.height / 2\"\n              [attr.fill]=\"node.options.color\"\n            />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  "
                 },] },
     ];
     GraphComponent.propDecorators = {
@@ -809,8 +849,10 @@ var GraphComponent = /** @class */ (function (_super) {
         center$: [{ type: Input }],
         zoomToFit$: [{ type: Input }],
         zoomToNode$: [{ type: Input }],
+        dagreLayout: [{ type: Input }],
         activate: [{ type: Output }],
         deactivate: [{ type: Output }],
+        zoomChange: [{ type: Output }],
         linkTemplate: [{ type: ContentChild, args: ['linkTemplate',] }],
         nodeTemplate: [{ type: ContentChild, args: ['nodeTemplate',] }],
         defsTemplate: [{ type: ContentChild, args: ['defsTemplate',] }],
