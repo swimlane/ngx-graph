@@ -240,4 +240,8 @@ export class AppComponent implements OnInit {
   center() {
     this.center$.next(true);
   }
+
+  onZoom(zoomLevel: number) {
+    console.log('Zoom level:', zoomLevel);
+  }
 }
