@@ -3,9 +3,9 @@
  * Throttle a function
  *
  * @export
- * @param {*}      func
- * @param {number} wait
- * @param {*}      [options]
+ * @param func
+ * @param wait
+ * @param options
  * @returns
  */
 export function throttle(func: any, wait: number, options?: any) {
@@ -51,12 +51,12 @@ export function throttle(func: any, wait: number, options?: any) {
  *
  *  class MyClass {
  *    throttleable(10)
- *    myFn() { ... }
+ *    myFn()
  *  }
  *
  * @export
- * @param {number} duration
- * @param {*} [options]
+ * @param duration
+ * @param options
  * @returns
  */
 export function throttleable(duration: number, options?: any) {

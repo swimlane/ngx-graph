@@ -67,7 +67,7 @@ export class ColaForceDirectedLayout implements Layout {
       ] as any,
       groups: [
         ...this.inputGraph.clusters.map(
-          (cluster): Group => ({
+          (cluster): any => ({
             id: cluster.id,
             padding: 5,
             groups: cluster.childNodeIds

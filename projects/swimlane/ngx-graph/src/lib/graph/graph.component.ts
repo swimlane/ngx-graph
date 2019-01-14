@@ -42,7 +42,10 @@ import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 
-console.log('EL REF', ElementRef);
+/**
+ * Default Dimension
+ */
+export const DEFAULT_DIM = 30;
 
 /**
  * Matrix
@@ -323,7 +326,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   ngOnChanges(changes: SimpleChanges): void {
     console.log(changes);
-    const { layout, layoutSettings, nodes, clusters, links } = changes;
+    const { layoutSettings, nodes, clusters, links } = changes;
     this.setLayout(this.layout);
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
@@ -440,6 +443,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         n.data = {};
       }
       n.data = {
+        ...n.data,
         color: this.colors.getColor(this.groupResultsBy(n))
       };
     });
@@ -450,6 +454,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         n.data = {};
       }
       n.data = {
+        ...n.data,
         color: this.colors.getColor(this.groupResultsBy(n))
       };
     });
@@ -527,6 +532,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         const nativeElement = elem.nativeElement;
         const node = this.graph.nodes.find(n => n.id === nativeElement.id);
 
+        // Check if the height and width has been overridden
+        if ((node.dimension || {height: undefined}).height !== DEFAULT_DIM && (node.dimension || {width: undefined}).width !== DEFAULT_DIM) {
+          return;
+        }
+
         // calculate the height
         let dims;
         try {
@@ -535,6 +545,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
         }
+
         if (this.nodeHeight) {
           node.dimension.height = this.nodeHeight;
         } else {
@@ -616,8 +627,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         n.id = id();
       }
       n.dimension = {
-        width: 30,
-        height: 30
+        width: (n.dimension || {}).width || DEFAULT_DIM,
+        height: (n.dimension || {}).height || DEFAULT_DIM
       };
       n.position = {
         x: 0,
