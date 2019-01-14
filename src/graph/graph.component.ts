@@ -375,7 +375,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
           return;
         }
         if (this.nodeHeight) {
-          node.height = this.nodeHeight;
+          node.height = node.height ? node.height : this.nodeHeight;
         } else {
           node.height = dims.height;
         }
@@ -384,7 +384,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         if (this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
 
         if (this.nodeWidth) {
-          node.width = this.nodeWidth;
+          node.width = node.width ? node.width : this.nodeWidth;
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
@@ -563,8 +563,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     });
 
     for (const node of this._nodes) {
-      node.width = 20;
-      node.height = 30;
+      node.width = node.width ? node.width : 20;
+      node.height = node.height ? node.height : 30;
 
       // update dagre
       this.graph.setNode(node.id, node);
