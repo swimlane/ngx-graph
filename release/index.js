@@ -1,5 +1,5 @@
 /**
- * ngx-graph v"5.3.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"5.4.0" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -44038,7 +44038,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
                     return;
                 }
                 if (_this.nodeHeight) {
-                    node.height = _this.nodeHeight;
+                    node.height = node.height ? node.height : _this.nodeHeight;
                 }
                 else {
                     node.height = dims.height;
@@ -44048,7 +44048,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
                 if (_this.nodeMinHeight)
                     node.height = Math.min(node.height, _this.nodeMinHeight);
                 if (_this.nodeWidth) {
-                    node.width = _this.nodeWidth;
+                    node.width = node.width ? node.width : _this.nodeWidth;
                 }
                 else {
                     // calculate the width
@@ -44214,8 +44214,8 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         });
         for (var _i = 0, _a = this._nodes; _i < _a.length; _i++) {
             var node = _a[_i];
-            node.width = 20;
-            node.height = 30;
+            node.width = node.width ? node.width : 20;
+            node.height = node.height ? node.height : 30;
             // update dagre
             this.graph.setNode(node.id, node);
             // set view options

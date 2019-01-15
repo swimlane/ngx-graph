@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.4.0
+
+- Feature: Adding ability to have custom width and height per each node. (#148)
+
 ## 5.3.0
 
 - Feature: Adds zoomChange output (#141)
