@@ -12,7 +12,8 @@ ngx-graph is a graph visualization library for Angular
 - Add the `ngx-graph` component:
 
 ```html { playground }
-<ngx-graph class="chart-container"
+<ngx-graph
+  class="chart-container"
   [view]="[500, 200]"
   [links]="[
     {
@@ -38,7 +39,8 @@ ngx-graph is a graph visualization library for Angular
       id: 'third',
       label: 'C'
     }
-  ]">
+  ]"
+>
 </ngx-graph>
 ```
 
@@ -65,15 +67,17 @@ ngx-graph is a graph visualization library for Angular
 | autoZoom        | boolean          | false         | automatically zoom the graph to fit in the avialable viewport when the graph is updated                                                             |
 | panOnZoom       | boolean          | true          | pan to the mouse cursor while zooming                                                                                                               |
 | autoCenter      | boolean          | false         | center the graph in the viewport when the graph is updated                                                                                          |
-| update$         | Observable       |               | update the graph                                                                                                                                    |
-| center$         | Observable       |               | center the graph                                                                                                                                    |
-| zoomToFit$      | Observable       |               | zoom the graph to fit in the viewport                                                                                                               |
+| update\$        | Observable       |               | update the graph                                                                                                                                    |
+| center\$        | Observable       |               | center the graph                                                                                                                                    |
+| zoomToFit\$     | Observable       |               | zoom the graph to fit in the viewport                                                                                                               |
 | nodeHeight      | number           |               | the height of the nodes **deprecated**{ .badge .warn }                                                                                              |
 | nodeMaxHeight   | number           |               | the max height of the nodes **deprecated**{ .badge .warn }                                                                                          |
 | nodeMinHeight   | number           |               | the min height of the nodes **deprecated**{ .badge .warn }                                                                                          |
 | nodeWidth       | number           |               | the width of the nodes **deprecated**{ .badge .warn }                                                                                               |
 | nodeMinWidth    | number           |               | the min width of the nodes **deprecated**{ .badge .warn }                                                                                           |
 | nodeMaxWidth    | number           |               | the max width of the nodes **deprecated**{ .badge .warn }                                                                                           |
+
+_Deprecated inputs will be removed in the next major version of the package._
 
 ## Outputs
 
