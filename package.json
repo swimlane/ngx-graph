@@ -15,6 +15,7 @@
     "ci": "npm run build && start-server-and-test start http-get://localhost:4200 cypress",
     "publish": "npm publish ./dist/swimlane/ngx-graph"
   },
+  "license": "MIT",
   "dependencies": {
     "@angular/animations": "^7.1.0",
     "@angular/common": "^7.1.0",
