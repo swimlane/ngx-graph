@@ -207,6 +207,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   legendOptions: any;
   isPanning: boolean = false;
   isDragging: boolean = false;
+  isCustomNodeSize: boolean = false;
   draggingNode: any;
   initialized: boolean = false;
   graph: any;
@@ -374,8 +375,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
         }
+
         if (this.nodeHeight) {
-          node.height = node.height ? node.height : this.nodeHeight;
+          if (!this.isCustomNodeSize) {
+            node.height = this.nodeHeight;
+          }
         } else {
           node.height = dims.height;
         }
@@ -383,33 +387,35 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         if (this.nodeMaxHeight) node.height = Math.max(node.height, this.nodeMaxHeight);
         if (this.nodeMinHeight) node.height = Math.min(node.height, this.nodeMinHeight);
 
-        if (this.nodeWidth) {
-          node.width = node.width ? node.width : this.nodeWidth;
-        } else {
-          // calculate the width
-          if (nativeElement.getElementsByTagName('text').length) {
-            let maxTextDims;
-            try {
-              for (const textElem of nativeElement.getElementsByTagName('text')) {
-                const currentBBox = textElem.getBBox();
-                if (!maxTextDims) {
-                  maxTextDims = currentBBox;
-                } else {
-                  if (currentBBox.width > maxTextDims.width) {
-                    maxTextDims.width = currentBBox.width;
-                  }
-                  if (currentBBox.height > maxTextDims.height) {
-                    maxTextDims.height = currentBBox.height;
+        if (!this.isCustomNodeSize) {
+          if (this.nodeWidth) {
+            node.width = this.nodeWidth;
+          } else {
+            // calculate the width
+            if (nativeElement.getElementsByTagName('text').length) {
+              let maxTextDims;
+              try {
+                for (const textElem of nativeElement.getElementsByTagName('text')) {
+                  const currentBBox = textElem.getBBox();
+                  if (!maxTextDims) {
+                    maxTextDims = currentBBox;
+                  } else {
+                    if (currentBBox.width > maxTextDims.width) {
+                      maxTextDims.width = currentBBox.width;
+                    }
+                    if (currentBBox.height > maxTextDims.height) {
+                      maxTextDims.height = currentBBox.height;
+                    }
                   }
                 }
+              } catch (ex) {
+                // Skip drawing if element is not displayed - Firefox would throw an error here
+                return;
               }
-            } catch (ex) {
-              // Skip drawing if element is not displayed - Firefox would throw an error here
-              return;
+              node.width = maxTextDims.width + 20;
+            } else {
+              node.width = dims.width;
             }
-            node.width = maxTextDims.width + 20;
-          } else {
-            node.width = dims.width;
           }
         }
 
@@ -563,8 +569,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     });
 
     for (const node of this._nodes) {
-      node.width = node.width ? node.width : 20;
-      node.height = node.height ? node.height : 30;
+      if (node.width && node.height) {
+        this.isCustomNodeSize = true;
+      }
+
+      node.width = this.isCustomNodeSize ? node.width : 20;
+      node.height = this.isCustomNodeSize ? node.height : 30;
 
       // update dagre
       this.graph.setNode(node.id, node);
