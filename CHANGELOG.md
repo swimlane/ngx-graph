@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.4.1
+
+- Bug: Fixes issue where the node width is ignored when setting a custom width (#151)
+
 ## 5.4.0
 
 - Feature: Adding ability to have custom width and height per each node. (#148)

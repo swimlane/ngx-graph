@@ -1,5 +1,5 @@
 /**
- * ngx-graph v"5.4.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"5.4.1" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -43884,6 +43884,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         _this.results = [];
         _this.isPanning = false;
         _this.isDragging = false;
+        _this.isCustomNodeSize = false;
         _this.initialized = false;
         _this.graphDims = { width: 0, height: 0 };
         _this._oldLinks = [];
@@ -44038,7 +44039,9 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
                     return;
                 }
                 if (_this.nodeHeight) {
-                    node.height = node.height ? node.height : _this.nodeHeight;
+                    if (!_this.isCustomNodeSize) {
+                        node.height = _this.nodeHeight;
+                    }
                 }
                 else {
                     node.height = dims.height;
@@ -44047,38 +44050,40 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
                     node.height = Math.max(node.height, _this.nodeMaxHeight);
                 if (_this.nodeMinHeight)
                     node.height = Math.min(node.height, _this.nodeMinHeight);
-                if (_this.nodeWidth) {
-                    node.width = node.width ? node.width : _this.nodeWidth;
-                }
-                else {
-                    // calculate the width
-                    if (nativeElement.getElementsByTagName('text').length) {
-                        var maxTextDims = void 0;
-                        try {
-                            for (var _i = 0, _a = nativeElement.getElementsByTagName('text'); _i < _a.length; _i++) {
-                                var textElem = _a[_i];
-                                var currentBBox = textElem.getBBox();
-                                if (!maxTextDims) {
-                                    maxTextDims = currentBBox;
-                                }
-                                else {
-                                    if (currentBBox.width > maxTextDims.width) {
-                                        maxTextDims.width = currentBBox.width;
+                if (!_this.isCustomNodeSize) {
+                    if (_this.nodeWidth) {
+                        node.width = _this.nodeWidth;
+                    }
+                    else {
+                        // calculate the width
+                        if (nativeElement.getElementsByTagName('text').length) {
+                            var maxTextDims = void 0;
+                            try {
+                                for (var _i = 0, _a = nativeElement.getElementsByTagName('text'); _i < _a.length; _i++) {
+                                    var textElem = _a[_i];
+                                    var currentBBox = textElem.getBBox();
+                                    if (!maxTextDims) {
+                                        maxTextDims = currentBBox;
                                     }
-                                    if (currentBBox.height > maxTextDims.height) {
-                                        maxTextDims.height = currentBBox.height;
+                                    else {
+                                        if (currentBBox.width > maxTextDims.width) {
+                                            maxTextDims.width = currentBBox.width;
+                                        }
+                                        if (currentBBox.height > maxTextDims.height) {
+                                            maxTextDims.height = currentBBox.height;
+                                        }
                                     }
                                 }
                             }
+                            catch (ex) {
+                                // Skip drawing if element is not displayed - Firefox would throw an error here
+                                return;
+                            }
+                            node.width = maxTextDims.width + 20;
                         }
-                        catch (ex) {
-                            // Skip drawing if element is not displayed - Firefox would throw an error here
-                            return;
+                        else {
+                            node.width = dims.width;
                         }
-                        node.width = maxTextDims.width + 20;
-                    }
-                    else {
-                        node.width = dims.width;
                     }
                 }
                 if (_this.nodeMaxWidth)
@@ -44214,8 +44219,11 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         });
         for (var _i = 0, _a = this._nodes; _i < _a.length; _i++) {
             var node = _a[_i];
-            node.width = node.width ? node.width : 20;
-            node.height = node.height ? node.height : 30;
+            if (node.width && node.height) {
+                this.isCustomNodeSize = true;
+            }
+            node.width = this.isCustomNodeSize ? node.width : 20;
+            node.height = this.isCustomNodeSize ? node.height : 30;
             // update dagre
             this.graph.setNode(node.id, node);
             // set view options

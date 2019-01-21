@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-graph",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "description": "Graph visualization for angular!",
   "main": "release/index.js",
   "module": "release/index.js",

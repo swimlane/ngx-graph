@@ -68,6 +68,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     legendOptions: any;
     isPanning: boolean;
     isDragging: boolean;
+    isCustomNodeSize: boolean;
     draggingNode: any;
     initialized: boolean;
     graph: any;
