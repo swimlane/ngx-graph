@@ -25,9 +25,12 @@ export interface DagreSettings {
     acyclicer?: 'greedy' | undefined;
     ranker?: 'network-simplex' | 'tight-tree' | 'longest-path';
 }
-export declare class DagreLayout implements Layout {
-    defaultSettings: DagreSettings;
-    settings: DagreSettings;
+export interface DagreNodesOnlySettings extends DagreSettings {
+    curveDistance?: number;
+}
+export declare class DagreNodesOnlyLayout implements Layout {
+    defaultSettings: DagreNodesOnlySettings;
+    settings: DagreNodesOnlySettings;
     dagreGraph: any;
     dagreNodes: any;
     dagreEdges: any;

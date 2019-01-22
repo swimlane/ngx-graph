@@ -58,9 +58,13 @@ export interface Matrix {
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
   template: `
+  <div class="zoom-buttons">
+    <button (click)="zoomIn()"><img src="src/assets/icons8-zoom-in-26.png"></button>
+    <button (click)="zoomOut()"><img src="src/assets/icons8-zoom-out-26.png"></button>
+  </div>
   <ngx-charts-chart [view]="[width, height]" [showLegend]="legend" [legendOptions]="legendOptions" (legendLabelClick)="onClick($event)"
-  (legendLabelActivate)="onActivate($event)" (legendLabelDeactivate)="onDeactivate($event)" mouseWheel (mouseWheelUp)="onZoom($event, 'in')"
-  (mouseWheelDown)="onZoom($event, 'out')">
+  (legendLabelActivate)="onActivate($event)" (legendLabelDeactivate)="onDeactivate($event)"
+  >
   <svg:g *ngIf="initialized && graph" [attr.transform]="transform" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
     class="graph chart">
     <defs>
@@ -693,6 +697,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
 
     this.updateTransform();
+  }
+
+  zoomIn(): void {
+    this.zoom(1 + this.zoomSpeed);
+  }
+
+  zoomOut(): void {
+    this.zoom(1 - this.zoomSpeed);
   }
 
   /**

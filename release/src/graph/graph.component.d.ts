@@ -1,11 +1,11 @@
-import { AfterViewInit, ElementRef, EventEmitter, OnDestroy, OnInit, QueryList, TemplateRef, NgZone, ChangeDetectorRef } from '@angular/core';
+import { AfterViewInit, ElementRef, EventEmitter, OnDestroy, OnInit, QueryList, TemplateRef, NgZone, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { BaseChartComponent, ColorHelper, ViewDimensions } from '@swimlane/ngx-charts';
 import 'd3-transition';
 import { Observable, Subscription } from 'rxjs';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
 import { Edge } from '../models/edge.model';
-import { Node } from '../models/node.model';
+import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 /**
  * Matrix
@@ -18,16 +18,16 @@ export interface Matrix {
     e: number;
     f: number;
 }
-export declare class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
+export declare class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
     private el;
     zone: NgZone;
     cd: ChangeDetectorRef;
     private layoutService;
     legend: boolean;
     nodes: Node[];
+    clusters: ClusterNode[];
     links: Edge[];
     activeEntries: any[];
-    orientation: string;
     curve: any;
     draggingEnabled: boolean;
     nodeHeight: number;
@@ -48,14 +48,17 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     center$: Observable<any>;
     zoomToFit$: Observable<any>;
     layout: string | Layout;
+    layoutSettings: any;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     linkTemplate: TemplateRef<any>;
     nodeTemplate: TemplateRef<any>;
+    clusterTemplate: TemplateRef<any>;
     defsTemplate: TemplateRef<any>;
     chart: ElementRef;
     nodeElements: QueryList<ElementRef>;
     linkElements: QueryList<ElementRef>;
+    graphSubscription: Subscription;
     subscriptions: Subscription[];
     colors: ColorHelper;
     dims: ViewDimensions;
@@ -104,6 +107,9 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @memberOf GraphComponent
      */
     ngOnInit(): void;
+    ngOnChanges(changes: SimpleChanges): void;
+    setLayout(layout: string | Layout): void;
+    setLayoutSettings(settings: any): void;
     /**
      * Angular lifecycle event
      *
@@ -132,6 +138,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @memberOf GraphComponent
      */
     draw(): void;
+    tick(): void;
     /**
      * Measures the node element and applies the dimensions
      *
@@ -185,7 +192,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @param x
      * @param y
      */
-    pan(x: number, y: number): void;
+    pan(x: number, y: number, zoomLevel?: number): void;
     /**
      * Pan to a fixed x/y
      *
@@ -199,6 +206,8 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
      */
     zoom(factor: number): void;
+    zoomIn(): void;
+    zoomOut(): void;
     /**
      * Zoom to a fixed level
      *
@@ -221,6 +230,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @memberOf GraphComponent
      */
     onDrag(event: any): void;
+    redrawEdge(edge: Edge): void;
     /**
      * Update the entire view for the new pan position
      *
@@ -332,11 +342,11 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     /**
      * On mouse up event to disable panning/dragging.
      *
-     * @param {MouseEvent} $event
+     * @param {MouseEvent} event
      *
      * @memberOf GraphComponent
      */
-    onMouseUp($event: MouseEvent): void;
+    onMouseUp(event: MouseEvent): void;
     /**
      * On node mouse down to kick off dragging
      *
