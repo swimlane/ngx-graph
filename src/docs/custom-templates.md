@@ -130,7 +130,7 @@ To define a custom template for the edges, define a `#linkTemplate` element as a
 
 ## Cluster Template
 
-To define a custom template for the cluster nodes, define a `#clusterTemplate` element as a content child of the `ngx-graph` component. Each cluster object is passed to the template via the `cluster` template context, so you can style each link based on its properties.
+To define a custom template for the cluster nodes, define a `#clusterTemplate` element as a content child of the `ngx-graph` component. Each cluster object is passed to the template via the `cluster` template context, so you can style each cluster based on its properties.
 
 ```
 <ng-template #clusterTemplate let-cluster>

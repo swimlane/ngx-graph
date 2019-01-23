@@ -244,7 +244,7 @@ The dagre cluster layout groups clustered nodes together into a rectangle
 ></ngx-graph>
 ```
 
-### Cole Force Directed Cluster
+### Cola Force Directed Cluster
 
 ```html { playground }
 <ngx-graph
