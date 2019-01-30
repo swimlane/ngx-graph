@@ -8,4 +8,4 @@
 <md-toc path="/" max-depth="2"></md-toc>
 <md-toc path="custom-templates" max-depth="2"></md-toc>
 <md-toc path="layouts" max-depth="2"></md-toc>
-<md-toc path="interactive-demo" max-depth="2"></md-toc>
+<md-toc path="demos/interactive-demo" max-depth="2"></md-toc>
