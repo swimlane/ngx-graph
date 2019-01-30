@@ -106,110 +106,46 @@ export interface Matrix {
   animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @Input()
-  legend: boolean = false;
+  @Input() legend: boolean = false;
+  @Input() nodes: Node[] = [];
+  @Input() clusters: ClusterNode[] = [];
+  @Input() links: Edge[] = [];
+  @Input() activeEntries: any[] = [];
+  @Input() curve: any;
+  @Input() draggingEnabled = true;
+  @Input() nodeHeight: number;
+  @Input() nodeMaxHeight: number;
+  @Input() nodeMinHeight: number;
+  @Input() nodeWidth: number;
+  @Input() nodeMinWidth: number;
+  @Input() nodeMaxWidth: number;
+  @Input() panningEnabled = true;
+  @Input() enableZoom = true;
+  @Input() zoomSpeed = 0.1;
+  @Input() minZoomLevel = 0.1;
+  @Input() maxZoomLevel = 4.0;
+  @Input() autoZoom = false;
+  @Input() panOnZoom = true;
+  @Input() autoCenter = false;
+  @Input() update$: Observable<any>;
+  @Input() center$: Observable<any>;
+  @Input() zoomToFit$: Observable<any>;
+  @Input() panToNode$: Observable<any>;
+  @Input() layout: string | Layout;
+  @Input() layoutSettings: any;
 
-  @Input()
-  nodes: Node[] = [];
+  @Output() activate: EventEmitter<any> = new EventEmitter();
+  @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() zoomChange: EventEmitter<number> = new EventEmitter();
 
-  @Input()
-  clusters: ClusterNode[] = [];
+  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
+  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
+  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
 
-  @Input()
-  links: Edge[] = [];
-
-  @Input()
-  activeEntries: any[] = [];
-
-  @Input()
-  curve: any;
-
-  @Input()
-  draggingEnabled = true;
-
-  @Input()
-  nodeHeight: number;
-
-  @Input()
-  nodeMaxHeight: number;
-
-  @Input()
-  nodeMinHeight: number;
-
-  @Input()
-  nodeWidth: number;
-
-  @Input()
-  nodeMinWidth: number;
-
-  @Input()
-  nodeMaxWidth: number;
-
-  @Input()
-  panningEnabled = true;
-
-  @Input()
-  enableZoom = true;
-
-  @Input()
-  zoomSpeed = 0.1;
-
-  @Input()
-  minZoomLevel = 0.1;
-
-  @Input()
-  maxZoomLevel = 4.0;
-
-  @Input()
-  autoZoom = false;
-
-  @Input()
-  panOnZoom = true;
-
-  @Input()
-  autoCenter = false;
-
-  @Input()
-  update$: Observable<any>;
-
-  @Input()
-  center$: Observable<any>;
-
-  @Input()
-  zoomToFit$: Observable<any>;
-
-  @Input()
-  layout: string | Layout;
-
-  @Input()
-  layoutSettings: any;
-
-  @Output()
-  activate: EventEmitter<any> = new EventEmitter();
-
-  @Output()
-  deactivate: EventEmitter<any> = new EventEmitter();
-
-  @ContentChild('linkTemplate')
-  linkTemplate: TemplateRef<any>;
-
-  @ContentChild('nodeTemplate')
-  nodeTemplate: TemplateRef<any>;
-
-  @ContentChild('clusterTemplate')
-  clusterTemplate: TemplateRef<any>;
-
-  @ContentChild('defsTemplate')
-  defsTemplate: TemplateRef<any>;
-
-  @ViewChild(ChartComponent, { read: ElementRef })
-  chart: ElementRef;
-
-  @ViewChildren('nodeElement')
-  nodeElements: QueryList<ElementRef>;
-
-  @ViewChildren('linkElement')
-  linkElements: QueryList<ElementRef>;
+  @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
+  @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
+  @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
@@ -314,6 +250,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.subscriptions.push(
         this.zoomToFit$.subscribe(() => {
           this.zoomToFit();
+        })
+      );
+    }
+
+    if (this.panToNode$) {
+      this.subscriptions.push(
+        this.panToNode$.subscribe((nodeId: string) => {
+          this.panToNodeId(nodeId);
         })
       );
     }
@@ -704,10 +648,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       const svgPoint = point.matrixTransform(svgGroup.getScreenCTM().inverse());
 
       // Panzoom
-      const NO_ZOOM_LEVEL = 1;
-      this.pan(svgPoint.x, svgPoint.y, NO_ZOOM_LEVEL);
+      this.pan(svgPoint.x, svgPoint.y, true);
       this.zoom(zoomFactor);
-      this.pan(-svgPoint.x, -svgPoint.y, NO_ZOOM_LEVEL);
+      this.pan(-svgPoint.x, -svgPoint.y, true);
     } else {
       this.zoom(zoomFactor);
     }
@@ -716,8 +659,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   /**
    * Pan by x/y
    *
+   * @param x
+   * @param y
    */
-  pan(x: number, y: number, zoomLevel: number = this.zoomLevel): void {
+  pan(x: number, y: number, ignoreZoomLevel: boolean = false): void {
+    const zoomLevel = ignoreZoomLevel ? 1 : this.zoomLevel;
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
@@ -728,8 +674,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    */
   panTo(x: number, y: number): void {
-    this.transformationMatrix.e = x === null || x === undefined || isNaN(x) ? this.transformationMatrix.e : Number(x);
-    this.transformationMatrix.f = y === null || y === undefined || isNaN(y) ? this.transformationMatrix.f : Number(y);
+    if (x === null || x === undefined || isNaN(x) || y === null || y === undefined || isNaN(y)) {
+      return;
+    }
+
+    const panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
+    const panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
+
+    this.transformationMatrix = transform(
+      this.transformationMatrix,
+      translate(panX / this.zoomLevel, panY / this.zoomLevel)
+    );
 
     this.updateTransform();
   }
@@ -740,7 +695,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   zoom(factor: number): void {
     this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
-
+    this.zoomChange.emit(this.zoomLevel);
     this.updateTransform();
   }
 
@@ -751,7 +706,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   zoomTo(level: number): void {
     this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
     this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
-
+    this.zoomChange.emit(this.zoomLevel);
     this.updateTransform();
   }
 
@@ -1007,10 +962,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * Center the graph in the viewport
    */
   center(): void {
-    this.panTo(
-      this.dims.width / 2 - (this.graphDims.width * this.zoomLevel) / 2,
-      this.dims.height / 2 - (this.graphDims.height * this.zoomLevel) / 2
-    );
+    this.panTo(this.graphDims.width / 2, this.graphDims.height / 2);
   }
 
   /**
@@ -1020,9 +972,28 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
     const zoomLevel = Math.min(heightZoom, widthZoom, 1);
+
+    if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
+      return;
+    }
+    
     if (zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
       this.updateTransform();
+      this.zoomChange.emit(this.zoomLevel);
     }
+  }
+
+  /**
+   * Pans to the node
+   * @param nodeId 
+   */
+  panToNodeId(nodeId: string): void {
+    const node = this.nodes.find(n => n.id === nodeId);
+    if (!node) {
+      return;
+    }
+
+    this.panTo(node.position.x, node.position.y);
   }
 }
