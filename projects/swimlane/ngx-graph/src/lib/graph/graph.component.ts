@@ -42,8 +42,6 @@ import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 
-console.log('EL REF', ElementRef);
-
 /**
  * Matrix
  */
@@ -322,15 +320,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
     const { layout, layoutSettings, nodes, clusters, links } = changes;
     this.setLayout(this.layout);
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
     }
-    if (nodes || clusters || links) {
-      this.update();
-    }
+    this.update();
   }
 
   setLayout(layout: string | Layout): void {
