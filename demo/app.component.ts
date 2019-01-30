@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { colorSets } from '../src/utils/color-sets';
 import { id } from '../src/utils/id';
 import chartGroups from './chartTypes';
-import { countries, getTurbineData } from './data';
+import { countries, getTurbineData, MultiEdgeSourceNode, MultiEdgeDestinationNode, MultiEdgeLink } from './data';
 
 @Component({
   selector: 'app',
@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
   enableZoom: boolean = true;
   autoCenter: boolean = false;
   linkDataUI: boolean = false;
+  enableMultiEdges: boolean = false;
 
   // observables
   update$: Subject<any> = new Subject();
@@ -159,6 +160,22 @@ export class AppComponent implements OnInit {
 
   showlinkDataUI(): void {
     this.updateChart();
+  }
+
+  updateGraphWithMultiEdges(): void {
+      if (this.enableMultiEdges) {
+        return;
+      }
+
+      this.enableMultiEdges = true;
+      this.hierarchialGraph.nodes.push(MultiEdgeSourceNode);
+      this.hierarchialGraph.nodes.push(MultiEdgeDestinationNode);
+      this.hierarchialGraph.links.push(MultiEdgeLink);
+      this.hierarchialGraph.links.push(MultiEdgeLink);
+
+      this.hierarchialGraph.links = [...this.hierarchialGraph.links];
+      this.hierarchialGraph.nodes = [...this.hierarchialGraph.nodes];
+      this.updateChart();
   }
 
   selectChart(chartSelector) {

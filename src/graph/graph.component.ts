@@ -62,7 +62,7 @@ const defaultDagreLayout: DagreLayout = {
   ranksep: 100,
   acyclicer: undefined,
   ranker: 'network-simplex',
-  align: undefined,
+  align: undefined
 };
 
 @Component({
@@ -182,6 +182,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() zoomToNode$: Observable<any>;
 
   @Input() dagreLayout: DagreLayout = defaultDagreLayout;
+  @Input() multigraph: boolean = false;
+  @Input() compound: boolean = false;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -443,9 +445,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const l = this.graph._edgeLabels[k];
 
       const normKey = k.replace(/[^\w-]*/g, '');
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+      let oldLink = this.multigraph ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey) :
+                                      this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);           
       if (!oldLink) {
-        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
+        oldLink = this.multigraph ? this._links.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey) :
+                                    this._links.find(nl => `${nl.source}${nl.target}` === normKey);
       }
 
       oldLink.oldLine = oldLink.line;
@@ -536,7 +540,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   createGraph(): void {
-    this.graph = new dagre.graphlib.Graph();
+    const graphParameters = {
+      multigraph: this.multigraph,
+      compound: this.compound
+    };
+
+    this.graph = new dagre.graphlib.Graph(graphParameters);
     this.graph.setGraph({
       rankdir: this.orientation,
       nodesep: this.dagreLayout.nodesep ? this.dagreLayout.nodesep : defaultDagreLayout.nodesep,
@@ -588,7 +597,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
     // update dagre
     for (const edge of this._links) {
-      this.graph.setEdge(edge.source, edge.target);
+      this.multigraph ? this.graph.setEdge(edge.source, edge.target, edge, edge.id) : 
+                        this.graph.setEdge(edge.source, edge.target);
     }
 
     requestAnimationFrame(() => this.draw());
