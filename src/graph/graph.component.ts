@@ -113,12 +113,16 @@ const defaultDagreLayout: DagreLayout = {
               [ngTemplateOutlet]="linkTemplate"
               [ngTemplateOutletContext]="{ $implicit: link }"
             ></ng-template>
-            <ng-template
-              *ngIf="linkDataTemplate"
-              [ngTemplateOutlet]="linkDataTemplate"
-              [ngTemplateOutletContext]="{ $implicit: link }"
-            ></ng-template>
             <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
+          </svg:g>
+        </svg:g>
+        <svg:g class="datalinks" *ngIf="linkDataTemplate">
+          <svg:g *ngFor="let datalink of _dataLinks; trackBy: trackNodeBy" class="datalink-group" 
+                  #datalinkElement [id]="datalink.id">
+            <ng-template
+              [ngTemplateOutlet]="linkDataTemplate"
+              [ngTemplateOutletContext]="{ $implicit: datalink }"
+            ></ng-template>
           </svg:g>
         </svg:g>
         <svg:g class="nodes">
@@ -152,6 +156,7 @@ const defaultDagreLayout: DagreLayout = {
 export class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() legend: boolean;
   @Input() nodes: any[] = [];
+  @Input() dataLinks: any[] = [];
   @Input() links: any[] = [];
   @Input() activeEntries: any[] = [];
   @Input() orientation: string = 'LR';
@@ -196,6 +201,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+  @ViewChildren('datalinkElement') dataLinkElements: QueryList<ElementRef>;
 
   subscriptions: Subscription[] = [];
   colors: ColorHelper;
@@ -213,6 +219,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   graph: any;
   graphDims: any = { width: 0, height: 0 };
   _nodes: any[];
+  _dataLinks: any[];
   _links: any[];
   _oldLinks: any[] = [];
   transformationMatrix: Matrix = identity();
@@ -496,6 +503,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     requestAnimationFrame(() => this.redrawLines());
+    this.redrawDataLinks();
+
     this.cd.markForCheck();
   }
 
@@ -518,14 +527,41 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
         .duration(_animate ? 500 : 0)
         .attr('d', l.line);
 
-      this.handleLinkDataUIRedraw(linkEl, l);
-
       const textPathSelection = select(this.chartElement.nativeElement).select(`#${l.id}`);
       textPathSelection
         .attr('d', l.oldTextPath)
         .transition()
         .duration(_animate ? 500 : 0)
         .attr('d', l.textPath);
+    });
+  }
+
+  redrawDataLinks(): void {
+    this.dataLinkElements.map(dataLinkEl => {
+      // Finding the datalink element
+      const datalink = this._dataLinks.find(lin => lin.id === dataLinkEl.nativeElement.id);
+      if (!datalink) return;
+
+      // Finding the line that we want to place it on.
+      const line = this._links.find(l => (l.source === datalink.source) && (l.target === datalink.target));
+      if (!line) return;
+
+      const dataLinkUI = select(dataLinkEl.nativeElement).select('.linkDataUI');
+      switch (line.points.length) {
+        case 1:
+          break;
+        case 2:
+          // Placing the link data template in the middle point between the start point and the end.
+          const middleX = (line.points[0].x + line.points[1].x) / 2;
+          const middleY = (line.points[0].y + line.points[1].y) / 2;
+          dataLinkUI.attr('transform', `translate(${middleX}, ${middleY})`);
+          break;
+        default:
+          // Placing the link data template in the middle point
+          const middlePointIndex = Math.floor(line.points.length / 2);
+          dataLinkUI.attr('transform', `translate(${line.points[middlePointIndex].x}, 
+                                                  ${line.points[middlePointIndex].y})`);
+      }
     });
   }
 
@@ -566,6 +602,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const newLink = Object.assign({}, l);
       if (!newLink.id) newLink.id = id();
       return newLink;
+    });
+
+    this._dataLinks = this._links.map(l => {
+      return Object.assign({}, l);
     });
 
     for (const node of this._nodes) {
@@ -790,6 +830,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     this.redrawLines(false);
+    this.redrawDataLinks();
   }
 
   /**
@@ -1031,27 +1072,5 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     }
 
     this.panTo(node.x, node.y);
-  }
-
-  handleLinkDataUIRedraw(linkEl, l): void {
-    const linkCenter = select(linkEl.nativeElement).select('.linkDataUI');
-    if (!linkCenter || !linkEl || !l || !l.points) {
-      return;
-    }
-
-    switch (l.points.length) {
-      case 1:
-        break;
-      case 2:
-        // Placing the link data template in the middle point between the start point and the end.
-        const middleX = (l.points[0].x + l.points[1].x) / 2;
-        const middleY = (l.points[0].y + l.points[1].y) / 2;
-        linkCenter.attr('transform', `translate(${middleX}, ${middleY})`);
-        break;
-      default:
-        // Placing the link data template in the middle point
-        const middlePointIndex = Math.floor(l.points.length / 2);
-        linkCenter.attr('transform', `translate(${l.points[middlePointIndex].x}, ${l.points[middlePointIndex].y})`);
-    }
   }
 }
