@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-graph",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.2",
   "description": "Graph visualization for angular",
   "repository": {
     "type": "git",
