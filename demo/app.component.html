@@ -23,6 +23,7 @@
         [zoomToFit$]="zoomToFit$"
         [zoomToNode$]="zoomToNode$"
         [center$]="center$"
+        [multigraph]="enableMultiEdges"
         (zoomChange)="onZoom($event)"
         (select)="select($event)"
       >
@@ -186,6 +187,7 @@
         <button class="btn btn-default" (click)="center()">Center</button>
         <button class="btn btn-default" (click)="zoomToFit()">Fit in view</button>
         <button class="btn btn-default" (click)="updateChart()">Update</button>
+        <button class="btn btn-default" (click)="updateGraphWithMultiEdges()">Multi Edge</button>
       </div>
     </div>
   </div>
