@@ -465,7 +465,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         // calculate the height
         let dims;
         try {
-          dims = nativeElement.getBoundingClientRect();
+          dims = nativeElement.getBBox();
         } catch (ex) {
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
@@ -488,14 +488,26 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-            let textDims;
+            let maxTextDims;
             try {
-              textDims = nativeElement.getElementsByTagName('text')[0].getBBox();
+              for (const textElem of nativeElement.getElementsByTagName('text')) {
+                const currentBBox = textElem.getBBox();
+                if (!maxTextDims) {
+                  maxTextDims = currentBBox;
+                } else {
+                  if (currentBBox.width > maxTextDims.width) {
+                    maxTextDims.width = currentBBox.width;
+                  }
+                  if (currentBBox.height > maxTextDims.height) {
+                    maxTextDims.height = currentBBox.height;
+                  }
+                }
+              }
             } catch (ex) {
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
-            node.dimension.width = node.dimension.width ? node.dimension.width : textDims.width + 20;
+            node.dimension.width = node.dimension.width ? node.dimension.width : maxTextDims.width + 20;
           } else {
             node.dimension.width = node.dimension.width ? node.dimension.width : dims.width;
           }
