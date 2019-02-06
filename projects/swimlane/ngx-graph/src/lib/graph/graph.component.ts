@@ -470,10 +470,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
         }
-        if (this.nodeHeight) {
-          node.dimension.height = this.nodeHeight;
+        if (this.nodeHeight) {          
+          node.dimension.height = node.dimension.height ? node.dimension.height : this.nodeHeight;
         } else {
-          node.dimension.height = dims.height;
+          node.dimension.height = node.dimension.height ? node.dimension.height : dims.height;
         }
 
         if (this.nodeMaxHeight) {
@@ -484,7 +484,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         }
 
         if (this.nodeWidth) {
-          node.dimension.width = this.nodeWidth;
+          node.dimension.width =  node.dimension.width ? node.dimension.width :this.nodeWidth;
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
@@ -495,9 +495,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
-            node.dimension.width = textDims.width + 20;
+            node.dimension.width = node.dimension.width ? node.dimension.width : textDims.width + 20;
           } else {
-            node.dimension.width = dims.width;
+            node.dimension.width = node.dimension.width ? node.dimension.width : dims.width;
           }
         }
 
@@ -550,10 +550,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       if (!n.id) {
         n.id = id();
       }
-      n.dimension = {
-        width: 30,
-        height: 30
-      };
+      if (!n.dimension) {
+        n.dimension = {
+          width: this.nodeWidth ? this.nodeWidth : 30,
+          height: this.nodeHeight ? this.nodeHeight : 30
+        };
+      }
       n.position = {
         x: 0,
         y: 0
