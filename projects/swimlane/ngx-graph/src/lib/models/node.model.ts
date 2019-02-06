@@ -15,6 +15,7 @@ export interface Node {
   transform?: string;
   label?: string;
   data?: any;
+  meta?: any;
 }
 
 export interface ClusterNode extends Node {

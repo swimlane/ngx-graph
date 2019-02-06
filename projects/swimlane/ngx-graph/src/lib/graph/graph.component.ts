@@ -57,50 +57,7 @@ export interface Matrix {
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
-  template: `
-  <ngx-charts-chart [view]="[width, height]" [showLegend]="legend" [legendOptions]="legendOptions" (legendLabelClick)="onClick($event)"
-  (legendLabelActivate)="onActivate($event)" (legendLabelDeactivate)="onDeactivate($event)" mouseWheel (mouseWheelUp)="onZoom($event, 'in')"
-  (mouseWheelDown)="onZoom($event, 'out')">
-  <svg:g *ngIf="initialized && graph" [attr.transform]="transform" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
-    class="graph chart">
-    <defs>
-      <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate">
-      </ng-template>
-      <svg:path class="text-path" *ngFor="let link of graph.edges" [attr.d]="link.textPath" [attr.id]="link.id">
-      </svg:path>
-    </defs>
-    <svg:rect class="panning-rect" [attr.width]="dims.width * 100" [attr.height]="dims.height * 100" [attr.transform]="'translate(' + ((-dims.width || 0) * 50) +',' + ((-dims.height || 0) *50) + ')' "
-      (mousedown)="isPanning = true" />
-      <svg:g class="clusters">
-        <svg:g #clusterElement *ngFor="let node of graph.clusters; trackBy: trackNodeBy" class="node-group" [id]="node.id" [attr.transform]="node.transform"
-          (click)="onClick(node)">
-          <ng-template *ngIf="clusterTemplate" [ngTemplateOutlet]="clusterTemplate" [ngTemplateOutletContext]="{ $implicit: node }">
-          </ng-template>
-          <svg:g *ngIf="!clusterTemplate" class="node cluster">
-            <svg:rect [attr.width]="node.dimension.width" [attr.height]="node.dimension.height" [attr.fill]="node.data?.color" />
-            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">{{node.label}}</svg:text>
-          </svg:g>
-        </svg:g>
-      </svg:g>
-      <svg:g class="links">
-      <svg:g #linkElement *ngFor="let link of graph.edges; trackBy: trackLinkBy" class="link-group" [id]="link.id">
-        <ng-template *ngIf="linkTemplate" [ngTemplateOutlet]="linkTemplate" [ngTemplateOutletContext]="{ $implicit: link }">
-        </ng-template>
-        <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
-      </svg:g>
-    </svg:g>
-    <svg:g class="nodes">
-      <svg:g #nodeElement *ngFor="let node of graph.nodes; trackBy: trackNodeBy" class="node-group" [id]="node.id" [attr.transform]="node.transform"
-        (click)="onClick(node)" (mousedown)="onNodeMouseDown($event, node)">
-        <ng-template *ngIf="nodeTemplate" [ngTemplateOutlet]="nodeTemplate" [ngTemplateOutletContext]="{ $implicit: node }">
-        </ng-template>
-        <svg:circle *ngIf="!nodeTemplate" r="10" [attr.cx]="node.dimension.width / 2" [attr.cy]="node.dimension.height / 2" [attr.fill]="node.data?.color"
-        />
-      </svg:g>
-    </svg:g>
-  </svg:g>
-</ngx-charts-chart>
-  `,
+  templateUrl: 'graph.component.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
@@ -322,7 +279,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   update(): void {
     super.update();
-
     if (!this.curve) {
       this.curve = shape.curveBundle.beta(1);
     }
@@ -343,6 +299,53 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.updateTransform();
       this.initialized = true;
     });
+  }
+
+  /**
+   * Creates the dagre graph engine
+   *
+   * @memberOf GraphComponent
+   */
+  createGraph(): void {
+    this.graphSubscription.unsubscribe();
+    this.graphSubscription = new Subscription();
+    const initializeNode = n => {
+      if (!n.meta) {
+        n.meta = {};
+      }
+      if (!n.id) {
+        n.id = id();
+      }
+      if (!n.dimension) {
+        n.dimension = {
+          width: this.nodeWidth ? this.nodeWidth : 30,
+          height: this.nodeHeight ? this.nodeHeight : 30
+        };
+
+        n.meta.forceDimensions = false;
+      } else {
+        n.meta.forceDimensions = n.meta.forceDimensions === undefined ? true : n.meta.forceDimensions;
+      }
+      n.position = {
+        x: 0,
+        y: 0
+      };
+      n.data = n.data ? n.data : {};
+      return n;
+    };
+
+    this.graph = {
+      nodes: [...this.nodes].map(initializeNode),
+      clusters: [...(this.clusters || [])].map(initializeNode),
+      edges: [...this.links].map(e => {
+        if (!e.id) {
+          e.id = id();
+        }
+        return e;
+      })
+    };
+
+    requestAnimationFrame(() => this.draw());
   }
 
   /**
@@ -471,9 +474,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           return;
         }
         if (this.nodeHeight) {          
-          node.dimension.height = node.dimension.height ? node.dimension.height : this.nodeHeight;
+          node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
         } else {
-          node.dimension.height = node.dimension.height ? node.dimension.height : dims.height;
+          node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
         }
 
         if (this.nodeMaxHeight) {
@@ -484,7 +487,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         }
 
         if (this.nodeWidth) {
-          node.dimension.width =  node.dimension.width ? node.dimension.width :this.nodeWidth;
+          node.dimension.width =  node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
@@ -507,9 +510,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
-            node.dimension.width = node.dimension.width ? node.dimension.width : maxTextDims.width + 20;
+            node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
           } else {
-            node.dimension.width = node.dimension.width ? node.dimension.width : dims.width;
+            node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
           }
         }
 
@@ -548,45 +551,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           .attr('d', edge.textPath);
       }
     });
-  }
-
-  /**
-   * Creates the dagre graph engine
-   *
-   * @memberOf GraphComponent
-   */
-  createGraph(): void {
-    this.graphSubscription.unsubscribe();
-    this.graphSubscription = new Subscription();
-    const initializeNode = n => {
-      if (!n.id) {
-        n.id = id();
-      }
-      if (!n.dimension) {
-        n.dimension = {
-          width: this.nodeWidth ? this.nodeWidth : 30,
-          height: this.nodeHeight ? this.nodeHeight : 30
-        };
-      }
-      n.position = {
-        x: 0,
-        y: 0
-      };
-      n.data = n.data ? n.data : {};
-      return n;
-    };
-    this.graph = {
-      nodes: [...this.nodes].map(initializeNode),
-      clusters: [...(this.clusters || [])].map(initializeNode),
-      edges: [...this.links].map(e => {
-        if (!e.id) {
-          e.id = id();
-        }
-        return e;
-      })
-    };
-
-    requestAnimationFrame(() => this.draw());
   }
 
   /**
