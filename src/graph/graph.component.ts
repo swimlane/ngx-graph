@@ -187,6 +187,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() zoomToNode$: Observable<any>;
 
   @Input() dagreLayout: DagreLayout = defaultDagreLayout;
+  @Input() singleNodesPerLine: number = 1;
   @Input() multigraph: boolean = false;
   @Input() compound: boolean = false;
 
@@ -433,6 +434,41 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       });
     }
 
+    if (this.singleNodesPerLine > 1) {
+      let singleNodesAmount: number  = 0;
+      let currentDestinationNode;
+      const components = dagre.graphlib.alg.components(this.graph);
+      for (let i = 0; i < components.length; i++) {
+        if (components[i].length > 1) {
+          continue;
+        }
+
+        singleNodesAmount++;
+        singleNodesAmount = singleNodesAmount % this.singleNodesPerLine;
+
+        // Starting a new nodes row by adding a new temp node
+        if (singleNodesAmount === 1) {
+          currentDestinationNode = {
+            id: id(),
+            width: 20,
+            height: 30,
+          };
+
+          this.graph.setNode(currentDestinationNode.id, currentDestinationNode);
+        }
+
+        // Finding the single node element
+        const removedNodeId: string = components[i][0];
+        const currentSourceNode = this._nodes.find(n => n.id === removedNodeId);
+
+        // Connecting it to the last node in the row.
+        this.graph.setEdge(currentSourceNode.id, currentDestinationNode.id);
+
+        // Update last node in the row
+        currentDestinationNode = currentSourceNode;
+      }
+    }
+
     // Dagre to recalc the layout
     dagre.layout(this.graph);
 
@@ -457,6 +493,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       if (!oldLink) {
         oldLink = this.multigraph ? this._links.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey) :
                                     this._links.find(nl => `${nl.source}${nl.target}` === normKey);
+      }
+
+      // This is for supporting multiple single nodes in a row
+      if (!oldLink) {
+        continue;
       }
 
       oldLink.oldLine = oldLink.line;
