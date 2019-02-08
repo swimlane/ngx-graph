@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.5.0
+
+- Feature: Support multiple links between two nodes (#159)
+- Enhancement: Update layout to spread orphan nodes in a grid (#161)
+- Bug: Fix pan on zoom (#157)
+- Bug: Fix flickering problem with the link data UI. (#160)
+
 ## 5.4.1
 
 - Bug: Fixes issue where the node width is ignored when setting a custom width (#151)

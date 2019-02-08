@@ -24,6 +24,7 @@ export interface DagreLayout {
 export declare class GraphComponent extends BaseChartComponent implements OnInit, OnDestroy, AfterViewInit {
     legend: boolean;
     nodes: any[];
+    dataLinks: any[];
     links: any[];
     activeEntries: any[];
     orientation: string;
@@ -48,6 +49,9 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     zoomToFit$: Observable<any>;
     zoomToNode$: Observable<any>;
     dagreLayout: DagreLayout;
+    singleNodesPerLine: number;
+    multigraph: boolean;
+    compound: boolean;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     zoomChange: EventEmitter<number>;
@@ -58,6 +62,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     chart: ElementRef;
     nodeElements: QueryList<ElementRef>;
     linkElements: QueryList<ElementRef>;
+    dataLinkElements: QueryList<ElementRef>;
     subscriptions: Subscription[];
     colors: ColorHelper;
     dims: ViewDimensions;
@@ -74,6 +79,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     graph: any;
     graphDims: any;
     _nodes: any[];
+    _dataLinks: any[];
     _links: any[];
     _oldLinks: any[];
     transformationMatrix: Matrix;
@@ -144,6 +150,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @memberOf GraphComponent
      */
     redrawLines(_animate?: boolean): void;
+    redrawDataLinks(): void;
     /**
      * Creates the dagre graph engine
      *
@@ -183,7 +190,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      * @param x
      * @param y
      */
-    pan(x: number, y: number): void;
+    pan(x: number, y: number, ignoreZoomLevel?: boolean): void;
     /**
      * Pan to a fixed x/y
      *
@@ -353,5 +360,4 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
      */
     zoomToFit(): void;
     panToNodeId(nodeId: string): void;
-    handleLinkDataUIRedraw(linkEl: any, l: any): void;
 }
