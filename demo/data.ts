@@ -49,6 +49,22 @@ export const countries = [
   'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
+export const MultiEdgeSourceNode = {
+  id: "multiEdgeSource",
+  label: "MultiEdgeSource"
+};
+
+export const MultiEdgeDestinationNode = {
+  id: "multiEdgeDestination",
+  label: "MultiEdgeDestination"
+};
+
+export const MultiEdgeLink = {
+  source: "multiEdgeSource",
+  target: "multiEdgeDestination",
+  label: "on success"
+}
+
 export function generateGraph(nodeCount: number) {
   const nodes = [];
   const links = [];
