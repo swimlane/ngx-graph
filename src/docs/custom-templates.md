@@ -18,15 +18,20 @@ ngx-graph gives you complete control over the look and behavior of your graph. Y
       target: 'c1',
       label: 'custom label'
     }, {
-      id: 'c',
-      source: 'first',
-      target: 'c1',
-      label: 'custom label'
-    }, {
       id: 'd',
       source: 'first',
       target: 'c2',
       label: 'custom label'
+    }, {
+      id: 'e',
+      source: 'c1',
+      target: 'd',
+      label: 'first link'
+    }, {
+      id: 'f',
+      source: 'c1',
+      target: 'd',
+      label: 'second link'
     }
   ]"
   [nodes]="[
@@ -42,6 +47,9 @@ ngx-graph gives you complete control over the look and behavior of your graph. Y
     }, {
       id: 'c2',
       label: 'C2'
+    }, {
+      id: 'd',
+      label: 'D'
     }
   ]"
   [clusters]="[

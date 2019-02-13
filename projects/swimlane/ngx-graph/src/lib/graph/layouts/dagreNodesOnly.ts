@@ -28,6 +28,8 @@ export interface DagreSettings {
   align?: Alignment;
   acyclicer?: 'greedy' | undefined;
   ranker?: 'network-simplex' | 'tight-tree' | 'longest-path';
+  multigraph?: boolean;
+  compound?: boolean;
 }
 
 export interface DagreNodesOnlySettings extends DagreSettings {
@@ -46,7 +48,9 @@ export class DagreNodesOnlyLayout implements Layout {
     edgePadding: 100,
     rankPadding: 100,
     nodePadding: 50,
-    curveDistance: 20
+    curveDistance: 20,
+    multigraph: true,
+    compound: true
   };
   settings: DagreNodesOnlySettings = {};
 
@@ -119,8 +123,8 @@ export class DagreNodesOnlyLayout implements Layout {
   }
 
   createDagreGraph(graph: Graph): any {
-    this.dagreGraph = new dagre.graphlib.Graph();
     const settings = Object.assign({}, this.defaultSettings, this.settings);
+    this.dagreGraph = new dagre.graphlib.Graph({ compound: settings.compound, multigraph: settings.multigraph });
     this.dagreGraph.setGraph({
       rankdir: settings.orientation,
       marginx: settings.marginX,
@@ -130,7 +134,9 @@ export class DagreNodesOnlyLayout implements Layout {
       nodesep: settings.nodePadding,
       align: settings.align,
       acyclicer: settings.acyclicer,
-      ranker: settings.ranker
+      ranker: settings.ranker,
+      multigraph: settings.multigraph,
+      compound: settings.compound
     });
 
     // Default to assigning a new object as a label for each new edge.
@@ -171,7 +177,11 @@ export class DagreNodesOnlyLayout implements Layout {
 
     // update dagre
     for (const edge of this.dagreEdges) {
-      this.dagreGraph.setEdge(edge.source, edge.target);
+      if (settings.multigraph) {
+        this.dagreGraph.setEdge(edge.source, edge.target, edge, edge.id);
+      } else {
+        this.dagreGraph.setEdge(edge.source, edge.target);
+      }
     }
 
     return this.dagreGraph;
