@@ -682,6 +682,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
     this.zoomChange.emit(this.zoomLevel);
     this.updateTransform();
+    this.update();
   }
 
   /**
@@ -956,6 +957,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.updateTransform();
       this.zoomChange.emit(this.zoomLevel);
     }
+    this.update();
   }
 
   /**
