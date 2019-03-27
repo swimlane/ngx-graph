@@ -412,6 +412,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       newLink.line = line;
       newLink.points = points;
 
+      if (points.length % 2 === 1) {
+        newLink.midPoint = points[Math.floor(points.length / 2)];
+      } else {
+        const first = points[points.length / 2];
+        const second = points[points.length / 2 - 1];
+        newLink.midPoint = {
+          x: (first.x + second.x) / 2,
+          y: (first.y + second.y) / 2
+        };
+      }
+
       const textPos = points[Math.floor(points.length / 2)];
       if (textPos) {
         newLink.textTransform = `translate(${textPos.x || 0},${textPos.y || 0})`;

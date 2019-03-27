@@ -1,3 +1,5 @@
+import { NodePosition } from "./node.model";
+
 export interface Edge {
   id?: string;
   source: string;
@@ -11,4 +13,5 @@ export interface Edge {
   oldLine?: any;
   oldTextPath?: string;
   textPath?: string;
+  midPoint?: NodePosition
 }

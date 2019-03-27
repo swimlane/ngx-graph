@@ -5,6 +5,7 @@ import { id } from '../../utils/id';
 import { forceCollide, forceLink, forceManyBody, forceSimulation } from 'd3-force';
 import { Edge } from '../../models/edge.model';
 import { Observable, Subject } from 'rxjs';
+import { NodePosition } from '../../models';
 
 export interface D3ForceDirectedSettings {
   force?: any;
@@ -22,6 +23,7 @@ export interface D3Node {
 export interface D3Edge {
   source: string | D3Node;
   target: string | D3Node;
+  midPoint: NodePosition;
 }
 export interface D3Graph {
   nodes: D3Node[];
