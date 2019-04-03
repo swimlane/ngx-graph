@@ -968,7 +968,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.updateTransform();
       this.zoomChange.emit(this.zoomLevel);
     }
-    this.update();
   }
 
   /**
