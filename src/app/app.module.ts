@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
-import { DocspaCoreModule, MarkdownModule, MarkdownElementsModule, RuntimeContentModule, DocsifyPluginsModule } from '@swimlane/docspa-core';
+import { DocspaCoreModule, MarkdownModule, MarkdownElementsModule, RuntimeContentModule, DocsifyPluginsModule, EmbedStackblitzModule } from '@swimlane/docspa-core';
 import { config } from '../docspa.config';
 import { Location, LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { DemoModule } from 'src/docs/demos/demo.module';
@@ -26,7 +26,8 @@ import { environment } from 'src/environments/environment';
         NgxChartsModule
       ]
     }),
-    DocsifyPluginsModule
+    DocsifyPluginsModule,
+    EmbedStackblitzModule
   ],
   providers: [Location, { provide: LocationStrategy, useClass: HashLocationStrategy }],
   bootstrap: [AppComponent]
