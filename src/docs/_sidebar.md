@@ -1,6 +1,8 @@
 <h1><a class="app-name-link" href="">NGX-GRAPH</a></h1>
 
-<center>v<env-var var="version"></env-var></center>
+<center>
+  <md-env var="version"></md-enf>
+</center>
 
 <md-toc-search paths="main"></md-toc>
 <md-toc-search paths="layouts"></md-toc>

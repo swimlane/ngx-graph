@@ -155,3 +155,7 @@ If you want to define SVG defs object that you can reference in the other templa
   // your SVG defs here
 </ng-template>
 ```
+
+## Custom SVG
+
+Any other SVG elements that you define inside the component will be projected into the main SVG element of the graph component.

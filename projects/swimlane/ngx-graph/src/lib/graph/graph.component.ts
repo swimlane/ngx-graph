@@ -891,7 +891,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    */
   @HostListener('document:touchmove', ['$event'])
-  onTouchMove($event: TouchEvent): void {
+  onTouchMove($event: any): void {
     if (this.isPanning && this.panningEnabled) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
