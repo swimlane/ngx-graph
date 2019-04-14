@@ -552,17 +552,19 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       if (edge) {
         const linkSelection = select(linkEl.nativeElement).select('.line');
         linkSelection
-          .attr('d', edge.oldLine)
+          .attr('d', edge.line)
+          .style('opacity', 0)
           .transition()
           .duration(_animate ? 500 : 0)
-          .attr('d', edge.line);
+          .style('opacity', 1);
 
-        const textPathSelection = select(this.chartElement.nativeElement).select(`#${edge.id}`);
+        const textPathSelection = select(linkEl.nativeElement).select('.edge-label');
         textPathSelection
-          .attr('d', edge.oldTextPath)
+          .attr('d', edge.textPath)
+          .style('opacity', 0)
           .transition()
           .duration(_animate ? 500 : 0)
-          .attr('d', edge.textPath);
+          .style('opacity', 1);
       }
     });
   }
