@@ -238,7 +238,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       }
     }
     if (links) {
-      console.log(links);
       if (links.isFirstChange()) {
         this.edgePreviousArray = links.currentValue;
       } else {
