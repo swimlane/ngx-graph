@@ -461,7 +461,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.center();
     }
 
-    requestAnimationFrame(() => this.redrawLines());
+    requestAnimationFrame(() => {
+      this.redrawNodes();
+      this.redrawLines();
+    });
     this.cd.markForCheck();
   }
 
@@ -560,6 +563,21 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           .transition()
           .duration(_animate ? 500 : 0)
           .attr('d', edge.textPath);
+      }
+    });
+  }
+  
+  redrawNodes(_animate = true): void {
+    this.nodeElements.map(nodeEl => {
+      const node = this.graph.nodes.find(nod => nod.id === nodeEl.nativeElement.id);
+
+      if (node) {
+        const nodeSelection = select(nodeEl.nativeElement).select('.node');
+        nodeSelection
+          .style('opacity', 0)
+          .transition()
+          .style('opacity', 1)
+          .duration(_animate ? 500 : 0)
       }
     });
   }
