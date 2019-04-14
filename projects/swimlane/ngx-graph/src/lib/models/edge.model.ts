@@ -13,5 +13,6 @@ export interface Edge {
   oldLine?: any;
   oldTextPath?: string;
   textPath?: string;
-  midPoint?: NodePosition
+  midPoint?: NodePosition;
+  newLine?: boolean;
 }

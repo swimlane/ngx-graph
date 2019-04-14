@@ -123,6 +123,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
+  nodePreviousArray: Node[] = [];
+  edgePreviousArray: Edge[] = []
 
   constructor(
     private el: ElementRef,
@@ -223,6 +225,31 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   ngOnChanges(changes: SimpleChanges): void {
     const { layout, layoutSettings, nodes, clusters, links } = changes;
     this.setLayout(this.layout);
+    if (nodes) {
+      if (nodes.isFirstChange()) {
+        this.nodePreviousArray = nodes.currentValue;
+      } else {
+        const nodeCurrentArray: Node[] = nodes.currentValue;
+        if (nodeCurrentArray.length > this.nodePreviousArray.length) {
+          nodeCurrentArray.slice(0, this.nodePreviousArray.length).map(n => n.newNode = false);
+          nodeCurrentArray.slice(this.nodePreviousArray.length, nodeCurrentArray.length).map(n => n.newNode = true);
+          this.nodePreviousArray = nodes.currentValue;
+        }
+      }
+    }
+    if (links) {
+      console.log(links);
+      if (links.isFirstChange()) {
+        this.edgePreviousArray = links.currentValue;
+      } else {
+        const edgeCurrentArray: Edge[] = links.currentValue;
+        if (edgeCurrentArray.length > this.edgePreviousArray.length) {
+          edgeCurrentArray.slice(0, this.edgePreviousArray.length).map(e => e.newLine = false);
+          edgeCurrentArray.slice(this.edgePreviousArray.length, edgeCurrentArray.length).map(e => e.newLine = true);
+          this.edgePreviousArray = links.currentValue;
+        }
+      }
+    }
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
     }
@@ -309,7 +336,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   createGraph(): void {
     this.graphSubscription.unsubscribe();
     this.graphSubscription = new Subscription();
-    const initializeNode = n => {
+    const initializeNode = (n: Node | ClusterNode) => {
       if (!n.meta) {
         n.meta = {};
       }
@@ -549,18 +576,34 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.linkElements.map(linkEl => {
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
-      if (edge) {
+      if (edge && !edge.newLine) {
         const linkSelection = select(linkEl.nativeElement).select('.line');
         linkSelection
-          .attr('d', edge.line)
+          .attr('d', edge.oldLine)
+          .transition()
+          .duration(_animate ? 500 : 0)
+          .attr('d', edge.line);
+
+        const textPathSelection = select(linkEl.nativeElement).select('.edge-label');
+        textPathSelection
+          .attr('d', edge.oldTextPath)
+          .transition()
+          .duration(_animate ? 500 : 0)
+          .attr('d', edge.textPath);
+      }
+
+      if (edge && edge.newLine) {
+        const newLinkSelection = select(linkEl.nativeElement).select('.line');
+        newLinkSelection
+          .attr('d', edge.oldLine)
           .style('opacity', 0)
           .transition()
           .duration(_animate ? 500 : 0)
           .style('opacity', 1);
 
-        const textPathSelection = select(linkEl.nativeElement).select('.edge-label');
-        textPathSelection
-          .attr('d', edge.textPath)
+        const newTextPathSelection = select(linkEl.nativeElement).select('.edge-label');
+        newTextPathSelection
+          .attr('d', edge.oldTextPath)
           .style('opacity', 0)
           .transition()
           .duration(_animate ? 500 : 0)
@@ -573,13 +616,13 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.nodeElements.map(nodeEl => {
       const node = this.graph.nodes.find(nod => nod.id === nodeEl.nativeElement.id);
 
-      if (node) {
+      if (node && node.newNode) {
         const nodeSelection = select(nodeEl.nativeElement).select('.node');
         nodeSelection
           .style('opacity', 0)
           .transition()
-          .style('opacity', 1)
           .duration(_animate ? 500 : 0)
+          .style('opacity', 1);
       }
     });
   }
