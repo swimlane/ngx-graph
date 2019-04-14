@@ -18,6 +18,10 @@
   }
 
   .node-group {
+    &.old-node {
+      transition: transform 0.5s ease-in-out;
+    }
+
     .node {
       &:focus {
         outline: none;
