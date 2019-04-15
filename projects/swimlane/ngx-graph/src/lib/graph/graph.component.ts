@@ -31,6 +31,7 @@ import {
 } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
+import * as ease from 'd3-ease';
 import 'd3-transition';
 import { Observable, Subscription, of } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -563,6 +564,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         linkSelection
           .attr('d', edge.oldLine)
           .transition()
+          .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
           .attr('d', edge.line);
 
@@ -570,6 +572,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         textPathSelection
           .attr('d', edge.oldTextPath)
           .transition()
+          .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
           .attr('d', edge.textPath);
       }
