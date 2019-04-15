@@ -60,8 +60,7 @@ export interface Matrix {
   styleUrls: ['./graph.component.scss'],
   templateUrl: 'graph.component.html',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() legend: boolean = false;
