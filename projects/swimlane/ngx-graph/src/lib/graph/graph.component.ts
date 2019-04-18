@@ -410,9 +410,16 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
 
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey || `${ol.source}${ol.target}${ol.id}` === normKey);
+      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey);
+      let linkFromGraph = this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey);
+      
       if (!oldLink) {
-        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey || `${nl.source}${nl.target}${nl.id}` === normKey) || edgeLabel;
+        oldLink = linkFromGraph || edgeLabel;
+      } else if (
+        oldLink.data && 
+        linkFromGraph && linkFromGraph.data && 
+        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)) { // Compare old link to new link and replace if not equal      
+        oldLink.data = linkFromGraph.data 
       }
 
       oldLink.oldLine = oldLink.line;
