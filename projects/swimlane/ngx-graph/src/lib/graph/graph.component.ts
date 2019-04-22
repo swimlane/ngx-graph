@@ -31,6 +31,7 @@ import {
 } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
+import * as ease from 'd3-ease';
 import 'd3-transition';
 import { Observable, Subscription, of } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -59,8 +60,7 @@ export interface Matrix {
   styleUrls: ['./graph.component.scss'],
   templateUrl: 'graph.component.html',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [trigger('link', [ngTransition('* => *', [animate(500, style({ transform: '*' }))])])]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() legend: boolean = false;
@@ -83,6 +83,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() maxZoomLevel = 4.0;
   @Input() autoZoom = false;
   @Input() panOnZoom = true;
+  @Input() animate? = false;
   @Input() autoCenter = false;
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
@@ -120,6 +121,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   graph: Graph;
   graphDims: any = { width: 0, height: 0 };
   _oldLinks: Edge[] = [];
+  oldNodes: Set<string> = new Set();
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
@@ -375,6 +377,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   tick() {
     // Transposes view options to the node
+    const oldNodes: Set<string> = new Set();
+
     this.graph.nodes.map(n => {
       n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
         0})`;
@@ -382,7 +386,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      oldNodes.add(n.id);
     });
+
+    // Prevent animations on new nodes
+    setTimeout(() => {
+      this.oldNodes = oldNodes;
+    }, 500);
+
     (this.graph.clusters || []).map(n => {
       n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
         0})`;
@@ -398,9 +409,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       const edgeLabel = this.graph.edgeLabels[edgeLabelId];
 
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+
+      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey);
+      let linkFromGraph = this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey);
+      
       if (!oldLink) {
-        oldLink = this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey) || edgeLabel;
+        oldLink = linkFromGraph || edgeLabel;
+      } else if (
+        oldLink.data && 
+        linkFromGraph && linkFromGraph.data && 
+        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)) { // Compare old link to new link and replace if not equal      
+        oldLink.data = linkFromGraph.data 
       }
 
       oldLink.oldLine = oldLink.line;
@@ -542,7 +561,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  redrawLines(_animate = true): void {
+  redrawLines(_animate = this.animate): void {
     this.linkElements.map(linkEl => {
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
@@ -551,6 +570,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         linkSelection
           .attr('d', edge.oldLine)
           .transition()
+          .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
           .attr('d', edge.line);
 
@@ -558,6 +578,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         textPathSelection
           .attr('d', edge.oldTextPath)
           .transition()
+          .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
           .attr('d', edge.textPath);
       }
