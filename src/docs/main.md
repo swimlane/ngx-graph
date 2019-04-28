@@ -61,6 +61,7 @@ ngx-graph is a graph visualization library for Angular
 | draggingEnabled | boolean            | true          | enable dragging nodes                                                                                                                               |
 | panningEnabled  | boolean            | true          | enable panning                                                                                                                                      |
 | enableZoom      | boolean            | true          | enable zoom                                                                                                                                         |
+| animate         | boolean            | false         | enable animations                                                                                                                                   |
 | zoomSpeed       | number             | 0.1           | the zoom speed                                                                                                                                      |
 | minZoomLevel    | number             | 0.1           | the minimum zoom level                                                                                                                              |
 | maxZoomLevel    | number             | 4.0           | the maximum zoom level                                                                                                                              |

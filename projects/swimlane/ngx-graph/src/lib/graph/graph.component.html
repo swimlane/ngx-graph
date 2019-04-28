@@ -79,6 +79,7 @@
         #nodeElement
         *ngFor="let node of graph.nodes; trackBy: trackNodeBy"
         class="node-group"
+        [class.old-node]="animate && oldNodes.has(node.id)"
         [id]="node.id"
         [attr.transform]="node.transform"
         (click)="onClick(node)"
