@@ -8,6 +8,7 @@
 <md-toc-search paths="layouts"></md-toc>
 
 <md-toc path="/" max-depth="2"></md-toc>
+<md-toc path="data-format" max-depth="2"></md-toc>
 <md-toc path="custom-templates" max-depth="2"></md-toc>
 <md-toc path="layouts" max-depth="2"></md-toc>
 <md-toc path="demos/interactive-demo" max-depth="2"></md-toc>
