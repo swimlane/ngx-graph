@@ -35,7 +35,7 @@ import * as ease from 'd3-ease';
 import 'd3-transition';
 import { Observable, Subscription, of } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { identity, scale, toSVG, transform, translate } from 'transformation-matrix';
+import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
 import { Edge } from '../models/edge.model';
@@ -785,7 +785,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   updateTransform(): void {
-    this.transform = toSVG(this.transformationMatrix);
+    this.transform = toSVG(smoothMatrix(this.transformationMatrix, 100));
   }
 
   /**

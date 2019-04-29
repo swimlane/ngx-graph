@@ -54,7 +54,7 @@
     "quick-lru": "^1.1.0",
     "rxjs": "^6.3.3",
     "smoothscroll-polyfill": "^0.4.3",
-    "transformation-matrix": "^1.14.1",
+    "transformation-matrix": "^1.15.3",
     "url-resolve": "^1.0.0",
     "vfile": "^3.0.0",
     "vfile-reporter": "^5.1.1",
