@@ -11,7 +11,7 @@
     "test": "npm run cypress",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build-pkg": "ng build @swimlane/ngx-graph",
+    "build-pkg": "ng build @swimlane/ngx-graph && cp README.md projects/dist/ngx-graph/README.md",
     "build-docs": "cross-env NODE_ENV=production ng build --prod --no-aot --no-build-optimizer --base-href=\"/ngx-graph/\"",
     "predeploy-docs": "npm run build-docs ",
     "deploy-docs": "angular-cli-ghpages --dir ./dist/ngxGraph",
