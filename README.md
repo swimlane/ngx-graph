@@ -9,7 +9,6 @@ https://swimlane.github.io/ngx-graph/
 
 ## Installation
 1. `npm install @swimlane/ngx-graph --save`
-2. Make sure the peer dependencies are installed (d3)
 3. Import `NgxGraphModule` into your module
 4. Use the `ngx-graph` component in your components
 
