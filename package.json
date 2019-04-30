@@ -13,7 +13,7 @@
     "e2e": "ng e2e",
     "build-pkg": "ng build @swimlane/ngx-graph",
     "ci": "npm run build && start-server-and-test start http-get://localhost:4200 cypress",
-    "publish": "npm publish projects/dist/ngx-graph --tag vnext"
+    "publish": "npm publish projects/dist/ngx-graph"
   },
   "license": "MIT",
   "dependencies": {
