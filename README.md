@@ -12,7 +12,8 @@ https://swimlane.github.io/ngx-graph/
 2. Make sure the peer dependencies are installed (d3)
 3. Import `NgxGraphModule` into your module
 4. Use the `ngx-graph` component in your components
-```
+
+```html
 <ngx-graph
   class="chart-container"
   [view]="[500, 550]"
@@ -129,7 +130,7 @@ https://swimlane.github.io/ngx-graph/
 ## Data
 
 ### Nodes
-```
+```javascript
 [
   {
     id: '1',
@@ -159,7 +160,7 @@ https://swimlane.github.io/ngx-graph/
 ```
 
 ### Edges
-```
+```javascript
 [
   {
     id: 'a',
@@ -195,7 +196,7 @@ https://swimlane.github.io/ngx-graph/
 ```
 
 ### Clusters
-```
+```javascript
 [
   {
     id: 'cluster0',
