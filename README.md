@@ -4,16 +4,8 @@
 
 A Graph visualization for angular
 
-## Demo
+## Documentation & Demos 
 https://swimlane.github.io/ngx-graph/
-
-## Features
-* Custom templates for nodes and edges
-* Automatic layout using [Dagre](https://github.com/cpettitt/dagre)
-* Animations
-
-### How is it different from `ngx-charts`?
-This library is focused on handling graph data (anything with nodes and edges) rather than chart data.  Currently the only visualization uses the Dagre layout, which is specialized for directed graphs.  The plan is to implement multiple visualisations for graph data within this same library.  Eventually, `ngx-charts-force-directed-graph` may be imported into this library as another option to visualize your graph data.
 
 ## Installation
 1. `npm install @swimlane/ngx-graph --save`
@@ -23,42 +15,114 @@ This library is focused on handling graph data (anything with nodes and edges) r
 ```
 <ngx-graph
   class="chart-container"
-  [view]="view"
-  [legend]="showLegend"
-  [links]="hierarchialGraph.links"
-  (legendLabelClick)="onLegendLabelClick($event)"
-  [nodes]="hierarchialGraph.nodes"
-  [scheme]="colorScheme"
-  [orientation]="orientation"
-  [curve]="curve"
-  (select)="select($event)">
-
+  [view]="[500, 550]"
+  [links]="[
+    {
+      id: 'a',
+      source: 'first',
+      target: 'second',
+      label: 'is parent of'
+    }, {
+      id: 'b',
+      source: 'first',
+      target: 'c1',
+      label: 'custom label'
+    }, {
+      id: 'd',
+      source: 'first',
+      target: 'c2',
+      label: 'custom label'
+    }, {
+      id: 'e',
+      source: 'c1',
+      target: 'd',
+      label: 'first link'
+    }, {
+      id: 'f',
+      source: 'c1',
+      target: 'd',
+      label: 'second link'
+    }
+  ]"
+  [nodes]="[
+    {
+      id: 'first',
+      label: 'A'
+    }, {
+      id: 'second',
+      label: 'B'
+    }, {
+      id: 'c1',
+      label: 'C1'
+    }, {
+      id: 'c2',
+      label: 'C2'
+    }, {
+      id: 'd',
+      label: 'D'
+    }
+  ]"
+  [clusters]="[
+    {
+      id: 'third',
+      label: 'Cluster node',
+      childNodeIds: ['c1', 'c2']
+    }
+  ]"
+  layout="dagreCluster"
+>
   <ng-template #defsTemplate>
     <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4" orient="auto">
       <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
     </svg:marker>
   </ng-template>
 
-  <ng-template #nodeTemplate let-node>
-    <svg:g class="node"
+  <ng-template #clusterTemplate let-cluster>
+    <svg:g
+      class="node cluster"
       ngx-tooltip
       [tooltipPlacement]="'top'"
       [tooltipType]="'tooltip'"
-      [tooltipTitle]="node.label">
-      <svg:rect [attr.width]="node.width" [attr.height]="node.height" [attr.fill]="node.options.color" />
-      <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">{{node.label}}</svg:text>
+      [tooltipTitle]="cluster.label"
+    >
+      <svg:rect
+        rx="5"
+        ry="5"
+        [attr.width]="cluster.dimension.width"
+        [attr.height]="cluster.dimension.height"
+        [attr.fill]="cluster.data.color"
+      />
+    </svg:g>
+  </ng-template>
+
+  <ng-template #nodeTemplate let-node>
+    <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
+      <svg:rect
+        [attr.width]="node.dimension.width"
+        [attr.height]="node.dimension.height"
+        [attr.fill]="node.data.color"
+      />
+      <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
+        {{node.label}}
+      </svg:text>
     </svg:g>
   </ng-template>
 
   <ng-template #linkTemplate let-link>
     <svg:g class="edge">
-      <svg:path
-        stroke-width="2"
-        marker-end="url(#arrow)" >
-      </svg:path>
+      <svg:path class="line" stroke-width="2" marker-end="url(#arrow)"></svg:path>
+      <svg:text class="edge-label" text-anchor="middle">
+        <textPath
+          class="text-path"
+          [attr.href]="'#' + link.id"
+          [style.dominant-baseline]="link.dominantBaseline"
+          startOffset="50%"
+        >
+          {{link.label}}
+        </textPath>
+      </svg:text>
     </svg:g>
   </ng-template>
-
 </ngx-graph>
 ```
 
@@ -68,53 +132,75 @@ This library is focused on handling graph data (anything with nodes and edges) r
 ```
 [
   {
-    id: 'start',
-    label: 'start'
-  }, {
     id: '1',
-    label: 'Query ThreatConnect',
-  }, {
+    label: 'Node A'
+  },
+  {
     id: '2',
-    label: 'Query XForce',
-  }, {
+    label: 'Node B'
+  },
+  {
     id: '3',
-    label: 'Format Results'
-  }, {
+    label: 'Node C'
+  },
+  {
     id: '4',
-    label: 'Search Splunk'
-  }, {
+    label: 'Node D'
+  },
+  {
     id: '5',
-    label: 'Block LDAP'
-  }, {
+    label: 'Node E'
+  },
+  {
     id: '6',
-    label: 'Email Results'
+    label: 'Node F'
   }
 ]
 ```
 
-### Links
+### Edges
 ```
 [
   {
-    source: 'start',
-    target: '1',
-    label: 'links to'
-  }, {
-    source: 'start',
-    target: '2'
-  }, {
+    id: 'a',
     source: '1',
-    target: '3',
-    label: 'related to'
-  }, {
-    source: '2',
+    target: '2'
+  },
+  {
+    id: 'b',
+    source: '1',
+    target: '3'
+  },
+  {
+    id: 'c',
+    source: '3',
     target: '4'
-  }, {
-    source: '2',
-    target: '6'
-  }, {
+  },
+  {
+    id: 'd',
     source: '3',
     target: '5'
+  },
+  {
+    id: 'e',
+    source: '4',
+    target: '5'
+  },
+  {
+    id: 'f',
+    source: '2',
+    target: '6'
+  }
+]
+```
+
+### Clusters
+```
+[
+  {
+    id: 'cluster0',
+    label: 'Cluster node',
+    childNodeIds: ['2', '3']
   }
 ]
 ```
