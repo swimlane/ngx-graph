@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.0.1
+
+- Fix: Added readme and licence files to npm package
+
 ## 6.0.0
 
 - Breaking: Changed the data format, removed inputs. Please refer to the docs to see what the newly available inputs are.
