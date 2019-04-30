@@ -45,7 +45,7 @@
     "d3-shape": "^1.2.0",
     "d3-timer": "^1.0.7",
     "d3-transition": "^1.1.1",
-    "dagre": "^0.8.2",
+    "dagre": "^0.8.4",
     "transformation-matrix": "^1.7.0",
     "webcola": "^3.3.8"
   }
