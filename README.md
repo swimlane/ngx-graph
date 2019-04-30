@@ -13,6 +13,44 @@ https://swimlane.github.io/ngx-graph/
 3. Import `NgxGraphModule` into your module
 4. Use the `ngx-graph` component in your components
 
+## Usage
+
+### Simple
+```html
+<ngx-graph
+  class="chart-container"
+  [view]="[500, 200]"
+  [links]="[
+    {
+      id: 'a',
+      source: 'first',
+    target: 'second',
+      label: 'is parent of'
+    }, {
+      id: 'b',
+      source: 'first',
+      target: 'third',
+      label: 'custom label'
+    }
+  ]"
+  [nodes]="[
+    {
+      id: 'first',
+      label: 'A'
+    }, {
+      id: 'second',
+      label: 'B'
+    }, {
+      id: 'third',
+      label: 'C'
+    }
+  ]"
+>
+</ngx-graph>
+```
+
+### Custom Templates
+
 ```html
 <ngx-graph
   class="chart-container"
