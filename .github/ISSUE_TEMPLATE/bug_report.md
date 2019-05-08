@@ -26,5 +26,8 @@ If applicable, add screenshots to help explain your problem.
 **Demo**
 Provide an online demo (stackblitz, codesandbox, or similar) where the issue can be reproduced 
 
+**ngx-graph version**
+Specify the version of ngx-graph where this bug is present
+
 **Additional context**
 Add any other context about the problem here.
