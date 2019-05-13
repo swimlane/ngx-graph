@@ -467,9 +467,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       });
     }
 
-    // Calculate the height/width total
-    this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
-    this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
+    // Calculate the height/width total, but only if we have any nodes
+    if(this.graph.nodes && this.graph.nodes.length) {
+      this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
+      this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
+    }
 
     if (this.autoZoom) {
       this.zoomToFit();
