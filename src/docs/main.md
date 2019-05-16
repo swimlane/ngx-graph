@@ -40,7 +40,6 @@ ngx-graph is a graph visualization library for Angular
       label: 'C'
     }
   ]"
-  [panningEnabled]="'true'"
 >
 </ngx-graph>
 ```
@@ -60,7 +59,8 @@ ngx-graph is a graph visualization library for Angular
 | [curve](/demos/interactive-demo#line-curve-interpolation) | any                 |               | the interpolation function used to generate the curve. It accepts any d3.curve function                                                             |
 | legend                                                    | boolean             | false         | show/hide the legend. **deprecated**{ .badge .warn }                                                                                                |
 | draggingEnabled                                           | boolean             | true          | enable dragging nodes                                                                                                                               |
-| panningEnabled                                            | string             | 'true'          | enable panning                                                                                                                                      |
+| panningEnabled                                            | boolean             | true          | enable panning                                                                                                                                      |
+| panningAxis                                               | string             | 'both', 'horizontal', 'vertical'          | set panning direction                                                                                                                                      |
 | enableZoom                                                | boolean             | true          | enable zoom                                                                                                                                         |
 | animate                                                   | boolean             | false         | enable animations                                                                                                                                   |
 | zoomSpeed                                                 | number              | 0.1           | the zoom speed                                                                                                                                      |

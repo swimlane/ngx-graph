@@ -1,6 +1,5 @@
-export enum PanningEnum {
-  True = 'true',
-  False = 'false',
+export enum PanningAxis {
+  Both = 'both',
   Horizontal = 'horizontal',
   Vertical = 'vertical',
 }

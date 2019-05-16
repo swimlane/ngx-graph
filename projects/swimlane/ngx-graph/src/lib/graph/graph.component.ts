@@ -42,7 +42,7 @@ import { Edge } from '../models/edge.model';
 import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
-import { PanningEnum } from '../enums/panning.enum';
+import { PanningAxis } from '../enums/panning.enum';
 
 /**
  * Matrix
@@ -77,7 +77,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() nodeWidth: number;
   @Input() nodeMinWidth: number;
   @Input() nodeMaxWidth: number;
-  @Input() panningEnabled: PanningEnum = PanningEnum.True;
+  @Input() panningEnabled: boolean = true;
+  @Input() panningAxis: PanningAxis = PanningAxis.Both;
   @Input() enableZoom = true;
   @Input() zoomSpeed = 0.1;
   @Input() minZoomLevel = 0.1;
@@ -312,7 +313,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   createGraph(): void {
     this.graphSubscription.unsubscribe();
     this.graphSubscription = new Subscription();
-    const initializeNode = (n: Node | ClusterNode) => {
+    const initializeNode = (n: Node) => {
       if (!n.meta) {
         n.meta = {};
       }
@@ -889,8 +890,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
-    if (this.isPanning) {
-      this.checkEnum(this.panningEnabled, $event);
+    if (this.isPanning && this.panningEnabled) {
+      this.checkEnum(this.panningAxis, $event);
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
@@ -901,7 +902,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onTouchStart(event: TouchEvent): void {
+  onTouchStart(event: any): void {
     this._touchLastX = event.changedTouches[0].clientX;
     this._touchLastY = event.changedTouches[0].clientY;
 
@@ -913,8 +914,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    */
   @HostListener('document:touchmove', ['$event'])
-  onTouchMove($event: TouchEvent): void {
-    if (this.isPanning && this.panningEnabled === PanningEnum.True) {
+  onTouchMove($event: any): void {
+    if (this.isPanning && this.panningEnabled) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
       const movementX = clientX - this._touchLastX;
@@ -931,7 +932,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onTouchEnd(event: TouchEvent) {
+  onTouchEnd(event: any) {
     this.isPanning = false;
   }
 
@@ -1007,13 +1008,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   private checkEnum(key: string, event: MouseEvent) {
     switch (key) {
-      case PanningEnum.False:
-        // Do nothing here.
-        break;
-      case PanningEnum.Horizontal:
+      case PanningAxis.Horizontal:
         this.pan(event.movementX, 0);
         break;
-      case PanningEnum.Vertical:
+      case PanningAxis.Vertical:
         this.pan(0, event.movementY);
         break;
       default:
