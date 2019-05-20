@@ -410,8 +410,13 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
 
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey);
-      let linkFromGraph = this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey);
+      const isMultigraph = this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
+
+      let oldLink = isMultigraph ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey) :
+                                      this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);  
+
+      const linkFromGraph = isMultigraph ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey) :
+                                            this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);  
       
       if (!oldLink) {
         oldLink = linkFromGraph || edgeLabel;
