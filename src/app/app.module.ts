@@ -23,7 +23,8 @@ import { environment } from 'src/environments/environment';
     RuntimeContentModule.forRoot({
       imports: [
         NgxGraphModule, 
-        NgxChartsModule
+        NgxChartsModule,
+        DemoModule
       ]
     }),
     DocsifyPluginsModule,
