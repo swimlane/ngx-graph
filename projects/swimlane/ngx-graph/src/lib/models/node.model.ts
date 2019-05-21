@@ -19,5 +19,5 @@ export interface Node {
 }
 
 export interface ClusterNode extends Node {
-  childNodeIds: string[];
+  childNodeIds?: string[];
 }

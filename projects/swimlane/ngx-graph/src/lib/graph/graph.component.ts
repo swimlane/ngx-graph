@@ -42,6 +42,7 @@ import { Edge } from '../models/edge.model';
 import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
+import { PanningAxis } from '../enums/panning.enum';
 
 /**
  * Matrix
@@ -76,7 +77,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() nodeWidth: number;
   @Input() nodeMinWidth: number;
   @Input() nodeMaxWidth: number;
-  @Input() panningEnabled = true;
+  @Input() panningEnabled: boolean = true;
+  @Input() panningAxis: PanningAxis = PanningAxis.Both;
   @Input() enableZoom = true;
   @Input() zoomSpeed = 0.1;
   @Input() minZoomLevel = 0.1;
@@ -311,7 +313,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   createGraph(): void {
     this.graphSubscription.unsubscribe();
     this.graphSubscription = new Subscription();
-    const initializeNode = n => {
+    const initializeNode = (n: Node) => {
       if (!n.meta) {
         n.meta = {};
       }
@@ -613,7 +615,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  generateLine(points): any {
+  generateLine(points: any): any {
     const lineFunction = shape
       .line<any>()
       .x(d => d.x)
@@ -724,7 +726,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onPan(event): void {
+  onPan(event: MouseEvent): void {
     this.pan(event.movementX, event.movementY);
   }
 
@@ -733,7 +735,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onDrag(event): void {
+  onDrag(event: MouseEvent): void {
     if (!this.draggingEnabled) {
       return;
     }
@@ -796,7 +798,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onClick(event): void {
+  onClick(event: any): void {
     this.select.emit(event);
   }
 
@@ -846,7 +848,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  trackLinkBy(index, link): any {
+  trackLinkBy(index: number, link: Edge): any {
     return link.id;
   }
 
@@ -856,7 +858,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  trackNodeBy(index, node): any {
+  trackNodeBy(index: number, node: Node): any {
     return node.id;
   }
 
@@ -891,7 +893,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
     if (this.isPanning && this.panningEnabled) {
-      this.onPan($event);
+      this.checkEnum(this.panningAxis, $event);
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
@@ -902,7 +904,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onTouchStart(event) {
+  onTouchStart(event: any): void {
     this._touchLastX = event.changedTouches[0].clientX;
     this._touchLastY = event.changedTouches[0].clientY;
 
@@ -932,7 +934,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onTouchEnd(event) {
+  onTouchEnd(event: any) {
     this.isPanning = false;
   }
 
@@ -1004,5 +1006,19 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     }
 
     this.panTo(node.position.x, node.position.y);
+  }
+
+  private checkEnum(key: string, event: MouseEvent) {
+    switch (key) {
+      case PanningAxis.Horizontal:
+        this.pan(event.movementX, 0);
+        break;
+      case PanningAxis.Vertical:
+        this.pan(0, event.movementY);
+        break;
+      default:
+        this.onPan(event);
+        break;
+    }
   }
 }
