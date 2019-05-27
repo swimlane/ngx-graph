@@ -138,3 +138,11 @@ export class MyComponent{
 ```html
 <ngx-graph ... [zoomToFit$]="zoomToFit$"> </ngx-graph>
 ```
+
+# Templates Example
+
+## Organization Tree
+
+```html { playground }
+<ngx-graph-org-tree></ngx-graph-org-tree>
+```
