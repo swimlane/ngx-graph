@@ -34,9 +34,9 @@
     "@ngx-loading-bar/core": "^2.2.0",
     "@ngx-loading-bar/http-client": "^2.2.0",
     "@stackblitz/sdk": "^1.2.0",
-    "@swimlane/docspa-core": "^3.0.2",
+    "@swimlane/docspa-core": "^4.0.0",
     "@swimlane/docspa-remark-preset": "^2.0.1",
-    "@swimlane/docspa-stackblitz": "^3.0.0",
+    "@swimlane/docspa-stackblitz": "^4.0.0",
     "@swimlane/ngx-charts": "^10.0.0",
     "@types/d3-ease": "^1.0.8",
     "@types/d3-selection": "^1.4.1",
@@ -69,9 +69,9 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.13.8",
     "@angular-devkit/build-ng-packagr": "^0.13.8",
-    "@angular/cli": "^7.3.8",
-    "@angular/compiler-cli": "^7.2.11",
-    "@angular/language-service": "^7.1.0",
+    "@angular/cli": "^8.0.0",
+    "@angular/compiler-cli": "^8.0.0",
+    "@angular/language-service": "^8.0.0",
     "@swimlane/prettier-config-swimlane": "^1.0.0",
     "@types/jasmine": "~2.8.6",
     "@types/jasminewd2": "~2.0.3",
@@ -80,7 +80,7 @@
     "@types/unist": "^2.0.2",
     "@types/vfile": "^3.0.2",
     "angular-cli-ghpages": "^0.5.3",
-    "codelyzer": "~4.3.0",
+    "codelyzer": "~5.0.1",
     "cross-env": "^5.2.0",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
@@ -98,6 +98,6 @@
     "tslint": "~5.11.0",
     "tslint-config-prettier": "^1.17.0",
     "tslint-config-swimlane": "^4.0.0",
-    "typescript": "~3.1.1"
+    "typescript": "~3.4.0"
   }
 }
