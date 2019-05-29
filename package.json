@@ -64,7 +64,7 @@
     "vfile": "^3.0.0",
     "vfile-reporter": "^5.1.1",
     "webcola": "^3.3.8",
-    "zone.js": "~0.8.26"
+    "zone.js": "~0.9.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.13.8",
