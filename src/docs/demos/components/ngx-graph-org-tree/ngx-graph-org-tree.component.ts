@@ -90,7 +90,10 @@ export class NgxGraphOrgTreeComponent implements OnInit {
       const edge: Edge =   {
         source: employee.upperManagerId,
         target: employee.id,
-        label: ''
+        label: '',
+        data: {
+          linkText: 'Manager of'
+        }
       }
 
       this.links.push(edge);

@@ -438,16 +438,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       newLink.line = line;
       newLink.points = points;
 
-      if (points.length % 2 === 1) {
-        newLink.midPoint = points[Math.floor(points.length / 2)];
-      } else {
-        const first = points[points.length / 2];
-        const second = points[points.length / 2 - 1];
-        newLink.midPoint = {
-          x: (first.x + second.x) / 2,
-          y: (first.y + second.y) / 2
-        };
-      }
+      this.updateMidpointOnEdge(newLink, points);
 
       const textPos = points[Math.floor(points.length / 2)];
       if (textPos) {
@@ -590,6 +581,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
           .attr('d', edge.textPath);
+
+        this.updateMidpointOnEdge(edge, edge.points);
       }
     });
   }
@@ -1024,6 +1017,19 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       default:
         this.onPan(event);
         break;
+    }
+  }
+
+  private updateMidpointOnEdge(edge: Edge, points: any): void {
+    if (points.length % 2 === 1) {
+      edge.midPoint = points[Math.floor(points.length / 2)];
+    } else {
+      const first = points[points.length / 2];
+      const second = points[points.length / 2 - 1];
+      edge.midPoint = {
+        x: (first.x + second.x) / 2,
+        y: (first.y + second.y) / 2
+      };
     }
   }
 }
