@@ -1021,6 +1021,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   private updateMidpointOnEdge(edge: Edge, points: any): void {
+    if (!edge || !points) {
+      return;
+    }
+    
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
