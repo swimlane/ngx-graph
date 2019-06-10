@@ -98,12 +98,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
 
-  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
-  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
+  @ContentChild('linkTemplate', {static: false}) linkTemplate: TemplateRef<any>;
+  @ContentChild('nodeTemplate', {static: false}) nodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate', {static: false}) clusterTemplate: TemplateRef<any>;
+  @ContentChild('defsTemplate', {static: false}) defsTemplate: TemplateRef<any>;
 
-  @ViewChild(ChartComponent, { read: ElementRef }) chart: ElementRef;
+  @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
