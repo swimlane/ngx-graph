@@ -22,19 +22,19 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import {
-  BaseChartComponent,
-  ChartComponent,
-  ColorHelper,
-  ViewDimensions,
-  calculateViewDimensions
-} from '@swimlane/ngx-charts';
+// import {
+//   BaseChartComponent,
+//   ChartComponent,
+//   ColorHelper,
+//   ViewDimensions,
+//   calculateViewDimensions
+// } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as ease from 'd3-ease';
 import 'd3-transition';
-import { Observable, Subscription, of } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Observable, Subscription, of, fromEvent as observableFromEvent } from 'rxjs';
+import { debounceTime, first } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -43,6 +43,10 @@ import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
+import { ViewDimensions, calculateViewDimensions } from '../utils/view-dimension-helper';
+import { ColorHelper } from '../utils/color-helper';
+import { GraphWrapperComponent } from './graph-wrapper/graph-wrapper.component';
+import { VisibilityObserver } from '../utils/visibility-observer';
 
 /**
  * Matrix
@@ -63,7 +67,7 @@ export interface Matrix {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() legend: boolean = false;
   @Input() nodes: Node[] = [];
   @Input() clusters: ClusterNode[] = [];
@@ -94,6 +98,15 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
 
+  // From Ngx-Charts Base Chart Component
+  @Input() results: any[] = [];
+  @Input() view: number[];
+  @Input() scheme: any = 'cool';
+  @Input() schemeType: string = 'ordinal';
+  @Input() customColors: any;
+  @Input() animations: boolean = true;
+  @Output() select = new EventEmitter();
+
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
@@ -103,7 +116,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ContentChild('clusterTemplate', {static: false}) clusterTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate', {static: false}) defsTemplate: TemplateRef<any>;
 
-  @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
+  @ViewChild(GraphWrapperComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
@@ -112,7 +125,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   colors: ColorHelper;
   dims: ViewDimensions;
   margin = [0, 0, 0, 0];
-  results = [];
   seriesDomain: any;
   transform: string;
   legendOptions: any;
@@ -128,14 +140,18 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   _touchLastX = null;
   _touchLastY = null;
 
+  // From Ngx-Charts Base Chart Component
+  width: number;
+  height: number;
+  resizeSubscription: any;
+  visibilityObserver: VisibilityObserver;
+
   constructor(
-    private el: ElementRef,
     public zone: NgZone,
     public cd: ChangeDetectorRef,
+    private chartElement: ElementRef,
     private layoutService: LayoutService
-  ) {
-    super(el, zone, cd);
-  }
+  ) {}
 
   @Input()
   groupResultsBy: (node: any) => string = node => node.label;
@@ -258,7 +274,13 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   ngOnDestroy(): void {
-    super.ngOnDestroy();
+    // From Ngx-Charts Base Chart Component
+    this.unbindEvents();
+    if (this.visibilityObserver) {
+      this.visibilityObserver.visible.unsubscribe();
+      this.visibilityObserver.destroy();
+    }
+
     for (const sub of this.subscriptions) {
       sub.unsubscribe();
     }
@@ -272,9 +294,71 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   ngAfterViewInit(): void {
-    super.ngAfterViewInit();
+    // From Ngx-Charts Base Chart Component
+    this.bindWindowResizeEvent();
+    // listen for visibility of the element for hidden by default scenario
+    this.visibilityObserver = new VisibilityObserver(this.chartElement, this.zone);
+    this.visibilityObserver.visible.subscribe(this.update.bind(this));
+
     setTimeout(() => this.update());
   }
+
+  // From Ngx-Charts Base Chart Component
+  getContainerDims(): any {
+    let width;
+    let height;
+    const hostElem = this.chartElement.nativeElement;
+
+    if (hostElem.parentNode !== null) {
+      // Get the container dimensions
+      const dims = hostElem.parentNode.getBoundingClientRect();
+      width = dims.width;
+      height = dims.height;
+    }
+
+    if (width && height) {
+      return { width, height };
+    }
+
+    return null;
+  }
+
+  // From Ngx-Charts Base Chart Component
+  baseUpdate(): void {
+    if (this.results) {
+      this.results = this.cloneData(this.results);
+    } else {
+      this.results =  [];
+    }
+
+    if (this.view) {
+      this.width = this.view[0];
+      this.height = this.view[1];
+    } else {
+      const dims = this.getContainerDims();
+      if (dims) {
+        this.width = dims.width;
+        this.height = dims.height;
+      }
+    }
+
+    // default values if width or height are 0 or undefined
+    if (!this.width) {
+      this.width = 600;
+    }
+
+    if (!this.height) {
+      this.height = 400;
+    }
+
+    this.width = Math.floor(this.width);
+    this.height = Math.floor(this.height);
+
+    if (this.cd) {
+      this.cd.markForCheck();
+    }
+  }
+
 
   /**
    * Base class update implementation for the dag graph
@@ -282,7 +366,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   update(): void {
-    super.update();
+    this.baseUpdate();
     if (!this.curve) {
       this.curve = shape.curveBundle.beta(1);
     }
@@ -1034,6 +1118,63 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         x: (first.x + second.x) / 2,
         y: (first.y + second.y) / 2
       };
+    }
+  }
+
+  // From Ngx-Charts Base Component
+  private bindWindowResizeEvent(): void {
+    const source = observableFromEvent(window, 'resize');
+    const subscription = source.pipe(debounceTime(200)).subscribe(e => {
+      this.update();
+      if (this.cd) {
+        this.cd.markForCheck();
+      }
+    });
+    this.resizeSubscription = subscription;
+  }
+
+  /**
+   * Clones the data into a new object
+   *
+   * @private
+   * @param {any} data
+   * @returns {*}
+   *
+   * @memberOf BaseChart
+   */
+  private cloneData(data): any {
+    const results = [];
+
+    for (const item of data) {
+      const copy = {
+        name: item['name']
+      };
+
+      if (item['value'] !== undefined) {
+        copy['value'] = item['value'];
+      }
+
+      if (item['series'] !== undefined) {
+        copy['series'] = [];
+        for (const seriesItem of item['series']) {
+          const seriesItemCopy = Object.assign({}, seriesItem);
+          copy['series'].push(seriesItemCopy);
+        }
+      }
+
+      if(item['extra'] !== undefined) {
+        copy['extra'] = JSON.parse(JSON.stringify(item['extra']));
+      }
+
+      results.push(copy);
+    }
+
+    return results;
+  }
+
+  protected unbindEvents(): void {
+    if (this.resizeSubscription) {
+      this.resizeSubscription.unsubscribe();
     }
   }
 }

@@ -1,0 +1,38 @@
+<div
+  class="ngx-graphs-outer"
+  [style.width.px]="view[0]"
+  [@animationState]="'active'"
+  [@.disabled]="!animations">
+
+  <!-- Graph Content Wrapper -->
+  <svg
+    class="ngx-graphs-inner"
+    [attr.width]="chartWidth"
+    [attr.height]="view[1]">
+    <ng-content></ng-content>
+  </svg>
+
+  <ngx-graph-scale-legend
+    *ngIf="showLegend && legendType === 'scaleLegend'"
+    class="chart-legend"
+    [valueRange]="legendOptions.domain"
+    [colors]="legendOptions.colors"
+    [height]="view[1]"
+    [width]="legendWidth">
+  </ngx-graph-scale-legend>
+
+  <ngx-graph-legend
+    *ngIf="showLegend && legendType === 'legend'"
+    class="chart-legend"
+    [data]="legendOptions.domain"
+    [title]="legendOptions.title"
+    [colors]="legendOptions.colors"
+    [height]="view[1]"
+    [width]="legendWidth"
+    [activeEntries]="activeEntries"
+    (labelClick)="legendLabelClick.emit($event)"
+    (labelActivate)="legendLabelActivate.emit($event)"
+    (labelDeactivate)="legendLabelDeactivate.emit($event)">
+  </ngx-graph-legend>
+
+</div>
