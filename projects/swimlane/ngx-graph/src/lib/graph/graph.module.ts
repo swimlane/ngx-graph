@@ -26,6 +26,7 @@ export { GraphComponent };
     TooltipDirective,
     TooltipContentComponent,
   ],
+  entryComponents: [TooltipContentComponent],
   exports: [GraphComponent, MouseWheelDirective, TooltipDirective],
   providers: [InjectionService, LayoutService, TooltipService]
 })
