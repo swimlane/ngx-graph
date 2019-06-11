@@ -1,5 +1,4 @@
-import { PlacementTypes } from '@swimlane/ngx-charts/release/common/tooltip/position';
-
+import { PlacementPosition } from '../enums/placement.enum';
 
 const caretOffset = 7;
 
@@ -219,19 +218,19 @@ export class PositionHelper {
     let left = 0;
 
     // TODO: Refactor using switch case
-    if (placement === PlacementTypes.right) {
+    if (placement === PlacementPosition.right) {
       left = -7;
       top = PositionHelper.calculateVerticalCaret(
         hostDim, elmDim, caretDimensions, alignment);
-    } else if (placement === PlacementTypes.left) {
+    } else if (placement === PlacementPosition.left) {
       left = elmDim.width;
       top = PositionHelper.calculateVerticalCaret(
         hostDim, elmDim, caretDimensions, alignment);
-    } else if (placement === PlacementTypes.top) {
+    } else if (placement === PlacementPosition.top) {
       top = elmDim.height;
       left = PositionHelper.calculateHorizontalCaret(
         hostDim, elmDim, caretDimensions, alignment);
-    } else if (placement === PlacementTypes.bottom) {
+    } else if (placement === PlacementPosition.bottom) {
       top = -7;
       left = PositionHelper.calculateHorizontalCaret(
         hostDim, elmDim, caretDimensions, alignment);
@@ -258,19 +257,19 @@ export class PositionHelper {
     let left = 0;
 
     // TODO: Refactor using switch case
-    if (placement === PlacementTypes.right) {
+    if (placement === PlacementPosition.right) {
       left = hostDim.left + hostDim.width + spacing;
       top = PositionHelper.calculateVerticalAlignment(
         hostDim, elmDim, alignment);
-    } else if (placement === PlacementTypes.left) {
+    } else if (placement === PlacementPosition.left) {
       left = hostDim.left - elmDim.width - spacing;
       top = PositionHelper.calculateVerticalAlignment(
         hostDim, elmDim, alignment);
-    } else if (placement === PlacementTypes.top) {
+    } else if (placement === PlacementPosition.top) {
       top = hostDim.top - elmDim.height - spacing;
       left = PositionHelper.calculateHorizontalAlignment(
         hostDim, elmDim, alignment);
-    } else if (placement === PlacementTypes.bottom) {
+    } else if (placement === PlacementPosition.bottom) {
       top = hostDim.top + hostDim.height + spacing;
       left = PositionHelper.calculateHorizontalAlignment(
         hostDim, elmDim, alignment);
@@ -302,14 +301,14 @@ export class PositionHelper {
 
     // TODO: Refactor using switch case
     if(shouldFlip) {
-      if (placement === PlacementTypes.right) {
-        return PlacementTypes.left;
-      } else if (placement === PlacementTypes.left) {
-        return PlacementTypes.right;
-      } else if (placement === PlacementTypes.top) {
-        return PlacementTypes.bottom;
-      } else if (placement === PlacementTypes.bottom) {
-        return PlacementTypes.top;
+      if (placement === PlacementPosition.right) {
+        return PlacementPosition.left;
+      } else if (placement === PlacementPosition.left) {
+        return PlacementPosition.right;
+      } else if (placement === PlacementPosition.top) {
+        return PlacementPosition.bottom;
+      } else if (placement === PlacementPosition.bottom) {
+        return PlacementPosition.top;
       }
     }
 

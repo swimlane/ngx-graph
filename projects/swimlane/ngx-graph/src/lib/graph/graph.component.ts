@@ -22,13 +22,6 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-// import {
-//   BaseChartComponent,
-//   ChartComponent,
-//   ColorHelper,
-//   ViewDimensions,
-//   calculateViewDimensions
-// } from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as ease from 'd3-ease';
