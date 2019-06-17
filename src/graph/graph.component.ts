@@ -190,6 +190,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
   @Input() singleNodesPerLine: number = 1;
   @Input() multigraph: boolean = false;
   @Input() compound: boolean = false;
+  @Input() animate: boolean = true;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -547,7 +548,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       this.center();
     }
 
-    requestAnimationFrame(() => this.redrawLines());
+    requestAnimationFrame(() => this.redrawLines(this.animate));
     this.redrawDataLinks();
 
     this.cd.markForCheck();
