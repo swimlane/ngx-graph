@@ -1,4 +1,4 @@
-function Step(context, t) {
+export function Step(context, t) {
   this._context = context;
   this._t = t;
 }
@@ -63,14 +63,14 @@ Step.prototype = {
   }
 };
 
-stepRound = function(context) {
+export const stepRound = function(context) {
   return new Step(context, 0.5);
 };
 
-stepRoundBefore = function(context) {
+export const stepRoundBefore = function(context) {
   return new Step(context, 0);
 };
 
-stepRoundAfter = function(context) {
+export const stepRoundAfter = function(context) {
   return new Step(context, 1);
 };
