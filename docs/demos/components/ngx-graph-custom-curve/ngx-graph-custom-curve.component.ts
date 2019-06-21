@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
 import { Layout, Edge, Node } from '@swimlane/ngx-graph';
 import { DagreNodesOnlyLayout } from './customDagreNodesOnly'
-import './customStepCurved';
-
-declare var stepRound;
+import { stepRound } from './customStepCurved';
 
 @Component({
   selector: 'ngx-graph-custom-curve',
