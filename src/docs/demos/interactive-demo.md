@@ -40,12 +40,6 @@ export class MyComponent{
 <ngx-graph ... [curve]="curve"> </ngx-graph>
 ```
 
-## Add Custom Curve
-
-```html { playground }
-<ngx-graph-custom-curve></ngx-graph-custom-curve>
-```
-
 ## Triggering Update
 
 The graph component updates itself on every input change. The inputs are immutable, so in order to trigger the update, you would need to pass a new object instance.
@@ -137,12 +131,4 @@ export class MyComponent{
 
 ```html
 <ngx-graph ... [zoomToFit$]="zoomToFit$"> </ngx-graph>
-```
-
-# Templates Example
-
-## Organization Tree
-
-```html { playground }
-<ngx-graph-org-tree></ngx-graph-org-tree>
 ```
