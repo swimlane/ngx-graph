@@ -52,6 +52,7 @@ export declare class GraphComponent extends BaseChartComponent implements OnInit
     singleNodesPerLine: number;
     multigraph: boolean;
     compound: boolean;
+    animate: boolean;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     zoomChange: EventEmitter<number>;

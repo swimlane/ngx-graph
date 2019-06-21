@@ -49,6 +49,7 @@ var GraphComponent = /** @class */ (function (_super) {
         _this.singleNodesPerLine = 1;
         _this.multigraph = false;
         _this.compound = false;
+        _this.animate = true;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
         _this.zoomChange = new EventEmitter();
@@ -363,7 +364,7 @@ var GraphComponent = /** @class */ (function (_super) {
             // Auto-center when rendering
             this.center();
         }
-        requestAnimationFrame(function () { return _this.redrawLines(); });
+        requestAnimationFrame(function () { return _this.redrawLines(_this.animate); });
         this.redrawDataLinks();
         this.cd.markForCheck();
     };
@@ -922,6 +923,7 @@ var GraphComponent = /** @class */ (function (_super) {
         singleNodesPerLine: [{ type: Input }],
         multigraph: [{ type: Input }],
         compound: [{ type: Input }],
+        animate: [{ type: Input }],
         activate: [{ type: Output }],
         deactivate: [{ type: Output }],
         zoomChange: [{ type: Output }],

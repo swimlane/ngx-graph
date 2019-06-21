@@ -1,5 +1,5 @@
 /**
- * ngx-graph v"5.5.0" (https://github.com/swimlane/ngx-graph)
+ * ngx-graph v"5.6.0" (https://github.com/swimlane/ngx-graph)
  * Copyright 2016
  * Licensed under MIT
  */
@@ -33807,8 +33807,10 @@ function __rest(s, e) {
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
         t[p] = s[p];
     if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
     return t;
 }
 
@@ -33901,6 +33903,14 @@ function __spread() {
         ar = ar.concat(__read(arguments[i]));
     return ar;
 }
+
+function __spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 
 function __await(v) {
     return this instanceof __await ? (this.v = v, this) : new __await(v);
@@ -42101,14 +42111,6 @@ function zipAll(project) {
 
 /***/ }),
 
-/***/ "./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-!function(r,n){ true?module.exports=n():"function"==typeof define&&define.amd?define([],n):"object"==typeof exports?exports.TransformationMatrix=n():r.TransformationMatrix=n()}(window,function(){return function(r){var n={};function t(e){if(n[e])return n[e].exports;var o=n[e]={i:e,l:!1,exports:{}};return r[e].call(o.exports,o,o.exports,t),o.l=!0,o.exports}return t.m=r,t.c=n,t.d=function(r,n,e){t.o(r,n)||Object.defineProperty(r,n,{enumerable:!0,get:e})},t.r=function(r){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(r,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(r,"__esModule",{value:!0})},t.t=function(r,n){if(1&n&&(r=t(r)),8&n)return r;if(4&n&&"object"==typeof r&&r&&r.__esModule)return r;var e=Object.create(null);if(t.r(e),Object.defineProperty(e,"default",{enumerable:!0,value:r}),2&n&&"string"!=typeof r)for(var o in r)t.d(e,o,function(n){return r[n]}.bind(null,o));return e},t.n=function(r){var n=r&&r.__esModule?function(){return r.default}:function(){return r};return t.d(n,"a",n),n},t.o=function(r,n){return Object.prototype.hasOwnProperty.call(r,n)},t.p="",t(t.s=0)}([function(r,n,t){"use strict";function e(r,n){return Array.isArray(n)?[r.a*n[0]+r.c*n[1]+r.e,r.b*n[0]+r.d*n[1]+r.f]:{x:r.a*n.x+r.c*n.y+r.e,y:r.b*n.x+r.d*n.y+r.f}}function o(r,n){return n.map(function(n){return e(r,n)})}function u(r){return{a:parseFloat(r.a),b:parseFloat(r.b),c:parseFloat(r.c),d:parseFloat(r.d),e:parseFloat(r.e),f:parseFloat(r.f)}}t.r(n);var a=/^matrix\(\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*\)$/i;function i(r){var n=r.match(a);if(null===n||n.length<7)throw new Error("'"+r+"' is not a matrix");return{a:parseFloat(n[1]),b:parseFloat(n[2]),c:parseFloat(n[3]),d:parseFloat(n[4]),e:parseFloat(n[5]),f:parseFloat(n[6])}}function f(){return{a:1,c:0,e:0,b:0,d:1,f:0}}function c(r){var n=r.a,t=r.b,e=r.c,o=r.d,u=r.e,a=r.f,i=n*o-t*e;return{a:o/i,b:t/-i,c:e/-i,d:n/i,e:(o*u-e*a)/-i,f:(t*u-n*a)/i}}var d="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(r){return typeof r}:function(r){return r&&"function"==typeof Symbol&&r.constructor===Symbol&&r!==Symbol.prototype?"symbol":typeof r},s=function(r){return"number"==typeof r&&!isNaN(r)&&isFinite(r)},l=function(r){return null!=r&&"object"===(void 0===r?"undefined":d(r))};function p(r){return l(r)&&r.hasOwnProperty("a")&&s(r.a)&&r.hasOwnProperty("b")&&s(r.b)&&r.hasOwnProperty("c")&&s(r.c)&&r.hasOwnProperty("d")&&s(r.d)&&r.hasOwnProperty("e")&&s(r.e)&&r.hasOwnProperty("f")&&s(r.f)}function y(r){return void 0===r}function b(r){return{a:1,c:0,e:r,b:0,d:1,f:arguments.length>1&&void 0!==arguments[1]?arguments[1]:0}}function v(){for(var r=arguments.length,n=Array(r),t=0;t<r;t++)n[t]=arguments[t];var e=function(r,n){return{a:r.a*n.a+r.c*n.b,c:r.a*n.c+r.c*n.d,e:r.a*n.e+r.c*n.f+r.e,b:r.b*n.a+r.d*n.b,d:r.b*n.c+r.d*n.d,f:r.b*n.e+r.d*n.f+r.f}};switch((n=Array.isArray(n[0])?n[0]:n).length){case 0:throw new Error("no matrices provided");case 1:return n[0];case 2:return e(n[0],n[1]);default:var o=function(r){return Array.isArray(r)?r:Array.from(r)}(n),u=o[0],a=o[1],i=o.slice(2),f=e(u,a);return v.apply(void 0,[f].concat(function(r){if(Array.isArray(r)){for(var n=0,t=Array(r.length);n<r.length;n++)t[n]=r[n];return t}return Array.from(r)}(i)))}}function m(){return v.apply(void 0,arguments)}var h=Math.cos,x=Math.sin,g=Math.PI;function w(r,n,t){var e=h(r),o=x(r),u={a:e,c:-o,e:0,b:o,d:e,f:0};return y(n)||y(t)?u:v([b(n,t),u,b(-n,-t)])}function P(r){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:void 0,t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:void 0;return w(r*g/180,n,t)}function S(r){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:void 0;return y(n)&&(n=r),{a:r,c:0,e:0,b:0,d:n,f:0}}function O(r,n){return{a:1,c:r,e:0,b:n,d:1,f:0}}var A=Math.tan;function F(r,n){return{a:1,c:A(r),e:0,b:A(n),d:1,f:0}}function M(r,n){return F(r*Math.PI/180,n*Math.PI/180)}function j(r){return T(r)}function _(r){return T(r)}function T(r){return"matrix("+r.a+","+r.b+","+r.c+","+r.d+","+r.e+","+r.f+")"}t.d(n,"applyToPoint",function(){return e}),t.d(n,"applyToPoints",function(){return o}),t.d(n,"fromObject",function(){return u}),t.d(n,"fromString",function(){return i}),t.d(n,"identity",function(){return f}),t.d(n,"inverse",function(){return c}),t.d(n,"isAffineMatrix",function(){return p}),t.d(n,"rotate",function(){return w}),t.d(n,"rotateDEG",function(){return P}),t.d(n,"scale",function(){return S}),t.d(n,"shear",function(){return O}),t.d(n,"skew",function(){return F}),t.d(n,"skewDEG",function(){return M}),t.d(n,"toCSS",function(){return j}),t.d(n,"toSVG",function(){return _}),t.d(n,"toString",function(){return T}),t.d(n,"transform",function(){return v}),t.d(n,"compose",function(){return m}),t.d(n,"translate",function(){return b})}])});
-//# sourceMappingURL=transformation-matrix.min.js.map
-
-/***/ }),
-
 /***/ "./node_modules/webpack/buildin/global.js":
 /***/ (function(module, exports) {
 
@@ -42435,7 +42437,7 @@ function sleep(time) {
 
 
 
-var emptyOn = src_dispatch("start", "end", "interrupt");
+var emptyOn = src_dispatch("start", "end", "cancel", "interrupt");
 var emptyTween = [];
 
 var CREATED = 0;
@@ -42473,7 +42475,7 @@ function init(node, id) {
 
 function schedule_set(node, id) {
   var schedule = schedule_get(node, id);
-  if (schedule.state > STARTING) throw new Error("too late; already started");
+  if (schedule.state > STARTED) throw new Error("too late; already running");
   return schedule;
 }
 
@@ -42516,7 +42518,6 @@ function create(node, id, self) {
       if (o.state === STARTED) return src_timeout(start);
 
       // Interrupt the active transition, if any.
-      // Dispatch the interrupt event.
       if (o.state === RUNNING) {
         o.state = ENDED;
         o.timer.stop();
@@ -42524,12 +42525,11 @@ function create(node, id, self) {
         delete schedules[i];
       }
 
-      // Cancel any pre-empted transitions. No interrupt event is dispatched
-      // because the cancelled transitions never started. Note that this also
-      // removes this transition from the pending list!
+      // Cancel any pre-empted transitions.
       else if (+i < id) {
         o.state = ENDED;
         o.timer.stop();
+        o.on.call("cancel", node, node.__data__, o.index, o.group);
         delete schedules[i];
       }
     }
@@ -42569,7 +42569,7 @@ function create(node, id, self) {
         n = tween.length;
 
     while (++i < n) {
-      tween[i].call(null, t);
+      tween[i].call(node, t);
     }
 
     // Dispatch the end event.
@@ -42607,7 +42607,7 @@ function create(node, id, self) {
     active = schedule.state > STARTING && schedule.state < ENDING;
     schedule.state = ENDED;
     schedule.timer.stop();
-    if (active) schedule.on.call("interrupt", node, node.__data__, schedule.index, schedule.group);
+    schedule.on.call(active ? "interrupt" : "cancel", node, node.__data__, schedule.index, schedule.group);
     delete schedules[i];
   }
 
@@ -42745,52 +42745,56 @@ function attrRemoveNS(fullname) {
 }
 
 function attrConstant(name, interpolate, value1) {
-  var value00,
+  var string00,
+      string1 = value1 + "",
       interpolate0;
   return function() {
-    var value0 = this.getAttribute(name);
-    return value0 === value1 ? null
-        : value0 === value00 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value1);
+    var string0 = this.getAttribute(name);
+    return string0 === string1 ? null
+        : string0 === string00 ? interpolate0
+        : interpolate0 = interpolate(string00 = string0, value1);
   };
 }
 
 function attrConstantNS(fullname, interpolate, value1) {
-  var value00,
+  var string00,
+      string1 = value1 + "",
       interpolate0;
   return function() {
-    var value0 = this.getAttributeNS(fullname.space, fullname.local);
-    return value0 === value1 ? null
-        : value0 === value00 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value1);
+    var string0 = this.getAttributeNS(fullname.space, fullname.local);
+    return string0 === string1 ? null
+        : string0 === string00 ? interpolate0
+        : interpolate0 = interpolate(string00 = string0, value1);
   };
 }
 
 function attrFunction(name, interpolate, value) {
-  var value00,
-      value10,
+  var string00,
+      string10,
       interpolate0;
   return function() {
-    var value0, value1 = value(this);
+    var string0, value1 = value(this), string1;
     if (value1 == null) return void this.removeAttribute(name);
-    value0 = this.getAttribute(name);
-    return value0 === value1 ? null
-        : value0 === value00 && value1 === value10 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value10 = value1);
+    string0 = this.getAttribute(name);
+    string1 = value1 + "";
+    return string0 === string1 ? null
+        : string0 === string00 && string1 === string10 ? interpolate0
+        : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
   };
 }
 
 function attrFunctionNS(fullname, interpolate, value) {
-  var value00,
-      value10,
+  var string00,
+      string10,
       interpolate0;
   return function() {
-    var value0, value1 = value(this);
+    var string0, value1 = value(this), string1;
     if (value1 == null) return void this.removeAttributeNS(fullname.space, fullname.local);
-    value0 = this.getAttributeNS(fullname.space, fullname.local);
-    return value0 === value1 ? null
-        : value0 === value00 && value1 === value10 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value10 = value1);
+    string0 = this.getAttributeNS(fullname.space, fullname.local);
+    string1 = value1 + "";
+    return string0 === string1 ? null
+        : string0 === string00 && string1 === string10 ? interpolate0
+        : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
   };
 }
 
@@ -42799,29 +42803,41 @@ function attrFunctionNS(fullname, interpolate, value) {
   return this.attrTween(name, typeof value === "function"
       ? (fullname.local ? attrFunctionNS : attrFunction)(fullname, i, tweenValue(this, "attr." + name, value))
       : value == null ? (fullname.local ? attrRemoveNS : attrRemove)(fullname)
-      : (fullname.local ? attrConstantNS : attrConstant)(fullname, i, value + ""));
+      : (fullname.local ? attrConstantNS : attrConstant)(fullname, i, value));
 });
 
 // CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/attrTween.js
 
 
+function attrInterpolate(name, i) {
+  return function(t) {
+    this.setAttribute(name, i(t));
+  };
+}
+
+function attrInterpolateNS(fullname, i) {
+  return function(t) {
+    this.setAttributeNS(fullname.space, fullname.local, i(t));
+  };
+}
+
 function attrTweenNS(fullname, value) {
+  var t0, i0;
   function tween() {
-    var node = this, i = value.apply(node, arguments);
-    return i && function(t) {
-      node.setAttributeNS(fullname.space, fullname.local, i(t));
-    };
+    var i = value.apply(this, arguments);
+    if (i !== i0) t0 = (i0 = i) && attrInterpolateNS(fullname, i);
+    return t0;
   }
   tween._value = value;
   return tween;
 }
 
 function attrTween(name, value) {
+  var t0, i0;
   function tween() {
-    var node = this, i = value.apply(node, arguments);
-    return i && function(t) {
-      node.setAttribute(name, i(t));
-    };
+    var i = value.apply(this, arguments);
+    if (i !== i0) t0 = (i0 = i) && attrInterpolate(name, i);
+    return t0;
   }
   tween._value = value;
   return tween;
@@ -42969,7 +42985,7 @@ function onFunction(id, name, listener) {
   };
 }
 
-/* harmony default export */ var on = (function(name, listener) {
+/* harmony default export */ var transition_on = (function(name, listener) {
   var id = this._id;
 
   return arguments.length < 2
@@ -42986,7 +43002,7 @@ function removeFunction(id) {
   };
 }
 
-/* harmony default export */ var remove = (function() {
+/* harmony default export */ var transition_remove = (function() {
   return this.on("end.remove", removeFunction(this._id));
 });
 
@@ -43057,67 +43073,95 @@ var Selection = external__d3_selection_["selection"].prototype.constructor;
 
 
 
-function styleRemove(name, interpolate) {
-  var value00,
-      value10,
+
+function styleNull(name, interpolate) {
+  var string00,
+      string10,
       interpolate0;
   return function() {
-    var value0 = Object(external__d3_selection_["style"])(this, name),
-        value1 = (this.style.removeProperty(name), Object(external__d3_selection_["style"])(this, name));
-    return value0 === value1 ? null
-        : value0 === value00 && value1 === value10 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value10 = value1);
+    var string0 = Object(external__d3_selection_["style"])(this, name),
+        string1 = (this.style.removeProperty(name), Object(external__d3_selection_["style"])(this, name));
+    return string0 === string1 ? null
+        : string0 === string00 && string1 === string10 ? interpolate0
+        : interpolate0 = interpolate(string00 = string0, string10 = string1);
   };
 }
 
-function styleRemoveEnd(name) {
+function styleRemove(name) {
   return function() {
     this.style.removeProperty(name);
   };
 }
 
 function styleConstant(name, interpolate, value1) {
-  var value00,
+  var string00,
+      string1 = value1 + "",
       interpolate0;
   return function() {
-    var value0 = Object(external__d3_selection_["style"])(this, name);
-    return value0 === value1 ? null
-        : value0 === value00 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value1);
+    var string0 = Object(external__d3_selection_["style"])(this, name);
+    return string0 === string1 ? null
+        : string0 === string00 ? interpolate0
+        : interpolate0 = interpolate(string00 = string0, value1);
   };
 }
 
 function styleFunction(name, interpolate, value) {
-  var value00,
-      value10,
+  var string00,
+      string10,
       interpolate0;
   return function() {
-    var value0 = Object(external__d3_selection_["style"])(this, name),
-        value1 = value(this);
-    if (value1 == null) value1 = (this.style.removeProperty(name), Object(external__d3_selection_["style"])(this, name));
-    return value0 === value1 ? null
-        : value0 === value00 && value1 === value10 ? interpolate0
-        : interpolate0 = interpolate(value00 = value0, value10 = value1);
+    var string0 = Object(external__d3_selection_["style"])(this, name),
+        value1 = value(this),
+        string1 = value1 + "";
+    if (value1 == null) string1 = value1 = (this.style.removeProperty(name), Object(external__d3_selection_["style"])(this, name));
+    return string0 === string1 ? null
+        : string0 === string00 && string1 === string10 ? interpolate0
+        : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+  };
+}
+
+function styleMaybeRemove(id, name) {
+  var on0, on1, listener0, key = "style." + name, event = "end." + key, remove;
+  return function() {
+    var schedule = schedule_set(this, id),
+        on = schedule.on,
+        listener = schedule.value[key] == null ? remove || (remove = styleRemove(name)) : undefined;
+
+    // If this node shared a dispatch with the previous node,
+    // just assign the updated shared dispatch and we’re done!
+    // Otherwise, copy-on-write.
+    if (on !== on0 || listener0 !== listener) (on1 = (on0 = on).copy()).on(event, listener0 = listener);
+
+    schedule.on = on1;
   };
 }
 
 /* harmony default export */ var style = (function(name, value, priority) {
   var i = (name += "") === "transform" ? external__d3_interpolate_["interpolateTransformCss"] : transition_interpolate;
   return value == null ? this
-          .styleTween(name, styleRemove(name, i))
-          .on("end.style." + name, styleRemoveEnd(name))
-      : this.styleTween(name, typeof value === "function"
-          ? styleFunction(name, i, tweenValue(this, "style." + name, value))
-          : styleConstant(name, i, value + ""), priority);
+      .styleTween(name, styleNull(name, i))
+      .on("end.style." + name, styleRemove(name))
+    : typeof value === "function" ? this
+      .styleTween(name, styleFunction(name, i, tweenValue(this, "style." + name, value)))
+      .each(styleMaybeRemove(this._id, name))
+    : this
+      .styleTween(name, styleConstant(name, i, value), priority)
+      .on("end.style." + name, null);
 });
 
 // CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/styleTween.js
+function styleInterpolate(name, i, priority) {
+  return function(t) {
+    this.style.setProperty(name, i(t), priority);
+  };
+}
+
 function styleTween(name, value, priority) {
+  var t, i0;
   function tween() {
-    var node = this, i = value.apply(node, arguments);
-    return i && function(t) {
-      node.style.setProperty(name, i(t), priority);
-    };
+    var i = value.apply(this, arguments);
+    if (i !== i0) t = (i0 = i) && styleInterpolate(name, i, priority);
+    return t;
   }
   tween._value = value;
   return tween;
@@ -43179,7 +43223,36 @@ function textFunction(value) {
   return new Transition(groups, this._parents, name, id1);
 });
 
+// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/end.js
+
+
+/* harmony default export */ var transition_end = (function() {
+  var on0, on1, that = this, id = that._id, size = that.size();
+  return new Promise(function(resolve, reject) {
+    var cancel = {value: reject},
+        end = {value: function() { if (--size === 0) resolve(); }};
+
+    that.each(function() {
+      var schedule = schedule_set(this, id),
+          on = schedule.on;
+
+      // If this node shared a dispatch with the previous node,
+      // just assign the updated shared dispatch and we’re done!
+      // Otherwise, copy-on-write.
+      if (on !== on0) {
+        on1 = (on0 = on).copy();
+        on1._.cancel.push(cancel);
+        on1._.interrupt.push(cancel);
+        on1._.end.push(end);
+      }
+
+      schedule.on = on1;
+    });
+  });
+});
+
 // CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/index.js
+
 
 
 
@@ -43232,17 +43305,18 @@ Transition.prototype = src_transition_transition.prototype = {
   size: selection_prototype.size,
   empty: selection_prototype.empty,
   each: selection_prototype.each,
-  on: on,
+  on: transition_on,
   attr: attr,
   attrTween: transition_attrTween,
   style: style,
   styleTween: transition_styleTween,
   text: transition_text,
-  remove: remove,
+  remove: transition_remove,
   tween: transition_tween,
   delay: transition_delay,
   duration: duration,
-  ease: ease
+  ease: ease,
+  end: transition_end
 };
 
 // CONCATENATED MODULE: ./node_modules/d3-ease/src/linear.js
@@ -43588,9 +43662,446 @@ var dagre_default = /*#__PURE__*/__webpack_require__.n(dagre);
 var external__rxjs_ = __webpack_require__("rxjs");
 var external__rxjs__default = /*#__PURE__*/__webpack_require__.n(external__rxjs_);
 
-// EXTERNAL MODULE: ./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js
-var transformation_matrix_min = __webpack_require__("./node_modules/transformation-matrix/build-umd/transformation-matrix.min.js");
-var transformation_matrix_min_default = /*#__PURE__*/__webpack_require__.n(transformation_matrix_min);
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/applyToPoint.js
+/**
+ * Calculate a point transformed with an affine matrix
+ * @param matrix Affine matrix
+ * @param point Point
+ * @returns {{x: number, y: number} | Array} Point
+ */
+function applyToPoint(matrix, point) {
+  return Array.isArray(point) ? [matrix.a * point[0] + matrix.c * point[1] + matrix.e, matrix.b * point[0] + matrix.d * point[1] + matrix.f] : {
+    x: matrix.a * point.x + matrix.c * point.y + matrix.e,
+    y: matrix.b * point.x + matrix.d * point.y + matrix.f
+  };
+}
+
+/**
+ * Calculate an array of points transformed with an affine matrix
+ * @param matrix Affine matrix
+ * @param points Array of points
+ * @returns {array} Array of points
+ */
+function applyToPoints(matrix, points) {
+  return points.map(function (point) {
+    return applyToPoint(matrix, point);
+  });
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/fromObject.js
+/**
+ * Extract an affine matrix from an object that contains a,b,c,d,e,f keys
+ * Each value could be a float or a string that contains a float
+ * @param object
+ * @return {{a: *, b: *, c: *, e: *, d: *, f: *}}}
+ */
+function fromObject(object) {
+  return {
+    a: parseFloat(object.a),
+    b: parseFloat(object.b),
+    c: parseFloat(object.c),
+    d: parseFloat(object.d),
+    e: parseFloat(object.e),
+    f: parseFloat(object.f)
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/fromString.js
+/**
+ * @ignore
+ * @type {RegExp}
+ */
+var matrixRegex = /^matrix\(\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*,\s*([0-9_+-.e]+)\s*\)$/i;
+
+/**
+ * Parse a string matrix formatted as matrix(a,b,c,d,e,f)
+ * @param string String with a matrix
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function fromString(string) {
+  var parsed = string.match(matrixRegex);
+  if (parsed === null || parsed.length < 7) throw new Error("'" + string + "' is not a matrix");
+  return {
+    a: parseFloat(parsed[1]),
+    b: parseFloat(parsed[2]),
+    c: parseFloat(parsed[3]),
+    d: parseFloat(parsed[4]),
+    e: parseFloat(parsed[5]),
+    f: parseFloat(parsed[6])
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/identity.js
+/**
+ * Identity matrix
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function identity() {
+  return {
+    a: 1,
+    c: 0,
+    e: 0,
+    b: 0,
+    d: 1,
+    f: 0
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/inverse.js
+/**
+ * Calculate a matrix that is the inverse of the provided matrix
+ * @param matrix Affine matrix
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function inverse(matrix) {
+  // http://www.wolframalpha.com/input/?i=Inverse+%5B%7B%7Ba,c,e%7D,%7Bb,d,f%7D,%7B0,0,1%7D%7D%5D
+
+  var a = matrix.a,
+      b = matrix.b,
+      c = matrix.c,
+      d = matrix.d,
+      e = matrix.e,
+      f = matrix.f;
+
+
+  var denom = a * d - b * c;
+
+  return {
+    a: d / denom,
+    b: b / -denom,
+    c: c / -denom,
+    d: a / denom,
+    e: (d * e - c * f) / -denom,
+    f: (b * e - a * f) / denom
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/isAffineMatrix.js
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var isNumeric = function isNumeric(n) {
+  return typeof n === 'number' && !isNaN(n) && isFinite(n);
+};
+var isObject = function isObject(obj) {
+  return obj != null && (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object';
+};
+
+/**
+ * Check if the object contain an affine matrix
+ * @param object
+ * @return {boolean}
+ */
+function isAffineMatrix(object) {
+  return isObject(object) && object.hasOwnProperty('a') && isNumeric(object.a) && object.hasOwnProperty('b') && isNumeric(object.b) && object.hasOwnProperty('c') && isNumeric(object.c) && object.hasOwnProperty('d') && isNumeric(object.d) && object.hasOwnProperty('e') && isNumeric(object.e) && object.hasOwnProperty('f') && isNumeric(object.f);
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/utils.js
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/translate.js
+/**
+ * Calculate a translate matrix
+ * @param tx Translation on axis x
+ * @param [ty = 0] Translation on axis y
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function translate(tx) {
+  var ty = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+  return {
+    a: 1,
+    c: 0,
+    e: tx,
+    b: 0,
+    d: 1,
+    f: ty
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/transform.js
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+/**
+ * Merge multiple matrices into one
+ * @param matrices {...object} list of matrices
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function transform() {
+  for (var _len = arguments.length, matrices = Array(_len), _key = 0; _key < _len; _key++) {
+    matrices[_key] = arguments[_key];
+  }
+
+  matrices = Array.isArray(matrices[0]) ? matrices[0] : matrices;
+
+  var multiply = function multiply(m1, m2) {
+    return {
+      a: m1.a * m2.a + m1.c * m2.b,
+      c: m1.a * m2.c + m1.c * m2.d,
+      e: m1.a * m2.e + m1.c * m2.f + m1.e,
+      b: m1.b * m2.a + m1.d * m2.b,
+      d: m1.b * m2.c + m1.d * m2.d,
+      f: m1.b * m2.e + m1.d * m2.f + m1.f
+    };
+  };
+
+  switch (matrices.length) {
+    case 0:
+      throw new Error('no matrices provided');
+
+    case 1:
+      return matrices[0];
+
+    case 2:
+      return multiply(matrices[0], matrices[1]);
+
+    default:
+      var _matrices = matrices,
+          _matrices2 = _toArray(_matrices),
+          m1 = _matrices2[0],
+          m2 = _matrices2[1],
+          rest = _matrices2.slice(2);
+
+      var m = multiply(m1, m2);
+      return transform.apply(undefined, [m].concat(_toConsumableArray(rest)));
+  }
+}
+
+/**
+ * Merge multiple matrices into one (alias of `transform`)
+ * @param matrices {...object} list of matrices
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function compose() {
+  return transform.apply(undefined, arguments);
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/rotate.js
+
+
+
+
+var cos = Math.cos,
+    sin = Math.sin,
+    PI = Math.PI;
+/**
+ * Calculate a rotation matrix
+ * @param angle Angle in radians
+ * @param [cx] If (cx,cy) are supplied the rotate is about this point
+ * @param [cy] If (cx,cy) are supplied the rotate is about this point
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix *
+ */
+
+function rotate(angle, cx, cy) {
+  var cosAngle = cos(angle);
+  var sinAngle = sin(angle);
+  var rotationMatrix = {
+    a: cosAngle,
+    c: -sinAngle,
+    e: 0,
+    b: sinAngle,
+    d: cosAngle,
+    f: 0
+  };
+  if (isUndefined(cx) || isUndefined(cy)) {
+    return rotationMatrix;
+  }
+
+  return transform([translate(cx, cy), rotationMatrix, translate(-cx, -cy)]);
+}
+
+/**
+ * Calculate a rotation matrix with a DEG angle
+ * @param angle Angle in degree
+ * @param [cx] If (cx,cy) are supplied the rotate is about this point
+ * @param [cy] If (cx,cy) are supplied the rotate is about this point
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function rotateDEG(angle) {
+  var cx = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+  var cy = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+
+  return rotate(angle * PI / 180, cx, cy);
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/scale.js
+
+
+/**
+ * Calculate a scaling matrix
+ * @param sx Scaling on axis x
+ * @param [sy = sx] Scaling on axis y (default sx)
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function scale(sx) {
+  var sy = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+
+  if (isUndefined(sy)) sy = sx;
+  return {
+    a: sx,
+    c: 0,
+    e: 0,
+    b: 0,
+    d: sy,
+    f: 0
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/shear.js
+/**
+ * Calculate a shear matrix
+ * @param shx Shear on axis x
+ * @param shy Shear on axis y
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function shear(shx, shy) {
+  return {
+    a: 1,
+    c: shx,
+    e: 0,
+    b: shy,
+    d: 1,
+    f: 0
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/skew.js
+// https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/skew
+var tan = Math.tan;
+
+/**
+ * Calculate a skew matrix
+ * @param ax Skew on axis x
+ * @param ay Skew on axis y
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+
+function skew(ax, ay) {
+  return {
+    a: 1,
+    c: tan(ax),
+    e: 0,
+    b: tan(ay),
+    d: 1,
+    f: 0
+  };
+}
+
+/**
+ * Calculate a skew matrix using DEG angles
+ * @param ax Skew on axis x
+ * @param ay Skew on axis y
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix
+ */
+function skewDEG(ax, ay) {
+  return skew(ax * Math.PI / 180, ay * Math.PI / 180);
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/toString.js
+/**
+ * Serialize the matrix to a string that can be used with CSS or SVG
+ * @param matrix Affine matrix
+ * @returns {string} String that contains a matrix formatted as matrix(a,b,c,d,e,f)
+ */
+function toCSS(matrix) {
+  return toString_toString(matrix);
+}
+
+/**
+ * Serialize the matrix to a string that can be used with CSS or SVG
+ * @param matrix Affine matrix
+ * @returns {string} String that contains a matrix formatted as matrix(a,b,c,d,e,f)
+ */
+function toSVG(matrix) {
+  return toString_toString(matrix);
+}
+
+/**
+ * Serialize the matrix to a string that can be used with CSS or SVG
+ * @param matrix Affine matrix
+ * @returns {string} String that contains a matrix formatted as matrix(a,b,c,d,e,f)
+ */
+function toString_toString(matrix) {
+  return "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/smoothMatrix.js
+/**
+ * Rounds all elements of the given matrix using the given precision
+ * @param m  {{a: number, b: number, c: number, d: number, e: number, f: number}} a matrix to round
+ * @param [precision] a precision to use for Math.round. Defaults to 10000000000 (meaning which rounds to the 10th digit after the comma).
+ * @returns {{a: number, b: number, c: number, d: number, e: number, f: number}} the rounded matrix
+ */
+function smoothMatrix(m) {
+  var precision = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10000000000;
+
+  return {
+    a: Math.round(m.a * precision) / precision,
+    b: Math.round(m.b * precision) / precision,
+    c: Math.round(m.c * precision) / precision,
+    d: Math.round(m.d * precision) / precision,
+    e: Math.round(m.e * precision) / precision,
+    f: Math.round(m.f * precision) / precision
+  };
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/fromTriangles.js
+
+
+
+
+/**
+ * Returns a matrix that transforms a triangle t1 into another triangle t2, or throws an exception if it is impossible.
+ * @param t1 {Array.<{x: number, y: number}> | Array.<Array<number>>} an array of points containing the three points for the first triangle
+ * @param t2 {Array.<{x: number, y: number}> | Array.<Array<number>>} an array of points containing the three points for the second triangle
+ * @returns {{a: number, b: number, c: number, e: number, d: number, f: number}} Affine matrix which transforms t1 to t2
+ * @throws Exception if the matrix becomes not invertible
+ */
+function fromTriangles(t1, t2) {
+  // point p = first point of the triangle
+  var px1 = t1[0].x != null ? t1[0].x : t1[0][0];
+  var py1 = t1[0].y != null ? t1[0].y : t1[0][1];
+  var px2 = t2[0].x != null ? t2[0].x : t2[0][0];
+  var py2 = t2[0].y != null ? t2[0].y : t2[0][1];
+
+  // point q = second point of the triangle
+  var qx1 = t1[1].x != null ? t1[1].x : t1[1][0];
+  var qy1 = t1[1].y != null ? t1[1].y : t1[1][1];
+  var qx2 = t2[1].x != null ? t2[1].x : t2[1][0];
+  var qy2 = t2[1].y != null ? t2[1].y : t2[1][1];
+
+  // point r = third point of the triangle
+  var rx1 = t1[2].x != null ? t1[2].x : t1[2][0];
+  var ry1 = t1[2].y != null ? t1[2].y : t1[2][1];
+  var rx2 = t2[2].x != null ? t2[2].x : t2[2][0];
+  var ry2 = t2[2].y != null ? t2[2].y : t2[2][1];
+
+  var r1 = {
+    a: px1 - rx1,
+    b: py1 - ry1,
+    c: qx1 - rx1,
+    d: qy1 - ry1,
+    e: rx1,
+    f: ry1
+  };
+  var r2 = {
+    a: px2 - rx2,
+    b: py2 - ry2,
+    c: qx2 - rx2,
+    d: qy2 - ry2,
+    e: rx2,
+    f: ry2
+  };
+
+  var inverseR1 = inverse(r1);
+  var affineMatrix = transform([r2, inverseR1]);
+
+  // round the matrix elements to smooth the finite inversion
+  return smoothMatrix(affineMatrix);
+}
+// CONCATENATED MODULE: ./node_modules/transformation-matrix/build-es/index.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // CONCATENATED MODULE: ./src/utils/id.ts
 var cache = {};
@@ -43880,6 +44391,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         _this.singleNodesPerLine = 1;
         _this.multigraph = false;
         _this.compound = false;
+        _this.animate = true;
         _this.activate = new core_["EventEmitter"]();
         _this.deactivate = new core_["EventEmitter"]();
         _this.zoomChange = new core_["EventEmitter"]();
@@ -43892,7 +44404,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         _this.initialized = false;
         _this.graphDims = { width: 0, height: 0 };
         _this._oldLinks = [];
-        _this.transformationMatrix = Object(transformation_matrix_min["identity"])();
+        _this.transformationMatrix = identity();
         _this._touchLastX = null;
         _this._touchLastY = null;
         _this.groupResultsBy = function (node) { return node.label; };
@@ -44194,7 +44706,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
             // Auto-center when rendering
             this.center();
         }
-        requestAnimationFrame(function () { return _this.redrawLines(); });
+        requestAnimationFrame(function () { return _this.redrawLines(_this.animate); });
         this.redrawDataLinks();
         this.cd.markForCheck();
     };
@@ -44401,7 +44913,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
     GraphComponent.prototype.pan = function (x, y, ignoreZoomLevel) {
         if (ignoreZoomLevel === void 0) { ignoreZoomLevel = false; }
         var zoomLevel = ignoreZoomLevel ? 1 : this.zoomLevel;
-        this.transformationMatrix = Object(transformation_matrix_min["transform"])(this.transformationMatrix, Object(transformation_matrix_min["translate"])(x / zoomLevel, y / zoomLevel));
+        this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
         this.updateTransform();
     };
     /**
@@ -44416,7 +44928,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         }
         var panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
         var panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
-        this.transformationMatrix = Object(transformation_matrix_min["transform"])(this.transformationMatrix, Object(transformation_matrix_min["translate"])(panX / this.zoomLevel, panY / this.zoomLevel));
+        this.transformationMatrix = transform(this.transformationMatrix, translate(panX / this.zoomLevel, panY / this.zoomLevel));
         this.updateTransform();
     };
     /**
@@ -44425,7 +44937,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
      * @param factor Zoom multiplicative factor (1.1 for zooming in 10%, for instance)
      */
     GraphComponent.prototype.zoom = function (factor) {
-        this.transformationMatrix = Object(transformation_matrix_min["transform"])(this.transformationMatrix, Object(transformation_matrix_min["scale"])(factor, factor));
+        this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
         this.zoomChange.emit(this.zoomLevel);
         this.updateTransform();
     };
@@ -44502,7 +45014,7 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
      * @memberOf GraphComponent
      */
     GraphComponent.prototype.updateTransform = function () {
-        this.transform = Object(transformation_matrix_min["toSVG"])(this.transformationMatrix);
+        this.transform = toSVG(this.transformationMatrix);
     };
     /**
      * Node was clicked
@@ -44831,6 +45343,10 @@ var graph_component_GraphComponent = /** @class */ (function (_super) {
         Object(core_["Input"])(),
         __metadata("design:type", Boolean)
     ], GraphComponent.prototype, "compound", void 0);
+    __decorate([
+        Object(core_["Input"])(),
+        __metadata("design:type", Boolean)
+    ], GraphComponent.prototype, "animate", void 0);
     __decorate([
         Object(core_["Output"])(),
         __metadata("design:type", core_["EventEmitter"])

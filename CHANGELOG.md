@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.0
+
+- Feature: Added the ability to enable\disable animations (#214)
+
 ## 5.5.0
 
 - Feature: Support multiple links between two nodes (#159)
