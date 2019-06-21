@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.1.0
+
+- Enhancement: Update dependencies to Angular 8 (#211)
+- Bug: Fix issue with wrong transformation matrix calculated when nodes list is empty (#196)
+- Bug: Update midpoint UI to be updated on drag + update org tree example with mid point UI (#202)
+- Bug: Add parameter check for update mid point function (#209)
+- Docs: add a custom curve demo + create demo components folder (#198)
+- Chore: Added panning enum, enforced types and updated docs (#195)
+
 ## 6.0.1
 
 - Fix: Added readme and licence files to npm package
