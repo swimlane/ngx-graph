@@ -4,11 +4,13 @@ import { CommonModule } from '@angular/common';
 import { NgxGraphCustomCurve } from './components/ngx-graph-custom-curve/ngx-graph-custom-curve.component';
 import { NgxGraphOrgTreeComponent } from './components/ngx-graph-org-tree/ngx-graph-org-tree.component';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
   imports: [BaseModule,
     CommonModule,
-    NgxGraphModule
+    NgxGraphModule,
+    NgxChartsModule
   ],
   declarations: [
     NgxGraphCustomCurve,
