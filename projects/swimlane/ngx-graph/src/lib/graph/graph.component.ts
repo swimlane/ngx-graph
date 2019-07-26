@@ -97,6 +97,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
+  @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
 
   @ContentChild('linkTemplate', {static: false}) linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate', {static: false}) nodeTemplate: TemplateRef<any>;
@@ -106,6 +107,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+
+  private isMouseMoveCalled:boolean = false;
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
@@ -890,11 +893,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
+    this.isMouseMoveCalled = true;
     if (this.isPanning && this.panningEnabled) {
       this.checkEnum(this.panningAxis, $event);
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
+  }
+
+  @HostListener('document:mousedown', ['$event'])
+  onMouseDown(event: MouseEvent): void {
+     this.isMouseMoveCalled = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  graphClick(event: MouseEvent): void {
+    if (!this.isMouseMoveCalled)
+      this.clickHandler.emit(event);
   }
 
   /**
