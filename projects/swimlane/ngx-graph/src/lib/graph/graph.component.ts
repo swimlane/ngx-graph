@@ -410,8 +410,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.oldClusters = oldClusters;
     }, 500);
 
-    console.log(this.oldClusters)
-
     // Update the labels to the new positions
     const newLinks = [];
     for (const edgeLabelId in this.graph.edgeLabels) {
