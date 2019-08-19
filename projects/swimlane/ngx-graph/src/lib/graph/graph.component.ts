@@ -956,7 +956,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  @HostListener('document:mouseup')
+  @HostListener('document:mouseup', ['$event'])
   onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
