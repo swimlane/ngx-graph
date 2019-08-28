@@ -23,6 +23,11 @@ export class MouseWheelDirective {
     this.mouseWheelFunc(event);
   }
 
+  @HostListener('wheel', ['$event'])
+  onWheel(event: any): void {
+    this.mouseWheelFunc(event);
+  }
+
   @HostListener('onmousewheel', ['$event'])
   onMouseWheelIE(event: any): void {
     this.mouseWheelFunc(event);
@@ -33,10 +38,13 @@ export class MouseWheelDirective {
       event = window.event;
     }
 
-    const delta = Math.max(-1, Math.min(1, event.wheelDelta || -event.detail));
-    if (delta > 0) {
+    const delta: number = Math.max(-1, Math.min(1, event.wheelDelta || -event.detail || event.deltaY || event.deltaX));
+    // Firefox don't have native support for wheel event, as a result delta values are reverse
+    const isWheelMouseUp: boolean = event.wheelDelta ? delta > 0 : delta < 0;
+    const isWheelMouseDown: boolean = event.wheelDelta ? delta < 0 : delta > 0;
+    if (isWheelMouseUp) {
       this.mouseWheelUp.emit(event);
-    } else if (delta < 0) {
+    } else if (isWheelMouseDown) {
       this.mouseWheelDown.emit(event);
     }
 
