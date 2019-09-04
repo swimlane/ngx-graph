@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.2.0
+
+- Enhancement: Support in output click handler for graph clicks (#229)
+- Bug: Fix error when using fullTemplateTypeCheck (#237)
+- Docs: Fix custom curve demo
+
 ## 6.1.0
 
 - Enhancement: Update dependencies to Angular 8 (#211)
