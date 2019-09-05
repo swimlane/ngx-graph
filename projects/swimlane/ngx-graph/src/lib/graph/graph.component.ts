@@ -93,6 +93,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() panToNode$: Observable<any>;
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
+  @Input() enableTrackpadSupport = false;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -630,7 +631,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onZoom($event: MouseEvent, direction): void {
+  onZoom($event: WheelEvent, direction): void {
+    if (this.enableTrackpadSupport && !$event.ctrlKey) {
+      this.pan($event.deltaX * -1, $event.deltaY * -1);
+      return;
+    }
+
     const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
 
     // Check that zooming wouldn't put us out of bounds
