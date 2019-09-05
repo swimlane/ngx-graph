@@ -128,6 +128,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   graphDims: any = { width: 0, height: 0 };
   _oldLinks: Edge[] = [];
   oldNodes: Set<string> = new Set();
+  oldClusters: Set<string> = new Set();
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
@@ -395,10 +396,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       oldNodes.add(n.id);
     });
 
-    // Prevent animations on new nodes
-    setTimeout(() => {
-      this.oldNodes = oldNodes;
-    }, 500);
+    const oldClusters: Set<string> = new Set();
 
     (this.graph.clusters || []).map(n => {
       n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
@@ -407,7 +405,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      oldClusters.add(n.id);
     });
+
+    // Prevent animations on new nodes
+    setTimeout(() => {
+      this.oldNodes = oldNodes;
+      this.oldClusters = oldClusters;
+    }, 500);
 
     // Update the labels to the new positions
     const newLinks = [];

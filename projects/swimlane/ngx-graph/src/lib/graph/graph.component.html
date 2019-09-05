@@ -41,6 +41,7 @@
         #clusterElement
         *ngFor="let node of graph.clusters; trackBy: trackNodeBy"
         class="node-group"
+        [class.old-node]="animate && oldClusters.has(node.id)"
         [id]="node.id"
         [attr.transform]="node.transform"
         (click)="onClick(node)"
