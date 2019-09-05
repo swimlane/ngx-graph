@@ -6,7 +6,7 @@ import { DocspaStackblitzModule } from '@swimlane/docspa-stackblitz';
 import { config } from '../docspa.config';
 import { Location, LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { DemoModule } from 'src/docs/demos/demo.module';
-import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { NgxGraphModule } from '../../projects/swimlane/ngx-graph/src/public_api';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { preset } from '@swimlane/docspa-remark-preset';
 import { LoggerModule, NgxLoggerLevel } from 'ngx-logger';

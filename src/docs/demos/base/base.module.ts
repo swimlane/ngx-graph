@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { NgxGraphModule } from '../../../../projects/swimlane/ngx-graph/src/public_api';
 import { CommonModule } from '@angular/common';
 
 @NgModule({
