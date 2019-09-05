@@ -93,10 +93,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() panToNode$: Observable<any>;
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
+  @Input() enableTrackpadSupport = false;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
+  @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
 
   @ContentChild('linkTemplate', {static: false}) linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate', {static: false}) nodeTemplate: TemplateRef<any>;
@@ -106,6 +108,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+
+  private isMouseMoveCalled:boolean = false;
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
@@ -627,7 +631,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  onZoom($event: MouseEvent, direction): void {
+  onZoom($event: WheelEvent, direction): void {
+    if (this.enableTrackpadSupport && !$event.ctrlKey) {
+      this.pan($event.deltaX * -1, $event.deltaY * -1);
+      return;
+    }
+
     const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
 
     // Check that zooming wouldn't put us out of bounds
@@ -890,11 +899,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
+    this.isMouseMoveCalled = true;
     if (this.isPanning && this.panningEnabled) {
       this.checkEnum(this.panningAxis, $event);
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
+  }
+
+  @HostListener('document:mousedown', ['$event'])
+  onMouseDown(event: MouseEvent): void {
+     this.isMouseMoveCalled = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  graphClick(event: MouseEvent): void {
+    if (!this.isMouseMoveCalled)
+      this.clickHandler.emit(event);
   }
 
   /**
@@ -941,7 +962,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    *
    * @memberOf GraphComponent
    */
-  @HostListener('document:mouseup')
+  @HostListener('document:mouseup', ['$event'])
   onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
