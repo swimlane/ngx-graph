@@ -31,7 +31,7 @@
       [attr.width]="dims.width * 100"
       [attr.height]="dims.height * 100"
       [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
-      (mousedown)="isPanning = true"
+      (mousedown)="onGraphMouseDown($event)"
     />
 
     <ng-content></ng-content>

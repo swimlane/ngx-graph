@@ -79,14 +79,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() nodeMaxWidth: number;
   @Input() panningEnabled: boolean = true;
   @Input() panningAxis: PanningAxis = PanningAxis.Both;
-  @Input() enableZoom = true;
-  @Input() zoomSpeed = 0.1;
-  @Input() minZoomLevel = 0.1;
-  @Input() maxZoomLevel = 4.0;
-  @Input() autoZoom = false;
-  @Input() panOnZoom = true;
-  @Input() animate? = false;
-  @Input() autoCenter = false;
+  @Input() enableZoom: boolean = true;
+  @Input() zoomSpeed: number = 0.1;
+  @Input() minZoomLevel: number = 0.1;
+  @Input() maxZoomLevel: number = 4.0;
+  @Input() autoZoom: boolean = false;
+  @Input() panOnZoom: boolean = true;
+  @Input() animate?: boolean = false;
+  @Input() autoCenter: boolean = false;
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
   @Input() zoomToFit$: Observable<any>;
@@ -109,21 +109,22 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
-  private isMouseMoveCalled:boolean = false;
+  private isMouseMoveCalled: boolean = false;
+  private _panOffsetAxis: number[] = [0, 0];
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
   colors: ColorHelper;
   dims: ViewDimensions;
-  margin = [0, 0, 0, 0];
+  margin: number[] = [0, 0, 0, 0];
   results = [];
   seriesDomain: any;
   transform: string;
   legendOptions: any;
-  isPanning = false;
-  isDragging = false;
+  isPanning: boolean = false;
+  isDragging: boolean = false;
   draggingNode: Node;
-  initialized = false;
+  initialized: boolean = false;
   graph: Graph;
   graphDims: any = { width: 0, height: 0 };
   _oldLinks: Edge[] = [];
@@ -160,33 +161,20 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   /**
-   * Get the current `x` position of the graph
+   * Get the current `x` and `y` position of the graph as Array.
    */
-  get panOffsetX() {
-    return this.transformationMatrix.e;
+  get panOffsetAxis() {
+    return this._panOffsetAxis;
   }
 
   /**
-   * Set the current `x` position of the graph
+   * Set the current `x` and `y` position of the graph as Array.
    */
-  @Input('panOffsetX')
-  set panOffsetX(x) {
-    this.panTo(Number(x), null);
-  }
-
-  /**
-   * Get the current `y` position of the graph
-   */
-  get panOffsetY() {
-    return this.transformationMatrix.f;
-  }
-
-  /**
-   * Set the current `y` position of the graph
-   */
-  @Input('panOffsetY')
-  set panOffsetY(y) {
-    this.panTo(null, Number(y));
+  @Input()
+  set panOffsetAxis(val: any[]) {
+    this.isPanning = true;
+    this.panTo(val[0], val[1]);
+    this.isPanning = false;
   }
 
   /**
@@ -690,19 +678,30 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * Pan to a fixed x/y
    *
    */
-  panTo(x: number, y: number): void {
-    if (x === null || x === undefined || isNaN(x) || y === null || y === undefined || isNaN(y)) {
+  panTo(x: any, y: any): void {
+    let panX: number = +this.panOffsetAxis[0];
+    let panY: number = -this.panOffsetAxis[1];
+    // Check both x - y values in case they are not numbers.
+    const isNumberX: boolean = !(typeof x !== 'number' || isNaN(x));
+    const isNumberY: boolean = !(typeof y !== 'number' || isNaN(y));
+    if (isNumberX && isNumberY) {
+      panX =+ (x * this.zoomLevel);
+      panY =- (y * this.zoomLevel);
+    } else if (!isNumberX && isNumberY) {
+      panY =- (y * this.zoomLevel);
+    } else if (isNumberX && !isNumberY) {
+      panX =+ (x * this.zoomLevel);
+    } else {
+      // Just in case.
       return;
     }
-
-    const panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
-    const panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
-
     this.transformationMatrix = transform(
       this.transformationMatrix,
       translate(panX / this.zoomLevel, panY / this.zoomLevel)
     );
 
+    // Set pan offset values.
+    this._panOffsetAxis = [this.transformationMatrix.e, this.transformationMatrix.f];
     this.updateTransform();
   }
 
@@ -986,6 +985,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (this.layout && typeof this.layout !== 'string' && this.layout.onDragStart) {
       this.layout.onDragStart(node, event);
     }
+  }
+
+  onGraphMouseDown($event: MouseEvent) {
+    this.isPanning = true;
   }
 
   /**
