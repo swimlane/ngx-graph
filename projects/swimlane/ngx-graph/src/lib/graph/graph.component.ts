@@ -668,10 +668,33 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @param y
    */
   pan(x: number, y: number, ignoreZoomLevel: boolean = false): void {
+    console.log({x, y, graphDims: this.graphDims});
     const zoomLevel = ignoreZoomLevel ? 1 : this.zoomLevel;
+
+    const newX = x;
+    const newY = y;
+
+    const rightBorder = (this.dims.width - this.graphDims.width * this.zoomLevel) ;
+    const bottomBorder = (this.dims.height - this.graphDims.height * this.zoomLevel) ;
+
+    if (this.transformationMatrix.e < 0 && newX < 0) {
+      x = 0;
+    }
+    if (this.transformationMatrix.e > rightBorder  && newX > 0) {
+      x = 0;
+    }
+
+    if (this.transformationMatrix.f < 0 && newY < 0) {
+      y = 0;
+    }
+    if (this.transformationMatrix.f > bottomBorder && newY > 0) {
+      y = 0
+    }
+
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
+    console.log('matrix', this.transformationMatrix);
   }
 
   /**
