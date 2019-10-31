@@ -56,6 +56,8 @@ export interface Matrix {
   f: number;
 }
 
+const MINIMAP_MAX_WIDTH = 100;
+
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
@@ -109,7 +111,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
-  private isMouseMoveCalled:boolean = false;
+  private isMouseMoveCalled: boolean = false;
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
@@ -132,6 +134,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
+
+  minimapScaleCoefficient: number = 3;
 
   constructor(
     private el: ElementRef,
@@ -478,6 +482,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if(this.graph.nodes && this.graph.nodes.length) {
       this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
       this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
+
+      this.minimapScaleCoefficient = this.graphDims.width / MINIMAP_MAX_WIDTH;
     }
 
     if (this.autoZoom) {
