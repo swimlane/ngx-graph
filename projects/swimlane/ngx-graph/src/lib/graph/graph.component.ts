@@ -43,6 +43,7 @@ import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
+import { MiniMapPosition } from '../enums/mini-map-position.enum';
 
 /**
  * Matrix
@@ -55,8 +56,6 @@ export interface Matrix {
   e: number;
   f: number;
 }
-
-const MINIMAP_MAX_WIDTH = 100;
 
 @Component({
   selector: 'ngx-graph',
@@ -96,6 +95,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
   @Input() enableTrackpadSupport = false;
+  @Input() showMiniMap: boolean = false;
+  @Input() miniMapMaxWidth: number = 100;
+  @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperLeft;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -104,6 +106,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   @ContentChild('linkTemplate', {static: false}) linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate', {static: false}) nodeTemplate: TemplateRef<any>;
+  @ContentChild('miniMapNodeTemplate', {static: false}) miniMapNodeTemplate: TemplateRef<any>;
   @ContentChild('clusterTemplate', {static: false}) clusterTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate', {static: false}) defsTemplate: TemplateRef<any>;
 
@@ -483,7 +486,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
       this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
 
-      this.minimapScaleCoefficient = this.graphDims.width / MINIMAP_MAX_WIDTH;
+      this.minimapScaleCoefficient = this.graphDims.width / this.miniMapMaxWidth;
     }
 
     if (this.autoZoom) {
@@ -1036,6 +1039,20 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     }
 
     this.panTo(node.position.x, node.position.y);
+  }
+
+  getMinimapTransform(): string {
+    switch (this.miniMapPosition) {
+      case MiniMapPosition.UpperLeft: {
+        return "";
+      }
+      case MiniMapPosition.UpperRight: {
+        return "translate(" + (this.graphDims.width) + "," + 0 + ")"; 
+      }
+      default: {
+        return "";
+      }
+    }
   }
 
   private checkEnum(key: string, event: MouseEvent) {

@@ -109,7 +109,7 @@
     ></svg:rect>
   </svg:clipPath>
 
-  <svg:g class="minimap" clip-path="url(#minimapClip)">
+  <svg:g class="minimap" *ngIf="showMiniMap" [attr.transform]="getMinimapTransform()"  clip-path="url(#minimapClip)">
     <svg:rect
       class="minimap-background"
       [attr.width]="graphDims.width / minimapScaleCoefficient"
@@ -126,12 +126,17 @@
         [attr.transform]="node.transform"
       >
         <ng-template
-          *ngIf="nodeTemplate"
+          *ngIf="miniMapNodeTemplate"
+          [ngTemplateOutlet]="miniMapNodeTemplate"
+          [ngTemplateOutletContext]="{ $implicit: node }"
+        ></ng-template>
+        <ng-template
+          *ngIf="!miniMapNodeTemplate && nodeTemplate"
           [ngTemplateOutlet]="nodeTemplate"
           [ngTemplateOutletContext]="{ $implicit: node }"
         ></ng-template>
         <svg:circle
-          *ngIf="!nodeTemplate"
+          *ngIf="!nodeTemplate && !miniMapNodeTemplate"
           r="10"
           [attr.cx]="node.dimension.width / 2 / minimapScaleCoefficient"
           [attr.cy]="node.dimension.height / 2 / minimapScaleCoefficient"
