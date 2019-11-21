@@ -94,6 +94,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
   @Input() enableTrackpadSupport = false;
+  @Input() panLimitEnabled: boolean = false;
+  @Input() panLimitTopLeft: number = 300;
+  @Input() panLimitBottomRight: number = 150;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -686,6 +689,21 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   pan(x: number, y: number, ignoreZoomLevel: boolean = false): void {
     const zoomLevel = ignoreZoomLevel ? 1 : this.zoomLevel;
+    
+    if (this.panLimitEnabled && !ignoreZoomLevel) {
+      const newTempTransofrmationMetrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
+
+      if (newTempTransofrmationMetrix.e < (this.graphDims.width * zoomLevel * -1) + this.panLimitTopLeft * zoomLevel || 
+          newTempTransofrmationMetrix.e > (this.dims.width - this.panLimitBottomRight * zoomLevel)) {
+        return;
+      }
+
+      if (newTempTransofrmationMetrix.f < (this.graphDims.height * -1 * zoomLevel) + this.panLimitTopLeft * zoomLevel||
+          newTempTransofrmationMetrix.f > (this.dims.height - this.panLimitBottomRight * zoomLevel)) {
+        return;
+      }
+  }
+
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
