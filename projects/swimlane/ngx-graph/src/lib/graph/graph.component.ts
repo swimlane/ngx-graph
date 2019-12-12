@@ -725,7 +725,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
     this.updateTransform();
-    console.log('matrix', this.transformationMatrix);
   }
 
   /**
