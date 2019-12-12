@@ -68,6 +68,7 @@ The dagre cluster layout groups clustered nodes together into a rectangle
 <ngx-graph
   [view]="[500, 500]"
   layout="dagreCluster"
+  [panLimit]="true"
   [links]="[
     {
       id: 'a',
