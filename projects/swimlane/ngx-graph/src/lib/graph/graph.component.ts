@@ -43,6 +43,7 @@ import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
+import { KeyboardEventNumbers } from './key-codes';
 
 /**
  * Matrix
@@ -94,6 +95,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
   @Input() enableTrackpadSupport = false;
+  @Input() keyboardPanValue: number = 50;
+  @Input() zoomKeyboardIncrease: number = 1.2;
+  @Input() zoomKeyboardDecrease: number = 0.8;
+  @Input() keyboardNavigationEnabled: boolean = true;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -110,6 +115,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
   private isMouseMoveCalled:boolean = false;
+  private keydownPressed: boolean = false;
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
@@ -897,6 +903,76 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     };
   }
 
+  @HostListener('window:keydown', ['$event'])
+  keyDownEvent(event: KeyboardEvent) {
+    if (this.shouldIgnoreKeyboardAction(event.keyCode)) {
+      return;
+    }
+
+    event.stopPropagation();
+    event.preventDefault();
+    this.keydownPressed = true;
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  keyUpEvent(event: KeyboardEvent) {
+    if (!this.keydownPressed || this.shouldIgnoreKeyboardAction(event.keyCode)) {
+        return;
+    }
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (event.keyCode === KeyboardEventNumbers.keyLeft) {
+      this.pan(this.keyboardPanValue, 0);
+      return;
+    }
+
+    if (event.keyCode === KeyboardEventNumbers.keyRight) {
+      this.pan(-this.keyboardPanValue, 0);
+      return;
+    }
+
+    if (event.keyCode === KeyboardEventNumbers.keyDown) {
+      this.pan(0, -this.keyboardPanValue);
+      return;
+    }
+
+    if (event.keyCode === KeyboardEventNumbers.keyUp) {
+      this.pan(0, this.keyboardPanValue);
+      return;
+    }
+
+    if (event.keyCode === KeyboardEventNumbers.keyPlus) {
+      this.zoom(this.zoomKeyboardIncrease);
+      return;
+    }
+
+    if (event.keyCode === KeyboardEventNumbers.keyMinus) {
+      this.zoom(this.zoomKeyboardDecrease);
+      return;
+    }
+
+    this.keydownPressed = false;
+  }
+
+  private shouldIgnoreKeyboardAction(keyCode: number): boolean {
+    if (!this.keyboardNavigationEnabled) {
+      return true;
+    }
+
+    if (keyCode !== KeyboardEventNumbers.keyDown && 
+      keyCode !== KeyboardEventNumbers.keyLeft &&
+      keyCode !== KeyboardEventNumbers.keyRight &&
+      keyCode !== KeyboardEventNumbers.keyUp &&
+      keyCode !== KeyboardEventNumbers.keyPlus &&
+      keyCode !== KeyboardEventNumbers.keyMinus) {
+      return true;
+    }
+
+    return false;
+  }
+
   /**
    * On mouse move event, used for panning and dragging.
    *
@@ -1024,7 +1100,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @param nodeId 
    */
   panToNodeId(nodeId: string): void {
-    const node = this.nodes.find(n => n.id === nodeId);
+    const node = this.graph.nodes.find(n => n.id === nodeId);
     if (!node) {
       return;
     }
