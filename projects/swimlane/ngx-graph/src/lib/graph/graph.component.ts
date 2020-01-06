@@ -100,10 +100,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
 
-  @ContentChild('linkTemplate', {static: false}) linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate', {static: false}) nodeTemplate: TemplateRef<any>;
-  @ContentChild('clusterTemplate', {static: false}) clusterTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate', {static: false}) defsTemplate: TemplateRef<any>;
+  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
+  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
+  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
 
   @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
