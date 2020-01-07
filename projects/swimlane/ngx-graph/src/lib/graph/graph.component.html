@@ -66,11 +66,11 @@
 
     <svg:g class="links">
       <svg:g #linkElement *ngFor="let link of graph.edges; trackBy: trackLinkBy" class="link-group" [id]="link.id">
-        <ng-template
+        <ng-container
           *ngIf="linkTemplate"
           [ngTemplateOutlet]="linkTemplate"
           [ngTemplateOutletContext]="{ $implicit: link }"
-        ></ng-template>
+        ></ng-container>
         <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
       </svg:g>
     </svg:g>
@@ -86,11 +86,11 @@
         (click)="onClick(node)"
         (mousedown)="onNodeMouseDown($event, node)"
       >
-        <ng-template
+        <ng-container
           *ngIf="nodeTemplate"
           [ngTemplateOutlet]="nodeTemplate"
           [ngTemplateOutletContext]="{ $implicit: node }"
-        ></ng-template>
+        ></ng-container>
         <svg:circle
           *ngIf="!nodeTemplate"
           r="10"
