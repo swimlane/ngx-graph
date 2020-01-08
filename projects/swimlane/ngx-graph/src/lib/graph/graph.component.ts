@@ -354,7 +354,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       })
     };
 
-    requestAnimationFrame(() => this.draw());
+    if (this.animate) {
+      requestAnimationFrame(() => this.draw());
+    } else {
+      this.draw()
+    }
   }
 
   /**
