@@ -17,7 +17,7 @@
     class="graph chart"
   >
     <defs>
-      <ng-template *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-template>
+      <ng-container *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-container>
       <svg:path
         class="text-path"
         *ngFor="let link of graph.edges"
@@ -46,11 +46,11 @@
         [attr.transform]="node.transform"
         (click)="onClick(node)"
       >
-        <ng-template
+        <ng-container
           *ngIf="clusterTemplate"
           [ngTemplateOutlet]="clusterTemplate"
           [ngTemplateOutletContext]="{ $implicit: node }"
-        ></ng-template>
+        ></ng-container>
         <svg:g *ngIf="!clusterTemplate" class="node cluster">
           <svg:rect
             [attr.width]="node.dimension.width"
