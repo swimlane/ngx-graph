@@ -124,6 +124,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   results = [];
   seriesDomain: any;
   transform: string;
+  minimapTransform: string;
   legendOptions: any;
   isPanning = false;
   isDragging = false;
@@ -486,6 +487,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
       this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
 
+      this.minimapTransform = this.getMinimapTransform();
+      
       this.minimapScaleCoefficient = this.graphDims.width / this.miniMapMaxWidth;
     }
 

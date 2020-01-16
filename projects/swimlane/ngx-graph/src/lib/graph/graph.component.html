@@ -109,7 +109,7 @@
     ></svg:rect>
   </svg:clipPath>
 
-  <svg:g class="minimap" *ngIf="showMiniMap" [attr.transform]="getMinimapTransform()"  clip-path="url(#minimapClip)">
+  <svg:g class="minimap" *ngIf="showMiniMap" [attr.transform]="minimapTransform"  clip-path="url(#minimapClip)">
     <svg:rect
       class="minimap-background"
       [attr.width]="graphDims.width / minimapScaleCoefficient"
