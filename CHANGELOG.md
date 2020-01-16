@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0-rc.1
+
+- Enhancement: Implement animation of cluster nodes (#234)
+- Enhancement: Support in track pad navigation instead of zoom (#241)
+- Bug: Update events in mouse wheel directive (#232)
+
 ## 6.2.0
 
 - Enhancement: Support in output click handler for graph clicks (#229)
