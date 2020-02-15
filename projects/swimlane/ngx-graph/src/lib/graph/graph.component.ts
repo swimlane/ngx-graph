@@ -1024,7 +1024,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @param nodeId 
    */
   panToNodeId(nodeId: string): void {
-    const node = this.nodes.find(n => n.id === nodeId);
+    const node = this.graph.nodes.find(n => n.id === nodeId);
     if (!node) {
       return;
     }
