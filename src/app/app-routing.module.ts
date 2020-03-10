@@ -5,7 +5,7 @@ import {
   LocationStrategy,
   PathLocationStrategy
 } from '@angular/common';
-import { DocSPACoreComponent } from '@swimlane/docspa-core';
+import { DocSPACoreComponent, LocationWithSlashes } from '@swimlane/docspa-core';
 
 const routes: Routes = [
   { path: '**', component: DocSPACoreComponent }
@@ -15,7 +15,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
   providers: [
-    Location,
+    { provide: Location, useClass: LocationWithSlashes },
     { provide: LocationStrategy, useClass: PathLocationStrategy }
   ]
 })
