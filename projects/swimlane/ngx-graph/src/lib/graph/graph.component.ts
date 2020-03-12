@@ -85,7 +85,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() maxZoomLevel = 4.0;
   @Input() autoZoom = false;
   @Input() panOnZoom = true;
-  @Input() animate? = false;
+  @Input() animate?= false;
   @Input() autoCenter = false;
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
@@ -109,7 +109,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
-  private isMouseMoveCalled:boolean = false;
+  private isMouseMoveCalled: boolean = false;
 
   graphSubscription: Subscription = new Subscription();
   subscriptions: Subscription[] = [];
@@ -344,14 +344,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     };
 
     this.graph = {
-      nodes: [...this.nodes].map(initializeNode),
-      clusters: [...(this.clusters || [])].map(initializeNode),
-      edges: [...this.links].map(e => {
-        if (!e.id) {
-          e.id = id();
-        }
-        return e;
-      })
+      nodes: this.nodes.length > 0 ? [...this.nodes].map(initializeNode) : [],
+      clusters: this.clusters && this.clusters.length > 0 ? [...this.clusters].map(initializeNode) : [],
+      edges:
+        this.links.length > 0
+          ? [...this.links].map(e => {
+              if (!e.id) {
+                e.id = id();
+              }
+              return e;
+            })
+          : []
     };
 
     requestAnimationFrame(() => this.draw());
@@ -379,7 +382,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         this.tick();
       })
     );
-    result$.pipe(first(graph => graph.nodes.length > 0)).subscribe(() => this.applyNodeDimensions());
+
+    if (this.graph.nodes.length === 0) {
+      return;
+    }
+
+    result$.pipe(first()).subscribe(() => this.applyNodeDimensions());
   }
 
   tick() {
@@ -475,7 +483,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     }
 
     // Calculate the height/width total, but only if we have any nodes
-    if(this.graph.nodes && this.graph.nodes.length) {
+    if (this.graph.nodes && this.graph.nodes.length) {
       this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
       this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
     }
@@ -914,7 +922,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   @HostListener('document:mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
-     this.isMouseMoveCalled = false;
+    this.isMouseMoveCalled = false;
   }
 
   @HostListener('document:click', ['$event'])
@@ -1006,12 +1014,16 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   zoomToFit(): void {
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
-    const zoomLevel = Math.min(heightZoom, widthZoom, 1);
+    let zoomLevel = Math.min(heightZoom, widthZoom, 1);
 
-    if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
-      return;
+    if (zoomLevel < this.minZoomLevel) {
+      zoomLevel = this.minZoomLevel;
     }
-    
+
+    if (zoomLevel > this.maxZoomLevel) {
+      zoomLevel = this.maxZoomLevel;
+    }
+
     if (zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
       this.updateTransform();
