@@ -87,6 +87,7 @@
     "angular-cli-ghpages": "^0.5.3",
     "codelyzer": "^5.1.2",
     "cross-env": "^6.0.3",
+    "husky": "^4.2.3",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^4.1.0",
@@ -96,6 +97,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "ng-packagr": "^9.0.3",
     "prettier": "^1.19.1",
+    "pretty-quick": "^2.0.1",
     "protractor": "^5.4.0",
     "ts-node": "~5.0.1",
     "tslint": "~5.11.0",
@@ -114,5 +116,10 @@
     "zlib": false,
     "https": false,
     "net": false
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
