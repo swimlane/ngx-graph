@@ -85,7 +85,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() maxZoomLevel = 4.0;
   @Input() autoZoom = false;
   @Input() panOnZoom = true;
-  @Input() animate?= false;
+  @Input() animate? = false;
   @Input() autoCenter = false;
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
@@ -429,21 +429,27 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
 
-      const isMultigraph = this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
+      const isMultigraph =
+        this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
 
-      let oldLink = isMultigraph ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey) :
-                                      this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);  
+      let oldLink = isMultigraph
+        ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey)
+        : this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
 
-      const linkFromGraph = isMultigraph ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey) :
-                                            this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);  
-      
+      const linkFromGraph = isMultigraph
+        ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey)
+        : this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
+
       if (!oldLink) {
         oldLink = linkFromGraph || edgeLabel;
       } else if (
-        oldLink.data && 
-        linkFromGraph && linkFromGraph.data && 
-        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)) { // Compare old link to new link and replace if not equal      
-        oldLink.data = linkFromGraph.data 
+        oldLink.data &&
+        linkFromGraph &&
+        linkFromGraph.data &&
+        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)
+      ) {
+        // Compare old link to new link and replace if not equal
+        oldLink.data = linkFromGraph.data;
       }
 
       oldLink.oldLine = oldLink.line;
@@ -511,6 +517,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.nodeElements.map(elem => {
         const nativeElement = elem.nativeElement;
         const node = this.graph.nodes.find(n => n.id === nativeElement.id);
+        if (!node) {
+          return;
+        }
+
+        console.log(node);
 
         // calculate the height
         let dims;
@@ -520,10 +531,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
         }
-        if (this.nodeHeight) {          
-          node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
+        if (this.nodeHeight) {
+          node.dimension.height =
+            node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
         } else {
-          node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
+          node.dimension.height =
+            node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
         }
 
         if (this.nodeMaxHeight) {
@@ -534,7 +547,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         }
 
         if (this.nodeWidth) {
-          node.dimension.width =  node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
+          node.dimension.width =
+            node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
@@ -557,9 +571,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
-            node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
+            node.dimension.width =
+              node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
           } else {
-            node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
+            node.dimension.width =
+              node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
           }
         }
 
@@ -927,8 +943,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   @HostListener('document:click', ['$event'])
   graphClick(event: MouseEvent): void {
-    if (!this.isMouseMoveCalled)
-      this.clickHandler.emit(event);
+    if (!this.isMouseMoveCalled) this.clickHandler.emit(event);
   }
 
   /**
@@ -1033,7 +1048,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   /**
    * Pans to the node
-   * @param nodeId 
+   * @param nodeId
    */
   panToNodeId(nodeId: string): void {
     const node = this.graph.nodes.find(n => n.id === nodeId);
@@ -1062,7 +1077,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (!edge || !points) {
       return;
     }
-    
+
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
