@@ -521,8 +521,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           return;
         }
 
-        console.log(node);
-
         // calculate the height
         let dims;
         try {
