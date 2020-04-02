@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0
+
+- Bug: Fix pan to node (#288)
+- Bug: Set min and max zoom incase zoom is out of bounce and remove EmptyError (#297)
+- Chore: Update angular to 9.1
+
 ## 7.0.0-rc.1
 
 - Enhancement: Implement animation of cluster nodes (#234)
