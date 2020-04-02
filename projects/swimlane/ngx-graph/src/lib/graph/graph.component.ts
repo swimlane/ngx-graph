@@ -252,7 +252,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   setLayoutSettings(settings: any): void {
     if (this.layout && typeof this.layout !== 'string') {
       this.layout.settings = settings;
-      this.update();
     }
   }
 
