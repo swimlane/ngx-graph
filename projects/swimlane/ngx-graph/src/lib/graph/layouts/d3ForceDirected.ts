@@ -46,11 +46,9 @@ export function toD3Node(maybeNode: string | D3Node): D3Node {
 
 export class D3ForceDirectedLayout implements Layout {
   defaultSettings: D3ForceDirectedSettings = {
-    force: forceSimulation<any>()
-      .force('charge', forceManyBody().strength(-150))
-      .force('collide', forceCollide(5)),
+    force: forceSimulation<any>().force('charge', forceManyBody().strength(-150)).force('collide', forceCollide(5)),
     forceLink: forceLink<any, any>()
-      .id(node => node.id)
+      .id((node) => node.id)
       .distance(() => 100)
   };
   settings: D3ForceDirectedSettings = {};
@@ -65,8 +63,8 @@ export class D3ForceDirectedLayout implements Layout {
   run(graph: Graph): Observable<Graph> {
     this.inputGraph = graph;
     this.d3Graph = {
-      nodes: [...this.inputGraph.nodes.map(n => ({ ...n }))] as any,
-      edges: [...this.inputGraph.edges.map(e => ({ ...e }))] as any
+      nodes: [...this.inputGraph.nodes.map((n) => ({ ...n }))] as any,
+      edges: [...this.inputGraph.edges.map((e) => ({ ...e }))] as any
     };
     this.outputGraph = {
       nodes: [],
@@ -117,11 +115,12 @@ export class D3ForceDirectedLayout implements Layout {
         width: (node.dimension && node.dimension.width) || 20,
         height: (node.dimension && node.dimension.height) || 20
       },
-      transform: `translate(${node.x - ((node.dimension && node.dimension.width) || 20) / 2 || 0}, ${node.y -
-        ((node.dimension && node.dimension.height) || 20) / 2 || 0})`
+      transform: `translate(${node.x - ((node.dimension && node.dimension.width) || 20) / 2 || 0}, ${
+        node.y - ((node.dimension && node.dimension.height) || 20) / 2 || 0
+      })`
     }));
 
-    this.outputGraph.edges = this.d3Graph.edges.map(edge => ({
+    this.outputGraph.edges = this.d3Graph.edges.map((edge) => ({
       ...edge,
       source: toD3Node(edge.source).id,
       target: toD3Node(edge.target).id,
@@ -143,7 +142,7 @@ export class D3ForceDirectedLayout implements Layout {
 
   onDragStart(draggingNode: Node, $event: MouseEvent): void {
     this.settings.force.alphaTarget(0.3).restart();
-    const node = this.d3Graph.nodes.find(d3Node => d3Node.id === draggingNode.id);
+    const node = this.d3Graph.nodes.find((d3Node) => d3Node.id === draggingNode.id);
     if (!node) {
       return;
     }
@@ -156,7 +155,7 @@ export class D3ForceDirectedLayout implements Layout {
     if (!draggingNode) {
       return;
     }
-    const node = this.d3Graph.nodes.find(d3Node => d3Node.id === draggingNode.id);
+    const node = this.d3Graph.nodes.find((d3Node) => d3Node.id === draggingNode.id);
     if (!node) {
       return;
     }
@@ -168,7 +167,7 @@ export class D3ForceDirectedLayout implements Layout {
     if (!draggingNode) {
       return;
     }
-    const node = this.d3Graph.nodes.find(d3Node => d3Node.id === draggingNode.id);
+    const node = this.d3Graph.nodes.find((d3Node) => d3Node.id === draggingNode.id);
     if (!node) {
       return;
     }
