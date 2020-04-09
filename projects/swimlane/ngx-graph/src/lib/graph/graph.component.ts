@@ -1081,11 +1081,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
-      const first = points[points.length / 2];
-      const second = points[points.length / 2 - 1];
+      const _first = points[points.length / 2];
+      const _second = points[points.length / 2 - 1];
       edge.midPoint = {
-        x: (first.x + second.x) / 2,
-        y: (first.y + second.y) / 2
+        x: (_first.x + _second.x) / 2,
+        y: (_first.y + _second.y) / 2
       };
     }
   }

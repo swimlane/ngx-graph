@@ -4,25 +4,26 @@ export function Step(context, t) {
 }
 
 Step.prototype = {
-  areaStart: function () {
+  areaStart() {
     this._line = 0;
   },
-  areaEnd: function () {
+  areaEnd() {
     this._line = NaN;
   },
-  lineStart: function () {
+  lineStart() {
     this._x = this._y = NaN;
     this._point = 0;
   },
-  lineEnd: function () {
+  lineEnd() {
     if (0 < this._t && this._t < 1 && this._point === 2) this._context.lineTo(this._x, this._y);
     if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();
+    // tslint:disable-next-line: ban-comma-operator
     if (this._line >= 0) (this._t = 1 - this._t), (this._line = 1 - this._line);
   },
-  point: function (x, y) {
-    (x = +x), (y = +y);
+  point(x, y) {
+    x = +x;
+    y = +y;
     switch (this._point) {
-      case 0:
       case 0:
         this._point = 1;
         this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y);
@@ -30,7 +31,10 @@ Step.prototype = {
       case 1:
         this._point = 2; // proceed
       default: {
-        var xN, yN, mYb, mYa;
+        let xN;
+        let yN;
+        let mYb;
+        let mYa;
         if (this._t <= 0) {
           xN = Math.abs(x - this._x) * 0.25;
           yN = Math.abs(y - this._y) * 0.25;
@@ -42,7 +46,7 @@ Step.prototype = {
           this._context.quadraticCurveTo(this._x, y, this._x + xN, y);
           this._context.lineTo(x - xN, y);
         } else {
-          var x1 = this._x * (1 - this._t) + x * this._t;
+          const x1 = this._x * (1 - this._t) + x * this._t;
 
           xN = Math.abs(x - x1) * 0.25;
           yN = Math.abs(y - this._y) * 0.25;
@@ -57,6 +61,7 @@ Step.prototype = {
         break;
       }
     }
+    // tslint:disable-next-line: ban-comma-operator
     (this._x = x), (this._y = y);
   }
 };

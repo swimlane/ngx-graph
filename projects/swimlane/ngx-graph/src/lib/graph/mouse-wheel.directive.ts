@@ -6,6 +6,7 @@ import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
  *
  * @export
  */
+// tslint:disable-next-line: directive-selector
 @Directive({ selector: '[mouseWheel]' })
 export class MouseWheelDirective {
   @Output()
