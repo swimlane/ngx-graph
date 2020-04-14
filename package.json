@@ -18,6 +18,7 @@
     "predeploy-docs": "npm run build-docs",
     "deploy-docs": "angular-cli-ghpages --dir ./dist/ngxGraph",
     "ci": "run-s lint prettier:ci",
+    "preversion": "npm run ci",
     "package": "run-s build:lib:prod copy-files",
     "prepublish:lib": "npm run package",
     "publish:lib": "npm publish projects/dist/ngx-graph",
