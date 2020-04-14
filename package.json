@@ -20,7 +20,9 @@
     "ci": "run-s lint prettier:ci",
     "package": "run-s build:lib:prod copy-files",
     "prepublish:lib": "npm run package",
-    "publish:lib": "npm publish projects/dist/ngx-graph"
+    "publish:lib": "npm publish projects/dist/ngx-graph",
+    "publish": "run-s publish:lib deploy-docs",
+    "prepublishOnly": "echo \"This is the workspace -- you probably meant run 'npm run publish'.\" && exit 1"
   },
   "license": "MIT",
   "dependencies": {
