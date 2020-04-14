@@ -63,7 +63,7 @@ export class DagreNodesOnlyLayout implements Layout {
 
     for (const dagreNodeId in this.dagreGraph._nodes) {
       const dagreNode = this.dagreGraph._nodes[dagreNodeId];
-      const node = graph.nodes.find((n) => n.id === dagreNode.id);
+      const node = graph.nodes.find(n => n.id === dagreNode.id);
       node.position = {
         x: dagreNode.x,
         y: dagreNode.y
@@ -81,8 +81,8 @@ export class DagreNodesOnlyLayout implements Layout {
   }
 
   public updateEdge(graph: Graph, edge: Edge): Graph {
-    const sourceNode = graph.nodes.find((n) => n.id === edge.source);
-    const targetNode = graph.nodes.find((n) => n.id === edge.target);
+    const sourceNode = graph.nodes.find(n => n.id === edge.source);
+    const targetNode = graph.nodes.find(n => n.id === edge.target);
     const rankAxis: 'x' | 'y' = this.settings.orientation === 'BT' || this.settings.orientation === 'TB' ? 'y' : 'x';
     const orderAxis: 'x' | 'y' = rankAxis === 'y' ? 'x' : 'y';
     const rankDimension = rankAxis === 'y' ? 'height' : 'width';
@@ -143,7 +143,7 @@ export class DagreNodesOnlyLayout implements Layout {
       };
     });
 
-    this.dagreNodes = graph.nodes.map((n) => {
+    this.dagreNodes = graph.nodes.map(n => {
       const node: any = Object.assign({}, n);
       node.width = n.dimension.width;
       node.height = n.dimension.height;
@@ -152,7 +152,7 @@ export class DagreNodesOnlyLayout implements Layout {
       return node;
     });
 
-    this.dagreEdges = graph.edges.map((l) => {
+    this.dagreEdges = graph.edges.map(l => {
       let linkId: number = 1;
       const newLink: any = Object.assign({}, l);
       if (!newLink.id) {

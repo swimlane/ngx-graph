@@ -30,7 +30,7 @@ export class DagreClusterLayout implements Layout {
 
     graph.edgeLabels = this.dagreGraph._edgeLabels;
 
-    const dagreToOutput = (node) => {
+    const dagreToOutput = node => {
       const dagreNode = this.dagreGraph._nodes[node.id];
       return {
         ...node,
@@ -51,8 +51,8 @@ export class DagreClusterLayout implements Layout {
   }
 
   updateEdge(graph: Graph, edge: Edge): Graph {
-    const sourceNode = graph.nodes.find((n) => n.id === edge.source);
-    const targetNode = graph.nodes.find((n) => n.id === edge.target);
+    const sourceNode = graph.nodes.find(n => n.id === edge.source);
+    const targetNode = graph.nodes.find(n => n.id === edge.target);
 
     // determine new arrow position
     const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
@@ -105,7 +105,7 @@ export class DagreClusterLayout implements Layout {
 
     this.dagreClusters = graph.clusters || [];
 
-    this.dagreEdges = graph.edges.map((l) => {
+    this.dagreEdges = graph.edges.map(l => {
       const newLink: any = Object.assign({}, l);
       if (!newLink.id) {
         newLink.id = id();
@@ -119,7 +119,7 @@ export class DagreClusterLayout implements Layout {
 
     for (const cluster of this.dagreClusters) {
       this.dagreGraph.setNode(cluster.id, cluster);
-      cluster.childNodeIds.forEach((childNodeId) => {
+      cluster.childNodeIds.forEach(childNodeId => {
         this.dagreGraph.setParent(childNodeId, cluster.id);
       });
     }

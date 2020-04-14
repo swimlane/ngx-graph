@@ -59,7 +59,7 @@ export class ColaForceDirectedLayout implements Layout {
     }
     this.internalGraph = {
       nodes: [
-        ...this.inputGraph.nodes.map((n) => ({
+        ...this.inputGraph.nodes.map(n => ({
           ...n,
           width: n.dimension ? n.dimension.width : 20,
           height: n.dimension ? n.dimension.height : 20
@@ -70,19 +70,19 @@ export class ColaForceDirectedLayout implements Layout {
           (cluster): Group => ({
             padding: 5,
             groups: cluster.childNodeIds
-              .map((nodeId) => <any>this.inputGraph.clusters.findIndex((node) => node.id === nodeId))
-              .filter((x) => x >= 0),
+              .map(nodeId => <any>this.inputGraph.clusters.findIndex(node => node.id === nodeId))
+              .filter(x => x >= 0),
             leaves: cluster.childNodeIds
-              .map((nodeId) => <any>this.inputGraph.nodes.findIndex((node) => node.id === nodeId))
-              .filter((x) => x >= 0)
+              .map(nodeId => <any>this.inputGraph.nodes.findIndex(node => node.id === nodeId))
+              .filter(x => x >= 0)
           })
         )
       ],
       links: [
         ...this.inputGraph.edges
-          .map((e) => {
-            const sourceNodeIndex = this.inputGraph.nodes.findIndex((node) => e.source === node.id);
-            const targetNodeIndex = this.inputGraph.nodes.findIndex((node) => e.target === node.id);
+          .map(e => {
+            const sourceNodeIndex = this.inputGraph.nodes.findIndex(node => e.source === node.id);
+            const targetNodeIndex = this.inputGraph.nodes.findIndex(node => e.target === node.id);
             if (sourceNodeIndex === -1 || targetNodeIndex === -1) {
               return undefined;
             }
@@ -92,19 +92,19 @@ export class ColaForceDirectedLayout implements Layout {
               target: targetNodeIndex
             };
           })
-          .filter((x) => !!x)
+          .filter(x => !!x)
       ] as any,
       groupLinks: [
         ...this.inputGraph.edges
-          .map((e) => {
-            const sourceNodeIndex = this.inputGraph.nodes.findIndex((node) => e.source === node.id);
-            const targetNodeIndex = this.inputGraph.nodes.findIndex((node) => e.target === node.id);
+          .map(e => {
+            const sourceNodeIndex = this.inputGraph.nodes.findIndex(node => e.source === node.id);
+            const targetNodeIndex = this.inputGraph.nodes.findIndex(node => e.target === node.id);
             if (sourceNodeIndex >= 0 && targetNodeIndex >= 0) {
               return undefined;
             }
             return e;
           })
-          .filter((x) => !!x)
+          .filter(x => !!x)
       ]
     };
     this.outputGraph = {
@@ -152,7 +152,7 @@ export class ColaForceDirectedLayout implements Layout {
   }
 
   internalGraphToOutputGraph(internalGraph: any): Graph {
-    this.outputGraph.nodes = internalGraph.nodes.map((node) => ({
+    this.outputGraph.nodes = internalGraph.nodes.map(node => ({
       ...node,
       id: node.id || id(),
       position: {
@@ -169,7 +169,7 @@ export class ColaForceDirectedLayout implements Layout {
     }));
 
     this.outputGraph.edges = internalGraph.links
-      .map((edge) => {
+      .map(edge => {
         const source: any = toNode(internalGraph.nodes, edge.source);
         const target: any = toNode(internalGraph.nodes, edge.target);
         return {
@@ -183,13 +183,13 @@ export class ColaForceDirectedLayout implements Layout {
         };
       })
       .concat(
-        internalGraph.groupLinks.map((groupLink) => {
-          const sourceNode = internalGraph.nodes.find((foundNode) => (foundNode as any).id === groupLink.source);
-          const targetNode = internalGraph.nodes.find((foundNode) => (foundNode as any).id === groupLink.target);
+        internalGraph.groupLinks.map(groupLink => {
+          const sourceNode = internalGraph.nodes.find(foundNode => (foundNode as any).id === groupLink.source);
+          const targetNode = internalGraph.nodes.find(foundNode => (foundNode as any).id === groupLink.target);
           const source =
-            sourceNode || internalGraph.groups.find((foundGroup) => (foundGroup as any).id === groupLink.source);
+            sourceNode || internalGraph.groups.find(foundGroup => (foundGroup as any).id === groupLink.source);
           const target =
-            targetNode || internalGraph.groups.find((foundGroup) => (foundGroup as any).id === groupLink.target);
+            targetNode || internalGraph.groups.find(foundGroup => (foundGroup as any).id === groupLink.target);
           return {
             ...groupLink,
             source: source.id,
@@ -223,7 +223,7 @@ export class ColaForceDirectedLayout implements Layout {
   }
 
   onDragStart(draggingNode: Node, $event: MouseEvent): void {
-    const nodeIndex = this.outputGraph.nodes.findIndex((foundNode) => foundNode.id === draggingNode.id);
+    const nodeIndex = this.outputGraph.nodes.findIndex(foundNode => foundNode.id === draggingNode.id);
     const node = this.internalGraph.nodes[nodeIndex];
     if (!node) {
       return;
@@ -237,7 +237,7 @@ export class ColaForceDirectedLayout implements Layout {
     if (!draggingNode) {
       return;
     }
-    const nodeIndex = this.outputGraph.nodes.findIndex((foundNode) => foundNode.id === draggingNode.id);
+    const nodeIndex = this.outputGraph.nodes.findIndex(foundNode => foundNode.id === draggingNode.id);
     const node = this.internalGraph.nodes[nodeIndex];
     if (!node) {
       return;
@@ -250,7 +250,7 @@ export class ColaForceDirectedLayout implements Layout {
     if (!draggingNode) {
       return;
     }
-    const nodeIndex = this.outputGraph.nodes.findIndex((foundNode) => foundNode.id === draggingNode.id);
+    const nodeIndex = this.outputGraph.nodes.findIndex(foundNode => foundNode.id === draggingNode.id);
     const node = this.internalGraph.nodes[nodeIndex];
     if (!node) {
       return;

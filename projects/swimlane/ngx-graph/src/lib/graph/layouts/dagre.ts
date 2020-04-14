@@ -57,7 +57,7 @@ export class DagreLayout implements Layout {
 
     for (const dagreNodeId in this.dagreGraph._nodes) {
       const dagreNode = this.dagreGraph._nodes[dagreNodeId];
-      const node = graph.nodes.find((n) => n.id === dagreNode.id);
+      const node = graph.nodes.find(n => n.id === dagreNode.id);
       node.position = {
         x: dagreNode.x,
         y: dagreNode.y
@@ -72,8 +72,8 @@ export class DagreLayout implements Layout {
   }
 
   updateEdge(graph: Graph, edge: Edge): Graph {
-    const sourceNode = graph.nodes.find((n) => n.id === edge.source);
-    const targetNode = graph.nodes.find((n) => n.id === edge.target);
+    const sourceNode = graph.nodes.find(n => n.id === edge.source);
+    const targetNode = graph.nodes.find(n => n.id === edge.target);
 
     // determine new arrow position
     const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
@@ -116,7 +116,7 @@ export class DagreLayout implements Layout {
       };
     });
 
-    this.dagreNodes = graph.nodes.map((n) => {
+    this.dagreNodes = graph.nodes.map(n => {
       const node: any = Object.assign({}, n);
       node.width = n.dimension.width;
       node.height = n.dimension.height;
@@ -125,7 +125,7 @@ export class DagreLayout implements Layout {
       return node;
     });
 
-    this.dagreEdges = graph.edges.map((l) => {
+    this.dagreEdges = graph.edges.map(l => {
       const newLink: any = Object.assign({}, l);
       if (!newLink.id) {
         newLink.id = id();

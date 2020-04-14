@@ -143,7 +143,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   @Input()
-  groupResultsBy: (node: any) => string = (node) => node.label;
+  groupResultsBy: (node: any) => string = node => node.label;
 
   /**
    * Get the current zoom level
@@ -348,7 +348,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       clusters: this.clusters && this.clusters.length > 0 ? [...this.clusters].map(initializeNode) : [],
       edges:
         this.links.length > 0
-          ? [...this.links].map((e) => {
+          ? [...this.links].map(e => {
               if (!e.id) {
                 e.id = id();
               }
@@ -377,7 +377,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     const result = this.layout.run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
     this.graphSubscription.add(
-      result$.subscribe((graph) => {
+      result$.subscribe(graph => {
         this.graph = graph;
         this.tick();
       })
@@ -394,7 +394,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     // Transposes view options to the node
     const oldNodes: Set<string> = new Set();
 
-    this.graph.nodes.map((n) => {
+    this.graph.nodes.map(n => {
       n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
         n.position.y - n.dimension.height / 2 || 0
       })`;
@@ -407,7 +407,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
     const oldClusters: Set<string> = new Set();
 
-    (this.graph.clusters || []).map((n) => {
+    (this.graph.clusters || []).map(n => {
       n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
         n.position.y - n.dimension.height / 2 || 0
       })`;
@@ -435,12 +435,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
 
       let oldLink = isMultigraph
-        ? this._oldLinks.find((ol) => `${ol.source}${ol.target}${ol.id}` === normKey)
-        : this._oldLinks.find((ol) => `${ol.source}${ol.target}` === normKey);
+        ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey)
+        : this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
 
       const linkFromGraph = isMultigraph
-        ? this.graph.edges.find((nl) => `${nl.source}${nl.target}${nl.id}` === normKey)
-        : this.graph.edges.find((nl) => `${nl.source}${nl.target}` === normKey);
+        ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey)
+        : this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
 
       if (!oldLink) {
         oldLink = linkFromGraph || edgeLabel;
@@ -483,7 +483,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
     // Map the old links for animations
     if (this.graph.edges) {
-      this._oldLinks = this.graph.edges.map((l) => {
+      this._oldLinks = this.graph.edges.map(l => {
         const newL = Object.assign({}, l);
         newL.oldLine = l.line;
         return newL;
@@ -492,8 +492,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
     // Calculate the height/width total, but only if we have any nodes
     if (this.graph.nodes && this.graph.nodes.length) {
-      this.graphDims.width = Math.max(...this.graph.nodes.map((n) => n.position.x + n.dimension.width));
-      this.graphDims.height = Math.max(...this.graph.nodes.map((n) => n.position.y + n.dimension.height));
+      this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
+      this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
     }
 
     if (this.autoZoom) {
@@ -516,9 +516,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   applyNodeDimensions(): void {
     if (this.nodeElements && this.nodeElements.length) {
-      this.nodeElements.map((elem) => {
+      this.nodeElements.map(elem => {
         const nativeElement = elem.nativeElement;
-        const node = this.graph.nodes.find((n) => n.id === nativeElement.id);
+        const node = this.graph.nodes.find(n => n.id === nativeElement.id);
         if (!node) {
           return;
         }
@@ -595,8 +595,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   redrawLines(_animate = this.animate): void {
-    this.linkElements.map((linkEl) => {
-      const edge = this.graph.edges.find((lin) => lin.id === linkEl.nativeElement.id);
+    this.linkElements.map(linkEl => {
+      const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (edge) {
         const linkSelection = select(linkEl.nativeElement).select('.line');
@@ -649,8 +649,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   generateLine(points: any): any {
     const lineFunction = shape
       .line<any>()
-      .x((d) => d.x)
-      .y((d) => d.y)
+      .x(d => d.x)
+      .y(d => d.y)
       .curve(this.curve);
     return lineFunction(points);
   }
@@ -799,7 +799,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           const result = this.layout.updateEdge(this.graph, link);
           const result$ = result instanceof Observable ? result : of(result);
           this.graphSubscription.add(
-            result$.subscribe((graph) => {
+            result$.subscribe(graph => {
               this.graph = graph;
               this.redrawEdge(link);
             })
@@ -873,7 +873,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   getSeriesDomain(): any[] {
     return this.nodes
-      .map((d) => this.groupResultsBy(d))
+      .map(d => this.groupResultsBy(d))
       .reduce((nodes: string[], node): any[] => (nodes.indexOf(node) !== -1 ? nodes : nodes.concat([node])), [])
       .sort();
   }
@@ -1051,7 +1051,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @param nodeId
    */
   panToNodeId(nodeId: string): void {
-    const node = this.graph.nodes.find((n) => n.id === nodeId);
+    const node = this.graph.nodes.find(n => n.id === nodeId);
     if (!node) {
       return;
     }
