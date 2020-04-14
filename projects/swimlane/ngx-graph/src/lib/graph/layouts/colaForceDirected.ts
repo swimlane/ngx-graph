@@ -163,8 +163,9 @@ export class ColaForceDirectedLayout implements Layout {
         width: (node.dimension && node.dimension.width) || 20,
         height: (node.dimension && node.dimension.height) || 20
       },
-      transform: `translate(${node.x - ((node.dimension && node.dimension.width) || 20) / 2 || 0}, ${node.y -
-        ((node.dimension && node.dimension.height) || 20) / 2 || 0})`
+      transform: `translate(${node.x - ((node.dimension && node.dimension.width) || 20) / 2 || 0}, ${
+        node.y - ((node.dimension && node.dimension.height) || 20) / 2 || 0
+      })`
     }));
 
     this.outputGraph.edges = internalGraph.links

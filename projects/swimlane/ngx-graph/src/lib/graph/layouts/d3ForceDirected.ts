@@ -46,9 +46,7 @@ export function toD3Node(maybeNode: string | D3Node): D3Node {
 
 export class D3ForceDirectedLayout implements Layout {
   defaultSettings: D3ForceDirectedSettings = {
-    force: forceSimulation<any>()
-      .force('charge', forceManyBody().strength(-150))
-      .force('collide', forceCollide(5)),
+    force: forceSimulation<any>().force('charge', forceManyBody().strength(-150)).force('collide', forceCollide(5)),
     forceLink: forceLink<any, any>()
       .id(node => node.id)
       .distance(() => 100)
@@ -117,8 +115,9 @@ export class D3ForceDirectedLayout implements Layout {
         width: (node.dimension && node.dimension.width) || 20,
         height: (node.dimension && node.dimension.height) || 20
       },
-      transform: `translate(${node.x - ((node.dimension && node.dimension.width) || 20) / 2 || 0}, ${node.y -
-        ((node.dimension && node.dimension.height) || 20) / 2 || 0})`
+      transform: `translate(${node.x - ((node.dimension && node.dimension.width) || 20) / 2 || 0}, ${
+        node.y - ((node.dimension && node.dimension.height) || 20) / 2 || 0
+      })`
     }));
 
     this.outputGraph.edges = this.d3Graph.edges.map(edge => ({
