@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.1
+
+- Chore: update dependecies
+
 ## 7.0.0
 
 - Bug: Fix pan to node (#288)
