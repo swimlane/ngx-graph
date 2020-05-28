@@ -68,6 +68,30 @@ export class NgxGraphOrgTreeComponent implements OnInit {
         role: 'Student',
         backgroundColor: '#8A2BE2',
         upperManagerId: '4'
+      },
+      {
+        id: '6',
+        name: 'Employee 6',
+        office: 'Office 6',
+        role: 'Student',
+        backgroundColor: '#8A2BE2',
+        upperManagerId: '5'
+      },
+      {
+        id: '7',
+        name: 'Employee 7',
+        office: 'Office 7',
+        role: 'Student',
+        backgroundColor: '#8A2BE2',
+        upperManagerId: '6'
+      },
+      {
+        id: '8',
+        name: 'Employee 8',
+        office: 'Office 8',
+        role: 'Student',
+        backgroundColor: '#8A2BE2',
+        upperManagerId: '7'
       }
     ];
   }
