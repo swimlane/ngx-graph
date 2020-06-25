@@ -1,5 +1,17 @@
 # Changelog
 
+## 7.0.0
+
+- Bug: Fix pan to node (#288)
+- Bug: Set min and max zoom incase zoom is out of bounce and remove EmptyError (#297)
+- Chore: Update angular to 9.1
+
+## 7.0.0-rc.1
+
+- Enhancement: Implement animation of cluster nodes (#234)
+- Enhancement: Support in track pad navigation instead of zoom (#241)
+- Bug: Update events in mouse wheel directive (#232)
+
 ## 6.2.0
 
 - Enhancement: Support in output click handler for graph clicks (#229)

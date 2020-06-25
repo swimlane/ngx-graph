@@ -80,5 +80,8 @@ import '@webcomponents/custom-elements/src/native-shim';
 // Used for browsers without a native support of Custom Elements
 import '@webcomponents/custom-elements/custom-elements.min';
 
-import * as process from 'process';
-window['process'] = process;
+import '@ungap/global-this';
+
+window['global'] = globalThis as any;
+window['process'] = window['process'] || require('process/browser');
+window['Buffer'] = window['Buffer'] || require('buffer').Buffer;

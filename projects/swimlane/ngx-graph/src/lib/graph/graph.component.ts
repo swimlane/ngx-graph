@@ -105,11 +105,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
 
-  @ContentChild('linkTemplate', { static: false }) linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate', { static: false }) nodeTemplate: TemplateRef<any>;
-  @ContentChild('miniMapNodeTemplate', { static: false }) miniMapNodeTemplate: TemplateRef<any>;
-  @ContentChild('clusterTemplate', { static: false }) clusterTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate', { static: false }) defsTemplate: TemplateRef<any>;
+  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
+  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
+  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
+  @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
 
   @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
@@ -354,14 +354,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     };
 
     this.graph = {
-      nodes: [...this.nodes].map(initializeNode),
-      clusters: [...(this.clusters || [])].map(initializeNode),
-      edges: [...this.links].map(e => {
-        if (!e.id) {
-          e.id = id();
-        }
-        return e;
-      })
+      nodes: this.nodes.length > 0 ? [...this.nodes].map(initializeNode) : [],
+      clusters: this.clusters && this.clusters.length > 0 ? [...this.clusters].map(initializeNode) : [],
+      edges:
+        this.links.length > 0
+          ? [...this.links].map(e => {
+              if (!e.id) {
+                e.id = id();
+              }
+              return e;
+            })
+          : []
     };
 
     requestAnimationFrame(() => this.draw());
@@ -389,7 +392,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         this.tick();
       })
     );
-    result$.pipe(first(graph => graph.nodes.length > 0)).subscribe(() => this.applyNodeDimensions());
+
+    if (this.graph.nodes.length === 0) {
+      return;
+    }
+
+    result$.pipe(first()).subscribe(() => this.applyNodeDimensions());
   }
 
   tick() {
@@ -543,6 +551,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       this.nodeElements.map(elem => {
         const nativeElement = elem.nativeElement;
         const node = this.graph.nodes.find(n => n.id === nativeElement.id);
+        if (!node) {
+          return;
+        }
 
         // calculate the height
         let dims;
@@ -1051,10 +1062,14 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   zoomToFit(): void {
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
-    const zoomLevel = Math.min(heightZoom, widthZoom, 1);
+    let zoomLevel = Math.min(heightZoom, widthZoom, 1);
 
-    if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
-      return;
+    if (zoomLevel < this.minZoomLevel) {
+      zoomLevel = this.minZoomLevel;
+    }
+
+    if (zoomLevel > this.maxZoomLevel) {
+      zoomLevel = this.maxZoomLevel;
     }
 
     if (zoomLevel !== this.zoomLevel) {
@@ -1069,7 +1084,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @param nodeId
    */
   panToNodeId(nodeId: string): void {
-    const node = this.nodes.find(n => n.id === nodeId);
+    const node = this.graph.nodes.find(n => n.id === nodeId);
     if (!node) {
       return;
     }

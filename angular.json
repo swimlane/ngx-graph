@@ -13,6 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "aot": false,
             "outputPath": "dist/ngxGraph",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -24,6 +25,12 @@
           },
           "configurations": {
             "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -35,10 +42,10 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
+              "aot": false,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true
+              "buildOptimizer": false
             }
           }
         },
@@ -119,7 +126,8 @@
           },
           "configurations": {
             "production": {
-              "project": "projects/swimlane/ngx-graph/ng-package.prod.json"
+              "project": "projects/swimlane/ngx-graph/ng-package.prod.json",
+              "tsConfig": "projects/swimlane/ngx-graph/tsconfig.lib.prod.json"
             }
           }
         },
