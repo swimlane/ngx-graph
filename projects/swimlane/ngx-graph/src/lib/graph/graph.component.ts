@@ -1098,7 +1098,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     let x =
       event.offsetX - (this.dims.width - (this.graphDims.width + this.minimapOffsetX) / this.minimapScaleCoefficient);
     let y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;
-    console.log({ x, y, offsetX: this.minimapOffsetX });
 
     this.panTo(x * this.minimapScaleCoefficient, y * this.minimapScaleCoefficient);
     this.isMinimapPanning = true;
