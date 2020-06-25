@@ -93,8 +93,8 @@ export class DagreLayout implements Layout {
 
   createDagreGraph(graph: Graph): any {
     const settings = Object.assign({}, this.defaultSettings, this.settings);
-    this.dagreGraph = new dagre.graphlib.Graph({compound: settings.compound, multigraph: settings.multigraph});
-    
+    this.dagreGraph = new dagre.graphlib.Graph({ compound: settings.compound, multigraph: settings.multigraph });
+
     this.dagreGraph.setGraph({
       rankdir: settings.orientation,
       marginx: settings.marginX,

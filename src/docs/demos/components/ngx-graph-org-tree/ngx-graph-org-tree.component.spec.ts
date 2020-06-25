@@ -8,9 +8,8 @@ describe('NgxGraphOrgTreeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NgxGraphOrgTreeComponent ]
-    })
-    .compileComponents();
+      declarations: [NgxGraphOrgTreeComponent]
+    }).compileComponents();
   }));
 
   beforeEach(() => {

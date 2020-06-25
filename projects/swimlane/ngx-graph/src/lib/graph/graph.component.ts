@@ -262,7 +262,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   setLayoutSettings(settings: any): void {
     if (this.layout && typeof this.layout !== 'string') {
       this.layout.settings = settings;
-      this.update();
     }
   }
 
@@ -405,8 +404,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     const oldNodes: Set<string> = new Set();
 
     this.graph.nodes.map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
-        0})`;
+      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
+        n.position.y - n.dimension.height / 2 || 0
+      })`;
       if (!n.data) {
         n.data = {};
       }
@@ -417,8 +417,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     const oldClusters: Set<string> = new Set();
 
     (this.graph.clusters || []).map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${n.position.y - n.dimension.height / 2 ||
-        0})`;
+      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
+        n.position.y - n.dimension.height / 2 || 0
+      })`;
       if (!n.data) {
         n.data = {};
       }
@@ -1121,11 +1122,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
-      const first = points[points.length / 2];
-      const second = points[points.length / 2 - 1];
+      const _first = points[points.length / 2];
+      const _second = points[points.length / 2 - 1];
       edge.midPoint = {
-        x: (first.x + second.x) / 2,
-        y: (first.y + second.y) / 2
+        x: (_first.x + _second.x) / 2,
+        y: (_first.y + _second.y) / 2
       };
     }
   }

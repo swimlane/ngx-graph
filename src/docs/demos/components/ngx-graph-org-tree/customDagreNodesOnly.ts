@@ -107,7 +107,7 @@ export class DagreNodesOnlyLayout implements Layout {
       },
       {
         [orderAxis]: endingPoint[orderAxis],
-        [rankAxis]: (startingPoint[rankAxis] + endingPoint[rankAxis]) / 2,
+        [rankAxis]: (startingPoint[rankAxis] + endingPoint[rankAxis]) / 2
       },
       endingPoint
     ];
@@ -153,11 +153,11 @@ export class DagreNodesOnlyLayout implements Layout {
     });
 
     this.dagreEdges = graph.edges.map(l => {
-	  let linkId: number = 1;
+      let linkId: number = 1;
       const newLink: any = Object.assign({}, l);
       if (!newLink.id) {
         newLink.id = linkId;
-		    linkId++;
+        linkId++;
       }
       return newLink;
     });
