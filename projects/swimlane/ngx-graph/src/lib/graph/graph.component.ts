@@ -96,7 +96,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
   @Input() enableTrackpadSupport = false;
-  @Input() showMiniMap: boolean = true;
+  @Input() showMiniMap: boolean = false;
   @Input() miniMapMaxWidth: number = 100;
   @Input() miniMapMaxHeight: number;
   @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;

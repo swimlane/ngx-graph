@@ -15,6 +15,7 @@ ngx-graph is a graph visualization library for Angular
 <ngx-graph
   class="chart-container"
   [view]="[800, 200]"
+  [showMiniMap]="true"
   [links]="[
     {
       id: 'a',
@@ -83,6 +84,10 @@ ngx-graph is a graph visualization library for Angular
 | nodeWidth                                                 | number              |                                  | the width of the nodes **deprecated**{ .badge .warn }                                                                                               |
 | nodeMinWidth                                              | number              |                                  | the min width of the nodes **deprecated**{ .badge .warn }                                                                                           |
 | nodeMaxWidth                                              | number              |                                  | the max width of the nodes **deprecated**{ .badge .warn }                                                                                           |
+| showMiniMap                                               | boolean             | false                            | show/hide the minimap                                                                                                                               |
+| miniMapMaxWidth                                           | number              | 100                              | the maximum width of the minimap (in pixels)                                                                                                        |
+| miniMapMaxHeight                                          | number              |                                  | the maximum height of the minimap (in pixels)                                                                                                       |
+| miniMapPosition                                           | MiniMapPosition     | MiniMapPosition.UpperRight       | the position of the minimap                                                                                                                         |
 
 _Deprecated inputs will be removed in the next major version of the package._
 

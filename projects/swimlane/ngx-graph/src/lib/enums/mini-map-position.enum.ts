@@ -1,4 +1,4 @@
 export enum MiniMapPosition {
-  UpperLeft = 0,
-  UpperRight,
+  UpperLeft = 'UpperLeft',
+  UpperRight = 'UpperRight'
 }
