@@ -102,62 +102,77 @@
     </svg:g>
   </svg:g>
 
-  <svg:clipPath id="minimapClip">
+  <svg:clipPath [attr.id]="minimapClipPathId">
     <svg:rect
       [attr.width]="graphDims.width / minimapScaleCoefficient"
       [attr.height]="graphDims.height / minimapScaleCoefficient"
     ></svg:rect>
   </svg:clipPath>
 
-  <svg:g class="minimap" *ngIf="showMiniMap" [attr.transform]="minimapTransform" clip-path="url(#minimapClip)">
+  <svg:g
+    class="minimap"
+    *ngIf="showMiniMap"
+    [attr.transform]="minimapTransform"
+    [attr.clip-path]="'url(#' + minimapClipPathId + ')'"
+  >
     <svg:rect
       class="minimap-background"
       [attr.width]="graphDims.width / minimapScaleCoefficient"
       [attr.height]="graphDims.height / minimapScaleCoefficient"
     ></svg:rect>
 
-    <svg:g class="minimap-nodes" [style.transform]="'scale(' + 1 / minimapScaleCoefficient + ')'">
-      <svg:g
-        #nodeElement
-        *ngFor="let node of graph.nodes; trackBy: trackNodeBy"
-        class="node-group"
-        [class.old-node]="animate && oldNodes.has(node.id)"
-        [id]="node.id"
-        [attr.transform]="node.transform"
-      >
-        <ng-template
-          *ngIf="miniMapNodeTemplate"
-          [ngTemplateOutlet]="miniMapNodeTemplate"
-          [ngTemplateOutletContext]="{ $implicit: node }"
-        ></ng-template>
-        <ng-template
-          *ngIf="!miniMapNodeTemplate && nodeTemplate"
-          [ngTemplateOutlet]="nodeTemplate"
-          [ngTemplateOutletContext]="{ $implicit: node }"
-        ></ng-template>
-        <svg:circle
-          *ngIf="!nodeTemplate && !miniMapNodeTemplate"
-          r="10"
-          [attr.cx]="node.dimension.width / 2 / minimapScaleCoefficient"
-          [attr.cy]="node.dimension.height / 2 / minimapScaleCoefficient"
-          [attr.fill]="node.data?.color"
-        />
-      </svg:g>
-    </svg:g>
-
-    <svg:rect
-      [attr.transform]="
+    <svg:g
+      [style.transform]="
         'translate(' +
-        panOffsetX / zoomLevel / -minimapScaleCoefficient +
-        ',' +
-        panOffsetY / zoomLevel / -minimapScaleCoefficient +
-        ')'
+        -minimapOffsetX / minimapScaleCoefficient +
+        'px,' +
+        -minimapOffsetY / minimapScaleCoefficient +
+        'px)'
       "
-      class="minimap-drag"
-      [class.panning]="isMinimapPanning"
-      [attr.width]="width / minimapScaleCoefficient / zoomLevel"
-      [attr.height]="height / minimapScaleCoefficient / zoomLevel"
-      (mousedown)="onMinimapDragMouseDown($event)"
-    ></svg:rect>
+    >
+      <svg:g class="minimap-nodes" [style.transform]="'scale(' + 1 / minimapScaleCoefficient + ')'">
+        <svg:g
+          #nodeElement
+          *ngFor="let node of graph.nodes; trackBy: trackNodeBy"
+          class="node-group"
+          [class.old-node]="animate && oldNodes.has(node.id)"
+          [id]="node.id"
+          [attr.transform]="node.transform"
+        >
+          <ng-container
+            *ngIf="miniMapNodeTemplate"
+            [ngTemplateOutlet]="miniMapNodeTemplate"
+            [ngTemplateOutletContext]="{ $implicit: node }"
+          ></ng-container>
+          <ng-container
+            *ngIf="!miniMapNodeTemplate && nodeTemplate"
+            [ngTemplateOutlet]="nodeTemplate"
+            [ngTemplateOutletContext]="{ $implicit: node }"
+          ></ng-container>
+          <svg:circle
+            *ngIf="!nodeTemplate && !miniMapNodeTemplate"
+            r="10"
+            [attr.cx]="node.dimension.width / 2 / minimapScaleCoefficient"
+            [attr.cy]="node.dimension.height / 2 / minimapScaleCoefficient"
+            [attr.fill]="node.data?.color"
+          />
+        </svg:g>
+      </svg:g>
+
+      <svg:rect
+        [attr.transform]="
+          'translate(' +
+          panOffsetX / zoomLevel / -minimapScaleCoefficient +
+          ',' +
+          panOffsetY / zoomLevel / -minimapScaleCoefficient +
+          ')'
+        "
+        class="minimap-drag"
+        [class.panning]="isMinimapPanning"
+        [attr.width]="width / minimapScaleCoefficient / zoomLevel"
+        [attr.height]="height / minimapScaleCoefficient / zoomLevel"
+        (mousedown)="onMinimapDragMouseDown($event)"
+      ></svg:rect>
+    </svg:g>
   </svg:g>
 </ngx-charts-chart>
