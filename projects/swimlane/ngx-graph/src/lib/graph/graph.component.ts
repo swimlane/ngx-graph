@@ -1088,6 +1088,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   /**
+   * On minimap pan event. Pans the graph to the clicked position
+   *
+   * @memberOf GraphComponent
+   */
+  onMinimapPanTo(event: MouseEvent): void {
+    console.log(event);
+
+    let x =
+      event.offsetX - (this.dims.width - (this.graphDims.width + this.minimapOffsetX) / this.minimapScaleCoefficient);
+    let y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;
+    console.log({ x, y, offsetX: this.minimapOffsetX });
+
+    this.panTo(x * this.minimapScaleCoefficient, y * this.minimapScaleCoefficient);
+    this.isMinimapPanning = true;
+  }
+
+  /**
    * Center the graph in the viewport
    */
   center(): void {

@@ -119,6 +119,7 @@
       class="minimap-background"
       [attr.width]="graphDims.width / minimapScaleCoefficient"
       [attr.height]="graphDims.height / minimapScaleCoefficient"
+      (mousedown)="onMinimapPanTo($event)"
     ></svg:rect>
 
     <svg:g
