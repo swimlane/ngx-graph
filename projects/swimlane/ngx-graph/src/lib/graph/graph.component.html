@@ -109,7 +109,7 @@
     ></svg:rect>
   </svg:clipPath>
 
-  <svg:g class="minimap" *ngIf="showMiniMap" [attr.transform]="minimapTransform"  clip-path="url(#minimapClip)">
+  <svg:g class="minimap" *ngIf="showMiniMap" [attr.transform]="minimapTransform" clip-path="url(#minimapClip)">
     <svg:rect
       class="minimap-background"
       [attr.width]="graphDims.width / minimapScaleCoefficient"
@@ -154,8 +154,10 @@
         ')'
       "
       class="minimap-drag"
+      [class.panning]="isMinimapPanning"
       [attr.width]="width / minimapScaleCoefficient / zoomLevel"
       [attr.height]="height / minimapScaleCoefficient / zoomLevel"
+      (mousedown)="onMinimapDragMouseDown($event)"
     ></svg:rect>
   </svg:g>
 </ngx-charts-chart>

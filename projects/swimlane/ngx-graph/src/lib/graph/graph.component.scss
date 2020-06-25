@@ -9,6 +9,11 @@
     stroke-width: 1px;
     stroke-dasharray: 2px;
     stroke-dashoffset: 2px;
+    cursor: pointer;
+
+    &.panning {
+      fill: rgba(0, 0, 0, 0.3);
+    }
   }
 
   .minimap-nodes {

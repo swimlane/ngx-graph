@@ -5,7 +5,7 @@ ngx-graph gives you complete control over the look and behavior of your graph. Y
 ```html { playground }
 <ngx-graph
   class="chart-container"
-  [view]="[500, 550]"
+  [view]="[800, 550]"
   [links]="[
     {
       id: 'a',

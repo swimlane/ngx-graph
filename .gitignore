@@ -9,3 +9,4 @@ coverage/
 yarn.lock
 /ngx-charts.iml
 ngx-charts.iml
+/**/__ngcc_entry_points__.json

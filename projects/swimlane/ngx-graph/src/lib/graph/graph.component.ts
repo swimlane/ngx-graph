@@ -95,20 +95,21 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
   @Input() enableTrackpadSupport = false;
-  @Input() showMiniMap: boolean = false;
+  @Input() showMiniMap: boolean = true;
   @Input() miniMapMaxWidth: number = 100;
-  @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperLeft;
+  @Input() miniMapMaxHeight: number;
+  @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
 
-  @ContentChild('linkTemplate', {static: false}) linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate', {static: false}) nodeTemplate: TemplateRef<any>;
-  @ContentChild('miniMapNodeTemplate', {static: false}) miniMapNodeTemplate: TemplateRef<any>;
-  @ContentChild('clusterTemplate', {static: false}) clusterTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate', {static: false}) defsTemplate: TemplateRef<any>;
+  @ContentChild('linkTemplate', { static: false }) linkTemplate: TemplateRef<any>;
+  @ContentChild('nodeTemplate', { static: false }) nodeTemplate: TemplateRef<any>;
+  @ContentChild('miniMapNodeTemplate', { static: false }) miniMapNodeTemplate: TemplateRef<any>;
+  @ContentChild('clusterTemplate', { static: false }) clusterTemplate: TemplateRef<any>;
+  @ContentChild('defsTemplate', { static: false }) defsTemplate: TemplateRef<any>;
 
   @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
@@ -127,6 +128,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   minimapTransform: string;
   legendOptions: any;
   isPanning = false;
+  isMinimapPanning = false;
   isDragging = false;
   draggingNode: Node;
   initialized = false;
@@ -429,21 +431,27 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
       const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
 
-      const isMultigraph = this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
+      const isMultigraph =
+        this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
 
-      let oldLink = isMultigraph ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey) :
-                                      this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);  
+      let oldLink = isMultigraph
+        ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey)
+        : this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
 
-      const linkFromGraph = isMultigraph ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey) :
-                                            this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);  
-      
+      const linkFromGraph = isMultigraph
+        ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey)
+        : this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
+
       if (!oldLink) {
         oldLink = linkFromGraph || edgeLabel;
       } else if (
-        oldLink.data && 
-        linkFromGraph && linkFromGraph.data && 
-        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)) { // Compare old link to new link and replace if not equal      
-        oldLink.data = linkFromGraph.data 
+        oldLink.data &&
+        linkFromGraph &&
+        linkFromGraph.data &&
+        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)
+      ) {
+        // Compare old link to new link and replace if not equal
+        oldLink.data = linkFromGraph.data;
       }
 
       oldLink.oldLine = oldLink.line;
@@ -483,13 +491,19 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     }
 
     // Calculate the height/width total, but only if we have any nodes
-    if(this.graph.nodes && this.graph.nodes.length) {
+    if (this.graph.nodes && this.graph.nodes.length) {
       this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
       this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
 
-      this.minimapTransform = this.getMinimapTransform();
-      
       this.minimapScaleCoefficient = this.graphDims.width / this.miniMapMaxWidth;
+      if (this.miniMapMaxHeight) {
+        this.minimapScaleCoefficient = Math.max(
+          this.minimapScaleCoefficient,
+          this.graphDims.height / this.miniMapMaxHeight
+        );
+      }
+
+      this.minimapTransform = this.getMinimapTransform();
     }
 
     if (this.autoZoom) {
@@ -503,6 +517,20 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
     requestAnimationFrame(() => this.redrawLines());
     this.cd.markForCheck();
+  }
+
+  getMinimapTransform(): string {
+    switch (this.miniMapPosition) {
+      case MiniMapPosition.UpperLeft: {
+        return '';
+      }
+      case MiniMapPosition.UpperRight: {
+        return 'translate(' + (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient) + ',' + 0 + ')';
+      }
+      default: {
+        return '';
+      }
+    }
   }
 
   /**
@@ -524,10 +552,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
         }
-        if (this.nodeHeight) {          
-          node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
+        if (this.nodeHeight) {
+          node.dimension.height =
+            node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
         } else {
-          node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
+          node.dimension.height =
+            node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
         }
 
         if (this.nodeMaxHeight) {
@@ -538,7 +568,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         }
 
         if (this.nodeWidth) {
-          node.dimension.width =  node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
+          node.dimension.width =
+            node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
@@ -561,9 +592,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
               // Skip drawing if element is not displayed - Firefox would throw an error here
               return;
             }
-            node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
+            node.dimension.width =
+              node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
           } else {
-            node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
+            node.dimension.width =
+              node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
           }
         }
 
@@ -746,15 +779,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   /**
-   * Pan was invoked from event
-   *
-   * @memberOf GraphComponent
-   */
-  onPan(event: MouseEvent): void {
-    this.pan(event.movementX, event.movementY);
-  }
-
-  /**
    * Drag was invoked from an event
    *
    * @memberOf GraphComponent
@@ -917,8 +941,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
     this.isMouseMoveCalled = true;
-    if (this.isPanning && this.panningEnabled) {
-      this.checkEnum(this.panningAxis, $event);
+    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled) {
+      this.panWithConstraints(this.panningAxis, $event);
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
@@ -926,13 +950,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   @HostListener('document:mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
-     this.isMouseMoveCalled = false;
+    this.isMouseMoveCalled = false;
   }
 
   @HostListener('document:click', ['$event'])
   graphClick(event: MouseEvent): void {
-    if (!this.isMouseMoveCalled)
-      this.clickHandler.emit(event);
+    if (!this.isMouseMoveCalled) this.clickHandler.emit(event);
   }
 
   /**
@@ -983,6 +1006,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
+    this.isMinimapPanning = false;
     if (this.layout && typeof this.layout !== 'string' && this.layout.onDragEnd) {
       this.layout.onDragEnd(this.draggingNode, event);
     }
@@ -1006,6 +1030,15 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   /**
+   * On minimap drag mouse down to kick off minimap panning
+   *
+   * @memberOf GraphComponent
+   */
+  onMinimapDragMouseDown(): void {
+    this.isMinimapPanning = true;
+  }
+
+  /**
    * Center the graph in the viewport
    */
   center(): void {
@@ -1023,7 +1056,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
       return;
     }
-    
+
     if (zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
       this.updateTransform();
@@ -1033,7 +1066,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   /**
    * Pans to the node
-   * @param nodeId 
+   * @param nodeId
    */
   panToNodeId(nodeId: string): void {
     const node = this.nodes.find(n => n.id === nodeId);
@@ -1044,30 +1077,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.panTo(node.position.x, node.position.y);
   }
 
-  getMinimapTransform(): string {
-    switch (this.miniMapPosition) {
-      case MiniMapPosition.UpperLeft: {
-        return "";
-      }
-      case MiniMapPosition.UpperRight: {
-        return "translate(" + (this.graphDims.width) + "," + 0 + ")"; 
-      }
-      default: {
-        return "";
-      }
+  private panWithConstraints(key: string, event: MouseEvent) {
+    let x = event.movementX;
+    let y = event.movementY;
+    if (this.isMinimapPanning) {
+      x = -this.minimapScaleCoefficient * x * this.zoomLevel;
+      y = -this.minimapScaleCoefficient * y * this.zoomLevel;
     }
-  }
 
-  private checkEnum(key: string, event: MouseEvent) {
     switch (key) {
       case PanningAxis.Horizontal:
-        this.pan(event.movementX, 0);
+        this.pan(x, 0);
         break;
       case PanningAxis.Vertical:
-        this.pan(0, event.movementY);
+        this.pan(0, y);
         break;
       default:
-        this.onPan(event);
+        this.pan(x, y);
         break;
     }
   }
@@ -1076,7 +1102,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (!edge || !points) {
       return;
     }
-    
+
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
