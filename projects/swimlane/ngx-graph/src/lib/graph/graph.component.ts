@@ -43,6 +43,8 @@ import { Node, ClusterNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
+import { MiniMapPosition } from '../enums/mini-map-position.enum';
+import { throttleable } from '../utils/throttle';
 
 /**
  * Matrix
@@ -94,6 +96,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
   @Input() enableTrackpadSupport = false;
+  @Input() showMiniMap: boolean = false;
+  @Input() miniMapMaxWidth: number = 100;
+  @Input() miniMapMaxHeight: number;
+  @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -104,6 +110,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
   @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
+  @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
 
   @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
@@ -132,6 +139,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
+  minimapScaleCoefficient: number = 3;
+  minimapTransform: string;
+  minimapOffsetX: number = 0;
+  minimapOffsetY: number = 0;
+  isMinimapPanning = false;
+  minimapClipPathId: string;
 
   constructor(
     private el: ElementRef,
@@ -227,6 +240,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         })
       );
     }
+
+    this.minimapClipPathId = `minimapClip${id()}`;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -329,7 +344,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           width: this.nodeWidth ? this.nodeWidth : 30,
           height: this.nodeHeight ? this.nodeHeight : 30
         };
-
         n.meta.forceDimensions = false;
       } else {
         n.meta.forceDimensions = n.meta.forceDimensions === undefined ? true : n.meta.forceDimensions;
@@ -489,11 +503,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       });
     }
 
-    // Calculate the height/width total, but only if we have any nodes
-    if (this.graph.nodes && this.graph.nodes.length) {
-      this.graphDims.width = Math.max(...this.graph.nodes.map(n => n.position.x + n.dimension.width));
-      this.graphDims.height = Math.max(...this.graph.nodes.map(n => n.position.y + n.dimension.height));
-    }
+    this.updateMinimap();
 
     if (this.autoZoom) {
       this.zoomToFit();
@@ -506,6 +516,63 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
     requestAnimationFrame(() => this.redrawLines());
     this.cd.markForCheck();
+  }
+
+  getMinimapTransform(): string {
+    switch (this.miniMapPosition) {
+      case MiniMapPosition.UpperLeft: {
+        return '';
+      }
+      case MiniMapPosition.UpperRight: {
+        return 'translate(' + (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient) + ',' + 0 + ')';
+      }
+      default: {
+        return '';
+      }
+    }
+  }
+
+  updateGraphDims() {
+    let minX = +Infinity;
+    let maxX = -Infinity;
+    let minY = +Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < this.graph.nodes.length; i++) {
+      const node = this.graph.nodes[i];
+      minX = node.position.x < minX ? node.position.x : minX;
+      minY = node.position.y < minY ? node.position.y : minY;
+      maxX = node.position.x + node.dimension.width > maxX ? node.position.x + node.dimension.width : maxX;
+      maxY = node.position.y + node.dimension.height > maxY ? node.position.y + node.dimension.height : maxY;
+    }
+    minX -= 100;
+    minY -= 100;
+    maxX += 100;
+    maxY += 100;
+    this.graphDims.width = maxX - minX;
+    this.graphDims.height = maxY - minY;
+    this.minimapOffsetX = minX;
+    this.minimapOffsetY = minY;
+  }
+
+  @throttleable(500)
+  updateMinimap() {
+    // Calculate the height/width total, but only if we have any nodes
+    if (this.graph.nodes && this.graph.nodes.length) {
+      this.updateGraphDims();
+
+      if (this.miniMapMaxWidth) {
+        this.minimapScaleCoefficient = this.graphDims.width / this.miniMapMaxWidth;
+      }
+      if (this.miniMapMaxHeight) {
+        this.minimapScaleCoefficient = Math.max(
+          this.minimapScaleCoefficient,
+          this.graphDims.height / this.miniMapMaxHeight
+        );
+      }
+
+      this.minimapTransform = this.getMinimapTransform();
+    }
   }
 
   /**
@@ -526,6 +593,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         let dims;
         try {
           dims = nativeElement.getBBox();
+          if (!dims.width || !dims.height) {
+            return;
+          }
         } catch (ex) {
           // Skip drawing if element is not displayed - Firefox would throw an error here
           return;
@@ -757,15 +827,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   /**
-   * Pan was invoked from event
-   *
-   * @memberOf GraphComponent
-   */
-  onPan(event: MouseEvent): void {
-    this.pan(event.movementX, event.movementY);
-  }
-
-  /**
    * Drag was invoked from an event
    *
    * @memberOf GraphComponent
@@ -808,6 +869,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     }
 
     this.redrawLines(false);
+    this.updateMinimap();
   }
 
   redrawEdge(edge: Edge) {
@@ -928,8 +990,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
     this.isMouseMoveCalled = true;
-    if (this.isPanning && this.panningEnabled) {
-      this.checkEnum(this.panningAxis, $event);
+    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled) {
+      this.panWithConstraints(this.panningAxis, $event);
     } else if (this.isDragging && this.draggingEnabled) {
       this.onDrag($event);
     }
@@ -993,6 +1055,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   onMouseUp(event: MouseEvent): void {
     this.isDragging = false;
     this.isPanning = false;
+    this.isMinimapPanning = false;
     if (this.layout && typeof this.layout !== 'string' && this.layout.onDragEnd) {
       this.layout.onDragEnd(this.draggingNode, event);
     }
@@ -1013,6 +1076,31 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     if (this.layout && typeof this.layout !== 'string' && this.layout.onDragStart) {
       this.layout.onDragStart(node, event);
     }
+  }
+
+  /**
+   * On minimap drag mouse down to kick off minimap panning
+   *
+   * @memberOf GraphComponent
+   */
+  onMinimapDragMouseDown(): void {
+    this.isMinimapPanning = true;
+  }
+
+  /**
+   * On minimap pan event. Pans the graph to the clicked position
+   *
+   * @memberOf GraphComponent
+   */
+  onMinimapPanTo(event: MouseEvent): void {
+    console.log(event);
+
+    let x =
+      event.offsetX - (this.dims.width - (this.graphDims.width + this.minimapOffsetX) / this.minimapScaleCoefficient);
+    let y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;
+
+    this.panTo(x * this.minimapScaleCoefficient, y * this.minimapScaleCoefficient);
+    this.isMinimapPanning = true;
   }
 
   /**
@@ -1058,16 +1146,23 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.panTo(node.position.x, node.position.y);
   }
 
-  private checkEnum(key: string, event: MouseEvent) {
+  private panWithConstraints(key: string, event: MouseEvent) {
+    let x = event.movementX;
+    let y = event.movementY;
+    if (this.isMinimapPanning) {
+      x = -this.minimapScaleCoefficient * x * this.zoomLevel;
+      y = -this.minimapScaleCoefficient * y * this.zoomLevel;
+    }
+
     switch (key) {
       case PanningAxis.Horizontal:
-        this.pan(event.movementX, 0);
+        this.pan(x, 0);
         break;
       case PanningAxis.Vertical:
-        this.pan(0, event.movementY);
+        this.pan(0, y);
         break;
       default:
-        this.onPan(event);
+        this.pan(x, y);
         break;
     }
   }

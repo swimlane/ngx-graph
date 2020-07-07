@@ -1,3 +1,27 @@
+.minimap {
+  .minimap-background {
+    fill: rgba(0, 0, 0, 0.1);
+  }
+
+  .minimap-drag {
+    fill: rgba(0, 0, 0, 0.2);
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 1px;
+    stroke-dasharray: 2px;
+    stroke-dashoffset: 2px;
+    cursor: pointer;
+
+    &.panning {
+      fill: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .minimap-nodes {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
 .graph {
   user-select: none;
 

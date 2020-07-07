@@ -19,3 +19,6 @@ export * from './lib/graph/layouts/d3ForceDirected';
 export * from './lib/graph/layouts/dagre';
 export * from './lib/graph/layouts/dagreCluster';
 export * from './lib/graph/layouts/dagreNodesOnly';
+
+export * from './lib/enums/mini-map-position.enum';
+export * from './lib/enums/panning.enum';

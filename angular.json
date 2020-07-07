@@ -126,9 +126,9 @@
           },
           "configurations": {
             "production": {
-              "project": "projects/swimlane/ngx-graph/ng-package.prod.json"
-            ,              "tsConfig": "projects/swimlane/ngx-graph/tsconfig.lib.prod.json"
-}
+              "project": "projects/swimlane/ngx-graph/ng-package.prod.json",
+              "tsConfig": "projects/swimlane/ngx-graph/tsconfig.lib.prod.json"
+            }
           }
         },
         "test": {
