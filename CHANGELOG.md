@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.1.0
+
+- Feature: Add Minimap (#324)
+- Bug: Remove extra call to update() on initial render (#303)
+
 ## 7.0.1
 
 - Chore: update dependecies
