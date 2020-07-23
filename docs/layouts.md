@@ -134,7 +134,7 @@ The dagre cluster layout groups clustered nodes together into a rectangle
 
 ```html { playground }
 <ngx-graph
-  [view]="[500, 300]"
+  [view]="[800, 300]"
   layout="d3ForceDirected"
   [links]="[
     {
@@ -191,7 +191,7 @@ The dagre cluster layout groups clustered nodes together into a rectangle
 
 ```html { playground }
 <ngx-graph
-  [view]="[500, 300]"
+  [view]="[800, 300]"
   layout="colaForceDirected"
   [links]="[
     {
@@ -248,7 +248,7 @@ The dagre cluster layout groups clustered nodes together into a rectangle
 
 ```html { playground }
 <ngx-graph
-  [view]="[500, 500]"
+  [view]="[800, 500]"
   layout="colaForceDirected"
   [links]="[
     {
