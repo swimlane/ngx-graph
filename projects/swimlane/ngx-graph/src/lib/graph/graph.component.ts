@@ -557,6 +557,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
   @throttleable(500)
   updateMinimap() {
+    if (!this.showMiniMap) {
+      return;
+    }
+
     // Calculate the height/width total, but only if we have any nodes
     if (this.graph.nodes && this.graph.nodes.length) {
       this.updateGraphDims();
@@ -1093,8 +1097,6 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   onMinimapPanTo(event: MouseEvent): void {
-    console.log(event);
-
     let x =
       event.offsetX - (this.dims.width - (this.graphDims.width + this.minimapOffsetX) / this.minimapScaleCoefficient);
     let y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;

@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.1.1
+
+- Chore: Remove console.log
+
 ## 7.1.0
 
 - Feature: Add Minimap (#324)
