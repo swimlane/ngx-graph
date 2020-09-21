@@ -3,6 +3,9 @@
   "extends": ["codelyzer", "tslint-config-swimlane/base", "tslint-config-prettier"],
   "rules": {
     "no-implicit-dependencies": [false, "dev"],
+    "deprecation": {
+      "severity": "warning"
+    },
     "no-any": false,
     "typedef": true,
     "no-floating-promises": false,
