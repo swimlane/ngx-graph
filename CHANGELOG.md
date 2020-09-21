@@ -1,5 +1,9 @@
 # Changelog
 
+## HEAD
+
+- Chore: Update angular to 10.1
+
 ## 7.1.2
 
 - Bug: Fix center and fit to screen functionality
