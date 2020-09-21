@@ -24,7 +24,7 @@
     "publish:lib": "npm publish projects/dist/ngx-graph",
     "publish": "run-s publish:lib deploy-docs",
     "prepublishOnly": "echo \"This is the workspace -- you probably meant run 'npm run publish'.\" && exit 1",
-    "postinstall": "ngcc"
+    "postinstall": "ngcc --properties es2015 browser module main --first-only --create-ivy-entry-points"
   },
   "license": "MIT",
   "dependencies": {
