@@ -23,7 +23,8 @@
     "prepublish:lib": "npm run package",
     "publish:lib": "npm publish projects/dist/ngx-graph",
     "publish": "run-s publish:lib deploy-docs",
-    "prepublishOnly": "echo \"This is the workspace -- you probably meant run 'npm run publish'.\" && exit 1"
+    "prepublishOnly": "echo \"This is the workspace -- you probably meant run 'npm run publish'.\" && exit 1",
+    "postinstall": "ngcc"
   },
   "license": "MIT",
   "dependencies": {
@@ -112,7 +113,7 @@
     "tslint-config-prettier": "^1.17.0",
     "tslint-config-security": "^1.16.0",
     "tslint-config-swimlane": "^5.0.0",
-    "typescript": "~3.8.0"
+    "typescript": "~3.9.7"
   },
   "browser": {
     "fs": false,
