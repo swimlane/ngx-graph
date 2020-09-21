@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.1.2
+
+- Bug: Fix center and fit to screen functionality
+
 ## 7.1.1
 
 - Chore: Remove console.log
