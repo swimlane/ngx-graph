@@ -469,7 +469,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
 
       oldLink.oldLine = oldLink.line;
 	  
-	    oldLink.label = linkFromGraph.label || oldLink.label;
+	    oldLink.label = linkFromGraph.label ?? oldLink.label;
 
       const points = edgeLabel.points;
       const line = this.generateLine(points);
