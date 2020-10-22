@@ -44,6 +44,7 @@ https://swimlane.github.io/ngx-graph/
       label: 'C'
     }
   ]"
+  (select)="onNodeSelect($event)"
 >
 </ngx-graph>
 ```
@@ -134,7 +135,7 @@ https://swimlane.github.io/ngx-graph/
   </ng-template>
 
   <ng-template #nodeTemplate let-node>
-    <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
+    <svg:g (click)="onNodeClick($event)" (dblclick)="onNodeClick($event)" class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
       <svg:rect
         [attr.width]="node.dimension.width"
         [attr.height]="node.dimension.height"
