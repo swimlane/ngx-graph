@@ -105,6 +105,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
+  @Output() postInitHandler: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
@@ -292,7 +293,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    */
   ngAfterViewInit(): void {
     super.ngAfterViewInit();
-    setTimeout(() => this.update());
+    setTimeout(() => {
+      this.update();
+      this.postInitHandler.emit();
+    });
   }
 
   /**
