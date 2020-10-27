@@ -1,10 +1,10 @@
 {
-  "name": "@swimlane/ngx-graph",
-  "version": "7.1.2-obi",
-  "description": "Graph visualization for angular",
+  "name": "@obi4wan/ngx-graph",
+  "version": "7.1.2",
+  "description": "Fork of @swimlane/ngx-graph for OBI4wan",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/swimlane/ngx-graph.git"
+    "url": "git+https://github.com/obi4wan-b-v/ngx-graph.git"
   },
   "keywords": [
     "angular",
@@ -18,17 +18,15 @@
     "directed acyclic graph",
     "dag"
   ],
-  "author": "Swimlane",
+  "author": "Obi4wan",
   "maintainers": [
-    "Marjan Georgiev",
-    "Assaf Shemesh",
-    "Isaac Mann"
+    "Kee-Yeong Tan"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/swimlane/ngx-graph/issues"
+    "url": "https://github.com/obi4wan-b-v/ngx-graph/issues"
   },
-  "homepage": "https://github.com/swimlane/ngx-graph#readme",
+  "homepage": "https://github.com/obi4wan-b-v/ngx-graph#readme",
   "peerDependencies": {
     "@angular/animations": "6.x || 7.x || 8.x || 9.x || 10.x",
     "@angular/common": "6.x || 7.x || 8.x || 9.x || 10.x",
