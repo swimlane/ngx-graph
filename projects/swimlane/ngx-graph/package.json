@@ -20,7 +20,10 @@
   ],
   "author": "Obi4wan",
   "maintainers": [
-    "Kee-Yeong Tan"
+    "Kee-Yeong Tan",
+    "Barry van Driel",
+    "Hee Chan van der Haar",
+    "Matt Chapman"
   ],
   "license": "MIT",
   "bugs": {
