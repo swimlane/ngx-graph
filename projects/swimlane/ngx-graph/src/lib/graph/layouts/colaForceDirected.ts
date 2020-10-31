@@ -8,7 +8,7 @@ import * as d3Force from 'd3-force';
 import * as d3Timer from 'd3-timer';
 import { Edge } from '../../models/edge.model';
 import { Observable, Subject } from 'rxjs';
-import { ViewDimensions } from '@swimlane/ngx-charts';
+import { ViewDimensions } from '../../utils/view-dimensions.helper';
 
 export interface ColaForceDirectedSettings {
   force?: ColaLayout & ID3StyleLayoutAdaptor;

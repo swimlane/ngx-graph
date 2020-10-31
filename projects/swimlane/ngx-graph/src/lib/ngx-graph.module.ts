@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { GraphModule } from './graph/graph.module';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
-  imports: [NgxChartsModule],
+  imports: [CommonModule],
   exports: [GraphModule]
 })
 export class NgxGraphModule {}
