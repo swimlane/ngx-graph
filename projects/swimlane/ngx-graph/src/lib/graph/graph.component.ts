@@ -101,7 +101,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;
   @Input() view: [number, number];
   @Input() scheme: any = 'cool';
-  @Input() schemeType: string = 'ordinal';
   @Input() customColors: any;
   @Input() animations: boolean = true;
   @Output() select = new EventEmitter();
@@ -980,7 +979,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
+    this.colors = new ColorHelper(this.scheme, this.seriesDomain, this.customColors);
   }
 
   /**
