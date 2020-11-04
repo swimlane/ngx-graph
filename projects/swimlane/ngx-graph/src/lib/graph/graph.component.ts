@@ -128,8 +128,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   subscriptions: Subscription[] = [];
   colors: ColorHelper;
   dims: ViewDimensions;
-  margin = [0, 0, 0, 0];
-  results = [];
   seriesDomain: any;
   transform: string;
   isPanning = false;
@@ -326,11 +324,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
 
     this.zone.run(() => {
-      this.chartWidth = Math.floor((this.width * 12) / 12.0);
       this.dims = calculateViewDimensions({
         width: this.width,
-        height: this.height,
-        margins: this.margin
+        height: this.height
       });
 
       this.seriesDomain = this.getSeriesDomain();
@@ -1187,14 +1183,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
   }
 
-  ////
   public basicUpdate(): void {
-    if (this.results) {
-      this.results = this.cloneData(this.results);
-    } else {
-      this.results = [];
-    }
-
     if (this.view) {
       this.width = this.view[0];
       this.height = this.view[1];
@@ -1242,30 +1231,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     return null;
   }
 
-  /**
-   * Converts all date objects that appear as name
-   * into formatted date strings
-   */
-  formatDates(): void {
-    for (let i = 0; i < this.results.length; i++) {
-      const g = this.results[i];
-      g.label = g.name;
-      if (g.label instanceof Date) {
-        g.label = g.label.toLocaleDateString();
-      }
-
-      if (g.series) {
-        for (let j = 0; j < g.series.length; j++) {
-          const d = g.series[j];
-          d.label = d.name;
-          if (d.label instanceof Date) {
-            d.label = d.label.toLocaleDateString();
-          }
-        }
-      }
-    }
-  }
-
   protected unbindEvents(): void {
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
@@ -1281,40 +1246,5 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
     });
     this.resizeSubscription = subscription;
-  }
-
-  /**
-   * Clones the data into a new object
-   *
-   * @memberOf BaseChart
-   */
-  private cloneData(data): any {
-    const results = [];
-
-    for (const item of data) {
-      const copy = {
-        name: item['name']
-      };
-
-      if (item['value'] !== undefined) {
-        copy['value'] = item['value'];
-      }
-
-      if (item['series'] !== undefined) {
-        copy['series'] = [];
-        for (const seriesItem of item['series']) {
-          const seriesItemCopy = Object.assign({}, seriesItem);
-          copy['series'].push(seriesItemCopy);
-        }
-      }
-
-      if (item['extra'] !== undefined) {
-        copy['extra'] = JSON.parse(JSON.stringify(item['extra']));
-      }
-
-      results.push(copy);
-    }
-
-    return results;
   }
 }

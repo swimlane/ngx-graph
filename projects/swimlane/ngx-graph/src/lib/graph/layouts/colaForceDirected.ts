@@ -39,8 +39,7 @@ export class ColaForceDirectedLayout implements Layout {
       .avoidOverlaps(true),
     viewDimensions: {
       width: 600,
-      height: 600,
-      xOffset: 0
+      height: 600
     }
   };
   settings: ColaForceDirectedSettings = {};

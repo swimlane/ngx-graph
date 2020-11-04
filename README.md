@@ -4,17 +4,20 @@
 
 A Graph visualization for angular
 
-## Documentation & Demos 
+## Documentation & Demos
+
 https://swimlane.github.io/ngx-graph/
 
 ## Installation
+
 1. `npm install @swimlane/ngx-graph --save`
-3. Import `NgxGraphModule` into your module
-4. Use the `ngx-graph` component in your components
+2. Import `NgxGraphModule` into your module
+3. Use the `ngx-graph` component in your components
 
 ## Usage
 
 ### Simple
+
 ```html
 <ngx-graph
   class="chart-container"
@@ -116,13 +119,7 @@ https://swimlane.github.io/ngx-graph/
   </ng-template>
 
   <ng-template #clusterTemplate let-cluster>
-    <svg:g
-      class="node cluster"
-      ngx-tooltip
-      [tooltipPlacement]="'top'"
-      [tooltipType]="'tooltip'"
-      [tooltipTitle]="cluster.label"
-    >
+    <svg:g class="node cluster">
       <svg:rect
         rx="5"
         ry="5"
@@ -134,7 +131,7 @@ https://swimlane.github.io/ngx-graph/
   </ng-template>
 
   <ng-template #nodeTemplate let-node>
-    <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
+    <svg:g class="node">
       <svg:rect
         [attr.width]="node.dimension.width"
         [attr.height]="node.dimension.height"
@@ -167,6 +164,7 @@ https://swimlane.github.io/ngx-graph/
 ## Data
 
 ### Nodes
+
 ```javascript
 [
   {
@@ -193,10 +191,11 @@ https://swimlane.github.io/ngx-graph/
     id: '6',
     label: 'Node F'
   }
-]
+];
 ```
 
 ### Edges
+
 ```javascript
 [
   {
@@ -229,10 +228,11 @@ https://swimlane.github.io/ngx-graph/
     source: '2',
     target: '6'
   }
-]
+];
 ```
 
 ### Clusters
+
 ```javascript
 [
   {
@@ -240,12 +240,11 @@ https://swimlane.github.io/ngx-graph/
     label: 'Cluster node',
     childNodeIds: ['2', '3']
   }
-]
+];
 ```
 
-
 ## Credits
+
 `ngx-graph` is a [Swimlane](http://swimlane.com) open-source project; we believe in giving back to the open-source community by sharing some of the projects we build for our application. Swimlane is an automated cyber security operations and incident response platform that enables cyber security teams to leverage threat intelligence, speed up incident response and automate security operations.
 
 [SecOps Hub](http://secopshub.com) is an open, product-agnostic, online community for security professionals to share ideas, use cases, best practices, and incident response strategies.
-
