@@ -7,7 +7,7 @@
   (mouseWheelDown)="onZoom($event, 'out')"
   mouseWheel
 >
-  <svg:svg class="ngx-charts" [attr.width]="dims.width" [attr.height]="dims.height">
+  <svg:svg class="ngx-charts" [attr.width]="width" [attr.height]="height">
     <svg:g
       *ngIf="initialized && graph"
       [attr.transform]="transform"
