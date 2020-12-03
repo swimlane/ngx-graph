@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## 7.2.0
 
 - Chore: Update angular to 10.1
 
