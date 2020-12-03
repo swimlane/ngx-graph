@@ -14,7 +14,6 @@ import {
   Output,
   QueryList,
   TemplateRef,
-  ViewChild,
   ViewChildren,
   ViewEncapsulation,
   NgZone,
@@ -22,19 +21,12 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import {
-  BaseChartComponent,
-  ChartComponent,
-  ColorHelper,
-  ViewDimensions,
-  calculateViewDimensions
-} from '@swimlane/ngx-charts';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as ease from 'd3-ease';
 import 'd3-transition';
-import { Observable, Subscription, of } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Observable, Subscription, of, fromEvent as observableFromEvent } from 'rxjs';
+import { first, debounceTime } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -45,6 +37,9 @@ import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
 import { MiniMapPosition } from '../enums/mini-map-position.enum';
 import { throttleable } from '../utils/throttle';
+import { ColorHelper } from '../utils/color.helper';
+import { ViewDimensions, calculateViewDimensions } from '../utils/view-dimensions.helper';
+import { VisibilityObserver } from '../utils/visibility-observer';
 
 /**
  * Matrix
@@ -63,10 +58,14 @@ export interface Matrix {
   styleUrls: ['./graph.component.scss'],
   templateUrl: 'graph.component.html',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('animationState', [
+      ngTransition(':enter', [style({ opacity: 0 }), animate('500ms 100ms', style({ opacity: 1 }))])
+    ])
+  ]
 })
-export class GraphComponent extends BaseChartComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @Input() legend: boolean = false;
+export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() nodes: Node[] = [];
   @Input() clusters: ClusterNode[] = [];
   @Input() links: Edge[] = [];
@@ -100,6 +99,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @Input() miniMapMaxWidth: number = 100;
   @Input() miniMapMaxHeight: number;
   @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;
+  @Input() view: [number, number];
+  @Input() scheme: any = 'cool';
+  @Input() customColors: any;
+  @Input() animations: boolean = true;
+  @Output() select = new EventEmitter();
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -112,9 +116,10 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
   @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
 
-  @ViewChild(ChartComponent, { read: ElementRef, static: true }) chart: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+
+  public chartWidth: any;
 
   private isMouseMoveCalled: boolean = false;
 
@@ -122,11 +127,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   subscriptions: Subscription[] = [];
   colors: ColorHelper;
   dims: ViewDimensions;
-  margin = [0, 0, 0, 0];
-  results = [];
   seriesDomain: any;
   transform: string;
-  legendOptions: any;
   isPanning = false;
   isDragging = false;
   draggingNode: Node;
@@ -145,15 +147,17 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   minimapOffsetY: number = 0;
   isMinimapPanning = false;
   minimapClipPathId: string;
+  width: number;
+  height: number;
+  resizeSubscription: any;
+  visibilityObserver: VisibilityObserver;
 
   constructor(
     private el: ElementRef,
     public zone: NgZone,
     public cd: ChangeDetectorRef,
     private layoutService: LayoutService
-  ) {
-    super(el, zone, cd);
-  }
+  ) {}
 
   @Input()
   groupResultsBy: (node: any) => string = node => node.label;
@@ -245,6 +249,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    this.basicUpdate();
+
     const { layout, layoutSettings, nodes, clusters, links } = changes;
     this.setLayout(this.layout);
     if (layoutSettings) {
@@ -277,7 +283,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   ngOnDestroy(): void {
-    super.ngOnDestroy();
+    this.unbindEvents();
+    if (this.visibilityObserver) {
+      this.visibilityObserver.visible.unsubscribe();
+      this.visibilityObserver.destroy();
+    }
+
     for (const sub of this.subscriptions) {
       sub.unsubscribe();
     }
@@ -291,7 +302,12 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   ngAfterViewInit(): void {
-    super.ngAfterViewInit();
+    this.bindWindowResizeEvent();
+
+    // listen for visibility of the element for hidden by default scenario
+    this.visibilityObserver = new VisibilityObserver(this.el, this.zone);
+    this.visibilityObserver.visible.subscribe(this.update.bind(this));
+
     setTimeout(() => this.update());
   }
 
@@ -301,7 +317,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   update(): void {
-    super.update();
+    this.basicUpdate();
     if (!this.curve) {
       this.curve = shape.curveBundle.beta(1);
     }
@@ -309,14 +325,11 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
     this.zone.run(() => {
       this.dims = calculateViewDimensions({
         width: this.width,
-        height: this.height,
-        margins: this.margin,
-        showLegend: this.legend
+        height: this.height
       });
 
       this.seriesDomain = this.getSeriesDomain();
       this.setColors();
-      this.legendOptions = this.getLegendOptions();
 
       this.createGraph();
       this.updateTransform();
@@ -676,7 +689,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
           .duration(_animate ? 500 : 0)
           .attr('d', edge.line);
 
-        const textPathSelection = select(this.chartElement.nativeElement).select(`#${edge.id}`);
+        const textPathSelection = select(this.el.nativeElement).select(`#${edge.id}`);
         textPathSelection
           .attr('d', edge.oldTextPath)
           .transition()
@@ -754,7 +767,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
       const mouseY = $event.clientY;
 
       // Transform the mouse X/Y into a SVG X/Y
-      const svg = this.chart.nativeElement.querySelector('svg');
+      const svg = this.el.nativeElement.querySelector('svg');
       const svgGroup = svg.querySelector('g.chart');
 
       const point = svg.createSVGPoint();
@@ -966,20 +979,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
    * @memberOf GraphComponent
    */
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, 'ordinal', this.seriesDomain, this.customColors);
-  }
-
-  /**
-   * Gets the legend options
-   *
-   * @memberOf GraphComponent
-   */
-  getLegendOptions(): any {
-    return {
-      scaleType: 'ordinal',
-      domain: this.seriesDomain,
-      colors: this.colors
-    };
+    this.colors = new ColorHelper(this.scheme, this.seriesDomain, this.customColors);
   }
 
   /**
@@ -1180,5 +1180,70 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnChan
         y: (_first.y + _second.y) / 2
       };
     }
+  }
+
+  public basicUpdate(): void {
+    if (this.view) {
+      this.width = this.view[0];
+      this.height = this.view[1];
+    } else {
+      const dims = this.getContainerDims();
+      if (dims) {
+        this.width = dims.width;
+        this.height = dims.height;
+      }
+    }
+
+    // default values if width or height are 0 or undefined
+    if (!this.width) {
+      this.width = 600;
+    }
+
+    if (!this.height) {
+      this.height = 400;
+    }
+
+    this.width = Math.floor(this.width);
+    this.height = Math.floor(this.height);
+
+    if (this.cd) {
+      this.cd.markForCheck();
+    }
+  }
+
+  public getContainerDims(): any {
+    let width;
+    let height;
+    const hostElem = this.el.nativeElement;
+
+    if (hostElem.parentNode !== null) {
+      // Get the container dimensions
+      const dims = hostElem.parentNode.getBoundingClientRect();
+      width = dims.width;
+      height = dims.height;
+    }
+
+    if (width && height) {
+      return { width, height };
+    }
+
+    return null;
+  }
+
+  protected unbindEvents(): void {
+    if (this.resizeSubscription) {
+      this.resizeSubscription.unsubscribe();
+    }
+  }
+
+  private bindWindowResizeEvent(): void {
+    const source = observableFromEvent(window, 'resize');
+    const subscription = source.pipe(debounceTime(200)).subscribe(e => {
+      this.update();
+      if (this.cd) {
+        this.cd.markForCheck();
+      }
+    });
+    this.resizeSubscription = subscription;
   }
 }

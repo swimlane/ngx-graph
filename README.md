@@ -120,13 +120,7 @@ https://swimlane.github.io/ngx-graph/
   </ng-template>
 
   <ng-template #clusterTemplate let-cluster>
-    <svg:g
-      class="node cluster"
-      ngx-tooltip
-      [tooltipPlacement]="'top'"
-      [tooltipType]="'tooltip'"
-      [tooltipTitle]="cluster.label"
-    >
+    <svg:g class="node cluster">
       <svg:rect
         rx="5"
         ry="5"
