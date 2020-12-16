@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.0.0-rc.1
+
+- Breaking: Remove dependency on ngx-charts (removes the `legend` input) (#363)
+- Chore: Update angular to 11
+
 ## 7.2.0
 
 - Chore: Update angular to 10.1
