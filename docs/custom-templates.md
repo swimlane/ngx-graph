@@ -68,13 +68,7 @@ ngx-graph gives you complete control over the look and behavior of your graph. Y
   </ng-template>
 
   <ng-template #clusterTemplate let-cluster>
-    <svg:g
-      class="node cluster"
-      ngx-tooltip
-      [tooltipPlacement]="'top'"
-      [tooltipType]="'tooltip'"
-      [tooltipTitle]="cluster.label"
-    >
+    <svg:g class="node cluster">
       <svg:rect
         rx="5"
         ry="5"
@@ -86,7 +80,7 @@ ngx-graph gives you complete control over the look and behavior of your graph. Y
   </ng-template>
 
   <ng-template #nodeTemplate let-node>
-    <svg:g class="node" ngx-tooltip [tooltipPlacement]="'top'" [tooltipType]="'tooltip'" [tooltipTitle]="node.label">
+    <svg:g class="node">
       <svg:rect
         [attr.width]="node.dimension.width"
         [attr.height]="node.dimension.height"
