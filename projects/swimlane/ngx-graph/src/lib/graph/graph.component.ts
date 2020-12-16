@@ -481,8 +481,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
 
       oldLink.oldLine = oldLink.line;
-	  
-      oldLink.label = linkFromGraph.label || oldLink.label;
 
       const points = edgeLabel.points;
       const line = this.generateLine(points);
