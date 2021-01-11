@@ -1093,9 +1093,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onMinimapPanTo(event: MouseEvent): void {
-    let x =
+    const x =
       event.offsetX - (this.dims.width - (this.graphDims.width + this.minimapOffsetX) / this.minimapScaleCoefficient);
-    let y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;
+    const y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;
 
     this.panTo(x * this.minimapScaleCoefficient, y * this.minimapScaleCoefficient);
     this.isMinimapPanning = true;

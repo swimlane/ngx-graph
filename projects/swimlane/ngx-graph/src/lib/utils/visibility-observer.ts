@@ -4,6 +4,7 @@ import { Output, EventEmitter, NgZone, Directive, ElementRef } from '@angular/co
  * Visibility Observer
  */
 @Directive({
+  // tslint:disable-next-line:directive-selector
   selector: 'visibility-observer'
 })
 export class VisibilityObserver {
