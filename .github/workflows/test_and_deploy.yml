@@ -25,14 +25,14 @@ jobs:
 
       - name: Test
         run: |
-          npm run ci
+          npm run ci --if-present
         env:
           CI: true
 
       - name: Prepare and deploy
         run: |
           npm run deploy-docs -- --name="Swimlane" --email="swimlane-devops@swimlane.com" --no-silent
-        if: ${{ github.ref == 'refs/heads/master' }}
+
         env:
           CI: true
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
