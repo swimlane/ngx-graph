@@ -67,6 +67,7 @@ export interface Matrix {
 })
 export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() nodes: Node[] = [];
+  @Input() newNodes: Node[] = [];
   @Input() clusters: ClusterNode[] = [];
   @Input() links: Edge[] = [];
   @Input() activeEntries: any[] = [];
@@ -112,6 +113,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
+  @ContentChild('newNodeTemplate') newNodeTemplate: TemplateRef<any>;
   @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
   @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
@@ -250,7 +252,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   ngOnChanges(changes: SimpleChanges): void {
     this.basicUpdate();
-
+    if (changes.newNodes) {
+      this.newNodes = [...changes.newNodes.currentValue];
+    }
     const { layout, layoutSettings, nodes, clusters, links } = changes;
     this.setLayout(this.layout);
     if (layoutSettings) {
@@ -861,28 +865,29 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const y = node.position.y - node.dimension.height / 2;
     node.transform = `translate(${x}, ${y})`;
 
-    for (const link of this.graph.edges) {
-      if (
-        link.target === node.id ||
-        link.source === node.id ||
-        (link.target as any).id === node.id ||
-        (link.source as any).id === node.id
-      ) {
-        if (this.layout && typeof this.layout !== 'string') {
-          const result = this.layout.updateEdge(this.graph, link);
-          const result$ = result instanceof Observable ? result : of(result);
-          this.graphSubscription.add(
-            result$.subscribe(graph => {
-              this.graph = graph;
-              this.redrawEdge(link);
-            })
-          );
+    if (this.draggingNode.id) {
+      for (const link of this.graph.edges) {
+        if (
+          link.target === node.id ||
+          link.source === node.id ||
+          (link.target as any).id === node.id ||
+          (link.source as any).id === node.id
+        ) {
+          if (this.layout && typeof this.layout !== 'string') {
+            const result = this.layout.updateEdge(this.graph, link);
+            const result$ = result instanceof Observable ? result : of(result);
+            this.graphSubscription.add(
+              result$.subscribe(graph => {
+                this.graph = graph;
+                this.redrawEdge(link);
+              })
+            );
+          }
         }
       }
+      this.redrawLines(false);
+      this.updateMinimap();
     }
-
-    this.redrawLines(false);
-    this.updateMinimap();
   }
 
   redrawEdge(edge: Edge) {

@@ -74,6 +74,22 @@
         </svg:g>
       </svg:g>
 
+      <!--New node template-->
+      <svg:g
+        #nodeElement
+        class="new-node"
+        *ngFor="let newNode of newNodes"
+        [attr.transform]="newNode.transform"
+        (mousedown)="onNodeMouseDown($event, newNode)"
+      >
+        <ng-container
+          *ngIf="newNodeTemplate"
+          [ngTemplateOutlet]="newNodeTemplate"
+          [ngTemplateOutletContext]="{ $implicit: newNode }"
+        ></ng-container>
+      </svg:g>
+      <!--End new node template-->
+
       <svg:g class="nodes">
         <svg:g
           #nodeElement
