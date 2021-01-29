@@ -251,7 +251,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
     this.basicUpdate();
     if (changes.newNodes) {
       this.newNodes = [...changes.newNodes.currentValue];
@@ -858,7 +857,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.layout.onDrag(node, event);
     }
 
-    console.log('dragging node', node);
     node.position.x += event.movementX / this.zoomLevel;
     node.position.y += event.movementY / this.zoomLevel;
 
