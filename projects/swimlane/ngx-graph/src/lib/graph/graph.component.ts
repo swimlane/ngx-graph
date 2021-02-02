@@ -105,6 +105,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() customColors: any;
   @Input() animations: boolean = true;
   @Output() select = new EventEmitter();
+  @Output() panningUpdate = new EventEmitter();
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -797,7 +798,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   pan(x: number, y: number, ignoreZoomLevel: boolean = false): void {
     const zoomLevel = ignoreZoomLevel ? 1 : this.zoomLevel;
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
-
     this.updateTransform();
   }
 
@@ -905,6 +905,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   updateTransform(): void {
     this.transform = toSVG(smoothMatrix(this.transformationMatrix, 100));
+    this.panningUpdate.emit({ x: this.transformationMatrix.e, y: this.transformationMatrix.f });
   }
 
   /**
@@ -1037,7 +1038,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       const movementY = clientY - this._touchLastY;
       this._touchLastX = clientX;
       this._touchLastY = clientY;
-
       this.pan(movementX, movementY);
     }
   }
@@ -1156,7 +1156,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       x = -this.minimapScaleCoefficient * x * this.zoomLevel;
       y = -this.minimapScaleCoefficient * y * this.zoomLevel;
     }
-
     switch (key) {
       case PanningAxis.Horizontal:
         this.pan(x, 0);
