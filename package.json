@@ -61,6 +61,7 @@
     "dagre": "^0.8.4",
     "deepmerge": "^4.2.2",
     "mdast": "^3.0.0",
+    "msagl-js": "0.0.6",
     "ngx-logger": "^4.0.8",
     "path": "^0.12.7",
     "process": "^0.11.10",
