@@ -308,6 +308,12 @@ The dagre cluster layout groups clustered nodes together into a rectangle
 ></ngx-graph>
 ```
 
+### MSAGL layout (Preview)
+
+```html { playground }
+<ngx-graph-msagl></ngx-graph-msagl>
+```
+
 ---
 
 ## Custom Layouts
