@@ -1,13 +1,7 @@
 import { Graph, Layout, Edge } from '@swimlane/ngx-graph';
-import {
-  GeomGraph,
-  SugiyamaLayoutSettings,
-  interpolateICurve,
-  LayeredLayout,
-  CancelToken,
-  LayerDirectionEnum
-} from 'msagl-js';
+import { GeomGraph, SugiyamaLayoutSettings, interpolateICurve, LayerDirectionEnum } from 'msagl-js';
 import { Rectangle } from 'msagl-js/dist/layoutPlatform/math/geometry/rectangle';
+import { layoutGraph } from 'msagl-js/dist/layoutPlatform/layout/driver';
 
 const DEFAULT_EDGE_NAME = '\x00';
 const EDGE_KEY_DELIM = '\x01';
@@ -15,12 +9,13 @@ const EDGE_KEY_DELIM = '\x01';
 export class MSAGLLayout implements Layout {
   public run(graph: Graph): Graph {
     const g = this.createGeomGraph(graph);
+
     const sl = new SugiyamaLayoutSettings();
     sl.layerDirection = LayerDirectionEnum.LR;
     sl.MinNodeHeight = 100;
     sl.MinNodeWidth = 100;
-    const ll = new LayeredLayout(g, sl, new CancelToken());
-    ll.run();
+
+    layoutGraph(g, null, () => sl);
 
     graph.edgeLabels = [];
 
