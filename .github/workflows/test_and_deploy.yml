@@ -16,13 +16,13 @@ jobs:
 
       - name: Build
         run: |
-          npm run build --if-present
+          npm run build --if-present --max-old-space-size=4080
         env:
           CI: true
 
       - name: Test
         run: |
-          npm run ci --if-present
+          npm run ci --if-present --max-old-space-size=4080
         env:
           CI: true
 
