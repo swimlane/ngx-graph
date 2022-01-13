@@ -5,5 +5,5 @@
   "lib": {
     "entryFile": "src/public_api.ts"
   },
-  "whitelistedNonPeerDependencies": ["."]
+  "allowedNonPeerDependencies": ["."]
 }
