@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.0.0
+
+- Chore; Upgrade to angular 13
+
 ## 8.0.0-rc.1
 
 - Breaking: Remove dependency on ngx-charts (removes the `legend` input) (#363)
