@@ -201,22 +201,20 @@ export class ColaForceDirectedLayout implements Layout {
         })
       );
 
-    this.outputGraph.clusters = internalGraph.groups.map(
-      (group, index): ClusterNode => {
-        const inputGroup = this.inputGraph.clusters[index];
-        return {
-          ...inputGroup,
-          dimension: {
-            width: group.bounds ? group.bounds.width() : 20,
-            height: group.bounds ? group.bounds.height() : 20
-          },
-          position: {
-            x: group.bounds ? group.bounds.x + group.bounds.width() / 2 : 0,
-            y: group.bounds ? group.bounds.y + group.bounds.height() / 2 : 0
-          }
-        };
-      }
-    );
+    this.outputGraph.clusters = internalGraph.groups.map((group, index): ClusterNode => {
+      const inputGroup = this.inputGraph.clusters[index];
+      return {
+        ...inputGroup,
+        dimension: {
+          width: group.bounds ? group.bounds.width() : 20,
+          height: group.bounds ? group.bounds.height() : 20
+        },
+        position: {
+          x: group.bounds ? group.bounds.x + group.bounds.width() / 2 : 0,
+          y: group.bounds ? group.bounds.y + group.bounds.height() / 2 : 0
+        }
+      };
+    });
     this.outputGraph.edgeLabels = this.outputGraph.edges;
     return this.outputGraph;
   }
