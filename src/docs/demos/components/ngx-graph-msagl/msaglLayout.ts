@@ -66,7 +66,7 @@ export class MSAGLLayout implements Layout {
     if (matchingEdgeLabel) {
       matchingEdgeLabel.points = edge.points;
     } else {
-      graph.edgeLabels.set(edgeLabelId, { points: edge.points });
+      graph.edgeLabels[edgeLabelId] = { points: edge.points };
     }
     return graph;
   }
