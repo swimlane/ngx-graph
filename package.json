@@ -17,7 +17,7 @@
     "build-docs": "cross-env NODE_ENV=production ng build --configuration production --no-aot --no-build-optimizer --base-href=\"/ngx-graph/\"",
     "predeploy-docs": "npm run build-docs",
     "deploy-docs": "angular-cli-ghpages --dir ./dist/ngxGraph",
-    "ci": "run-s prettier:ci",
+    "ci": "run-s lint prettier:ci",
     "preversion": "npm run ci",
     "package": "run-s build:lib:prod copy-files",
     "prepublish:lib": "npm run package",
