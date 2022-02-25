@@ -1,3 +1,4 @@
 {
-    "typescript.check.workspaceVersion": false
+  "typescript.check.workspaceVersion": false,
+  "cSpell.words": ["throttleable"]
 }
