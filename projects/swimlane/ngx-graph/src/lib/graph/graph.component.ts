@@ -109,6 +109,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
+  @Output() graphUpdated = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
@@ -700,6 +701,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         this.updateMidpointOnEdge(edge, edge.points);
       }
     });
+
+    this.graphUpdated.next(true);
   }
 
   /**
