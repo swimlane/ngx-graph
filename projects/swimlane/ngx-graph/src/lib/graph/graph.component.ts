@@ -318,6 +318,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   update(): void {
+    this.graphUpdated.next(false);
+
     this.basicUpdate();
     if (!this.curve) {
       this.curve = shape.curveBundle.beta(1);
