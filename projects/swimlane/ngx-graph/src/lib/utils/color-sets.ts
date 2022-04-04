@@ -1,4 +1,4 @@
-export let colorSets = [
+export const colorSets = [
   {
     name: 'vivid',
     selectable: true,
