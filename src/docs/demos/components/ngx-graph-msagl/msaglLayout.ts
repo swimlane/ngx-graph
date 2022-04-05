@@ -1,7 +1,17 @@
 import { Graph, Layout, Edge } from '@swimlane/ngx-graph';
-import { GeomGraph, SugiyamaLayoutSettings, interpolateICurve, LayerDirectionEnum } from 'msagl-js';
-import { Rectangle } from 'msagl-js/dist/layoutPlatform/math/geometry/rectangle';
-import { layoutGraph } from 'msagl-js/dist/layoutPlatform/layout/driver';
+import {
+  Node,
+  GeomGraph,
+  SugiyamaLayoutSettings,
+  interpolateICurve,
+  LayerDirectionEnum,
+  Size,
+  GeomNode,
+  CurveFactory,
+  layoutGraphWithSugiayma,
+  Point,
+  GeomEdge
+} from 'msagl-js';
 
 const DEFAULT_EDGE_NAME = '\x00';
 const EDGE_KEY_DELIM = '\x01';
@@ -10,20 +20,23 @@ export class MSAGLLayout implements Layout {
   public run(graph: Graph): Graph {
     const g = this.createGeomGraph(graph);
 
-    const sl = new SugiyamaLayoutSettings();
-    sl.layerDirection = LayerDirectionEnum.LR;
-    sl.MinNodeHeight = 100;
-    sl.MinNodeWidth = 100;
+    const ss = new SugiyamaLayoutSettings();
 
-    layoutGraph(g, null, () => sl);
+    ss.layerDirection = LayerDirectionEnum.LR;
+    ss.LayerSeparation = 150;
+    ss.MinNodeHeight = 100;
+    ss.MinNodeWidth = 100;
+
+    g.layoutSettings = ss;
+    layoutGraphWithSugiayma(g);
 
     graph.edgeLabels = [];
 
     for (const node of g.shallowNodes()) {
       const graphNode = graph.nodes.find(n => n.id === node.id);
       graphNode.position = {
-        x: (node as any).center.x_,
-        y: (node as any).center.y_
+        x: (node as any).center.x,
+        y: (node as any).center.y
       };
       graphNode.dimension = {
         width: graphNode.dimension.width,
@@ -44,10 +57,20 @@ export class MSAGLLayout implements Layout {
     return graph;
   }
 
+  public setNode(g: GeomGraph, id: string, width: number, height: number, center = new Point(0, 0)): GeomNode {
+    let node = g.graph.findNode(id);
+    if (node == null) {
+      g.graph.addNode((node = new Node(id)));
+    }
+    const geomNode = new GeomNode(node);
+    geomNode.boundaryCurve = CurveFactory.createRectangle(width, height, center);
+    return geomNode;
+  }
+
   public createGeomGraph(graph: Graph): GeomGraph {
-    const g = GeomGraph.mk('graph', Rectangle.mkEmpty());
+    const g = GeomGraph.mk('graph', new Size(0, 0));
     graph.nodes.forEach(n => {
-      g.setNode(n.id, { width: n.dimension.width, height: n.dimension.height });
+      this.setNode(g, n.id, n.dimension.width, n.dimension.height);
     });
 
     graph.edges.forEach(l => {
@@ -71,7 +94,7 @@ export class MSAGLLayout implements Layout {
     return graph;
   }
 
-  private getPointsFromGeoEdge(e): any {
+  private getPointsFromGeoEdge(e: GeomEdge): any {
     const result = [];
     const points = interpolateICurve(e.curve, e.curve.end.sub(e.curve.start).length / 20);
 
@@ -81,6 +104,11 @@ export class MSAGLLayout implements Layout {
         ['x']: points[i].x
       });
     }
+
+    result.push({
+      ['y']: e.targetArrowhead.tipPosition.y,
+      ['x']: e.targetArrowhead.tipPosition.x
+    });
 
     return result;
   }
