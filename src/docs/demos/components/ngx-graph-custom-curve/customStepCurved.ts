@@ -29,7 +29,8 @@ Step.prototype = {
         this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y);
         break;
       case 1:
-        this._point = 2; // proceed
+        this._point = 2;
+      // falls through
       default: {
         let xN;
         let yN;

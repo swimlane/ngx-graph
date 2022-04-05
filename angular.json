@@ -81,6 +81,12 @@
             "scripts": [],
             "assets": ["src/favicon.ico", "src/assets"]
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts"]
+          }
         }
       }
     },
@@ -98,6 +104,12 @@
             "production": {
               "devServerTarget": "ngxGraph:serve:production"
             }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["e2e/**/*.ts"]
           }
         }
       }
@@ -127,6 +139,12 @@
             "main": "projects/swimlane/ngx-graph/src/test.ts",
             "tsConfig": "projects/swimlane/ngx-graph/tsconfig.spec.json",
             "karmaConfig": "projects/swimlane/ngx-graph/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/swimlane/ngx-graph/**/*.ts"]
           }
         }
       }
