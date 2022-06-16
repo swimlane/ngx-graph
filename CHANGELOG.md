@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.0.1
+
+- Chore: Add rxjs 7 as a peer dependency
+- Chore: Bump msagl tp 0.0.51 and update msagl layout
+
 ## 8.0.0
 
 - Chore; Upgrade to angular 13
