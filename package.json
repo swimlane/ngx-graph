@@ -67,7 +67,7 @@
     "path": "^0.12.7",
     "process": "^0.11.10",
     "quick-lru": "^4.0.1",
-    "rxjs": "^6.5.4",
+    "rxjs": "^6.5.4 || ^7.4.0",
     "smoothscroll-polyfill": "^0.4.3",
     "throttleit": "^1.0.0",
     "transformation-matrix": "^1.15.3",
