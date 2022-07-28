@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.0.2
+
+- Chore: Add angular 14 as a peer dependency
+
 ## 8.0.1
 
 - Chore: Add rxjs 7 as a peer dependency
