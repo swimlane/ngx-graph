@@ -804,10 +804,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Pan to a fixed x/y
    *
    */
-  panTo(x: number, y: number): void {
-    if (x === null || x === undefined || isNaN(x) || y === null || y === undefined || isNaN(y)) {
-      return;
-    }
+  panTo(x: number | null, y: number | null): void {
+    x = isFinite(x) ? x : this.transformationMatrix.e;
+    y = isFinite(y) ? y : this.transformationMatrix.f;
 
     const panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
     const panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
