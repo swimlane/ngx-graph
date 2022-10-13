@@ -1143,8 +1143,17 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (!node) {
       return;
     }
-
-    this.panTo(node.position.x, node.position.y);
+    switch (this.panningAxis) {
+      case PanningAxis.Both:
+        this.panTo(node.position.x, node.position.y);
+        break;
+      case PanningAxis.Horizontal:
+        this.panTo(node.position.x, null);
+        break;
+      case PanningAxis.Vertical:
+        this.panTo(null, node.position.y);
+        break;
+    }
   }
 
   private panWithConstraints(key: string, event: MouseEvent) {
