@@ -63,7 +63,7 @@
     "json-schema": "^0.4.0",
     "jsprim": "^1.4.2",
     "mdast": "^3.0.0",
-    "mermaid": "^8.13.8",
+    "mermaid": "^9.1.2",
     "msagl-js": "0.0.51",
     "ngx-logger": "^4.0.8",
     "path": "^0.12.7",
