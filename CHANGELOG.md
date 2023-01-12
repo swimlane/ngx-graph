@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.0.3
+
+- Chore: Bump d3 dependencies (#477)
+- Fix an issue where fixing a node position would not work (#463)
+
 ## 8.0.2
 
 - Chore: Add angular 14 as a peer dependency
