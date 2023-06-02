@@ -36,7 +36,6 @@
     "rxjs": "6.x || 7.x"
   },
   "dependencies": {
-    "cytoscape": "^3.25.0",
     "d3-dispatch": "^1.0.3",
     "d3-ease": "^1.0.5",
     "d3-force": "^1.1.0",
@@ -46,8 +45,10 @@
     "d3-timer": "^1.0.7",
     "d3-transition": "^3.0.1",
     "dagre": "^0.8.4",
+    "elkjs": "^0.8.2",
     "transformation-matrix": "^1.15.3",
     "tslib": "^2.0.0",
-    "webcola": "^3.3.8"
+    "webcola": "^3.3.8",
+    "web-worker": "^1.2.0"
   }
 }
