@@ -17,7 +17,6 @@ export class ElkLayout implements Layout {
 
   run(graph: Graph): Observable<Graph> {
     this.inputGraph = graph;
-    console.log('input', graph);
     if (!this.inputGraph.clusters) {
       this.inputGraph.clusters = [];
     }
