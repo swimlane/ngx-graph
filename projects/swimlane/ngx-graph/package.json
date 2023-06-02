@@ -36,6 +36,7 @@
     "rxjs": "6.x || 7.x"
   },
   "dependencies": {
+    "cytoscape": "^3.25.0",
     "d3-dispatch": "^1.0.3",
     "d3-ease": "^1.0.5",
     "d3-force": "^1.1.0",
