@@ -44,6 +44,7 @@ export class DagreClusterLayout implements Layout {
         }
       };
     };
+
     graph.clusters = (graph.clusters || []).map(dagreToOutput);
     graph.nodes = graph.nodes.map(dagreToOutput);
 

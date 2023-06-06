@@ -60,6 +60,67 @@ The component has a `layoutSettings` inputs, through which you can pass an objec
 ></ngx-graph>
 ```
 
+## Elk Compound Nodes
+
+```html { playground }
+<ngx-graph
+  [view]="[500, 300]"
+  layout="elk"
+  [links]="[
+    {
+      id: 'a',
+      source: 'group_1',
+      target: 'group_2'
+    },
+    {
+      id: 'b',
+      source: 'node_4',
+      target: 'node_0'
+    }
+  ]"
+  [nodes]="[
+  {
+    id: 'group_1',
+    label: 'group 1'
+  },
+  {
+    id: 'group_2',
+    label: 'group 2'
+  },
+  {
+    id: 'node_0',
+    label: 'node 0'
+  },
+  {
+    id: 'node_1',
+    label: 'node 1'
+  },
+  {
+    id: 'node_2',
+    label: 'node 2'
+  },
+  {
+    id: 'node_3',
+    label: 'node 3'
+  },
+  {
+    id: 'node_4',
+    label: 'node 4'
+  }
+  ]"
+  [compoundNodes]="[
+  {
+    id: 'group_1',
+    childNodeIds: ['node_0', 'node_1', 'node_2']
+  },
+  {
+    id: 'group_2',
+    childNodeIds: ['node_4']
+  }
+  ]"
+></ngx-graph>
+```
+
 ## Dagre
 
 ```html { playground }

@@ -21,3 +21,7 @@ export interface Node {
 export interface ClusterNode extends Node {
   childNodeIds?: string[];
 }
+
+export interface CompoundNode extends Node {
+  childNodeIds?: string[];
+}
