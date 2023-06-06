@@ -92,7 +92,7 @@ export class ElkLayout implements Layout {
           ...node,
           layoutOptions: {
             'elk.padding': `[left=${nodePadding}, top=${nodePadding}, right=${nodePadding}, bottom=${nodePadding}]`,
-            'spacing.nodeNodeBetweenLayers': nodePadding, // horizonal spacing between nodes
+            'spacing.nodeNodeBetweenLayers': nodePadding, // horizontal spacing between nodes
             'spacing.nodeNode': nodePadding, // vertical spacing between nodes
             ...(node.layoutOptions || {})
           },
