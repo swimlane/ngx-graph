@@ -70,12 +70,12 @@ The component has a `layoutSettings` inputs, through which you can pass an objec
     {
       id: 'a',
       source: 'group_1',
-      target: 'group_2'
+      target: 'node_4'
     },
     {
       id: 'b',
-      source: 'node_4',
-      target: 'node_0'
+      source: 'node_3',
+      target: 'group_2'
     }
   ]"
   [nodes]="[

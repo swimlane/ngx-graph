@@ -132,7 +132,7 @@ export class ElkLayout implements Layout {
         ...node,
         position: {
           x: node.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-          y: node.y
+          y: node.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
         },
         dimension: {
           width: node.width || 20,
