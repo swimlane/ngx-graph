@@ -13,6 +13,7 @@ jobs:
 
       - name: Install
         uses: bahmutov/npm-install@v1
+        run: npm install --legacy-peer-deps
 
       - name: Build
         run: |
