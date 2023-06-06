@@ -2,10 +2,9 @@ import { Layout } from '../../models/layout.model';
 import { Graph } from '../../models/graph.model';
 import ELK, { ElkNode, LayoutOptions, ElkExtendedEdge } from 'elkjs/lib/elk.bundled';
 import { Edge } from '../../models/edge.model';
-import { Node, NodeDimension } from '../../models/node.model';
+import { Node, NodePosition } from '../../models/node.model';
 import { Observable, Subject } from 'rxjs';
 import { ViewDimensions } from '../../utils/view-dimensions.helper';
-import { NodePosition } from '../../models';
 
 export interface ElkLayoutSettings {
   properties?: LayoutOptions;
