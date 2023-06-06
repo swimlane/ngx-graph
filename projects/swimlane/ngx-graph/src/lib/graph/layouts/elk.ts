@@ -16,11 +16,13 @@ export class ElkLayout implements Layout {
     // https://www.eclipse.org/elk/reference/options.html
     properties: {
       'elk.algorithm': 'layered',
-      'elk.spacing.nodeNode': '100',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
       'elk.padding': '70',
+      'spacing.componentComponent': '70',
+      spacing: '70',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
       'elk.spacing.edgeNode': '100',
-      'elk.edgeRouting': 'SPLINES',
+      'elk.spacing.nodeNode': '100',
+      'org.eclipse.elk.edgeRouting': 'SPLINES',
       'elk.insideSelfLoops.activate': 'true',
       'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
       'elk.childAreaHeight': '300',
@@ -29,7 +31,12 @@ export class ElkLayout implements Layout {
       'elk.nodeLabels.placement': 'INSIDE V_CENTER H_RIGHT',
       'elk.alg.layered.options.NodePlacementStrategy': 'NETWORK_SIMPLEX',
       'elk.nodeSize.constraints': 'NODE_LABELS',
-      'elk.layered.spacing': '70'
+      'elk.layered.spacing': '70',
+      'org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED',
+      'org.eclipse.elk.layered.cycleBreaking.strategy': 'DEPTH_FIRST',
+      'org.eclipse.elk.separateConnectedComponents': 'true',
+      'org.eclipse.elk.spacing.componentComponent': '40.0',
+      'org.eclipse.elk.layered.spacing.baseValue': '20.0'
     },
     viewDimensions: {
       width: 600,
@@ -95,6 +102,7 @@ export class ElkLayout implements Layout {
           ...node,
           layoutOptions: {
             'elk.padding': `[left=${nodePadding}, top=${nodePadding}, right=${nodePadding}, bottom=${nodePadding}]`,
+            'spacing.nodeNodeBetweenLayers': nodePadding,
             ...(node.layoutOptions || {})
           },
           children: []
