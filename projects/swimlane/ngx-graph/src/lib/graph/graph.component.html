@@ -72,6 +72,7 @@
           [id]="node.id"
           [attr.transform]="node.transform"
           (click)="onClick(node)"
+          (mousedown)="onNodeMouseDown($event, node)"
         >
           <ng-container
             *ngIf="nodeTemplate"

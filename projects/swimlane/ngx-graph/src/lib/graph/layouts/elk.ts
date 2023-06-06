@@ -240,8 +240,25 @@ export class ElkLayout implements Layout {
     return result;
   }
 
-  updateEdge(graph: Graph, edge: Edge): Observable<Graph> {
-    return this.outputGraph$.asObservable();
+  updateEdge(graph: Graph, edge: Edge): Graph {
+    const sourceNode = this.nodeMap.get(edge.source);
+    const targetNode = this.nodeMap.get(edge.target);
+
+    const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
+    const startingPoint = {
+      x: sourceNode.position.x,
+      y: sourceNode.position.y - dir * (sourceNode.dimension.height / 2)
+    };
+
+    // TODO: preserve bezier
+
+    const endingPoint = {
+      x: targetNode.position.x,
+      y: targetNode.position.y + dir * (targetNode.dimension.height / 2)
+    };
+
+    edge.points = [startingPoint, endingPoint];
+    return graph;
   }
 
   createGraph(graph: any): Promise<ElkNode> {
