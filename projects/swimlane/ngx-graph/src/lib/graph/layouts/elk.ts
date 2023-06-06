@@ -2,9 +2,10 @@ import { Layout } from '../../models/layout.model';
 import { Graph } from '../../models/graph.model';
 import ELK, { ElkNode, LayoutOptions, ElkExtendedEdge } from 'elkjs/lib/elk.bundled';
 import { Edge } from '../../models/edge.model';
-import { Node } from '../../models/node.model';
+import { Node, NodeDimension } from '../../models/node.model';
 import { Observable, Subject } from 'rxjs';
 import { ViewDimensions } from '../../utils/view-dimensions.helper';
+import { NodePosition } from '../../models';
 
 export interface ElkLayoutSettings {
   properties?: LayoutOptions;
@@ -125,10 +126,10 @@ export class ElkLayout implements Layout {
     return this.outputGraph;
   }
 
-  positionNodeRelativeToParent(dimensions: { x: number; y: number }, parent: Node & ElkNode) {
+  positionNodeRelativeToParent(position: NodePosition, parent: Node & ElkNode): NodePosition {
     return {
-      x: dimensions.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-      y: dimensions.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
+      x: position.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
+      y: position.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
     };
   }
 
