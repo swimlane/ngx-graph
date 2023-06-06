@@ -69,55 +69,74 @@ The component has a `layoutSettings` inputs, through which you can pass an objec
   [links]="[
     {
       id: 'a',
-      source: 'group_1',
-      target: 'node_4'
+      source: '1',
+      target: '2'
     },
     {
       id: 'b',
-      source: 'node_3',
-      target: 'group_2'
+      source: '2',
+      target: '3'
+    },
+    {
+      id: 'c',
+      source: '2.1',
+      target: '2.2'
+    },
+    {
+      id: 'd',
+      source: '2.1.1',
+      target: '2.1.2'
+    },
+    {
+      id: 'e',
+      source: '2.1.1',
+      target: '2.1.3'
     }
   ]"
   [nodes]="[
   {
-    id: 'group_1',
-    label: 'group 1'
+    id: '1',
+    label: '1'
   },
   {
-    id: 'group_2',
-    label: 'group 2'
+    id: '2',
+    label: '2'
   },
   {
-    id: 'node_0',
-    label: 'node 0'
+    id: '2.1',
+    label: '2.1'
   },
   {
-    id: 'node_1',
-    label: 'node 1'
+    id: '2.1.1',
+    label: '2.1.1'
   },
   {
-    id: 'node_2',
-    label: 'node 2'
+    id: '2.1.2',
+    label: '2.1.2'
   },
   {
-    id: 'node_3',
-    label: 'node 3'
+    id: '2.1.3',
+    label: '2.1.3'
   },
   {
-    id: 'node_4',
-    label: 'node 4'
+    id: '2.2',
+    label: '2.2'
+  },
+  {
+    id: '3',
+    label: '3'
   }
-  ]"
+ ]"
   [compoundNodes]="[
   {
-    id: 'group_1',
-    childNodeIds: ['node_0', 'node_1', 'node_2']
+    id: '2',
+    childNodeIds: ['2.1', '2.2']
   },
   {
-    id: 'group_2',
-    childNodeIds: ['node_4']
+    id: '2.1',
+    childNodeIds: ['2.1.1', '2.1.2', '2.1.3']
   }
-  ]"
+]"
 ></ngx-graph>
 ```
 
