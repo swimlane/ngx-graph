@@ -1,6 +1,6 @@
 import { Layout } from '../../models/layout.model';
 import { Graph } from '../../models/graph.model';
-import ELK, { ElkNode, LayoutOptions } from 'elkjs/lib/elk.bundled';
+import ELK, { ElkNode, LayoutOptions, ElkExtendedEdge } from 'elkjs/lib/elk.bundled';
 import { Edge } from '../../models/edge.model';
 import { Node } from '../../models/node.model';
 import { Observable, Subject } from 'rxjs';
@@ -121,21 +121,47 @@ export class ElkLayout implements Layout {
   internalGraphToOutputGraph(internalGraph: ElkNode): Graph {
     this.outputGraph.compoundNodes = this.compoundNodesFromTree(internalGraph, []);
     this.outputGraph.nodes = this.nodesFromTree(internalGraph, []);
-    this.outputGraph.edges = internalGraph.edges.map(edge => {
+    this.outputGraph.edges = this.edgesFromTree(internalGraph.edges);
+    this.outputGraph.edgeLabels = this.outputGraph.edges;
+    return this.outputGraph;
+  }
+
+  edgesFromTree(edges: Array<ElkExtendedEdge>): Array<Edge> {
+    return edges.map(edge => {
+      const parent = this.nodeMap.get((edge as any).container);
+      let points = [];
+      if (parent) {
+        points = [
+          {
+            x: edge.sections[0].startPoint.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
+            y: edge.sections[0].startPoint.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
+          },
+          ...(edge.sections[0].bendPoints
+            ? edge.sections[0].bendPoints.map(bend => ({
+                x: bend.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
+                y: bend.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
+              }))
+            : []),
+          {
+            x: edge.sections[0].endPoint.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
+            y: edge.sections[0].endPoint.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
+          }
+        ];
+      } else {
+        points = [
+          edge.sections[0].startPoint,
+          ...(edge.sections[0].bendPoints ? edge.sections[0].bendPoints : []),
+          edge.sections[0].endPoint
+        ];
+      }
       return {
         id: edge.id,
         sections: edge.sections,
         source: edge.sources[0],
         target: edge.targets[0],
-        points: [
-          edge.sections[0].startPoint,
-          ...(edge.sections[0].bendPoints ? edge.sections[0].bendPoints : []),
-          edge.sections[0].endPoint
-        ]
+        points
       };
     });
-    this.outputGraph.edgeLabels = this.outputGraph.edges;
-    return this.outputGraph;
   }
 
   nodesFromTree(node: ElkNode & Node, result: Array<ElkNode> = []): Array<ElkNode> {
