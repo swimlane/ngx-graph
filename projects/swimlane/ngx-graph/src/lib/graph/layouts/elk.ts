@@ -125,26 +125,44 @@ export class ElkLayout implements Layout {
     return this.outputGraph;
   }
 
+  positionNodeRelativeToParent(dimensions: { x: number; y: number }, parent: Node & ElkNode) {
+    return {
+      x: dimensions.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
+      y: dimensions.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
+    };
+  }
+
   edgesFromTree(edges: Array<ElkExtendedEdge>): Array<Edge> {
     return edges.map(edge => {
       const parent = this.nodeMap.get((edge as any).container);
       let points = [];
       if (parent) {
         points = [
-          {
-            x: edge.sections[0].startPoint.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-            y: edge.sections[0].startPoint.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
-          },
+          this.positionNodeRelativeToParent(
+            {
+              x: edge.sections[0].startPoint.x,
+              y: edge.sections[0].startPoint.y
+            },
+            parent
+          ),
           ...(edge.sections[0].bendPoints
-            ? edge.sections[0].bendPoints.map(bend => ({
-                x: bend.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-                y: bend.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
-              }))
+            ? edge.sections[0].bendPoints.map(bend =>
+                this.positionNodeRelativeToParent(
+                  {
+                    x: bend.x,
+                    y: bend.y
+                  },
+                  parent
+                )
+              )
             : []),
-          {
-            x: edge.sections[0].endPoint.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-            y: edge.sections[0].endPoint.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
-          }
+          this.positionNodeRelativeToParent(
+            {
+              x: edge.sections[0].endPoint.x,
+              y: edge.sections[0].endPoint.y
+            },
+            parent
+          )
         ];
       } else {
         points = [
@@ -168,10 +186,13 @@ export class ElkLayout implements Layout {
     if (!node.children.length) {
       const modifiedNode = {
         ...node,
-        position: {
-          x: node.x + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-          y: node.y + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
-        },
+        position: this.positionNodeRelativeToParent(
+          {
+            x: node.x,
+            y: node.y
+          },
+          parent
+        ),
         dimension: {
           width: node.width || 20,
           height: node.height || 20
@@ -195,10 +216,13 @@ export class ElkLayout implements Layout {
       const compoundNode = {
         childNodeIds: node.children.map(child => child.id),
         ...node,
-        position: {
-          x: node.x + node.width / 2 + (parent ? parent.position.x - parent.dimension.width / 2 : 0),
-          y: node.y + node.height / 2 + (parent ? parent.position.y - parent.dimension.height / 2 : 0)
-        },
+        position: this.positionNodeRelativeToParent(
+          {
+            x: node.x + node.width / 2,
+            y: node.y + node.height / 2
+          },
+          parent
+        ),
         dimension: {
           width: node.width || 20,
           height: node.height || 20
