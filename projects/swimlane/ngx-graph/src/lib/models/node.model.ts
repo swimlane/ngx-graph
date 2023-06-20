@@ -16,8 +16,14 @@ export interface Node {
   label?: string;
   data?: any;
   meta?: any;
+  layoutOptions?: any;
+  parentId?: string;
 }
 
 export interface ClusterNode extends Node {
+  childNodeIds?: string[];
+}
+
+export interface CompoundNode extends Node {
   childNodeIds?: string[];
 }

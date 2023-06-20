@@ -63,6 +63,35 @@
         </svg:g>
       </svg:g>
 
+      <svg:g class="compound-nodes">
+        <svg:g
+          #nodeElement
+          *ngFor="let node of graph.compoundNodes; trackBy: trackNodeBy"
+          class="node-group"
+          [class.old-node]="animate && oldCompoundNodes.has(node.id)"
+          [id]="node.id"
+          [attr.transform]="node.transform"
+          (click)="onClick(node)"
+          (mousedown)="onNodeMouseDown($event, node)"
+        >
+          <ng-container
+            *ngIf="nodeTemplate"
+            [ngTemplateOutlet]="nodeTemplate"
+            [ngTemplateOutletContext]="{ $implicit: node }"
+          ></ng-container>
+          <svg:g *ngIf="!nodeTemplate" class="node compound-node">
+            <svg:rect
+              [attr.width]="node.dimension.width"
+              [attr.height]="node.dimension.height"
+              [attr.fill]="node.data?.color"
+            />
+            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
+              {{ node.label }}
+            </svg:text>
+          </svg:g>
+        </svg:g>
+      </svg:g>
+
       <svg:g class="links">
         <svg:g #linkElement *ngFor="let link of graph.edges; trackBy: trackLinkBy" class="link-group" [id]="link.id">
           <ng-container

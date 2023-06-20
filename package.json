@@ -60,6 +60,7 @@
     "d3-transition": "^3.0.1",
     "dagre": "^0.8.5",
     "deepmerge": "^4.2.2",
+    "elkjs": "^0.8.2",
     "json-schema": "^0.4.0",
     "jsprim": "^1.4.2",
     "mdast": "^3.0.0",
@@ -77,6 +78,7 @@
     "url-resolve": "^1.0.0",
     "vfile": "^4.0.0",
     "vfile-reporter": "^5.1.1",
+    "web-worker": "^1.2.0",
     "webcola": "^3.3.8",
     "zone.js": "~0.11.4"
   },

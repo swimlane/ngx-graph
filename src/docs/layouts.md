@@ -3,6 +3,143 @@
 ngx-graph provides different types of built-in graph layouts, as well as the option to define your own custom layout.
 The component has a `layoutSettings` inputs, through which you can pass an object with the layout-speciffic options.
 
+## Elk
+
+```html { playground }
+<ngx-graph
+  [view]="[500, 300]"
+  layout="elk"
+  [links]="[
+    {
+      id: 'a',
+      source: '1',
+      target: '2'
+    }, {
+      id: 'b',
+      source: '1',
+      target: '3'
+    }, {
+      id: 'c',
+      source: '3',
+      target: '4'
+    }, {
+      id: 'd',
+      source: '3',
+      target: '5'
+    }, {
+      id: 'e',
+      source: '4',
+      target: '5'
+    }, {
+      id: 'f',
+      source: '2',
+      target: '6'
+    }
+  ]"
+  [nodes]="[
+    {
+      id: '1',
+      label: 'Node A'
+    }, {
+      id: '2',
+      label: 'Node B'
+    }, {
+      id: '3',
+      label: 'Node C'
+    }, {
+      id: '4',
+      label: 'Node D'
+    }, {
+      id: '5',
+      label: 'Node E'
+    }, {
+      id: '6',
+      label: 'Node F'
+    }
+  ]"
+></ngx-graph>
+```
+
+## Elk Compound Nodes
+
+```html { playground }
+<ngx-graph
+  [view]="[500, 300]"
+  layout="elk"
+  [links]="[
+    {
+      id: 'a',
+      source: '1',
+      target: '2'
+    },
+    {
+      id: 'b',
+      source: '2',
+      target: '3'
+    },
+    {
+      id: 'c',
+      source: '2.1',
+      target: '2.2'
+    },
+    {
+      id: 'd',
+      source: '2.1.1',
+      target: '2.1.2'
+    },
+    {
+      id: 'e',
+      source: '2.1.1',
+      target: '2.1.3'
+    }
+  ]"
+  [nodes]="[
+  {
+    id: '1',
+    label: '1'
+  },
+  {
+    id: '2',
+    label: '2'
+  },
+  {
+    id: '2.1',
+    label: '2.1'
+  },
+  {
+    id: '2.1.1',
+    label: '2.1.1'
+  },
+  {
+    id: '2.1.2',
+    label: '2.1.2'
+  },
+  {
+    id: '2.1.3',
+    label: '2.1.3'
+  },
+  {
+    id: '2.2',
+    label: '2.2'
+  },
+  {
+    id: '3',
+    label: '3'
+  }
+ ]"
+  [compoundNodes]="[
+  {
+    id: '2',
+    childNodeIds: ['2.1', '2.2']
+  },
+  {
+    id: '2.1',
+    childNodeIds: ['2.1.1', '2.1.2', '2.1.3']
+  }
+]"
+></ngx-graph>
+```
+
 ## Dagre
 
 ```html { playground }
