@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.0.4
+
+- Chore: Add angular 15 as a peer dependency
+
 ## 8.0.3
 
 - Chore: Bump d3 dependencies (#477)
