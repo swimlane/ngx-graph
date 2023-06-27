@@ -45,10 +45,8 @@
     "d3-timer": "^1.0.7",
     "d3-transition": "^3.0.1",
     "dagre": "^0.8.4",
-    "elkjs": "^0.8.2",
     "transformation-matrix": "^1.15.3",
     "tslib": "^2.0.0",
-    "webcola": "^3.3.8",
-    "web-worker": "^1.2.0"
+    "webcola": "^3.3.8"
   }
 }
