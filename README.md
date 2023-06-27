@@ -252,6 +252,40 @@ https://swimlane.github.io/ngx-graph/
 ];
 ```
 
+## Building ngx-graph
+
+To get started with development, clone a fork of the repository and run `npm install --legacy-peer-deps`.
+
+Run `npm run build:lib` to build ngx-graph. This must be done prior to building the demo.
+
+## Development server
+
+Run `npm run start` to serve the demo at `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+
+## Building
+
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+
+## Running tests
+
+- Run `npm run test` to execute the linter
+
+## Release
+
+- Checkout master (`git checkout master`)
+- Pull master (`git pull`)
+- Refresh node modules (`npm ci`)
+- Run tests (`npm test`)
+- Examine log to determine next version (X.Y.Z)
+- Run `git checkout -b release/X.Y.Z`
+- Update version in `projects/swimlane/ngx-graph/package.json`.
+- Update changelog in `projects/swimlane/ngx-graph/CHANGELOG.md`
+- Run `git commit -am "(release): X.Y.Z"`
+- Run `git tag X.Y.Z`
+- Run `git push origin HEAD --tags`
+- Run `npm run publish:lib`
+- Submit PR
+
 ## Credits
 
 `ngx-graph` is a [Swimlane](http://swimlane.com) open-source project; we believe in giving back to the open-source community by sharing some of the projects we build for our application. Swimlane is an automated cyber security operations and incident response platform that enables cyber security teams to leverage threat intelligence, speed up incident response and automate security operations.

@@ -5,15 +5,13 @@ import { DagreClusterLayout } from './dagreCluster';
 import { DagreNodesOnlyLayout } from './dagreNodesOnly';
 import { D3ForceDirectedLayout } from './d3ForceDirected';
 import { ColaForceDirectedLayout } from './colaForceDirected';
-import { ElkLayout } from './elk';
 
 const layouts = {
   dagre: DagreLayout,
   dagreCluster: DagreClusterLayout,
   dagreNodesOnly: DagreNodesOnlyLayout,
   d3ForceDirected: D3ForceDirectedLayout,
-  colaForceDirected: ColaForceDirectedLayout,
-  elk: ElkLayout
+  colaForceDirected: ColaForceDirectedLayout
 };
 
 @Injectable()
