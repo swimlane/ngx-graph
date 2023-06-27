@@ -1,4 +1,5 @@
-import packageInfo from '../../projects/swimlane/ngx-graph/package.json';
+// eslint-disable-next-line
+const packageVersion = require('../../projects/swimlane/ngx-graph/package.json').version;
 
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build ---prod` replaces `environment.ts` with `environment.prod.ts`.
@@ -6,7 +7,7 @@ import packageInfo from '../../projects/swimlane/ngx-graph/package.json';
 
 export const environment = {
   production: false,
-  version: packageInfo.version
+  version: packageVersion
 };
 
 /*
