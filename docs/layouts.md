@@ -1,7 +1,7 @@
 # Layouts
 
 ngx-graph provides different types of built-in graph layouts, as well as the option to define your own custom layout.
-The component has a `layoutSettings` inputs, through which you can pass an object with the layout-speciffic options.
+The component has a `layoutSettings` inputs, through which you can pass an object with the layout-specific options.
 
 ## Dagre
 
