@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.1.0
+
+- Feature: Support Elk Compound Nodes (#502) (#506)
+- Bug: Fix issues with the build (#507)
+
 ## 8.0.3
 
 - Chore: Bump d3 dependencies (#477)
