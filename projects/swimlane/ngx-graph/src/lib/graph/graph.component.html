@@ -46,7 +46,7 @@
           (click)="onClick(node)"
         >
           <ng-container
-            *ngIf="clusterTemplate"
+            *ngIf="clusterTemplate && !node.hidden"
             [ngTemplateOutlet]="clusterTemplate"
             [ngTemplateOutletContext]="{ $implicit: node }"
           ></ng-container>
@@ -75,7 +75,7 @@
           (mousedown)="onNodeMouseDown($event, node)"
         >
           <ng-container
-            *ngIf="nodeTemplate"
+            *ngIf="nodeTemplate && !node.hidden"
             [ngTemplateOutlet]="nodeTemplate"
             [ngTemplateOutletContext]="{ $implicit: node }"
           ></ng-container>
@@ -115,7 +115,7 @@
           (mousedown)="onNodeMouseDown($event, node)"
         >
           <ng-container
-            *ngIf="nodeTemplate"
+            *ngIf="nodeTemplate && !node.hidden"
             [ngTemplateOutlet]="nodeTemplate"
             [ngTemplateOutletContext]="{ $implicit: node }"
           ></ng-container>

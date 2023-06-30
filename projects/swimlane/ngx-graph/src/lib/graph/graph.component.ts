@@ -104,6 +104,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() scheme: any = 'cool';
   @Input() customColors: any;
   @Input() animations: boolean = true;
+  @Input() deferDisplayUntilPosition: boolean = false;
   @Output() select = new EventEmitter();
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
@@ -368,6 +369,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           x: 0,
           y: 0
         };
+        if (this.deferDisplayUntilPosition) {
+          n.hidden = true;
+        }
       }
 
       n.data = n.data ? n.data : {};
@@ -435,6 +439,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      if (this.deferDisplayUntilPosition) {
+        n.hidden = false;
+      }
       oldNodes.add(n.id);
     });
 
