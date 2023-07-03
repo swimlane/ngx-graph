@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.2.0
+
+- Feature: Update Angular 16 as a peer dependency (#499)
+- Feature: Use `deferDisplayUntilPosition` Input to display nodes after position returned by layout (#509)
+
 ## 8.1.0
 
 - Feature: Support Elk Compound Nodes (#502) (#506)
@@ -8,7 +13,7 @@
 ## 8.0.3
 
 - Chore: Bump d3 dependencies (#477)
-- Fix an issue where fixing a node position would not work (#463)
+- Bug: Fix an issue where fixing a node position would not work (#463)
 
 ## 8.0.2
 
