@@ -456,6 +456,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      if (this.deferDisplayUntilPosition) {
+        n.hidden = false;
+      }
       oldClusters.add(n.id);
     });
 
@@ -467,6 +470,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      if (this.deferDisplayUntilPosition) {
+        n.hidden = false;
+      }
       oldCompoundNodes.add(n.id);
     });
 
