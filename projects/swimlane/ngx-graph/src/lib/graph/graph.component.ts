@@ -1210,33 +1210,53 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
-      let _firstX = null;
-      let _secondX = null;
-      let _firstY = null;
-      let _secondY = null;
-      const dirRight = (this.layout as Layout).settings?.properties['elk.direction'] === 'RIGHT';
-      const hasBend = dirRight ? points.some(p => p.y !== points[0].y) : points.some(p => p.x !== points[0].x);
-
-      if (hasBend) {
-        // getting the last two points
-        _firstX = points[points.length - 1];
-        _secondX = points[points.length - 2];
-        _firstY = points[points.length - 1];
-        _secondY = points[points.length - 2];
+      // Checking if the current layout is Elk
+      if ((this.layout as Layout)?.settings?.properties?.['elk.direction']) {
+        this._calcMidPointElk(edge, points);
       } else {
-        if (dirRight) {
-          _firstX = points[0];
-          _secondX = points[points.length - 1];
-          _firstY = points[points.length / 2];
-          _secondY = points[points.length / 2 - 1];
-        } else {
-          _firstX = points[points.length / 2];
-          _secondX = points[points.length / 2 - 1];
-          _firstY = points[0];
-          _secondY = points[points.length - 1];
-        }
+        const _first = points[points.length / 2];
+        const _second = points[points.length / 2 - 1];
+        edge.midPoint = {
+          x: (_first.x + _second.x) / 2,
+          y: (_first.y + _second.y) / 2
+        };
       }
     }
+  }
+
+  private _calcMidPointElk(edge: Edge, points: any): void {
+    let _firstX = null;
+    let _secondX = null;
+    let _firstY = null;
+    let _secondY = null;
+    const orientation = (this.layout as Layout).settings?.properties['elk.direction'];
+    const hasBend =
+      orientation === 'RIGHT' ? points.some(p => p.y !== points[0].y) : points.some(p => p.x !== points[0].x);
+
+    if (hasBend) {
+      // getting the last two points
+      _firstX = points[points.length - 1];
+      _secondX = points[points.length - 2];
+      _firstY = points[points.length - 1];
+      _secondY = points[points.length - 2];
+    } else {
+      if (orientation === 'RIGHT') {
+        _firstX = points[0];
+        _secondX = points[points.length - 1];
+        _firstY = points[points.length / 2];
+        _secondY = points[points.length / 2 - 1];
+      } else {
+        _firstX = points[points.length / 2];
+        _secondX = points[points.length / 2 - 1];
+        _firstY = points[0];
+        _secondY = points[points.length - 1];
+      }
+    }
+
+    edge.midPoint = {
+      x: (_firstX.x + _secondX.x) / 2,
+      y: (_firstY.y + _secondY.y) / 2
+    };
   }
 
   public basicUpdate(): void {
