@@ -1210,12 +1210,32 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (points.length % 2 === 1) {
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
-      const _first = points[points.length / 2];
-      const _second = points[points.length / 2 - 1];
-      edge.midPoint = {
-        x: (_first.x + _second.x) / 2,
-        y: (_first.y + _second.y) / 2
-      };
+      let _firstX = null;
+      let _secondX = null;
+      let _firstY = null;
+      let _secondY = null;
+      const dirRight = (this.layout as Layout).settings?.properties['elk.direction'] === 'RIGHT';
+      const hasBend = dirRight ? points.some(p => p.y !== points[0].y) : points.some(p => p.x !== points[0].x);
+
+      if (hasBend) {
+        // getting the last two points
+        _firstX = points[points.length - 1];
+        _secondX = points[points.length - 2];
+        _firstY = points[points.length - 1];
+        _secondY = points[points.length - 2];
+      } else {
+        if (dirRight) {
+          _firstX = points[0];
+          _secondX = points[points.length - 1];
+          _firstY = points[points.length / 2];
+          _secondY = points[points.length / 2 - 1];
+        } else {
+          _firstX = points[points.length / 2];
+          _secondX = points[points.length / 2 - 1];
+          _firstY = points[0];
+          _secondY = points[points.length - 1];
+        }
+      }
     }
   }
 
