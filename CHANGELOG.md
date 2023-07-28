@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.2.2
+
+- Bug: Getting right values for edge midPoints (#511)
+
 ## 8.2.1
 
 - Bug: When using `deferDisplayUntilPosition` compound nodes and clusters may not be displayed (#511)
