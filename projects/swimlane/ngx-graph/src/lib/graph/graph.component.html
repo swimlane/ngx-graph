@@ -1,5 +1,5 @@
 <div
-  class="ngx-charts-outer"
+  class="ngx-graph-outer"
   [style.width.px]="width"
   [@animationState]="'active'"
   [@.disabled]="!animations"
@@ -7,7 +7,7 @@
   (mouseWheelDown)="onZoom($event, 'out')"
   mouseWheel
 >
-  <svg:svg class="ngx-charts" [attr.width]="width" [attr.height]="height">
+  <svg:svg class="ngx-graph" [attr.width]="width" [attr.height]="height">
     <svg:g
       *ngIf="initialized && graph"
       [attr.transform]="transform"
