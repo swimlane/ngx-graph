@@ -105,8 +105,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() customColors: any;
   @Input() animations: boolean = true;
   @Input() deferDisplayUntilPosition: boolean = false;
-  @Output() select = new EventEmitter();
+  @Input() centerNodesOnPositionChange = true;
 
+  @Output() select = new EventEmitter();
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
@@ -232,6 +233,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         })
       );
     }
+
     if (this.zoomToFit$) {
       this.subscriptions.push(
         this.zoomToFit$.subscribe(() => {
@@ -432,8 +434,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const oldNodes: Set<string> = new Set();
 
     this.graph.nodes.map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
-        n.position.y - n.dimension.height / 2 || 0
+      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
+        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
       })`;
       if (!n.data) {
         n.data = {};
@@ -449,9 +451,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const oldCompoundNodes: Set<string> = new Set();
 
     (this.graph.clusters || []).map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
-        n.position.y - n.dimension.height / 2 || 0
-      })`;
+      n.transform = `translate(${
+        n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) / 2 || 0
+      }, ${n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0})`;
       if (!n.data) {
         n.data = {};
       }
@@ -463,9 +465,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     });
 
     (this.graph.compoundNodes || []).map(n => {
-      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
-        n.position.y - n.dimension.height / 2 || 0
-      })`;
+      n.transform = `translate(${
+        n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) / 2 || 0
+      }, ${n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0})`;
       if (!n.data) {
         n.data = {};
       }
@@ -890,8 +892,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     node.position.y += event.movementY / this.zoomLevel;
 
     // move the node
-    const x = node.position.x - node.dimension.width / 2;
-    const y = node.position.y - node.dimension.height / 2;
+    const x = node.position.x - (this.centerNodesOnPositionChange ? node.dimension.width / 2 : 0);
+    const y = node.position.y - (this.centerNodesOnPositionChange ? node.dimension.height / 2 : 0);
     node.transform = `translate(${x}, ${y})`;
 
     for (const link of this.graph.edges) {
