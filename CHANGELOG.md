@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.2.3
+
+- Feature: `centerNodesOnPositionChange` Input when set to `false` will ignore dimensions when positioning nodes. Default is set to `true` to replicate existing behavior.
+
 ## 8.2.2
 
 - Bug: Getting right values for edge midPoints (#511)
