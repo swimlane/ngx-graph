@@ -430,13 +430,18 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   tick() {
+    const translationVector = (node: Node): [number, number] => {
+      const xTranslate = node.position.x - (this.centerNodesOnPositionChange ? node.dimension.width / 2 : 0) || 0;
+      const yTranslate = node.position.y - (this.centerNodesOnPositionChange ? node.dimension.height / 2 : 0) || 0;
+      return [xTranslate, yTranslate];
+    };
+
     // Transposes view options to the node
     const oldNodes: Set<string> = new Set();
 
     this.graph.nodes.map(n => {
-      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
-        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
-      })`;
+      const [xTranslate, yTranslate] = translationVector(n);
+      n.transform = `translate(${xTranslate}, ${yTranslate})`;
       if (!n.data) {
         n.data = {};
       }
@@ -451,9 +456,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const oldCompoundNodes: Set<string> = new Set();
 
     (this.graph.clusters || []).map(n => {
-      n.transform = `translate(${
-        n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) / 2 || 0
-      }, ${n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0})`;
+      const [xTranslate, yTranslate] = translationVector(n);
+      n.transform = `translate(${xTranslate}, ${yTranslate})`;
       if (!n.data) {
         n.data = {};
       }
@@ -465,9 +469,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     });
 
     (this.graph.compoundNodes || []).map(n => {
-      n.transform = `translate(${
-        n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) / 2 || 0
-      }, ${n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0})`;
+      const [xTranslate, yTranslate] = translationVector(n);
+      n.transform = `translate(${xTranslate}, ${yTranslate})`;
       if (!n.data) {
         n.data = {};
       }
