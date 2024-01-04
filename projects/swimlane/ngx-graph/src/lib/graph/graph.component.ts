@@ -451,9 +451,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const oldCompoundNodes: Set<string> = new Set();
 
     (this.graph.clusters || []).map(n => {
-      n.transform = `translate(${
-        n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) / 2 || 0
-      }, ${n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0})`;
+      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
+        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
+      })`;
       if (!n.data) {
         n.data = {};
       }
@@ -465,9 +465,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     });
 
     (this.graph.compoundNodes || []).map(n => {
-      n.transform = `translate(${
-        n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) / 2 || 0
-      }, ${n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0})`;
+      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
+        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
+      })`;
       if (!n.data) {
         n.data = {};
       }
