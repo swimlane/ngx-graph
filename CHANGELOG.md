@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.2.4
+
+- Bug: Position was offset by default (#539)
+
 ## 8.2.3
 
 - Feature: `centerNodesOnPositionChange` Input when set to `false` will ignore dimensions when positioning nodes. Default is set to `true` to replicate existing behavior.
