@@ -1,5 +1,26 @@
 # Changelog
 
+## 10.0.0
+
+- update angular
+
+## 9.0.2
+
+- update package.json links
+
+## 9.0.1
+
+- update readme
+
+## 9.0.0
+
+- update d3 (security vulneratbility)
+-
+
+## 8.2.5
+
+- Allow Angular 17
+
 ## 8.2.4
 
 - Bug: Position was offset by default (#539)
