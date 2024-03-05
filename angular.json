@@ -56,18 +56,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ngxGraph:build"
+            "buildTarget": "ngxGraph:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ngxGraph:build:production"
+              "buildTarget": "ngxGraph:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ngxGraph:build"
+            "buildTarget": "ngxGraph:build"
           }
         },
         "test": {
