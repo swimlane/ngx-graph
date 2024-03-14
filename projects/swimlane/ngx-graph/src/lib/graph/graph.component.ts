@@ -53,9 +53,19 @@ export interface Matrix {
   f: number;
 }
 
-export interface ZoomOptions {
+export interface NgxGraphZoomOptions {
   autoCenter?: boolean;
   force?: boolean;
+}
+
+export enum NgxGraphStates {
+  Init = 'init',
+  Subscribe = 'subscribe',
+  Transform = 'transform'
+}
+
+export interface NgxGraphStateChangeEvent {
+  state: NgxGraphStates;
 }
 
 @Component({
@@ -96,7 +106,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() autoCenter = false;
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
-  @Input() zoomToFit$: Observable<ZoomOptions>;
+  @Input() zoomToFit$: Observable<NgxGraphZoomOptions>;
   @Input() panToNode$: Observable<any>;
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
@@ -118,7 +128,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
-  @Output() stateChange: EventEmitter<{ state: 'init' | 'subscribe' | 'transform' }> = new EventEmitter();
+  @Output() stateChange: EventEmitter<NgxGraphStateChangeEvent> = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
@@ -250,7 +260,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
 
     this.minimapClipPathId = `minimapClip${id()}`;
-    this.stateChange.emit({ state: 'subscribe' });
+    this.stateChange.emit({ state: NgxGraphStates.Subscribe });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -336,7 +346,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.createGraph();
       this.updateTransform();
       if (!this.initialized) {
-        this.stateChange.emit({ state: 'init' });
+        this.stateChange.emit({ state: NgxGraphStates.Init });
       }
       this.initialized = true;
     });
@@ -937,7 +947,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   updateTransform(): void {
     this.transform = toSVG(smoothMatrix(this.transformationMatrix, 100));
-    this.stateChange.emit({ state: 'transform' });
+    this.stateChange.emit({ state: NgxGraphStates.Transform });
   }
 
   /**
@@ -1149,7 +1159,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   /**
    * Zooms to fit the entire graph
    */
-  zoomToFit(zoomOptions?: ZoomOptions): void {
+  zoomToFit(zoomOptions?: NgxGraphZoomOptions): void {
     this.updateGraphDims();
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
@@ -1165,7 +1175,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
     if (zoomOptions?.force === true || zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
-      if (!zoomOptions?.autoCenter !== true) {
+
+      if (zoomOptions?.autoCenter !== true) {
         this.updateTransform();
       }
       if (zoomOptions?.autoCenter === true) {
@@ -1329,16 +1340,14 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Checks if all nodes have dimension
    */
   public hasNodeDims(): boolean {
-    return this.graph.nodes?.filter(node => node.dimension.width === 0 && node.dimension.height === 0).length === 0;
+    return this.graph.nodes?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
   }
 
   /**
    * Checks if all compound nodes have dimension
    */
   public hasCompoundNodeDims(): boolean {
-    return (
-      this.graph.compoundNodes?.filter(node => node.dimension.width === 0 && node.dimension.height === 0).length === 0
-    );
+    return this.graph.compoundNodes?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
   }
 
   /**
