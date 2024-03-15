@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-graph",
-  "version": "8.2.4",
+  "version": "8.3.0",
   "description": "Graph visualization for angular",
   "repository": {
     "type": "git",
@@ -21,7 +21,8 @@
   "author": "Swimlane",
   "maintainers": [
     "Marjan Georgiev",
-    "Assaf Shemesh"
+    "Assaf Shemesh",
+    "Stephen Belovarich"
   ],
   "license": "MIT",
   "bugs": {

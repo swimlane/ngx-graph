@@ -1,5 +1,21 @@
 # Changelog
 
+## 8.3.0
+
+- Feature: new `ZoomOptions` gives users the ability to force update zoom to fit by omitting internal check and combining auto center to reduce chance of flicker.
+
+- Feature: `enablePreUpdateTransform @Input` allows users to disable extra call to `updateTransform` internally, reducing chance of flicker.
+
+- Feature: `stateChange @Output` emits changes in state, allowing users to check status of the graph.
+
+- Feature: `hasGraphDims`, `hasDims`, `hasNodeDims`, and `hasCompoundNodeDims` allow users to check elements have dimension.
+
+- Chore: Update docs.
+
+- Bug: Update graph dimensions before zoom because sometimes they were out of sync.
+
+- Bug: Format README instructions.
+
 ## 8.2.4
 
 - Bug: Position was offset by default (#539)
