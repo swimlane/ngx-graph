@@ -15,6 +15,43 @@ The graph component accepts a `view` input, which is an array with two numeric e
 [[note | Note]]
 | The parent container must have a non-zero height defined, and no padding in order for the graph to properly fit its size.
 
+Methods exist on `GraphComponent` to check if the graph has dimension. This can be useful for waiting to display the entire graph after it has proper dimensions.
+
+| Method              | Description                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| hasGraphDims        | Returns true when the graph container has dimension.                                                                       |
+| hasNodeDims         | Returns true when every node in the graph has dimension.                                                                   |
+| hasCompoundNodeDims | Returns true when every compound node in the graph has dimension.                                                          |
+| hasDims             | Returns true when all of the above methods combined return true. This means entire graph is ready to be drawn and updated. |
+
+These methods can be used with the `stateChange @Output` to check when the graph has dimension. Suppose you had `GraphComponent` has a `ViewChild` in a parent `Component`.
+
+```typescript
+@ViewChild(GraphComponent) graphRef: GraphComponent;
+```
+
+In your template, bind the `stateChange @Output` of `GraphComponent` to a handler on the parent `Component class`.
+
+```javascript
+    <ngx-graph
+      (stateChange)="handleStateChange($event)"
+      [zoomToFit$]="zoomToFit$"
+    >
+```
+
+In this callback, you can check for the `NgxGraphStates.Transform` state. `GraphComponent` emits this particular state whenever the graph is transformed. `NgxGraphStates` is an enum exported from @swimlane/ngx-graph. Upon a transform of the graph, check the graph has dimension with `hasDims()`. When `hasDims()` is `true`, it should be safe to zoom and center the graph on load, since these operations depend on the graph having proper dimensions. Additionally, if the parent `Component` implements a loading indicator (`this.isLoading`), the loading indicator can be removed since the graph is ready to display.
+
+```javascript
+handleStateChange(event: NgxGraphStateChangeEvent) {
+    if (event.state === NgxGraphStates.Transform && this.graphRef?.hasDims()) {
+        this.zoomToFit$.next({ autoCenter: true, force: true });
+        this.isLoading = false;
+    }
+}
+```
+
+If you are interested in what's happening in the above example with `zoomToFit$`, check out [Fit To View](#fit-to-view) below.
+
 ## Line Curve Interpolation
 
 This input allows you to choose the curve interpolation function for the edge lines. It accepts a function as an input, which is compatibe with D3's line interpolation functions and accepts any of them as an input, or a custom one ([link](https://github.com/d3/d3-shape/blob/master/README.md#curves)).
@@ -57,7 +94,7 @@ this.nodes.push(newNode);
 this.nodes = [...this.nodes];
 ```
 
-To manually trigger the updade, the graph accepts an `update$` input as an observable:
+To manually trigger the update, the graph accepts an `update$` input as an observable:
 
 #### Component:
 
@@ -122,10 +159,21 @@ export class MyComponent{
     ...
 
     fitGraph() {
-        this.zoomToFit$.next(true)
+        this.zoomToFit$.next()
     }
 }
 ```
+
+`zoomToFit$` optionally takes a configuration typed `NgxGraphZoomOptions`, i.e.
+
+```javascript
+this.zoomToFit$.next({ force: true, autoCenter: true });
+```
+
+| Event      | Description                                                |
+| ---------- | ---------------------------------------------------------- |
+| force      | skips an internal check for the zoom value and forces zoom |
+| autoCenter | combines zoomToFit with center                             |
 
 #### Template:
 

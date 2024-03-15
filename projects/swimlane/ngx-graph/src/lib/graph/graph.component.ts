@@ -25,8 +25,8 @@ import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import * as ease from 'd3-ease';
 import 'd3-transition';
-import { Observable, Subscription, of, fromEvent as observableFromEvent } from 'rxjs';
-import { first, debounceTime } from 'rxjs/operators';
+import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
+import { first, debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -51,6 +51,21 @@ export interface Matrix {
   d: number;
   e: number;
   f: number;
+}
+
+export interface NgxGraphZoomOptions {
+  autoCenter?: boolean;
+  force?: boolean;
+}
+
+export enum NgxGraphStates {
+  Init = 'init',
+  Subscribe = 'subscribe',
+  Transform = 'transform'
+}
+
+export interface NgxGraphStateChangeEvent {
+  state: NgxGraphStates;
 }
 
 @Component({
@@ -91,7 +106,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() autoCenter = false;
   @Input() update$: Observable<any>;
   @Input() center$: Observable<any>;
-  @Input() zoomToFit$: Observable<any>;
+  @Input() zoomToFit$: Observable<NgxGraphZoomOptions>;
   @Input() panToNode$: Observable<any>;
   @Input() layout: string | Layout;
   @Input() layoutSettings: any;
@@ -106,12 +121,14 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() animations: boolean = true;
   @Input() deferDisplayUntilPosition: boolean = false;
   @Input() centerNodesOnPositionChange = true;
+  @Input() enablePreUpdateTransform = true;
 
   @Output() select = new EventEmitter();
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
   @Output() zoomChange: EventEmitter<number> = new EventEmitter();
   @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
+  @Output() stateChange: EventEmitter<NgxGraphStateChangeEvent> = new EventEmitter();
 
   @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
   @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
@@ -127,7 +144,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   private isMouseMoveCalled: boolean = false;
 
   graphSubscription: Subscription = new Subscription();
-  subscriptions: Subscription[] = [];
   colors: ColorHelper;
   dims: ViewDimensions;
   seriesDomain: any;
@@ -155,6 +171,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   visibilityObserver: VisibilityObserver;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private el: ElementRef,
@@ -219,38 +236,31 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   ngOnInit(): void {
     if (this.update$) {
-      this.subscriptions.push(
-        this.update$.subscribe(() => {
-          this.update();
-        })
-      );
+      this.update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.update();
+      });
     }
 
     if (this.center$) {
-      this.subscriptions.push(
-        this.center$.subscribe(() => {
-          this.center();
-        })
-      );
+      this.center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.center();
+      });
     }
 
     if (this.zoomToFit$) {
-      this.subscriptions.push(
-        this.zoomToFit$.subscribe(() => {
-          this.zoomToFit();
-        })
-      );
+      this.zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(options => {
+        this.zoomToFit(options ? options : {});
+      });
     }
 
     if (this.panToNode$) {
-      this.subscriptions.push(
-        this.panToNode$.subscribe((nodeId: string) => {
-          this.panToNodeId(nodeId);
-        })
-      );
+      this.panToNode$.pipe(takeUntil(this.destroy$)).subscribe((nodeId: string) => {
+        this.panToNodeId(nodeId);
+      });
     }
 
     this.minimapClipPathId = `minimapClip${id()}`;
+    this.stateChange.emit({ state: NgxGraphStates.Subscribe });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -293,11 +303,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.visibilityObserver.visible.unsubscribe();
       this.visibilityObserver.destroy();
     }
-
-    for (const sub of this.subscriptions) {
-      sub.unsubscribe();
-    }
-    this.subscriptions = null;
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
@@ -338,6 +345,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
       this.createGraph();
       this.updateTransform();
+      if (!this.initialized) {
+        this.stateChange.emit({ state: NgxGraphStates.Init });
+      }
       this.initialized = true;
     });
   }
@@ -870,7 +880,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
     this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
     this.zoomChange.emit(this.zoomLevel);
-    this.updateTransform();
+    if (this.enablePreUpdateTransform) {
+      this.updateTransform();
+    }
     this.update();
   }
 
@@ -935,6 +947,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   updateTransform(): void {
     this.transform = toSVG(smoothMatrix(this.transformationMatrix, 100));
+    this.stateChange.emit({ state: NgxGraphStates.Transform });
   }
 
   /**
@@ -1144,9 +1157,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
-   * Zooms to fit the entier graph
+   * Zooms to fit the entire graph
    */
-  zoomToFit(): void {
+  zoomToFit(zoomOptions?: NgxGraphZoomOptions): void {
+    this.updateGraphDims();
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
     let zoomLevel = Math.min(heightZoom, widthZoom, 1);
@@ -1159,9 +1173,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       zoomLevel = this.maxZoomLevel;
     }
 
-    if (zoomLevel !== this.zoomLevel) {
+    if (zoomOptions?.force === true || zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
-      this.updateTransform();
+
+      if (zoomOptions?.autoCenter !== true) {
+        this.updateTransform();
+      }
+      if (zoomOptions?.autoCenter === true) {
+        this.center();
+      }
       this.zoomChange.emit(this.zoomLevel);
     }
   }
@@ -1307,6 +1327,34 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
 
     return null;
+  }
+
+  /**
+   * Checks if the graph has dimensions
+   */
+  public hasGraphDims(): boolean {
+    return this.graphDims.width > 0 && this.graphDims.height > 0;
+  }
+
+  /**
+   * Checks if all nodes have dimension
+   */
+  public hasNodeDims(): boolean {
+    return this.graph.nodes?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+  }
+
+  /**
+   * Checks if all compound nodes have dimension
+   */
+  public hasCompoundNodeDims(): boolean {
+    return this.graph.compoundNodes?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+  }
+
+  /**
+   * Checks if the graph and all nodes have dimension.
+   */
+  public hasDims(): boolean {
+    return this.hasGraphDims() && this.hasNodeDims() && this.hasCompoundNodeDims();
   }
 
   protected unbindEvents(): void {
