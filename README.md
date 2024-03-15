@@ -279,7 +279,7 @@ Run `npm run test` to execute the linter
 - Examine log to determine next version (X.Y.Z)
 - Run `git checkout -b release/X.Y.Z`
 - Update version in `projects/swimlane/ngx-graph/package.json`.
-- Update changelog in `projects/swimlane/ngx-graph/CHANGELOG.md`
+- Update changelog in `CHANGELOG.md`
 - Run `git commit -am "(release): X.Y.Z"`
 - Run `git tag X.Y.Z`
 - Run `git push origin HEAD --tags`
