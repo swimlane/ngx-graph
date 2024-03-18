@@ -8,7 +8,7 @@
     "module": "es2020",
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "target": "es2015",
+    "target": "ES2022",
     "typeRoots": ["node_modules/@types"],
     "lib": ["es2018", "dom"],
     "allowSyntheticDefaultImports": true,
@@ -18,7 +18,8 @@
       "@swimlane/ngx-graph": ["projects/swimlane/ngx-graph/src/public_api"],
       "@swimlane/ngx-graph/*": ["projects/swimlane/ngx-graph/src/*"]
     },
-    "types": ["node"]
+    "types": ["node"],
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true
