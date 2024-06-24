@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.4.0
+
+- Fix; Fixes a styling issue when using ngx-graph and ngx-charts on the same page
+- Chore: Updated peer dependencies to support new angular versions
+
 ## 8.3.0
 
 - Feature: new `ZoomOptions` gives users the ability to force update zoom to fit by omitting internal check and combining auto center to reduce chance of flicker.
