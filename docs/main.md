@@ -87,13 +87,15 @@ ngx-graph is a graph visualization library for Angular
 | miniMapMaxWidth                                           | number              | 100                              | the maximum width of the minimap (in pixels)                                                                                                        |
 | miniMapMaxHeight                                          | number              |                                  | the maximum height of the minimap (in pixels)                                                                                                       |
 | miniMapPosition                                           | MiniMapPosition     | MiniMapPosition.UpperRight       | the position of the minimap                                                                                                                         |
+| enablePreUpdateTransform                                  | boolean             | true                             | When set to false, disables an extra transform cycle when the graph updates                                                                         |
 
 _Deprecated inputs will be removed in the next major version of the package._
 
 ## Outputs
 
-| Event      | Description                                 |
-| ---------- | ------------------------------------------- |
-| activate   | element activation event (mouse enter)      |
-| deactivate | element deactivation event (mouse leave)    |
-| zoomChange | zoom change event, emits the new zoom level |
+| Event       | Description                                                                          |
+| ----------- | ------------------------------------------------------------------------------------ |
+| activate    | element activation event (mouse enter)                                               |
+| deactivate  | element deactivation event (mouse leave)                                             |
+| zoomChange  | zoom change event, emits the new zoom level                                          |
+| stateChange | state change event, emits lifecycle events like `init`, `transform`, and `subscribe` |
