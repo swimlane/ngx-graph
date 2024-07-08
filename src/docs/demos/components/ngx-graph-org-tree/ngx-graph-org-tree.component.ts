@@ -1,5 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Edge, Node, Layout } from '@swimlane/ngx-graph';
+import { Component, Input, OnInit } from '@angular/core';
+import { Edge, Layout, Node } from '@swimlane/ngx-graph';
 import { DagreNodesOnlyLayout } from './customDagreNodesOnly';
 import * as shape from 'd3-shape';
 
@@ -19,6 +19,9 @@ export class Employee {
 })
 export class NgxGraphOrgTreeComponent implements OnInit {
   @Input() employees: Employee[] = [];
+
+  public enableZoom = true;
+  public enableTrackpadSupport = false;
 
   public nodes: Node[] = [];
   public links: Edge[] = [];

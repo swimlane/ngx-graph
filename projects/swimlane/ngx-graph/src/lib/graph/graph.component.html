@@ -5,7 +5,7 @@
   [@.disabled]="!animations"
   (mouseWheelUp)="onZoom($event, 'in')"
   (mouseWheelDown)="onZoom($event, 'out')"
-  mouseWheel
+  [mouseWheelEnabled]="enableZoom || enableTrackpadSupport"
 >
   <svg:svg class="ngx-graph" [attr.width]="width" [attr.height]="height">
     <svg:g
