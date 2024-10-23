@@ -103,7 +103,7 @@
         </svg:g>
       </svg:g>
 
-      <svg:g class="nodes">
+      <svg:g class="nodes" #nodeGroup>
         <svg:g
           #nodeElement
           *ngFor="let node of graph.nodes; trackBy: trackNodeBy"
