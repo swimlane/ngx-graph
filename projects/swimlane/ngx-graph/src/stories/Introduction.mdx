@@ -1,0 +1,77 @@
+import { Meta, Story } from '@storybook/blocks';
+import { GettingStarted } from './introduction.stories';
+
+<Meta title="Introduction" />
+
+# Introduction
+
+ngx-graph is a graph visualization library for Angular.
+
+ngx-graph specializes in drawing Directed Acyclic Graph (DAG) layouts in the context of an Angular application. By importing NgxGraphModule, apps gain access to the GraphComponent, where engineers can map data
+models to nodes and edges displayed in a data visualization. DAG layouts are useful for data visualization, compiler design, and workflow management. Below is an example of a simple DAG layout gernerated with ngx-graph.
+
+<Story of={GettingStarted} />
+
+```html
+<ngx-graph
+  [view]="[500, 300]"
+  layout="dagre"
+  [links]="[
+    {
+      id: 'a',
+      source: '1',
+      target: '2'
+    }, {
+      id: 'b',
+      source: '1',
+      target: '3'
+    }, {
+      id: 'c',
+      source: '3',
+      target: '4'
+    }, {
+      id: 'd',
+      source: '3',
+      target: '5'
+    }, {
+      id: 'e',
+      source: '4',
+      target: '5'
+    }, {
+      id: 'f',
+      source: '2',
+      target: '6'
+    }
+  ]"
+  [nodes]="[
+    {
+      id: '1',
+      label: 'Node A'
+    }, {
+      id: '2',
+      label: 'Node B'
+    }, {
+      id: '3',
+      label: 'Node C'
+    }, {
+      id: '4',
+      label: 'Node D'
+    }, {
+      id: '5',
+      label: 'Node E'
+    }, {
+      id: '6',
+      label: 'Node F'
+    }
+  ]"
+></ngx-graph>
+```
+
+<h3>Install the package</h3>
+
+- Import NgxGraphModule into your Angular Module.
+- Add the ngx-graph component.
+- Provide a model for nodes and links (also known as edges).
+
+  ngx-graph is compatible with Dagre and Elk, but can also accept customized layouts via the layout Input (not
+  demoed in this example).
