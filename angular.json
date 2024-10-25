@@ -11,23 +11,18 @@
       "schematics": {},
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "customWebpackConfig": {
-              "path": "./webpack.config.js"
-            },
             "aot": false,
             "outputPath": "dist/ngxGraph",
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "browser": "src/main.ts",
+            "polyfills": ["src/polyfills.ts"],
             "tsConfig": "src/tsconfig.app.json",
             "assets": ["src/favicon.ico", "src/assets", "src/docs", "src/.nojekyll"],
             "styles": ["src/styles.css"],
             "scripts": [],
-            "vendorChunk": true,
             "extractLicenses": false,
-            "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true
@@ -50,8 +45,7 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false
+              "extractLicenses": true
             }
           },
           "defaultConfiguration": ""
@@ -59,18 +53,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ngxGraph:build"
+            "buildTarget": "ngxGraph:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ngxGraph:build:production"
+              "buildTarget": "ngxGraph:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ngxGraph:build"
+            "buildTarget": "ngxGraph:build"
           }
         },
         "test": {
@@ -149,9 +143,28 @@
           "options": {
             "lintFilePatterns": ["projects/swimlane/ngx-graph/**/*.ts"]
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": "projects/swimlane/ngx-graph/.storybook",
+            "browserTarget": "@swimlane/ngx-graph:build",
+            "compodoc": true,
+            "compodocArgs": ["-e", "json", "-d", "projects/swimlane/ngx-graph"],
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": "projects/swimlane/ngx-graph/.storybook",
+            "browserTarget": "@swimlane/ngx-graph:build",
+            "compodoc": true,
+            "compodocArgs": ["-e", "json", "-d", "projects/swimlane/ngx-graph"],
+            "outputDir": "dist/storybook/@swimlane/ngx-graph"
+          }
         }
       }
     }
-  },
-  "defaultProject": "ngxGraph"
+  }
 }

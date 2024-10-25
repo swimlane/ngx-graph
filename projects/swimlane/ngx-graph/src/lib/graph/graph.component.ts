@@ -726,7 +726,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (edge) {
-        const linkSelection = select(linkEl.nativeElement).select('.line');
+        const linkSelection: any = select(linkEl.nativeElement).select('.line');
         linkSelection
           .attr('d', edge.oldLine)
           .transition()
@@ -734,7 +734,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           .duration(_animate ? 500 : 0)
           .attr('d', edge.line);
 
-        const textPathSelection = select(this.el.nativeElement).select(`#${edge.id}`);
+        const textPathSelection: any = select(this.el.nativeElement).select(`#${edge.id}`);
         textPathSelection
           .attr('d', edge.oldTextPath)
           .transition()

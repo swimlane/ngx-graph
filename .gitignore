@@ -11,3 +11,7 @@ yarn.lock
 /ngx-charts.iml
 ngx-charts.iml
 __ngcc_entry_points__.json
+
+*storybook.log
+.yarn/
+.yarn/install-state.gz

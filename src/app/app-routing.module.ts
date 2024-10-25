@@ -1,16 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { DocSPACoreComponent, LocationWithSlashes } from '@swimlane/docspa-core';
+import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 
-const routes: Routes = [{ path: '**', component: DocSPACoreComponent }];
+const routes: Routes = [];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
-  providers: [
-    { provide: Location, useClass: LocationWithSlashes },
-    { provide: LocationStrategy, useClass: PathLocationStrategy }
-  ]
+  providers: [{ provide: LocationStrategy, useClass: PathLocationStrategy }]
 })
 export class AppRoutingModule {}
