@@ -8,9 +8,10 @@ import {
   GeomNode,
   CurveFactory,
   layoutGraphWithSugiayma,
-  Point
+  Point,
+  GeomGraph
 } from 'msagl-js';
-import type { GeomGraph, GeomEdge } from 'msagl-js';
+import type { GeomEdge } from 'msagl-js';
 
 const DEFAULT_EDGE_NAME = '\x00';
 const EDGE_KEY_DELIM = '\x01';
