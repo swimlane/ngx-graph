@@ -27,7 +27,7 @@ import * as shape from 'd3-shape';
 import * as ease from 'd3-ease';
 import 'd3-transition';
 import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
-import { first, debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -63,6 +63,7 @@ export enum NgxGraphStates {
   Init = 'init',
   Subscribe = 'subscribe',
   Transform = 'transform',
+  /* eslint-disable @typescript-eslint/no-shadow */
   Output = 'output'
 }
 
@@ -120,7 +121,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() view: [number, number];
   @Input() scheme: any = 'cool';
   @Input() customColors: any;
-  @Input() animations: boolean = true;
   @Input() deferDisplayUntilPosition: boolean = false;
   @Input() centerNodesOnPositionChange = true;
   @Input() enablePreUpdateTransform = true;
@@ -403,7 +403,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.graph = {
       nodes: this.nodes.map(n => initializeNode(n)),
       clusters: this.clusters.map(n => initializeNode(n)),
-      compoundNodes: this.clusters.map(n => initializeNode(n)),
+      compoundNodes: this.compoundNodes.map(n => initializeNode(n)),
       edges: this.links.map(e => initializeEdge(e))
     };
 
@@ -417,24 +417,16 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   draw(): void {
-    // Calc view dims for the nodes
-    // this.applyNodeDimensions();
-
-    // Recalc the layout
+    // Recalculate the layout
     const result = (this.layout as Layout).run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
+
     this.graphSubscription.add(
       result$.subscribe(graph => {
         this.graph = graph;
         this.tick();
       })
     );
-
-    //     if (this.graph.nodes.length === 0 && this.graph.compoundNodes?.length === 0) {
-    //       return;
-    //     }
-    //
-    // result$.pipe(first()).subscribe(() => this.applyNodeDimensions());
   }
 
   tick() {
@@ -739,7 +731,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         const linkSelection: any = select(linkEl.nativeElement).select('.line');
         linkSelection
           .attr('d', edge.oldLine)
-          // @ts-ignore
           .transition()
           .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
@@ -748,7 +739,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         const textPathSelection: any = select(this.el.nativeElement).select(`#${edge.id}`);
         textPathSelection
           .attr('d', edge.oldTextPath)
-          // @ts-ignore
           .transition()
           .ease(ease.easeSinInOut)
           .duration(_animate ? 500 : 0)
