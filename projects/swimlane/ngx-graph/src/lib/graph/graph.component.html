@@ -2,7 +2,7 @@
   class="ngx-graph-outer"
   [style.width.px]="width"
   [@animationState]="'active'"
-  [@.disabled]="!animations"
+  [@.disabled]="!animate"
   (mouseWheelUp)="onZoom($event, 'in')"
   (mouseWheelDown)="onZoom($event, 'out')"
   mouseWheel
