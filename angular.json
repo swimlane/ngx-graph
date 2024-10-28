@@ -150,7 +150,7 @@
             "configDir": "projects/swimlane/ngx-graph/.storybook",
             "browserTarget": "@swimlane/ngx-graph:build",
             "compodoc": true,
-            "compodocArgs": ["-e", "json", "-d", "projects/swimlane/ngx-graph"],
+            "compodocArgs": ["-e", "json", "-d", ".", "projects/swimlane/ngx-graph"],
             "port": 6006
           }
         },
@@ -160,7 +160,7 @@
             "configDir": "projects/swimlane/ngx-graph/.storybook",
             "browserTarget": "@swimlane/ngx-graph:build",
             "compodoc": true,
-            "compodocArgs": ["-e", "json", "-d", "projects/swimlane/ngx-graph"],
+            "compodocArgs": ["-e", "json", "-d", ".", "projects/swimlane/ngx-graph"],
             "outputDir": "dist/storybook/@swimlane/ngx-graph"
           }
         }

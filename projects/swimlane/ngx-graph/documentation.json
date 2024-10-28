@@ -81,6 +81,16 @@
         "defaultValue": "{}"
       },
       {
+        "name": "Demo",
+        "ctype": "miscellaneous",
+        "subtype": "variable",
+        "file": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+        "deprecated": false,
+        "deprecationMessage": "",
+        "type": "Story",
+        "defaultValue": "{}"
+      },
+      {
         "name": "GettingStarted",
         "ctype": "miscellaneous",
         "subtype": "variable",
@@ -89,6 +99,16 @@
         "deprecationMessage": "",
         "type": "Story",
         "defaultValue": "{}"
+      },
+      {
+        "name": "meta",
+        "ctype": "miscellaneous",
+        "subtype": "variable",
+        "file": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+        "deprecated": false,
+        "deprecationMessage": "",
+        "type": "Meta<GraphComponent>",
+        "defaultValue": "{\n  title: 'GraphComponent',\n  component: GraphComponent,\n  decorators: [\n    // Apply application config to all stories\n    applicationConfig({\n      // List of providers and environment providers that should be available to the root component and all its children.\n      providers: [LayoutService, importProvidersFrom(BrowserAnimationsModule)]\n    })\n  ],\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen'\n  }\n}"
       },
       {
         "name": "meta",
@@ -154,21 +174,21 @@
         "name": "meta",
         "ctype": "miscellaneous",
         "subtype": "variable",
-        "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts",
-        "deprecated": false,
-        "deprecationMessage": "",
-        "type": "Meta<NgxGraphMSAGLComponent>",
-        "defaultValue": "{\n  title: 'Example/NgxGraphMSAGLComponent',\n  component: NgxGraphMSAGLComponent,\n  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs\n  tags: ['autodocs'],\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen'\n  },\n  args: {}\n}"
-      },
-      {
-        "name": "meta",
-        "ctype": "miscellaneous",
-        "subtype": "variable",
         "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-custom-curve/ngx-graph-custom-curve.component.stories.ts",
         "deprecated": false,
         "deprecationMessage": "",
         "type": "Meta<NgxGraphCustomCurve>",
         "defaultValue": "{\n  title: 'Example/NgxGraphCustomCurveComponent',\n  component: NgxGraphCustomCurve,\n  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs\n  tags: ['autodocs'],\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen'\n  },\n  args: {}\n}"
+      },
+      {
+        "name": "meta",
+        "ctype": "miscellaneous",
+        "subtype": "variable",
+        "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts",
+        "deprecated": false,
+        "deprecationMessage": "",
+        "type": "Meta<NgxGraphMSAGLComponent>",
+        "defaultValue": "{\n  title: 'Example/NgxGraphMSAGLComponent',\n  component: NgxGraphMSAGLComponent,\n  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs\n  tags: ['autodocs'],\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen'\n  },\n  args: {}\n}"
       },
       {
         "name": "meta",
@@ -219,6 +239,17 @@
         "subtype": "typealias",
         "rawtype": "StoryObj<ColaClusterLayoutComponent>",
         "file": "projects/swimlane/ngx-graph/src/stories/layouts/cola.stories.ts",
+        "deprecated": false,
+        "deprecationMessage": "",
+        "description": "",
+        "kind": 183
+      },
+      {
+        "name": "Story",
+        "ctype": "miscellaneous",
+        "subtype": "typealias",
+        "rawtype": "StoryObj<GraphComponent>",
+        "file": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
         "deprecated": false,
         "deprecationMessage": "",
         "description": "",
@@ -294,8 +325,8 @@
         "name": "Story",
         "ctype": "miscellaneous",
         "subtype": "typealias",
-        "rawtype": "StoryObj<NgxGraphMSAGLComponent>",
-        "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts",
+        "rawtype": "StoryObj<NgxGraphCustomCurve>",
+        "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-custom-curve/ngx-graph-custom-curve.component.stories.ts",
         "deprecated": false,
         "deprecationMessage": "",
         "description": "",
@@ -305,8 +336,8 @@
         "name": "Story",
         "ctype": "miscellaneous",
         "subtype": "typealias",
-        "rawtype": "StoryObj<NgxGraphCustomCurve>",
-        "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-custom-curve/ngx-graph-custom-curve.component.stories.ts",
+        "rawtype": "StoryObj<NgxGraphMSAGLComponent>",
+        "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts",
         "deprecated": false,
         "deprecationMessage": "",
         "description": "",
@@ -468,6 +499,28 @@
           "defaultValue": "{\n  title: 'DagreClusterTemplate',\n  component: DagreLayoutComponent,\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen'\n  }\n}"
         }
       ],
+      "projects/swimlane/ngx-graph/src/stories/graph.stories.ts": [
+        {
+          "name": "Demo",
+          "ctype": "miscellaneous",
+          "subtype": "variable",
+          "file": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+          "deprecated": false,
+          "deprecationMessage": "",
+          "type": "Story",
+          "defaultValue": "{}"
+        },
+        {
+          "name": "meta",
+          "ctype": "miscellaneous",
+          "subtype": "variable",
+          "file": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+          "deprecated": false,
+          "deprecationMessage": "",
+          "type": "Meta<GraphComponent>",
+          "defaultValue": "{\n  title: 'GraphComponent',\n  component: GraphComponent,\n  decorators: [\n    // Apply application config to all stories\n    applicationConfig({\n      // List of providers and environment providers that should be available to the root component and all its children.\n      providers: [LayoutService, importProvidersFrom(BrowserAnimationsModule)]\n    })\n  ],\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen'\n  }\n}"
+        }
+      ],
       "projects/swimlane/ngx-graph/src/stories/introduction.stories.ts": [
         {
           "name": "GettingStarted",
@@ -574,6 +627,19 @@
           "kind": 183
         }
       ],
+      "projects/swimlane/ngx-graph/src/stories/graph.stories.ts": [
+        {
+          "name": "Story",
+          "ctype": "miscellaneous",
+          "subtype": "typealias",
+          "rawtype": "StoryObj<GraphComponent>",
+          "file": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+          "deprecated": false,
+          "deprecationMessage": "",
+          "description": "",
+          "kind": 183
+        }
+      ],
       "projects/swimlane/ngx-graph/src/stories/introduction.stories.ts": [
         {
           "name": "Story",
@@ -639,19 +705,6 @@
           "kind": 183
         }
       ],
-      "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts": [
-        {
-          "name": "Story",
-          "ctype": "miscellaneous",
-          "subtype": "typealias",
-          "rawtype": "StoryObj<NgxGraphMSAGLComponent>",
-          "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts",
-          "deprecated": false,
-          "deprecationMessage": "",
-          "description": "",
-          "kind": 183
-        }
-      ],
       "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-custom-curve/ngx-graph-custom-curve.component.stories.ts": [
         {
           "name": "Story",
@@ -659,6 +712,19 @@
           "subtype": "typealias",
           "rawtype": "StoryObj<NgxGraphCustomCurve>",
           "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-custom-curve/ngx-graph-custom-curve.component.stories.ts",
+          "deprecated": false,
+          "deprecationMessage": "",
+          "description": "",
+          "kind": 183
+        }
+      ],
+      "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts": [
+        {
+          "name": "Story",
+          "ctype": "miscellaneous",
+          "subtype": "typealias",
+          "rawtype": "StoryObj<NgxGraphMSAGLComponent>",
+          "file": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-msagl/ngx-graph-msagl.stories.ts",
           "deprecated": false,
           "deprecationMessage": "",
           "description": "",
@@ -807,6 +873,36 @@
       },
       {
         "filePath": "projects/swimlane/ngx-graph/src/stories/demos/components/ngx-graph-org-tree/ngx-graph-org-tree.stories.ts",
+        "type": "type alias",
+        "linktype": "miscellaneous",
+        "linksubtype": "typealias",
+        "name": "Story",
+        "coveragePercent": 0,
+        "coverageCount": "0/1",
+        "status": "low"
+      },
+      {
+        "filePath": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+        "type": "variable",
+        "linktype": "miscellaneous",
+        "linksubtype": "variable",
+        "name": "Demo",
+        "coveragePercent": 0,
+        "coverageCount": "0/1",
+        "status": "low"
+      },
+      {
+        "filePath": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
+        "type": "variable",
+        "linktype": "miscellaneous",
+        "linksubtype": "variable",
+        "name": "meta",
+        "coveragePercent": 0,
+        "coverageCount": "0/1",
+        "status": "low"
+      },
+      {
+        "filePath": "projects/swimlane/ngx-graph/src/stories/graph.stories.ts",
         "type": "type alias",
         "linktype": "miscellaneous",
         "linksubtype": "typealias",

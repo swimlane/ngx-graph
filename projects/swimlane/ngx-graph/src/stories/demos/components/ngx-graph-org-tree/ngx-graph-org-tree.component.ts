@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Edge, Node, Layout, NgxGraphModule } from '@swimlane/ngx-graph';
 import { DagreNodesOnlyLayout } from './customDagreNodesOnly';
 import * as shape from 'd3-shape';
@@ -16,8 +17,8 @@ export class Employee {
   standalone: true,
   selector: 'ngx-graph-org-tree',
   templateUrl: './ngx-graph-org-tree.component.html',
-  styleUrls: ['./ngx-graph-org-tree.component.scss'],
-  imports: [NgxGraphModule]
+  styleUrls: ['./ngx-graph-org-tree.component.css'],
+  imports: [NgxGraphModule, CommonModule]
 })
 export class NgxGraphOrgTreeComponent implements OnInit {
   @Input() employees: Employee[] = [];

@@ -3,16 +3,16 @@
   height: inherit;
   width: inherit;
 
-  .cardContainer {
+  & .cardContainer {
     height: 100;
     width: 150;
     display: block;
 
-    .name {
+    & .name {
       font-size: 24px;
     }
 
-    label {
+    & label {
       display: block;
       text-align: center;
       font-size: 20px;
@@ -21,14 +21,14 @@
     }
   }
 
-  .linkMidpoint {
-    ellipse {
+  & .linkMidpoint {
+    & ellipse {
       fill: white;
       stroke: black;
       stroke-width: 1;
     }
 
-    text {
+    & text {
       stroke: transparent;
       fill: black;
       text-anchor: middle;
