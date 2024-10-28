@@ -1,6 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Edge, Node, Layout, NgxGraphModule } from '@swimlane/ngx-graph';
+import type { Edge, Node, Layout } from '@swimlane/ngx-graph';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { DagreNodesOnlyLayout } from './customDagreNodesOnly';
 import * as shape from 'd3-shape';
 

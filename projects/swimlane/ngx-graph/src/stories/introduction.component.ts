@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Edge, Node, NgxGraphModule } from '@swimlane/ngx-graph';
+import type { Edge, Node } from '@swimlane/ngx-graph';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'graph-intro',

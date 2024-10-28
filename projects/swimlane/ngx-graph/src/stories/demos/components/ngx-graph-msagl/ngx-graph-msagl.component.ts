@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Layout, NgxGraphModule } from '@swimlane/ngx-graph';
+import type { Layout } from '@swimlane/ngx-graph';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { MSAGLLayout } from './msaglLayout';
 
 import * as shape from 'd3-shape';

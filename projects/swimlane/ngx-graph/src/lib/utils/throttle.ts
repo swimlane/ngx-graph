@@ -7,11 +7,10 @@
  * @param {*}      [options]
  * @returns
  */
-export function throttle(func: any, wait: number, options?: any) {
+export function throttle(context: any, func: any, wait: number, options?: any) {
   options = options || {};
-  let context;
-  let args;
-  let result;
+  let args: any;
+  let result: any;
   let timeout = null;
   let previous = 0;
 
@@ -29,7 +28,6 @@ export function throttle(func: any, wait: number, options?: any) {
     }
 
     const remaining = wait - (now - previous);
-    context = this;
     args = _arguments;
 
     if (remaining <= 0) {
@@ -67,7 +65,7 @@ export function throttleable(duration: number, options?: any) {
         Object.defineProperty(this, key, {
           configurable: true,
           enumerable: descriptor.enumerable,
-          value: throttle(descriptor.value, duration, options)
+          value: throttle(this, descriptor.value, duration, options)
         });
 
         return this[key];

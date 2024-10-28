@@ -1,9 +1,9 @@
 {
   "root": true,
+  "extends": ["@swimlane", "prettier"],
   "overrides": [
     {
       "files": ["*.ts"],
-      "extends": ["@swimlane", "prettier"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": ["./tsconfig.json"]
@@ -21,7 +21,9 @@
         "@angular-eslint/component-class-suffix": "off",
         "@typescript-eslint/no-inferrable-types": "off",
         "@angular-eslint/no-input-rename": "off",
-        "@angular-eslint/no-output-native": "off"
+        "@angular-eslint/no-output-native": "off",
+        "@typescript-eslint/consistent-type-imports": "off",
+        "@typescript-eslint/no-duplicate-enum-values": "off"
       }
     }
   ]

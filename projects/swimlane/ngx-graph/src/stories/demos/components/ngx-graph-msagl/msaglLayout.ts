@@ -1,7 +1,6 @@
-import { Graph, Layout, Edge } from '@swimlane/ngx-graph';
+import type { Graph, Layout, Edge } from '@swimlane/ngx-graph';
 import {
   Node,
-  GeomGraph,
   SugiyamaLayoutSettings,
   interpolateICurve,
   LayerDirectionEnum,
@@ -9,9 +8,9 @@ import {
   GeomNode,
   CurveFactory,
   layoutGraphWithSugiayma,
-  Point,
-  GeomEdge
+  Point
 } from 'msagl-js';
+import type { GeomGraph, GeomEdge } from 'msagl-js';
 
 const DEFAULT_EDGE_NAME = '\x00';
 const EDGE_KEY_DELIM = '\x01';

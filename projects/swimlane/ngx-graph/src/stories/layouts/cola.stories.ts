@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 // import { expect, userEvent, within } from '@storybook/test';
 
-import { ColaLayoutComponent, ColaClusterLayoutComponent } from './cola.component';
+import { ColaLayoutComponent } from './cola.component';
+import type { ColaClusterLayoutComponent } from './cola.component';
 
 const meta: Meta<ColaLayoutComponent> = {
   title: 'Cola',

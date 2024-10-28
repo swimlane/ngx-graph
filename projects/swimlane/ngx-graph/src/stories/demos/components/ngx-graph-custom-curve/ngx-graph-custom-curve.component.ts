@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Layout, Edge, Node, NgxGraphModule } from '@swimlane/ngx-graph';
+import type { Layout, Edge, Node } from '@swimlane/ngx-graph';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { DagreNodesOnlyLayout } from './customDagreNodesOnly';
 import { stepRound } from './customStepCurved';
 

@@ -1,4 +1,5 @@
-import { Meta, applicationConfig, StoryObj } from '@storybook/angular';
+import type { Meta, StoryObj } from '@storybook/angular';
+import { applicationConfig } from '@storybook/angular';
 // import { expect, userEvent, within } from '@storybook/test';
 import { importProvidersFrom } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -64,7 +65,6 @@ export const Demo: Story = {
     deferDisplayUntilPosition: false,
     centerNodesOnPositionChange: true,
     enablePreUpdateTransform: true,
-    animations: true,
     miniMapPosition: MiniMapPosition.UpperRight,
     zoomSpeed: 0.1,
     minZoomLevel: 0.1,

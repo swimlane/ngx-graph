@@ -17,16 +17,22 @@ Step.prototype = {
   lineEnd() {
     if (0 < this._t && this._t < 1 && this._point === 2) this._context.lineTo(this._x, this._y);
     if (this._line || (this._line !== 0 && this._point === 1)) this._context.closePath();
-    // tslint:disable-next-line: ban-comma-operator
-    if (this._line >= 0) (this._t = 1 - this._t), (this._line = 1 - this._line);
+    if (this._line >= 0) {
+      this._t = 1 - this._t;
+      this._line = 1 - this._line;
+    }
   },
-  point(x, y) {
+  point(x: number, y: number) {
     x = +x;
     y = +y;
     switch (this._point) {
       case 0:
         this._point = 1;
-        this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y);
+        if (this._line) {
+          this._context.lineTo(x, y);
+        } else {
+          this._context.moveTo(x, y);
+        }
         break;
       case 1:
         this._point = 2;
@@ -62,8 +68,9 @@ Step.prototype = {
         break;
       }
     }
-    // tslint:disable-next-line: ban-comma-operator
-    (this._x = x), (this._y = y);
+
+    this._x = x;
+    this._y = y;
   }
 };
 
