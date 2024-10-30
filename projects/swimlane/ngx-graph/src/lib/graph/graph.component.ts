@@ -14,7 +14,6 @@ import {
   Output,
   QueryList,
   TemplateRef,
-  ViewChild,
   ViewChildren,
   ViewEncapsulation,
   NgZone,
@@ -27,7 +26,7 @@ import * as shape from 'd3-shape';
 import * as ease from 'd3-ease';
 import 'd3-transition';
 import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { first, debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -138,7 +137,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
   @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
 
-  @ViewChild('nodeGroup') nodeGroupRef: ElementRef;
   @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
   @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
 
@@ -420,7 +418,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     // Recalculate the layout
     const result = (this.layout as Layout).run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
-
     this.graphSubscription.add(
       result$.subscribe(graph => {
         this.graph = graph;
@@ -552,26 +549,19 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
     this.applyNodeDimensions();
     this.redrawLines();
-    this.updateGraphDims();
-    this.updateTransform();
     this.updateMinimap();
 
     requestAnimationFrame(() => {
       this.applyNodeDimensions();
       this.redrawLines();
-      this.updateGraphDims();
-      this.updateTransform();
+      this.updateMinimap();
 
       if (this.autoZoom) {
-        this.zoomToFit();
-      }
-
-      if (this.autoCenter) {
+        this.zoomToFit({ autoCenter: this.autoCenter ? this.autoCenter : false });
+      } else if (this.autoCenter) {
         // Auto-center when rendering
         this.center();
       }
-
-      console.log('output', this.hasDims());
       this.stateChange.emit({ state: NgxGraphStates.Output });
     });
 
@@ -681,7 +671,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-            let maxTextDims;
+            let maxTextDims: { width: number; height: number };
             try {
               for (const textElem of nativeElement.getElementsByTagName('text')) {
                 const currentBBox = textElem.getBBox();
@@ -754,7 +744,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  calcDominantBaseline(link): void {
+  calcDominantBaseline(link: any): void {
     const firstPoint = link.points[0];
     const lastPoint = link.points[link.points.length - 1];
     link.oldTextPath = link.textPath;
@@ -789,7 +779,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  onZoom($event: WheelEvent, direction): void {
+  onZoom($event: WheelEvent, direction: string): void {
     if (this.enableTrackpadSupport && !$event.ctrlKey) {
       this.pan($event.deltaX * -1, $event.deltaY * -1);
       return;
@@ -1092,7 +1082,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  onTouchEnd(event: any) {
+  onTouchEnd() {
     this.isPanning = false;
   }
 
@@ -1155,7 +1145,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Center the graph in the viewport
    */
   center(): void {
-    this.updateGraphDims();
     this.panTo(this.graphDims.width / 2, this.graphDims.height / 2);
   }
 
@@ -1358,11 +1347,24 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
+   * Checks if all clusters have dimension
+   */
+  public hasClusterDims(): boolean {
+    return this.graph.clusters?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+  }
+
+  /**
    * Checks if the graph and all nodes have dimension.
    */
   public hasDims(): boolean {
     return (
-      this.hasGraphDims() && this.hasNodeDims() && (this.compoundNodes?.length ? this.hasCompoundNodeDims() : true)
+      this.hasGraphDims() &&
+      this.hasNodeDims() &&
+      (this.compoundNodes?.length
+        ? this.hasCompoundNodeDims()
+        : true || this.clusters?.length
+        ? this.hasClusterDims()
+        : true)
     );
   }
 
@@ -1381,13 +1383,5 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
     });
     this.resizeSubscription = subscription;
-  }
-
-  calculateNodeGroupDimensions() {
-    const nodeElement = this.nodeGroupRef.nativeElement;
-    return {
-      width: nodeElement.getBoundingClientRect().width,
-      height: nodeElement.getBoundingClientRect().height
-    };
   }
 }

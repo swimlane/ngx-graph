@@ -12,7 +12,7 @@
       *ngIf="initialized && graph"
       [attr.transform]="transform"
       (touchstart)="onTouchStart($event)"
-      (touchend)="onTouchEnd($event)"
+      (touchend)="onTouchEnd()"
       class="graph chart"
     >
       <defs>
