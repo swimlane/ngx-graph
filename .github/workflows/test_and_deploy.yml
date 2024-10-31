@@ -7,26 +7,29 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4.2.0
+
+      - name: Setup Node.js
+        run: actions/setup-node@v3
         with:
           node-version: 20.x
-          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install Yarn
-        run: npm install -g yarn@4
+        run: corepack prepare yarn@4.5.0 --activate
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Build
-        run: |
-          node --max-old-space-size=4096 yarn build:storybook
+        run: yarn build:storybook
         env:
           CI: true
 
       - name: Test
-        run: |
-          node --max-old-space-size=4096 yarn ci
+        run: yarn ci
         env:
           CI: true
 
