@@ -1360,11 +1360,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     return (
       this.hasGraphDims() &&
       this.hasNodeDims() &&
-      (this.compoundNodes?.length
-        ? this.hasCompoundNodeDims()
-        : true || this.clusters?.length
-        ? this.hasClusterDims()
-        : true)
+      ((this.compoundNodes?.length ? this.hasCompoundNodeDims() : true) ||
+        (this.clusters?.length ? this.hasClusterDims() : true))
     );
   }
 
