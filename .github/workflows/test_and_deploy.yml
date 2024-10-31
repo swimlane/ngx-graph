@@ -2,11 +2,12 @@ name: Build, Test, and Deploy
 
 on: [push]
 jobs:
-  run:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
