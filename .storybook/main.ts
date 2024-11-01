@@ -29,6 +29,9 @@ const config: StorybookConfig = {
   },
   core: {
     builder: '@storybook/builder-webpack5'
+  },
+  typescript: {
+    check: false
   }
 };
 export default config;

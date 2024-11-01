@@ -1,18 +1,18 @@
 {
-  "pipes": [],
-  "interfaces": [],
-  "injectables": [],
-  "guards": [],
-  "interceptors": [],
-  "classes": [],
-  "directives": [],
-  "components": [],
-  "modules": [],
-  "miscellaneous": [],
-  "routes": [],
-  "coverage": {
-    "count": 0,
-    "status": "low",
-    "files": []
-  }
+    "pipes": [],
+    "interfaces": [],
+    "injectables": [],
+    "guards": [],
+    "interceptors": [],
+    "classes": [],
+    "directives": [],
+    "components": [],
+    "modules": [],
+    "miscellaneous": [],
+    "routes": [],
+    "coverage": {
+        "count": 0,
+        "status": "low",
+        "files": []
+    }
 }
