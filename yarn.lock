@@ -5252,6 +5252,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-array@npm:^3":
+  version: 3.2.1
+  resolution: "@types/d3-array@npm:3.2.1"
+  checksum: 10c0/38bf2c778451f4b79ec81a2288cb4312fe3d6449ecdf562970cc339b60f280f31c93a024c7ff512607795e79d3beb0cbda123bb07010167bce32927f71364bca
+  languageName: node
+  linkType: hard
+
 "@types/d3-ease@npm:^1.0.8":
   version: 1.0.13
   resolution: "@types/d3-ease@npm:1.0.13"
@@ -5522,21 +5529,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:^22.0.0, @types/node@npm:^22.5.5":
+"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:^22.0.0, @types/node@npm:^22.5.5, @types/node@npm:^22.8.6":
   version: 22.8.6
   resolution: "@types/node@npm:22.8.6"
   dependencies:
     undici-types: "npm:~6.19.8"
   checksum: 10c0/d3a11f2549234a91a4c5d0ff35ab4bdcb7ba34db4d3f1d189be39b8bd41c19aac98d117150a95a9c5a9d45b1014135477ea240b2b8317c86ae3d3cf1c3b3f8f4
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:22.7.3":
-  version: 22.7.3
-  resolution: "@types/node@npm:22.7.3"
-  dependencies:
-    undici-types: "npm:~6.19.2"
-  checksum: 10c0/0e579813528b0370454337a952f43b792cd12731e10fdca0fdb627158e980c1219bba99e9048c134b6a19325d817016059afe016ccd372326c838a1b85a51574
   languageName: node
   linkType: hard
 
@@ -8246,7 +8244,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"d3-array@npm:2 - 3, d3-array@npm:2.10.0 - 3, d3-array@npm:2.5.0 - 3, d3-array@npm:3, d3-array@npm:^3.2.0":
+"d3-array@npm:2 - 3, d3-array@npm:2.10.0 - 3, d3-array@npm:2.5.0 - 3, d3-array@npm:3, d3-array@npm:^3.2.0, d3-array@npm:^3.2.4":
   version: 3.2.4
   resolution: "d3-array@npm:3.2.4"
   dependencies:
@@ -14664,6 +14662,7 @@ __metadata:
     "@storybook/test": "npm:^8.3.6"
     "@swimlane/eslint-config": "npm:^2.0.0"
     "@swimlane/prettier-config-swimlane": "npm:^3.0.2"
+    "@types/d3-array": "npm:^3"
     "@types/d3-ease": "npm:^1.0.8"
     "@types/d3-scale": "npm:^4"
     "@types/d3-selection": "npm:^1.4.1"
@@ -14673,7 +14672,7 @@ __metadata:
     "@types/jasminewd2": "npm:~2.0.3"
     "@types/mdast": "npm:^3.0.3"
     "@types/mocha": "npm:^10.0.9"
-    "@types/node": "npm:22.7.3"
+    "@types/node": "npm:^22.8.6"
     "@types/unist": "npm:^2.0.2"
     "@types/vfile": "npm:^4.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.12.1"
@@ -14686,6 +14685,7 @@ __metadata:
     angular-cli-ghpages: "npm:^0.6.2"
     core-js: "npm:^2.6.11"
     cross-env: "npm:^7.0.2"
+    d3-array: "npm:^3.2.4"
     d3-dispatch: "npm:^3.0.1"
     d3-ease: "npm:^3.0.1"
     d3-force: "npm:^3.0.0"
