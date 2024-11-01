@@ -1,9 +1,0 @@
-{
-  "extends": "../../../tsconfig.json",
-  "compilerOptions": {
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"]
-  },
-  "files": ["src/**"],
-  "exclude": ["**/*.spec.ts", "**/*.d.ts"]
-}
