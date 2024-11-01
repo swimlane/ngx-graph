@@ -165,5 +165,8 @@
     "extends": [
       "plugin:storybook/recommended"
     ]
+  },
+  "resolutions": {
+    "typescript": "5.4.5"
   }
 }
