@@ -1,8 +1,6 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["node"],
-    "typeRoots": ["../node_modules/@types"],
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true
   },

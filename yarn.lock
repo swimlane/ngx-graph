@@ -5081,6 +5081,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/theming@npm:^8.4.1":
+  version: 8.4.1
+  resolution: "@storybook/theming@npm:8.4.1"
+  peerDependencies:
+    storybook: ^8.2.0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
+  checksum: 10c0/77f9bf1a8b93625f9701fbec84fa9916b68a4906c140737f61be786e8f0fe22c841f7f2b4222cf1e3ca26b9f633d5a8e73d3dac7d8c109b29bf301e5b1be3cc8
+  languageName: node
+  linkType: hard
+
 "@swimlane/eslint-config@npm:^2.0.0":
   version: 2.0.0
   resolution: "@swimlane/eslint-config@npm:2.0.0"
@@ -5598,7 +5607,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.0.37":
+"@types/react@npm:*, @types/react@npm:^18, @types/react@npm:^18.0.37":
   version: 18.3.12
   resolution: "@types/react@npm:18.3.12"
   dependencies:
@@ -11741,6 +11750,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"http@npm:^0.0.1-security":
+  version: 0.0.1-security
+  resolution: "http@npm:0.0.1-security"
+  checksum: 10c0/c0354c2afb6027a80756a30b1fb06607608c0408d100a5e3610d762dd1a320cb2611b0c3cf5ccb969b80f839e2735237ecc9897841e936d098161c38ee153ee5
+  languageName: node
+  linkType: hard
+
 "https-browserify@npm:^1.0.0":
   version: 1.0.0
   resolution: "https-browserify@npm:1.0.0"
@@ -14574,6 +14590,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"net@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "net@npm:1.0.2"
+  checksum: 10c0/7cf9cf8f9c9a2bdadd9002e85da7bd509216ed84b76315aa903a51f15997e4844e7cb8c742f8af434d8cf431564c868d8565106004bbd9ce4223696c9b13d2fd
+  languageName: node
+  linkType: hard
+
 "ng-packagr@npm:~18.1.0":
   version: 18.1.0
   resolution: "ng-packagr@npm:18.1.0"
@@ -14660,6 +14683,7 @@ __metadata:
     "@storybook/blocks": "npm:^8.3.6"
     "@storybook/builder-webpack5": "npm:^8.3.6"
     "@storybook/test": "npm:^8.3.6"
+    "@storybook/theming": "npm:^8.4.1"
     "@swimlane/eslint-config": "npm:^2.0.0"
     "@swimlane/prettier-config-swimlane": "npm:^3.0.2"
     "@types/d3-array": "npm:^3"
@@ -14673,6 +14697,7 @@ __metadata:
     "@types/mdast": "npm:^3.0.3"
     "@types/mocha": "npm:^10.0.9"
     "@types/node": "npm:^22.8.6"
+    "@types/react": "npm:^18"
     "@types/unist": "npm:^2.0.2"
     "@types/vfile": "npm:^4.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.12.1"
@@ -14701,6 +14726,7 @@ __metadata:
     eslint-config-prettier: "npm:^8.5.0"
     eslint-plugin-security: "npm:^1.4.0"
     eslint-plugin-storybook: "npm:^0.10.1"
+    http: "npm:^0.0.1-security"
     husky: "npm:^4.2.4"
     jasmine-core: "npm:>=3.8.0"
     jasmine-spec-reporter: "npm:~5.0.0"
@@ -14714,6 +14740,7 @@ __metadata:
     mdast: "npm:^3.0.0"
     mermaid: "npm:^8.13.8"
     msagl-js: "npm:0.0.51"
+    net: "npm:^1.0.2"
     ng-packagr: "npm:~18.1.0"
     node-polyfill-webpack-plugin: "npm:^4.0.0"
     npm-run-all: "npm:^4.1.5"
@@ -14723,6 +14750,7 @@ __metadata:
     process: "npm:^0.11.10"
     protractor: "npm:~7.0.0"
     quick-lru: "npm:^4.0.1"
+    react: "npm:^18.3.1"
     remark-gfm: "npm:^4.0.0"
     rollup: "npm:4.14.3"
     rxjs: "npm:7.8.1"
@@ -16515,7 +16543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
+"react@npm:^16.8.0 || ^17.0.0 || ^18.0.0, react@npm:^18.3.1":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:

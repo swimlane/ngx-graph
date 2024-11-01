@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "target": "ES2022",
-    "typeRoots": ["node_modules/@types"],
+    "typeRoots": ["./node_modules/@types"],
     "lib": ["ES2022", "dom"],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -20,7 +20,7 @@
     },
     "types": ["node", "jasmine"]
   },
-  "include": ["./projects/**/*.ts", "**/*.d.ts", ".storybook/preview.ts", "**/*.spec.ts"],
+  "include": ["./projects/**/*.ts", "**/*.d.ts", ".storybook/*.ts", "**/*.spec.ts"],
   "exclude": ["**/*.e2e-spec.ts"],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true
