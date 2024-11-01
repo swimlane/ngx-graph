@@ -20,8 +20,8 @@
     },
     "types": ["node", "jasmine"]
   },
-  "include": ["./projects/**/*.ts", "**/*.d.ts", "./projects/swimlane/ngx-graph/.storybook/preview.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.e2e-spec.ts"],
+  "include": ["./projects/**/*.ts", "**/*.d.ts", ".storybook/preview.ts", "**/*.spec.ts"],
+  "exclude": ["**/*.e2e-spec.ts"],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true
   }
