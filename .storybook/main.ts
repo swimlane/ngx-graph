@@ -31,7 +31,8 @@ const config: StorybookConfig = {
     builder: '@storybook/builder-webpack5'
   },
   typescript: {
-    check: false
+    check: false,
+    skipCompiler: true
   }
 };
 export default config;
