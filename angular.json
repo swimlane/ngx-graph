@@ -40,7 +40,7 @@
           "builder": "@storybook/angular:start-storybook",
           "options": {
             "configDir": ".storybook",
-            "tsConfig": "./tsconfig.json",
+            "tsConfig": ".storybook/tsconfig.json",
             "browserTarget": "@swimlane/ngx-graph:build",
             "compodoc": true,
             "compodocArgs": ["-e", "json", "-d", ".", "projects/swimlane/ngx-graph"],
@@ -51,7 +51,7 @@
           "builder": "@storybook/angular:build-storybook",
           "options": {
             "configDir": ".storybook",
-            "tsConfig": "./tsconfig.json",
+            "tsConfig": ".storybook/tsconfig.json",
             "browserTarget": "@swimlane/ngx-graph:build",
             "compodoc": true,
             "compodocArgs": ["-e", "json", "-d", ".", "projects/swimlane/ngx-graph"],
