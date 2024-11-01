@@ -18,8 +18,10 @@
       "@swimlane/ngx-graph": ["projects/swimlane/ngx-graph/src/public_api"],
       "@swimlane/ngx-graph/*": ["projects/swimlane/ngx-graph/src/*"]
     },
-    "types": ["node"]
+    "types": ["node", "jasmine"]
   },
+  "include": ["./projects/**/*.ts", "**/*.d.ts", "./projects/swimlane/ngx-graph/.storybook/preview.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.e2e-spec.ts"],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true
   }
