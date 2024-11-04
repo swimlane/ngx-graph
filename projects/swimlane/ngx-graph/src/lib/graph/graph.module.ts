@@ -4,7 +4,7 @@ import { MouseWheelDirective } from './mouse-wheel.directive';
 import { LayoutService } from './layouts/layout.service';
 import { CommonModule } from '@angular/common';
 import { VisibilityObserver } from '../utils/visibility-observer';
-export { GraphComponent };
+export { GraphComponent, LayoutService };
 
 @NgModule({
   imports: [CommonModule],

@@ -61,7 +61,9 @@ export interface NgxGraphZoomOptions {
 export enum NgxGraphStates {
   Init = 'init',
   Subscribe = 'subscribe',
-  Transform = 'transform'
+  Transform = 'transform',
+  /* eslint-disable @typescript-eslint/no-shadow */
+  Output = 'output'
 }
 
 export interface NgxGraphStateChangeEvent {
@@ -118,7 +120,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() view: [number, number];
   @Input() scheme: any = 'cool';
   @Input() customColors: any;
-  @Input() animations: boolean = true;
   @Input() deferDisplayUntilPosition: boolean = false;
   @Input() centerNodesOnPositionChange = true;
   @Input() enablePreUpdateTransform = true;
@@ -265,13 +266,14 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   ngOnChanges(changes: SimpleChanges): void {
     this.basicUpdate();
-
-    const { layout, layoutSettings, nodes, clusters, links, compoundNodes } = changes;
+    const { layoutSettings } = changes;
     this.setLayout(this.layout);
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
     }
-    this.update();
+    if (this.layout && this.nodes.length && this.links.length) {
+      this.update();
+    }
   }
 
   setLayout(layout: string | Layout): void {
@@ -385,25 +387,22 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           n.hidden = true;
         }
       }
-
       n.data = n.data ? n.data : {};
       return n;
     };
 
+    const initializeEdge = (e: Edge) => {
+      if (!e.id) {
+        e.id = id();
+      }
+      return e;
+    };
+
     this.graph = {
-      nodes: this.nodes.length > 0 ? [...this.nodes].map(initializeNode) : [],
-      clusters: this.clusters && this.clusters.length > 0 ? [...this.clusters].map(initializeNode) : [],
-      compoundNodes:
-        this.compoundNodes && this.compoundNodes.length > 0 ? [...this.compoundNodes].map(initializeNode) : [],
-      edges:
-        this.links.length > 0
-          ? [...this.links].map(e => {
-              if (!e.id) {
-                e.id = id();
-              }
-              return e;
-            })
-          : []
+      nodes: this.nodes.map(n => initializeNode(n)),
+      clusters: this.clusters.map(n => initializeNode(n)),
+      compoundNodes: this.compoundNodes.map(n => initializeNode(n)),
+      edges: this.links.map(e => initializeEdge(e))
     };
 
     requestAnimationFrame(() => this.draw());
@@ -416,14 +415,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   draw(): void {
-    if (!this.layout || typeof this.layout === 'string') {
-      return;
-    }
-    // Calc view dims for the nodes
-    this.applyNodeDimensions();
-
-    // Recalc the layout
-    const result = this.layout.run(this.graph);
+    // Recalculate the layout
+    const result = (this.layout as Layout).run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
     this.graphSubscription.add(
       result$.subscribe(graph => {
@@ -431,19 +424,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         this.tick();
       })
     );
-
-    if (this.graph.nodes.length === 0 && this.graph.compoundNodes?.length === 0) {
-      return;
-    }
-
-    result$.pipe(first()).subscribe(() => this.applyNodeDimensions());
   }
 
   tick() {
     // Transposes view options to the node
     const oldNodes: Set<string> = new Set();
+    const oldClusters: Set<string> = new Set();
+    const oldCompoundNodes: Set<string> = new Set();
 
-    this.graph.nodes.map(n => {
+    this.graph.nodes.forEach(n => {
       n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
         n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
       })`;
@@ -457,10 +446,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       oldNodes.add(n.id);
     });
 
-    const oldClusters: Set<string> = new Set();
-    const oldCompoundNodes: Set<string> = new Set();
-
-    (this.graph.clusters || []).map(n => {
+    (this.graph.clusters || []).forEach(n => {
       n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
         n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
       })`;
@@ -474,7 +460,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       oldClusters.add(n.id);
     });
 
-    (this.graph.compoundNodes || []).map(n => {
+    (this.graph.compoundNodes || []).forEach(n => {
       n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
         n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
       })`;
@@ -561,18 +547,24 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     }
 
+    this.applyNodeDimensions();
+    this.redrawLines();
     this.updateMinimap();
 
-    if (this.autoZoom) {
-      this.zoomToFit();
-    }
+    requestAnimationFrame(() => {
+      this.applyNodeDimensions();
+      this.redrawLines();
+      this.updateMinimap();
 
-    if (this.autoCenter) {
-      // Auto-center when rendering
-      this.center();
-    }
+      if (this.autoZoom) {
+        this.zoomToFit({ autoCenter: this.autoCenter ? this.autoCenter : false });
+      } else if (this.autoCenter) {
+        // Auto-center when rendering
+        this.center();
+      }
+      this.stateChange.emit({ state: NgxGraphStates.Output });
+    });
 
-    requestAnimationFrame(() => this.redrawLines());
     this.cd.markForCheck();
   }
 
@@ -640,7 +632,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   applyNodeDimensions(): void {
     if (this.nodeElements && this.nodeElements.length) {
-      this.nodeElements.map(elem => {
+      this.nodeElements.forEach(elem => {
         const nativeElement = elem.nativeElement;
         const node = this.graph.nodes.find(n => n.id === nativeElement.id);
         if (!node) {
@@ -679,7 +671,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         } else {
           // calculate the width
           if (nativeElement.getElementsByTagName('text').length) {
-            let maxTextDims;
+            let maxTextDims: { width: number; height: number };
             try {
               for (const textElem of nativeElement.getElementsByTagName('text')) {
                 const currentBBox = textElem.getBBox();
@@ -722,11 +714,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   redrawLines(_animate = this.animate): void {
-    this.linkElements.map(linkEl => {
+    this.linkElements.forEach(linkEl => {
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (edge) {
-        const linkSelection = select(linkEl.nativeElement).select('.line');
+        const linkSelection: any = select(linkEl.nativeElement).select('.line');
         linkSelection
           .attr('d', edge.oldLine)
           .transition()
@@ -734,7 +726,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           .duration(_animate ? 500 : 0)
           .attr('d', edge.line);
 
-        const textPathSelection = select(this.el.nativeElement).select(`#${edge.id}`);
+        const textPathSelection: any = select(this.el.nativeElement).select(`#${edge.id}`);
         textPathSelection
           .attr('d', edge.oldTextPath)
           .transition()
@@ -752,7 +744,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  calcDominantBaseline(link): void {
+  calcDominantBaseline(link: any): void {
     const firstPoint = link.points[0];
     const lastPoint = link.points[link.points.length - 1];
     link.oldTextPath = link.textPath;
@@ -787,7 +779,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  onZoom($event: WheelEvent, direction): void {
+  onZoom($event: WheelEvent, direction: string): void {
     if (this.enableTrackpadSupport && !$event.ctrlKey) {
       this.pan($event.deltaX * -1, $event.deltaY * -1);
       return;
@@ -1090,7 +1082,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  onTouchEnd(event: any) {
+  onTouchEnd() {
     this.isPanning = false;
   }
 
@@ -1160,6 +1152,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Zooms to fit the entire graph
    */
   zoomToFit(zoomOptions?: NgxGraphZoomOptions): void {
+    this.dims = calculateViewDimensions({
+      width: this.width,
+      height: this.height
+    });
     this.updateGraphDims();
     const heightZoom = this.dims.height / this.graphDims.height;
     const widthZoom = this.dims.width / this.graphDims.width;
@@ -1351,10 +1347,22 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
+   * Checks if all clusters have dimension
+   */
+  public hasClusterDims(): boolean {
+    return this.graph.clusters?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+  }
+
+  /**
    * Checks if the graph and all nodes have dimension.
    */
   public hasDims(): boolean {
-    return this.hasGraphDims() && this.hasNodeDims() && this.hasCompoundNodeDims();
+    return (
+      this.hasGraphDims() &&
+      this.hasNodeDims() &&
+      ((this.compoundNodes?.length ? this.hasCompoundNodeDims() : true) ||
+        (this.clusters?.length ? this.hasClusterDims() : true))
+    );
   }
 
   protected unbindEvents(): void {
