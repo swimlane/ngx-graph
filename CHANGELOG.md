@@ -1,8 +1,18 @@
 # Changelog
 
+## 9.0.0
+
+- Breaking: Fix issues with load due to asynchronous node dimension handling
+- Chore: Updated peer dependencies to support angular 18 and newer dependencies
+- Chore: Updated documentation portal to run on Storybook
+
+This release causes possible breaking changes to how ngx-graph displays on load. The changes should make ngx-graph load more reliably.
+
+If you have developed in the repository previously, you may need to delete your node_modules and run yarn after updating to the latest on master. This repository switched from npm to yarn. Multiple development commands in the package.json have moved. See the README.md for an up to date reference.
+
 ## 8.4.0
 
-- Fix; Fixes a styling issue when using ngx-graph and ngx-charts on the same page
+- Fix: Fixes a styling issue when using ngx-graph and ngx-charts on the same page
 - Chore: Updated peer dependencies to support new angular versions
 
 ## 8.3.0
