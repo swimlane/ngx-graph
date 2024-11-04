@@ -13,13 +13,12 @@
     "prettier": "prettier --write \"projects/**/*.{js,ts,scss,css,md,mdx,json}\"",
     "prettier:ci": "prettier --check  \"projects/**/*.{js,ts,scss,css,md,mdx,json}\"",
     "copy-files": "cp README.md projects/dist/ngx-graph/README.md && cp LICENSE projects/dist/ngx-graph/LICENSE",
-    "build-docs": "cross-env NODE_ENV=production ng build --configuration production --no-aot --no-build-optimizer --base-href=\"/ngx-graph/\"",
     "ci": "run-s lint prettier:ci",
     "preversion": "npm run ci",
     "package": "run-s build:lib copy-files",
     "prepublish:lib": "npm run package",
     "publish:lib": "npm publish projects/dist/ngx-graph",
-    "publish": "run-s publish:lib deploy-docs",
+    "publish": "run-s publish:lib",
     "prepublishOnly": "echo \"This is the workspace -- you probably meant run 'npm run publish'.\" && exit 1"
   },
   "license": "MIT",
@@ -143,6 +142,6 @@
     ]
   },
   "resolutions": {
-    "typescript": "5.4.5"
+    "typescript": "5.5.2"
   }
 }
