@@ -1,6 +1,6 @@
 {
   "name": "@swimlane/ngx-graph",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "Graph visualization for angular",
   "repository": {
     "type": "git",
@@ -30,11 +30,11 @@
   },
   "homepage": "https://github.com/swimlane/ngx-graph#readme",
   "peerDependencies": {
-    "@angular/animations": ">=18.0.0",
-    "@angular/common": ">=18.0.0",
-    "@angular/core": ">=18.0.0",
-    "@angular/cdk": ">=18.0.0",
-    "rxjs": "^7.8.1"
+    "@angular/animations": "15.x || 16.x || 17.x || 18.x",
+    "@angular/common": "15.x || 16.x || 17.x || 18.x",
+    "@angular/core": "15.x || 16.x || 17.x || 18.x",
+    "@angular/cdk": "15.x || 16.x || 17.x || 18.x",
+    "rxjs": "7.x"
   },
   "dependencies": {
     "d3-dispatch": "^3.0.1",
