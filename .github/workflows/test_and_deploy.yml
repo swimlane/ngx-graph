@@ -35,9 +35,11 @@ jobs:
 
       - name: Prepare and deploy
         if: ${{ github.ref == 'refs/heads/master' }}
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/storybook/@swimlane/ngx-graph
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ./dist/storybook/@swimlane/ngx-graph
+          clean: true
         env:
           CI: true
