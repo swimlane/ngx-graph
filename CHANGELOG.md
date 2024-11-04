@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.0.1
+
+- Fix: Restore versions in package.json to last 4 Angular
+
 ## 9.0.0
 
 - Breaking: Fix issues with load due to asynchronous node dimension handling
