@@ -13703,7 +13703,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     remark-gfm: "npm:^4.0.0"
     rollup: "npm:4.14.3"
-    rxjs: "npm:7.8.1"
+    rxjs: "npm:^7.8.1"
     start-server-and-test: "npm:^1.10.11"
     storybook: "npm:^8.4.1"
     transformation-matrix: "npm:^2.16.1"
