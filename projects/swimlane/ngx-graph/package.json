@@ -30,10 +30,10 @@
   },
   "homepage": "https://github.com/swimlane/ngx-graph#readme",
   "peerDependencies": {
-    "@angular/animations": "15.x || 16.x || 17.x || 18.x",
-    "@angular/common": "15.x || 16.x || 17.x || 18.x",
-    "@angular/core": "15.x || 16.x || 17.x || 18.x",
-    "@angular/cdk": "15.x || 16.x || 17.x || 18.x",
+    "@angular/animations": "15.x || 16.x || 17.x || 18.x || 19.x",
+    "@angular/common": "15.x || 16.x || 17.x || 18.x || 19.x",
+    "@angular/core": "15.x || 16.x || 17.x || 18.x || 19.x",
+    "@angular/cdk": "15.x || 16.x || 17.x || 18.x || 19.x",
     "rxjs": "7.x"
   },
   "dependencies": {
