@@ -74,7 +74,7 @@
     "@storybook/addon-interactions": "^8.4.1",
     "@storybook/addon-links": "^8.4.1",
     "@storybook/addon-onboarding": "^8.4.1",
-    "@storybook/angular": "^8.4.1",
+    "@storybook/angular": "^8.5.2",
     "@storybook/blocks": "^8.4.1",
     "@storybook/builder-webpack5": "^8.4.1",
     "@storybook/test": "^8.4.1",
