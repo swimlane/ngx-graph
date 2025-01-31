@@ -3,7 +3,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'dagre-layout',
-  standalone: true,
   imports: [NgxGraphModule],
   template: `
     <ngx-graph

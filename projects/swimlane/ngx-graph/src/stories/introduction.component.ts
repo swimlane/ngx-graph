@@ -4,7 +4,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'graph-intro',
-  standalone: true,
   imports: [NgxGraphModule],
   template: `
     <ngx-graph class="chart-container" [view]="view" [showMiniMap]="true" [links]="links" [nodes]="nodes"> </ngx-graph>

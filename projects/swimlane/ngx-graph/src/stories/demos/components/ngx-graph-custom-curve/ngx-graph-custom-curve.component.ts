@@ -5,7 +5,6 @@ import { DagreNodesOnlyLayout } from './customDagreNodesOnly';
 import { stepRound } from './customStepCurved';
 
 @Component({
-  standalone: true,
   selector: 'ngx-graph-custom-curve',
   templateUrl: './ngx-graph-custom-curve.component.html',
   imports: [NgxGraphModule]
