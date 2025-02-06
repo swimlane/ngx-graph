@@ -80,7 +80,8 @@ export interface NgxGraphStateChangeEvent {
     trigger('animationState', [
       ngTransition(':enter', [style({ opacity: 0 }), animate('500ms 100ms', style({ opacity: 1 }))])
     ])
-  ]
+  ],
+  standalone: false
 })
 export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() nodes: Node[] = [];

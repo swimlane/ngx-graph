@@ -7,7 +7,10 @@ import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
  * @export
  */
 // tslint:disable-next-line: directive-selector
-@Directive({ selector: '[mouseWheel]' })
+@Directive({
+  selector: '[mouseWheel]',
+  standalone: false
+})
 export class MouseWheelDirective {
   @Output()
   mouseWheelUp = new EventEmitter();

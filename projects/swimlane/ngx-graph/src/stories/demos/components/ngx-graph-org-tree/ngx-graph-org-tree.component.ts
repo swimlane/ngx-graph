@@ -16,7 +16,6 @@ export class Employee {
 }
 
 @Component({
-  standalone: true,
   selector: 'ngx-graph-org-tree',
   templateUrl: './ngx-graph-org-tree.component.html',
   styleUrls: ['./ngx-graph-org-tree.component.css'],

@@ -6,7 +6,6 @@ import { MSAGLLayout } from './msaglLayout';
 import * as shape from 'd3-shape';
 
 @Component({
-  standalone: true,
   selector: 'ngx-graph-msagl',
   templateUrl: './ngx-graph-msagl.component.html',
   styleUrls: ['./ngx-graph-msagl.component.css'],

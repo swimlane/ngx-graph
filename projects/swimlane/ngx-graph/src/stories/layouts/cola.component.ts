@@ -3,7 +3,6 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'cola-layout',
-  standalone: true,
   imports: [NgxGraphModule],
   template: `
     <ngx-graph
@@ -74,7 +73,6 @@ export class ColaLayoutComponent {}
 
 @Component({
   selector: 'cola-clusterlayout',
-  standalone: true,
   imports: [NgxGraphModule],
   template: `
     <ngx-graph
