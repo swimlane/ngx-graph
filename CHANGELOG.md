@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## HEAD (unreleased)
+## 10.0.0-alpha.1 (HEAD) (unreleased)
+
+- Fix: Prevent click event on a node when dragged
+
+## 10.0.0-alpha.0 (unreleased)
 
 - Enhancement: Support Angular 19, `standalone` now required in all `@Component`
 

@@ -144,6 +144,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   public chartWidth: any;
 
   private isMouseMoveCalled: boolean = false;
+  private isMouseMoveCalledOnNode: boolean = false;
 
   graphSubscription: Subscription = new Subscription();
   colors: ColorHelper;
@@ -888,6 +889,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (!this.draggingEnabled) {
       return;
     }
+    this.isMouseMoveCalledOnNode = true;
     const node = this.draggingNode;
     if (this.layout && typeof this.layout !== 'string' && this.layout.onDrag) {
       this.layout.onDrag(node, event);
@@ -950,7 +952,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onClick(event: any): void {
-    this.select.emit(event);
+    if (!this.isMouseMoveCalledOnNode) {
+      this.select.emit(event);
+    }
   }
 
   /**
@@ -1111,6 +1115,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (!this.draggingEnabled) {
       return;
     }
+    this.isMouseMoveCalledOnNode = false;
     this.isDragging = true;
     this.draggingNode = node;
 
