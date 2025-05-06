@@ -17,7 +17,7 @@
     "preversion": "npm run ci",
     "package": "run-s build:lib copy-files",
     "prepublish:lib": "npm run package",
-    "publish:lib": "npm publish projects/dist/ngx-graph",
+    "publish:lib": "npm publish ./dist/ngx-graph",
     "publish": "run-s publish:lib",
     "prepublishOnly": "echo \"This is the workspace -- you probably meant run 'npm run publish'.\" && exit 1"
   },
