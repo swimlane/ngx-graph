@@ -63,7 +63,7 @@
     "@angular-eslint/eslint-plugin-template": "~19.0.2",
     "@angular-eslint/schematics": "~19.0.2",
     "@angular-eslint/template-parser": "~19.0.2",
-    "@angular/cli": "19.1.5",
+    "@angular/cli": "20.0.3",
     "@angular/compiler-cli": "~19.1.4",
     "@angular/language-service": "~19.1.4",
     "@babel/core": "^7.7.7",
@@ -132,7 +132,7 @@
     }
   },
   "volta": {
-    "node": "20.17.0",
+    "node": "20.19.0",
     "yarn": "4.5.1"
   },
   "packageManager": "yarn@4.5.1",
