@@ -1,14 +1,5 @@
 Bundled license information:
 
-filesize/dist/filesize.cjs:
-  /**
-   * filesize
-   *
-   * @copyright 2024 Jason Mulligan <jason.mulligan@avoidwork.com>
-   * @license BSD-3-Clause
-   * @version 10.1.6
-   */
-
 react/cjs/react-jsx-runtime.production.min.js:
   /**
    * @license React
@@ -18,6 +9,15 @@ react/cjs/react-jsx-runtime.production.min.js:
    *
    * This source code is licensed under the MIT license found in the
    * LICENSE file in the root directory of this source tree.
+   */
+
+filesize/dist/filesize.esm.js:
+  /**
+   * filesize
+   *
+   * @copyright 2024 Jason Mulligan <jason.mulligan@avoidwork.com>
+   * @license BSD-3-Clause
+   * @version 10.1.6
    */
 
 @chromatic-com/storybook/dist/manager.mjs:
