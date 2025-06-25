@@ -23,17 +23,17 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@angular/animations": "~19.1.4",
-    "@angular/cdk": "~19.1.2",
-    "@angular/common": "~19.1.4",
-    "@angular/compiler": "~19.1.4",
-    "@angular/core": "~19.1.4",
-    "@angular/elements": "~19.1.4",
+    "@angular/animations": "~20.0.4",
+    "@angular/cdk": "~20.0.3",
+    "@angular/common": "~20.0.4",
+    "@angular/compiler": "~20.0.4",
+    "@angular/core": "~20.0.4",
+    "@angular/elements": "~20.0.4",
     "@angular/flex-layout": "15.0.0-beta.42",
-    "@angular/forms": "~19.1.4",
-    "@angular/platform-browser": "~19.1.4",
-    "@angular/platform-browser-dynamic": "~19.1.4",
-    "@angular/router": "~19.1.4",
+    "@angular/forms": "~20.0.4",
+    "@angular/platform-browser": "~20.0.4",
+    "@angular/platform-browser-dynamic": "~20.0.4",
+    "@angular/router": "~20.0.4",
     "d3-array": "^3.2.4",
     "d3-dispatch": "^3.0.1",
     "d3-ease": "^3.0.1",
@@ -54,18 +54,18 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "^0.1802.11",
-    "@angular-devkit/build-angular": "~19.1.5",
-    "@angular-devkit/core": "~19.1.5",
-    "@angular-devkit/schematics": "~19.1.5",
-    "@angular-eslint/builder": "~19.0.2",
-    "@angular-eslint/eslint-plugin": "~19.0.2",
-    "@angular-eslint/eslint-plugin-template": "~19.0.2",
-    "@angular-eslint/schematics": "~19.0.2",
-    "@angular-eslint/template-parser": "~19.0.2",
-    "@angular/cli": "19.1.5",
-    "@angular/compiler-cli": "~19.1.4",
-    "@angular/language-service": "~19.1.4",
+    "@angular-devkit/architect": "^0.2000.3",
+    "@angular-devkit/build-angular": "~20.0.3",
+    "@angular-devkit/core": "~20.0.3",
+    "@angular-devkit/schematics": "~20.0.3",
+    "@angular-eslint/builder": "~20.1.1",
+    "@angular-eslint/eslint-plugin": "~20.1.1",
+    "@angular-eslint/eslint-plugin-template": "~20.1.1",
+    "@angular-eslint/schematics": "~20.1.1",
+    "@angular-eslint/template-parser": "~20.1.1",
+    "@angular/cli": "20.0.3",
+    "@angular/compiler-cli": "~20.0.4",
+    "@angular/language-service": "~20.0.4",
     "@babel/core": "^7.7.7",
     "@chromatic-com/storybook": "^3.2.2",
     "@compodoc/compodoc": "^1.1.26",
@@ -114,7 +114,7 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
-    "ng-packagr": "~18.1.0",
+    "ng-packagr": "~20.0.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.0.4",
     "pretty-quick": "^2.0.1",
@@ -123,7 +123,7 @@
     "rollup": "4.14.3",
     "start-server-and-test": "^1.10.11",
     "storybook": "^8.4.1",
-    "typescript": "~5.5.2",
+    "typescript": "~5.8.3",
     "webpack": "5"
   },
   "husky": {
@@ -132,16 +132,16 @@
     }
   },
   "volta": {
-    "node": "20.17.0",
-    "yarn": "4.5.1"
+    "node": "22.16.0",
+    "yarn": "4.9.2"
   },
-  "packageManager": "yarn@4.5.1",
+  "packageManager": "yarn@4.9.2",
   "eslintConfig": {
     "extends": [
       "plugin:storybook/recommended"
     ]
   },
   "resolutions": {
-    "typescript": "5.5.2"
+    "typescript": "5.8.3"
   }
 }
