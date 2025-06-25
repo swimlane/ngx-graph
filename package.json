@@ -123,7 +123,7 @@
     "rollup": "4.14.3",
     "start-server-and-test": "^1.10.11",
     "storybook": "^8.4.1",
-    "typescript": "5.8.3",
+    "typescript": "~5.8.3",
     "webpack": "5"
   },
   "husky": {
@@ -132,10 +132,10 @@
     }
   },
   "volta": {
-    "node": "20.19.0",
-    "yarn": "4.5.1"
+    "node": "22.16.0",
+    "yarn": "4.9.2"
   },
-  "packageManager": "yarn@4.5.1",
+  "packageManager": "yarn@4.9.2",
   "eslintConfig": {
     "extends": [
       "plugin:storybook/recommended"
