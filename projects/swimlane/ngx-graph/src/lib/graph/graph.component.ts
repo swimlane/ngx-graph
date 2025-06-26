@@ -660,10 +660,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         }
 
         if (this.nodeMaxHeight) {
-          node.dimension.height = Math.max(node.dimension.height, this.nodeMaxHeight);
+          node.dimension.height = Math.min(node.dimension.height, this.nodeMaxHeight);
         }
         if (this.nodeMinHeight) {
-          node.dimension.height = Math.min(node.dimension.height, this.nodeMinHeight);
+          node.dimension.height = Math.max(node.dimension.height, this.nodeMinHeight);
         }
 
         if (this.nodeWidth) {
@@ -700,10 +700,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         }
 
         if (this.nodeMaxWidth) {
-          node.dimension.width = Math.max(node.dimension.width, this.nodeMaxWidth);
+          node.dimension.width = Math.min(node.dimension.width, this.nodeMaxWidth);
         }
         if (this.nodeMinWidth) {
-          node.dimension.width = Math.min(node.dimension.width, this.nodeMinWidth);
+          node.dimension.width = Math.max(node.dimension.width, this.nodeMinWidth);
         }
       });
     }
