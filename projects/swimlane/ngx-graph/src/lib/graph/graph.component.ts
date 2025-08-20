@@ -272,7 +272,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
     }
-    if (this.layout && this.nodes.length && this.links.length) {
+    if (this.layout && this.nodes && this.links) {
       this.update();
     }
   }
