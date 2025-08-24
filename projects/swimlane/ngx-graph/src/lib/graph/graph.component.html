@@ -5,7 +5,7 @@
   [@.disabled]="!animate"
   (mouseWheelUp)="onZoom($event, 'in')"
   (mouseWheelDown)="onZoom($event, 'out')"
-  mouseWheel
+  [mouseWheel]="enableZoom"
 >
   <svg:svg class="ngx-graph" [attr.width]="width" [attr.height]="height">
     <svg:g
