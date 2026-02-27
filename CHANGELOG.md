@@ -2,6 +2,11 @@
 
 ## HEAD (unreleased)
 
+## 12.0.0-alpha.0
+
+- Enhancement: Support for Angular 21
+- Chore: Upgrade storybook to v10
+
 ## 11.0.0
 
 - Enhancement: Added support for Angular 20

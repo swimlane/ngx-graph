@@ -715,7 +715,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   redrawLines(_animate = this.animate): void {
-    this.linkElements.forEach(linkEl => {
+    this.linkElements?.forEach(linkEl => {
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (edge) {
