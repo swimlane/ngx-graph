@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { applicationConfig } from '@storybook/angular';
 // import { expect, userEvent, within } from '@storybook/test';
-import { importProvidersFrom } from '@angular/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutService, GraphComponent, MiniMapPosition } from '../public_api';
 
 const meta: Meta<GraphComponent> = {
@@ -12,7 +10,8 @@ const meta: Meta<GraphComponent> = {
     // Apply application config to all stories
     applicationConfig({
       // List of providers and environment providers that should be available to the root component and all its children.
-      providers: [LayoutService, importProvidersFrom(BrowserAnimationsModule)]
+      // Animations: global `provideAnimations()` in `.storybook/preview.ts`
+      providers: [LayoutService]
     })
   ],
   parameters: {
@@ -65,6 +64,10 @@ export const Demo: Story = {
     deferDisplayUntilPosition: false,
     centerNodesOnPositionChange: true,
     enablePreUpdateTransform: true,
+    edgePathSampleCount: 48,
+    useLayoutTransitions: true,
+    /** Merged with defaults; use `mode: 'tween'` for layout morph (see Documentation / Interface). */
+    transitionAfterChanges: { mode: 'instant' },
     miniMapPosition: MiniMapPosition.UpperRight,
     zoomSpeed: 0.1,
     minZoomLevel: 0.1,
@@ -121,6 +124,15 @@ Demo.parameters = {
     },
     enablePreUpdateTransform: {
       control: { type: 'boolean' }
+    },
+    edgePathSampleCount: {
+      control: { type: 'number', min: 2, max: 512, step: 1 }
+    },
+    useLayoutTransitions: {
+      control: { type: 'boolean' }
+    },
+    transitionAfterChanges: {
+      control: { type: 'object' }
     },
     animate: {
       control: { type: 'boolean' }

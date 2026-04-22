@@ -73,5 +73,8 @@ models to nodes and edges displayed in a data visualization. DAG layouts are use
 - Add the ngx-graph component.
 - Provide a model for nodes and links (also known as edges).
 
-  ngx-graph is compatible with Dagre and Elk, but can also accept customized layouts via the layout Input (not
-  demoed in this example).
+  ngx-graph ships Dagre-family and other built-in layouts; **ELK** layered layout must be provided\*\* (install `elkjs`). You can also pass a custom `Layout` via the `layout` input.
+
+**Layout transitions** after model changes are configured with **`transitionAfterChanges`** (and related inputs such as **`useLayoutTransitions`**, **`transitionDuringTransform`**, **`layoutTransitionEffect`**). See **[Documentation / Interface](?path=/docs/documentation-interface--docs)** for the full inputs/outputs table and a short “Layout morph & continuity” guide.
+
+**Storybook examples:** [NgxGraphDagreLayoutTransition](?path=/story/example-ngxgraphdagrelayouttransition--dagre-layout-transition) (rank direction change + full-scope tween + `(drawComplete)`), [NgxGraphTranslateOnChanges](?path=/story/example-ngxgraphtranslateonchanges--translate-on-changes) (same graph vs new graph + tween), [NgxGraphColaBranching](?path=/story/example-ngxgraphcolabranching--cola-branching) (additive growth + `transitionAfterChanges`).

@@ -1,0 +1,44 @@
+.demo {
+  padding: 1rem;
+}
+
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.hint {
+  margin: 0 0 0.75rem;
+  max-width: 48rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #555;
+}
+
+.placeholder {
+  margin: 2rem 0;
+  font-size: 0.9375rem;
+  color: #444;
+}

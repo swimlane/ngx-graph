@@ -171,14 +171,13 @@ export class ColaForceDirectedLayout implements Layout {
       .map(edge => {
         const source: any = toNode(internalGraph.nodes, edge.source);
         const target: any = toNode(internalGraph.nodes, edge.target);
+        const p0 = (source.bounds as Rectangle).rayIntersection(target.bounds.cx(), target.bounds.cy());
+        const p1 = (target.bounds as Rectangle).rayIntersection(source.bounds.cx(), source.bounds.cy());
         return {
           ...edge,
           source: source.id,
           target: target.id,
-          points: [
-            (source.bounds as Rectangle).rayIntersection(target.bounds.cx(), target.bounds.cy()),
-            (target.bounds as Rectangle).rayIntersection(source.bounds.cx(), source.bounds.cy())
-          ]
+          points: [p0, p1]
         };
       })
       .concat(
@@ -189,14 +188,13 @@ export class ColaForceDirectedLayout implements Layout {
             sourceNode || internalGraph.groups.find(foundGroup => (foundGroup as any).id === groupLink.source);
           const target =
             targetNode || internalGraph.groups.find(foundGroup => (foundGroup as any).id === groupLink.target);
+          const p0 = (source.bounds as Rectangle).rayIntersection(target.bounds.cx(), target.bounds.cy());
+          const p1 = (target.bounds as Rectangle).rayIntersection(source.bounds.cx(), source.bounds.cy());
           return {
             ...groupLink,
             source: source.id,
             target: target.id,
-            points: [
-              (source.bounds as Rectangle).rayIntersection(target.bounds.cx(), target.bounds.cy()),
-              (target.bounds as Rectangle).rayIntersection(source.bounds.cx(), source.bounds.cy())
-            ]
+            points: [p0, p1]
           };
         })
       );

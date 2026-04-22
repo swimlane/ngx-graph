@@ -22,6 +22,16 @@
   }
 }
 
+/* Layout morph: JS rAF drives transforms; disable CSS so it does not fight imperative updates.
+ * `.layout-js-driven` is always on the host when `useLayoutTransitions` is true (default); set that input false
+ * to apply this class only while `transitionAfterChanges` tweening is active. */
+.layout-js-driven .graph .node-group,
+.layout-js-driven .minimap .node-group,
+.smooth-layout .graph .node-group,
+.smooth-layout .minimap .node-group {
+  transition: none;
+}
+
 .graph {
   user-select: none;
 
@@ -41,11 +51,8 @@
     cursor: move;
   }
 
+  /* Node motion is driven by graph.component.ts (rAF / unified layout), not CSS transition on transform. */
   .node-group {
-    &.old-node {
-      transition: transform 0.5s ease-in-out;
-    }
-
     .node {
       &:focus {
         outline: none;

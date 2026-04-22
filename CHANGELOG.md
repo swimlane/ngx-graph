@@ -2,6 +2,17 @@
 
 ## HEAD (unreleased)
 
+- Enhancement: `transitionAfterChanges`, `transitionDuringTransform`, `layoutTransitionEffect`, and `applyVisualContinuityBeforeLayout` inputs configure rich continuity when a prior graph had nodes, allowing for animations between graph updates.
+- Breaking: `useLayoutTransitions` (default `true` controls `layout-js-driven`; when `false` it applies only during JS `mode: 'tween'`);
+- Enhancement: `GraphComponent` `edgePathSampleCount` input (default 48, clamped 2–512) for edge resampling in layout, morph, and `redrawEdge`
+- Enhancement: `transitionAfterChanges.morphCapture` for prior translate source (model vs main-chart DOM, optional model fallback) and `syncTargetsFromPositionAfterTick` / `snapAddedNodeIds`; `mergeGraphLayoutTransition` merges `morphCapture` with defaults
+- Enhancement: `drawComplete` emits after a completed draw/tick pass (paths bound, graph ready). Use to hide loading UI or run one-shot center/zoomToFit without flashing before first layout.
+- Enhancement: Minimap can be displayed on bottom.
+- Fix: Observable layouts (Cola, D3 force) faster than `afterNextRender`—superseded passes repaint link paths from the current model without full `redrawLines` so layout morph is not cancelled.
+- Fix: Layout morph keeps `oldLine` / `oldTextPath` on paths that are not resampled-tweening until the tween ends instead of snapping to the new route early.
+- Fix: Drag `updateEdge` for Dagre and DagreCluster uses orientation-aware paths aligned with DagreNodesOnly.
+- Chore: Update Storybook with documentation, examples
+
 ## 12.0.0-alpha.0
 
 - Enhancement: Support for Angular 21

@@ -4,6 +4,7 @@ import { id } from '../../utils/id';
 import * as dagre from 'dagre';
 import { Edge } from '../../models/edge.model';
 import { DagreSettings, Orientation } from './dagre';
+import { dagreDragPolyline, rankOrderAxesFromDagreRankdir, resolveDagreDragEdgeStyle } from './edge-geometry';
 
 export interface DagreNodesOnlySettings extends DagreSettings {
   curveDistance?: number;
@@ -59,34 +60,14 @@ export class DagreNodesOnlyLayout implements Layout {
   updateEdge(graph: Graph, edge: Edge): Graph {
     const sourceNode = graph.nodes.find(n => n.id === edge.source);
     const targetNode = graph.nodes.find(n => n.id === edge.target);
-    const rankAxis: 'x' | 'y' = this.settings.orientation === 'BT' || this.settings.orientation === 'TB' ? 'y' : 'x';
-    const orderAxis: 'x' | 'y' = rankAxis === 'y' ? 'x' : 'y';
-    const rankDimension = rankAxis === 'y' ? 'height' : 'width';
-    // determine new arrow position
-    const dir = sourceNode.position[rankAxis] <= targetNode.position[rankAxis] ? -1 : 1;
-    const startingPoint = {
-      [orderAxis]: sourceNode.position[orderAxis],
-      [rankAxis]: sourceNode.position[rankAxis] - dir * (sourceNode.dimension[rankDimension] / 2)
-    };
-    const endingPoint = {
-      [orderAxis]: targetNode.position[orderAxis],
-      [rankAxis]: targetNode.position[rankAxis] + dir * (targetNode.dimension[rankDimension] / 2)
-    };
-
-    const curveDistance = this.settings.curveDistance || this.defaultSettings.curveDistance;
-    // generate new points
-    edge.points = [
-      startingPoint,
-      {
-        [orderAxis]: startingPoint[orderAxis],
-        [rankAxis]: startingPoint[rankAxis] - dir * curveDistance
-      },
-      {
-        [orderAxis]: endingPoint[orderAxis],
-        [rankAxis]: endingPoint[rankAxis] + dir * curveDistance
-      },
-      endingPoint
-    ];
+    if (!sourceNode?.position || !targetNode?.position) {
+      return graph;
+    }
+    const settings = Object.assign({}, this.defaultSettings, this.settings);
+    const axes = rankOrderAxesFromDagreRankdir(settings.orientation);
+    const curveDistance = settings.curveDistance ?? this.defaultSettings.curveDistance ?? 20;
+    const resolved = resolveDagreDragEdgeStyle(settings.dragEdgeStyle ?? 'auto', edge.points);
+    edge.points = dagreDragPolyline(sourceNode, targetNode, axes, curveDistance, resolved);
     const edgeLabelId = `${edge.source}${EDGE_KEY_DELIM}${edge.target}${EDGE_KEY_DELIM}${DEFAULT_EDGE_NAME}`;
     const matchingEdgeLabel = graph.edgeLabels[edgeLabelId];
     if (matchingEdgeLabel) {

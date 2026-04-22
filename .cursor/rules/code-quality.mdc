@@ -1,0 +1,16 @@
+---
+description: Linting, formatting, DRY, and clean-code requirements for all generated code in projects/web
+globs: ['projects/web/**/*.{ts,html,scss,css}']
+---
+
+# Code quality — `projects/web`
+
+**Generated code must** follow the repo's existing **linting and formatting**, **DRY**, **KISS**, **functional programming**, and **clean-code** principles, plus **testing requirements**. This applies to TypeScript, HTML, SCSS, and any other code in `projects/web`.
+
+- **Tests:** Generate co-located `*.spec.ts` files for all new components, services, directives, pipes, stores, guards, and resolvers. Aim for >80% code coverage (see **web-testing** rule).
+- For lint/format/DRY/KISS/functional programming/clean-code requirements see **code-quality** skill.
+
+## Cursor hook (project-specific)
+
+- **`.cursor/hooks.json`** runs format and lint after each edit (`afterFileEdit`). By default it runs only for files under **allowed paths** (e.g. `projects/web`) and only on the **edited file(s)**. It uses the same tools/configs as the repo.
+- You can switch to full project tasks (`task format:swimlane-web`, `task lint:swimlane-web`) by setting `USE_TASK_COMMANDS = true` in **`.cursor/hooks/format-and-lint-web.mjs`**. See that file for `ALLOWED_PATHS` and options.

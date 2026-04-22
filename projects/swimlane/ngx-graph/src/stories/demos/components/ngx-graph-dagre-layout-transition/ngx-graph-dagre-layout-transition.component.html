@@ -1,0 +1,25 @@
+<div class="demo">
+  <div class="toolbar">
+    <p class="hint">
+      <strong>transitionAfterChanges</strong> (<code>tween</code>, full scope, <code>durationMs: 2000</code>)
+      interpolates nodes and edges over two seconds when Dagre re-lays out. Toggle <strong>TB / LR</strong> to change
+      rank direction; larger viewport fits the graph in both orientations. <strong>animate</strong> is off so only
+      layout-driven motion runs.
+    </p>
+    <button type="button" (click)="toggleOrientation()">Toggle layout (TB / LR)</button>
+  </div>
+  <div class="graph-shell" [class.graph-shell--visible]="chartVisible">
+    <ngx-graph
+      [view]="[1200, 800]"
+      layout="dagre"
+      [nodes]="nodes"
+      [links]="links"
+      [groupResultsBy]="groupByNodeId"
+      [layoutSettings]="layoutSettings"
+      [transitionAfterChanges]="{ mode: 'tween', scope: 'full', durationMs: 2000 }"
+      [animate]="false"
+      [autoCenter]="recenterOnLayout"
+      (drawComplete)="onGraphDrawComplete()"
+    ></ngx-graph>
+  </div>
+</div>
