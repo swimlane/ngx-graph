@@ -168,7 +168,7 @@
           "
         >
           <svg:g class="minimap-nodes" [style.transform]="'scale(' + 1 / minimapScaleCoefficient + ')'">
-            @for (node of graph.nodes; track trackNodeBy($index, node)) {
+            @for (node of graph?.nodes ?? []; track trackNodeBy($index, node)) {
               <svg:g
                 #nodeElement
                 class="node-group"

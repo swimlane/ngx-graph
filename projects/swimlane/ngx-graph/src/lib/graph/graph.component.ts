@@ -38,7 +38,7 @@ import { Node, ClusterNode, CompoundNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
-import { MiniMapPosition } from '../enums/mini-map-position.enum';
+import { MiniMapPosition, DefaultMiniMapMargin, MiniMapMargin } from '../enums/mini-map-position.enum';
 import { throttleable } from '../utils/throttle';
 import { ColorHelper } from '../utils/color.helper';
 import { ViewDimensions, calculateViewDimensions } from '../utils/view-dimensions.helper';
@@ -139,6 +139,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   readonly miniMapMaxWidth = input<number>(100);
   readonly miniMapMaxHeight = input<number>(undefined);
   readonly miniMapPosition = input<MiniMapPosition>(MiniMapPosition.UpperRight);
+  readonly miniMapMargin = input<MiniMapMargin>(DefaultMiniMapMargin);
   readonly view = input<[number, number]>(undefined);
   readonly scheme = input<any>('cool');
   readonly customColors = input<any>(undefined);
@@ -229,6 +230,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   visibilityObserver: VisibilityObserver;
+  private waitForGraphDims: ReturnType<typeof setInterval>;
   private destroy$ = new Subject<void>();
 
   /** Latest requestAnimationFrame id per edge for imperative path morphing (cancel on relayout / drag). */
@@ -375,6 +377,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     }
 
+    this.waitForGraphDims = setInterval(() => {
+      if (this.hasDims()) {
+        clearInterval(this.waitForGraphDims);
+        this.drawComplete.emit();
+      }
+    }, 1000);
+
     this.minimapClipPathId = `minimapClip${id()}`;
     this.stateChange.emit({ state: NgxGraphStates.Subscribe });
   }
@@ -431,6 +440,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (this.visibilityObserver) {
       this.visibilityObserver.visible.unsubscribe();
       this.visibilityObserver.destroy();
+    }
+    if (this.waitForGraphDims) {
+      clearInterval(this.waitForGraphDims);
     }
     this.destroy$.next();
     this.destroy$.complete();
@@ -1480,20 +1492,32 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   getMinimapTransform(): string {
     switch (this.miniMapPosition()) {
       case MiniMapPosition.UpperLeft: {
-        return '';
+        return 'translate(' + this.miniMapMargin().left + ',' + this.miniMapMargin().top + ')';
       }
       case MiniMapPosition.UpperRight: {
-        return 'translate(' + (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient) + ',' + 0 + ')';
+        return (
+          'translate(' +
+          (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient - this.miniMapMargin().right) +
+          ',' +
+          this.miniMapMargin().top +
+          ')'
+        );
       }
       case MiniMapPosition.LowerLeft: {
-        return 'translate(' + 0 + ',' + (this.dims.height - this.graphDims.height / this.minimapScaleCoefficient) + ')';
+        return (
+          'translate(' +
+          this.miniMapMargin().left +
+          ',' +
+          (this.dims.height - this.graphDims.height / this.minimapScaleCoefficient - this.miniMapMargin().bottom) +
+          ')'
+        );
       }
       case MiniMapPosition.LowerRight: {
         return (
           'translate(' +
-          (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient) +
+          (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient - this.miniMapMargin().right) +
           ',' +
-          (this.dims.height - this.graphDims.height / this.minimapScaleCoefficient) +
+          (this.dims.height - this.graphDims.height / this.minimapScaleCoefficient - this.miniMapMargin().bottom) +
           ')'
         );
       }
@@ -1797,8 +1821,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       return;
     }
     this.stateChange.emit({ state: NgxGraphStates.Output });
-    // TODO: The 'emit' function requires a mandatory void argument
-    this.drawComplete.emit();
   }
 
   private cancelEdgePathAnimation(edgeId: string): void {
