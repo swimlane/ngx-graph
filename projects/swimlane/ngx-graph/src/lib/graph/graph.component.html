@@ -5,8 +5,7 @@
   [style.transform]="layoutOuterTransform"
   [style.transform-origin]="layoutEffectTransformOrigin"
   [style.width.px]="width"
-  [@animationState]="'active'"
-  [@.disabled]="!animate"
+  [animate.enter]="animate() ? 'ngx-graph-outer-fade' : null"
   (mouseWheelUp)="onZoom($event, 'in')"
   (mouseWheelDown)="onZoom($event, 'out')"
   mouseWheel
@@ -20,8 +19,8 @@
         class="graph chart"
       >
         <defs>
-          @if (defsTemplate) {
-            <ng-container [ngTemplateOutlet]="defsTemplate"></ng-container>
+          @if (defsTemplate()) {
+            <ng-container [ngTemplateOutlet]="defsTemplate()"></ng-container>
           }
           @for (link of graph.edges; track link) {
             <svg:path class="text-path" [attr.id]="link.id"></svg:path>
@@ -40,18 +39,18 @@
             <svg:g
               #clusterElement
               class="node-group"
-              [class.old-node]="(animate || layoutJsMorphEnabled) && oldClusters.has(node.id)"
+              [class.old-node]="(animate() || layoutJsMorphEnabled) && oldClusters.has(node.id)"
               [id]="node.id"
               [attr.transform]="node.transform"
               (click)="onClick(node)"
             >
-              @if (clusterTemplate && !node.hidden) {
+              @if (clusterTemplate() && !node.hidden) {
                 <ng-container
-                  [ngTemplateOutlet]="clusterTemplate"
+                  [ngTemplateOutlet]="clusterTemplate()"
                   [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
                 ></ng-container>
               }
-              @if (!clusterTemplate && !node.hidden) {
+              @if (!clusterTemplate() && !node.hidden) {
                 <svg:g class="node cluster">
                   <svg:rect
                     [attr.width]="node.dimension.width"
@@ -71,19 +70,19 @@
             <svg:g
               #nodeElement
               class="node-group"
-              [class.old-node]="(animate || layoutJsMorphEnabled) && oldCompoundNodes.has(node.id)"
+              [class.old-node]="(animate() || layoutJsMorphEnabled) && oldCompoundNodes.has(node.id)"
               [id]="node.id"
               [attr.transform]="node.transform"
               (click)="onClick(node)"
               (mousedown)="onNodeMouseDown($event, node)"
             >
-              @if (nodeTemplate && !node.hidden) {
+              @if (nodeTemplate() && !node.hidden) {
                 <ng-container
-                  [ngTemplateOutlet]="nodeTemplate"
+                  [ngTemplateOutlet]="nodeTemplate()"
                   [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
                 ></ng-container>
               }
-              @if (!nodeTemplate && !node.hidden) {
+              @if (!nodeTemplate() && !node.hidden) {
                 <svg:g class="node compound-node">
                   <svg:rect
                     [attr.width]="node.dimension.width"
@@ -101,13 +100,13 @@
         <svg:g class="links">
           @for (link of graph.edges; track trackLinkBy($index, link)) {
             <svg:g #linkElement class="link-group" [id]="link.id">
-              @if (linkTemplate) {
+              @if (linkTemplate()) {
                 <ng-container
-                  [ngTemplateOutlet]="linkTemplate"
+                  [ngTemplateOutlet]="linkTemplate()"
                   [ngTemplateOutletContext]="{ $implicit: link, transitionAfterChangesActive: layoutJsMorphEnabled }"
                 ></ng-container>
               }
-              @if (!linkTemplate) {
+              @if (!linkTemplate()) {
                 <svg:path class="edge line" />
               }
             </svg:g>
@@ -118,19 +117,19 @@
             <svg:g
               #nodeElement
               class="node-group"
-              [class.old-node]="(animate || layoutJsMorphEnabled) && oldNodes.has(node.id)"
+              [class.old-node]="(animate() || layoutJsMorphEnabled) && oldNodes.has(node.id)"
               [id]="node.id"
               [attr.transform]="node.transform"
               (click)="onClick(node)"
               (mousedown)="onNodeMouseDown($event, node)"
             >
-              @if (nodeTemplate && !node.hidden) {
+              @if (nodeTemplate() && !node.hidden) {
                 <ng-container
-                  [ngTemplateOutlet]="nodeTemplate"
+                  [ngTemplateOutlet]="nodeTemplate()"
                   [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
                 ></ng-container>
               }
-              @if (!nodeTemplate && !node.hidden) {
+              @if (!nodeTemplate() && !node.hidden) {
                 <svg:circle
                   [attr.r]="defaultNodeCircleRadius(node)"
                   [attr.cx]="node.dimension.width / 2"
@@ -151,7 +150,7 @@
       ></svg:rect>
     </svg:clipPath>
 
-    @if (showMiniMap) {
+    @if (showMiniMap()) {
       <svg:g class="minimap" [attr.transform]="minimapTransform" [attr.clip-path]="'url(#' + minimapClipPathId + ')'">
         <svg:rect
           class="minimap-background"
@@ -173,23 +172,23 @@
               <svg:g
                 #nodeElement
                 class="node-group"
-                [class.old-node]="(animate || layoutJsMorphEnabled) && oldNodes.has(node.id)"
+                [class.old-node]="(animate() || layoutJsMorphEnabled) && oldNodes.has(node.id)"
                 [id]="node.id"
                 [attr.transform]="node.transform"
               >
-                @if (miniMapNodeTemplate) {
+                @if (miniMapNodeTemplate()) {
                   <ng-container
-                    [ngTemplateOutlet]="miniMapNodeTemplate"
+                    [ngTemplateOutlet]="miniMapNodeTemplate()"
                     [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
                   ></ng-container>
                 }
-                @if (!miniMapNodeTemplate && nodeTemplate) {
+                @if (!miniMapNodeTemplate() && nodeTemplate()) {
                   <ng-container
-                    [ngTemplateOutlet]="nodeTemplate"
+                    [ngTemplateOutlet]="nodeTemplate()"
                     [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
                   ></ng-container>
                 }
-                @if (!nodeTemplate && !miniMapNodeTemplate && !node.hidden) {
+                @if (!nodeTemplate() && !miniMapNodeTemplate() && !node.hidden) {
                   <svg:circle
                     [attr.r]="defaultNodeCircleRadius(node) / minimapScaleCoefficient"
                     [attr.cx]="node.dimension.width / 2 / minimapScaleCoefficient"

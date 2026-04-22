@@ -5,8 +5,7 @@ import { Output, EventEmitter, NgZone, Directive, ElementRef } from '@angular/co
  */
 @Directive({
   // tslint:disable-next-line:directive-selector
-  selector: 'visibility-observer',
-  standalone: false
+  selector: 'visibility-observer'
 })
 export class VisibilityObserver {
   @Output() visible: EventEmitter<any> = new EventEmitter();

@@ -1,34 +1,34 @@
 // rename transition due to conflict with d3 transition
-import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChild,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
   Injector,
-  Input,
   OnDestroy,
   OnInit,
-  Output,
-  QueryList,
   TemplateRef,
-  ViewChildren,
   ViewEncapsulation,
   NgZone,
   ChangeDetectorRef,
   OnChanges,
   SimpleChanges,
   afterNextRender,
-  isDevMode
+  isDevMode,
+  effect,
+  input,
+  model,
+  output,
+  contentChild,
+  viewChildren
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
 import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
-import { first, debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
@@ -43,6 +43,7 @@ import { throttleable } from '../utils/throttle';
 import { ColorHelper } from '../utils/color.helper';
 import { ViewDimensions, calculateViewDimensions } from '../utils/view-dimensions.helper';
 import { VisibilityObserver } from '../utils/visibility-observer';
+import { MouseWheelDirective } from './mouse-wheel.directive';
 import {
   mergeGraphLayoutTransition,
   mergeViewportTransition,
@@ -99,56 +100,51 @@ export interface NgxGraphStateChangeEvent {
   templateUrl: 'graph.component.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('animationState', [
-      ngTransition(':enter', [style({ opacity: 0 }), animate('500ms 100ms', style({ opacity: 1 }))])
-    ])
-  ],
-  standalone: false
+  imports: [NgTemplateOutlet, MouseWheelDirective]
 })
 export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private readonly injector = inject(Injector);
 
-  @Input() nodes: Node[] = [];
-  @Input() clusters: ClusterNode[] = [];
-  @Input() compoundNodes: CompoundNode[] = [];
-  @Input() links: Edge[] = [];
-  @Input() activeEntries: any[] = [];
-  @Input() curve: any;
-  @Input() draggingEnabled = true;
-  @Input() nodeHeight: number;
-  @Input() nodeMaxHeight: number;
-  @Input() nodeMinHeight: number;
-  @Input() nodeWidth: number;
-  @Input() nodeMinWidth: number;
-  @Input() nodeMaxWidth: number;
-  @Input() panningEnabled: boolean = true;
-  @Input() panningAxis: PanningAxis = PanningAxis.Both;
-  @Input() enableZoom = true;
-  @Input() zoomSpeed = 0.1;
-  @Input() minZoomLevel = 0.1;
-  @Input() maxZoomLevel = 4.0;
-  @Input() autoZoom = false;
-  @Input() panOnZoom = true;
-  @Input() animate? = false;
-  @Input() autoCenter = false;
-  @Input() update$: Observable<any>;
-  @Input() center$: Observable<any>;
-  @Input() zoomToFit$: Observable<NgxGraphZoomOptions>;
-  @Input() panToNode$: Observable<any>;
-  @Input() layout: string | Layout;
-  @Input() layoutSettings: any;
-  @Input() enableTrackpadSupport = false;
-  @Input() showMiniMap: boolean = false;
-  @Input() miniMapMaxWidth: number = 100;
-  @Input() miniMapMaxHeight: number;
-  @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;
-  @Input() view: [number, number];
-  @Input() scheme: any = 'cool';
-  @Input() customColors: any;
-  @Input() deferDisplayUntilPosition: boolean = false;
-  @Input() centerNodesOnPositionChange = true;
-  @Input() enablePreUpdateTransform = true;
+  readonly nodes = input<Node[]>([]);
+  readonly clusters = input<ClusterNode[]>([]);
+  readonly compoundNodes = input<CompoundNode[]>([]);
+  readonly links = input<Edge[]>([]);
+  readonly activeEntries = model<any[]>([]);
+  readonly curve = model<any>(undefined);
+  readonly draggingEnabled = input(true);
+  readonly nodeHeight = input<number>(undefined);
+  readonly nodeMaxHeight = input<number>(undefined);
+  readonly nodeMinHeight = input<number>(undefined);
+  readonly nodeWidth = input<number>(undefined);
+  readonly nodeMinWidth = input<number>(undefined);
+  readonly nodeMaxWidth = input<number>(undefined);
+  readonly panningEnabled = input<boolean>(true);
+  readonly panningAxis = input<PanningAxis>(PanningAxis.Both);
+  readonly enableZoom = input(true);
+  readonly zoomSpeed = input(0.1);
+  readonly minZoomLevel = input(0.1);
+  readonly maxZoomLevel = input(4.0);
+  readonly autoZoom = input(false);
+  readonly panOnZoom = input(true);
+  readonly animate = input<boolean>(false);
+  readonly autoCenter = input(false);
+  readonly update$ = input<Observable<any>>(undefined);
+  readonly center$ = input<Observable<any>>(undefined);
+  readonly zoomToFit$ = input<Observable<NgxGraphZoomOptions>>(undefined);
+  readonly panToNode$ = input<Observable<any>>(undefined);
+  readonly layout = model<string | Layout>(undefined);
+  readonly layoutSettings = input<any>(undefined);
+  readonly enableTrackpadSupport = input(false);
+  readonly showMiniMap = input<boolean>(false);
+  readonly miniMapMaxWidth = input<number>(100);
+  readonly miniMapMaxHeight = input<number>(undefined);
+  readonly miniMapPosition = input<MiniMapPosition>(MiniMapPosition.UpperRight);
+  readonly view = input<[number, number]>(undefined);
+  readonly scheme = input<any>('cool');
+  readonly customColors = input<any>(undefined);
+  readonly deferDisplayUntilPosition = input<boolean>(false);
+  readonly centerNodesOnPositionChange = input(true);
+  readonly enablePreUpdateTransform = input(true);
   /**
    * Layout transition after nodes/links change. Merged with defaults via {@link mergeGraphLayoutTransition}; when omitted or
    * empty, defaults apply (`mode: 'instant'`). Use `{ mode: 'tween', scope: 'full' }` for full-graph interpolation, or
@@ -156,40 +152,47 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * **`mode: 'tween'` is opt-in** (no tween unless you pass a partial that resolves to tween after merge).
    */
-  @Input() transitionAfterChanges?: Partial<GraphLayoutTransition>;
+  readonly transitionAfterChanges = input<Partial<GraphLayoutTransition>>(undefined);
   /**
    * Number of samples along each edge polyline when building `line` / morph segments (layout tick, drag
    * {@link redrawEdge}, unified morph). Clamped to `[2, 512]`; default `48` when unset or non-finite.
    */
-  @Input() edgePathSampleCount?: number;
+  readonly edgePathSampleCount = input<number>(undefined);
   /**
    * When `true` (default), the host always has the `layout-js-driven` class so CSS does not animate `.node-group`
    * `transform` (matches historical behavior). When `false`, `layout-js-driven` is applied only while JS layout morphing
    * is active ({@link layoutJsMorphEnabled}), allowing host CSS transitions on node groups when not using `mode: 'tween'`.
    */
-  @Input() useLayoutTransitions = true;
+  readonly useLayoutTransitions = input(true);
   /** Optional eased translation for programmatic pan only (`panTo`, `center`, minimap, `zoomToFit` autoCenter). Zoom scale is never animated. */
-  @Input() transitionDuringTransform?: Partial<ViewportTranslationTransition>;
+  readonly transitionDuringTransform = input<Partial<ViewportTranslationTransition>>(undefined);
   /** Optional perspective / rotate flair during layout morph only (`mode: 'tween'`). */
-  @Input() layoutTransitionEffect?: Partial<LayoutTransitionEffect>;
+  readonly layoutTransitionEffect = input<Partial<LayoutTransitionEffect>>(undefined);
 
-  @Output() select = new EventEmitter();
-  @Output() activate: EventEmitter<any> = new EventEmitter();
-  @Output() deactivate: EventEmitter<any> = new EventEmitter();
-  @Output() zoomChange: EventEmitter<number> = new EventEmitter();
-  @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
-  @Output() stateChange: EventEmitter<NgxGraphStateChangeEvent> = new EventEmitter();
-  @Output() drawComplete = new EventEmitter<void>();
+  /** Template alias `zoomLevel` — imperatively sets zoom; see {@link zoomTo}. */
+  readonly zoomLevelInput = input<number | undefined>(undefined, { alias: 'zoomLevel' });
+  /** Template alias `panOffsetX` — imperatively pans; see {@link panTo}. */
+  readonly panOffsetXInput = input<number | undefined>(undefined, { alias: 'panOffsetX' });
+  /** Template alias `panOffsetY` — imperatively pans; see {@link panTo}. */
+  readonly panOffsetYInput = input<number | undefined>(undefined, { alias: 'panOffsetY' });
 
-  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
-  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
-  @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
+  readonly select = output();
+  readonly activate = output<any>();
+  readonly deactivate = output<any>();
+  readonly zoomChange = output<number>();
+  readonly clickHandler = output<MouseEvent>();
+  readonly stateChange = output<NgxGraphStateChangeEvent>();
+  readonly drawComplete = output<void>();
 
-  @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
-  @ViewChildren('clusterElement') clusterElements: QueryList<ElementRef>;
-  @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+  readonly linkTemplate = contentChild<TemplateRef<any>>('linkTemplate');
+  readonly nodeTemplate = contentChild<TemplateRef<any>>('nodeTemplate');
+  readonly clusterTemplate = contentChild<TemplateRef<any>>('clusterTemplate');
+  readonly defsTemplate = contentChild<TemplateRef<any>>('defsTemplate');
+  readonly miniMapNodeTemplate = contentChild<TemplateRef<any>>('miniMapNodeTemplate');
+
+  readonly nodeElements = viewChildren<ElementRef>('nodeElement');
+  readonly clusterElements = viewChildren<ElementRef>('clusterElement');
+  readonly linkElements = viewChildren<ElementRef>('linkElement');
 
   public chartWidth: any;
 
@@ -261,15 +264,36 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     public zone: NgZone,
     public cd: ChangeDetectorRef,
     private layoutService: LayoutService
-  ) {}
+  ) {
+    effect(() => {
+      const level = this.zoomLevelInput();
+      if (level == null || isNaN(Number(level))) {
+        return;
+      }
+      this.zoomTo(Number(level));
+    });
+    effect(() => {
+      const x = this.panOffsetXInput();
+      if (x == null || isNaN(Number(x))) {
+        return;
+      }
+      this.panTo(Number(x), null);
+    });
+    effect(() => {
+      const y = this.panOffsetYInput();
+      if (y == null || isNaN(Number(y))) {
+        return;
+      }
+      this.panTo(null, Number(y));
+    });
+  }
 
   /** Coloring domain key; default coalesces `label`, then `id`, then `''` so {@link ColorHelper} never receives null/undefined. */
-  @Input()
-  groupResultsBy: (node: any) => string = node => node.label ?? node.id ?? '';
+  readonly groupResultsBy = input<(node: any) => string>(node => node.label ?? node.id ?? '');
 
   /** Merged layout transition config from {@link transitionAfterChanges} and defaults. */
   get effectiveLayoutTransition(): GraphLayoutTransition {
-    return mergeGraphLayoutTransition(this.transitionAfterChanges);
+    return mergeGraphLayoutTransition(this.transitionAfterChanges());
   }
 
   /** `true` when rAF morph should run after layout (`mode: 'tween'`). */
@@ -284,15 +308,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Host `layout-js-driven` class: always on when {@link useLayoutTransitions} is `true`; otherwise only when {@link layoutJsMorphEnabled}. */
   get layoutJsDrivenHostClass(): boolean {
-    return this.useLayoutTransitions ? true : this.layoutJsMorphEnabled;
+    return this.useLayoutTransitions() ? true : this.layoutJsMorphEnabled;
   }
 
   get effectiveViewportTransition() {
-    return mergeViewportTransition(this.transitionDuringTransform);
+    return mergeViewportTransition(this.transitionDuringTransform());
   }
 
   get effectiveLayoutEffect(): LayoutTransitionEffect {
-    return mergeLayoutEffect(this.layoutTransitionEffect);
+    return mergeLayoutEffect(this.layoutTransitionEffect());
   }
 
   /**
@@ -303,26 +327,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
-   * Set the current zoom level
-   */
-  @Input('zoomLevel')
-  set zoomLevel(level) {
-    this.zoomTo(Number(level));
-  }
-
-  /**
    * Get the current `x` position of the graph
    */
   get panOffsetX() {
     return this.transformationMatrix.e;
-  }
-
-  /**
-   * Set the current `x` position of the graph
-   */
-  @Input('panOffsetX')
-  set panOffsetX(x) {
-    this.panTo(Number(x), null);
   }
 
   /**
@@ -333,40 +341,36 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
-   * Set the current `y` position of the graph
-   */
-  @Input('panOffsetY')
-  set panOffsetY(y) {
-    this.panTo(null, Number(y));
-  }
-
-  /**
    * Angular lifecycle event
    *
    *
    * @memberOf GraphComponent
    */
   ngOnInit(): void {
-    if (this.update$) {
-      this.update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const update$ = this.update$();
+    if (update$) {
+      update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.update();
       });
     }
 
-    if (this.center$) {
-      this.center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const center$ = this.center$();
+    if (center$) {
+      center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.center();
       });
     }
 
-    if (this.zoomToFit$) {
-      this.zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(options => {
+    const zoomToFit$ = this.zoomToFit$();
+    if (zoomToFit$) {
+      zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(options => {
         this.zoomToFit(options ? options : {});
       });
     }
 
-    if (this.panToNode$) {
-      this.panToNode$.pipe(takeUntil(this.destroy$)).subscribe((nodeId: string) => {
+    const panToNode$ = this.panToNode$();
+    if (panToNode$) {
+      panToNode$.pipe(takeUntil(this.destroy$)).subscribe((nodeId: string) => {
         this.panToNodeId(nodeId);
       });
     }
@@ -378,11 +382,12 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   ngOnChanges(changes: SimpleChanges): void {
     this.basicUpdate();
     const { layoutSettings } = changes;
-    this.setLayout(this.layout, !!changes['layout']);
+    const layout = this.layout();
+    this.setLayout(layout, !!changes['layout']);
     if (layoutSettings) {
-      this.setLayoutSettings(this.layoutSettings);
+      this.setLayoutSettings(this.layoutSettings());
     }
-    if (this.layout && this.nodes.length && this.links.length) {
+    if (layout && this.nodes().length && this.links().length) {
       this.update();
     }
   }
@@ -399,14 +404,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       layout = 'dagre';
     }
     if (typeof layout === 'string') {
-      this.layout = this.layoutService.getLayout(layout);
-      this.setLayoutSettings(this.layoutSettings);
+      this.layout.set(this.layoutService.getLayout(layout));
+      this.setLayoutSettings(this.layoutSettings());
     }
   }
 
   setLayoutSettings(settings: any): void {
-    if (this.layout && typeof this.layout !== 'string') {
-      this.layout.settings = settings;
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string') {
+      layout.settings = settings;
     }
   }
 
@@ -453,8 +459,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   update(): void {
     this.basicUpdate();
-    if (!this.curve) {
-      this.curve = shape.curveBundle.beta(1);
+    if (!this.curve()) {
+      this.curve.set(shape.curveBundle.beta(1));
     }
 
     this.zone.run(() => {
@@ -491,9 +497,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.id = id();
       }
       if (!n.dimension) {
+        const nodeWidth = this.nodeWidth();
+        const nodeHeight = this.nodeHeight();
         n.dimension = {
-          width: this.nodeWidth ? this.nodeWidth : 30,
-          height: this.nodeHeight ? this.nodeHeight : 30
+          width: nodeWidth ? nodeWidth : 30,
+          height: nodeHeight ? nodeHeight : 30
         };
         n.meta.forceDimensions = false;
       } else {
@@ -504,7 +512,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           x: 0,
           y: 0
         };
-        if (this.deferDisplayUntilPosition) {
+        if (this.deferDisplayUntilPosition()) {
           n.hidden = true;
         }
       }
@@ -522,10 +530,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const priorGraph = this.graph;
 
     const nextGraph: Graph = {
-      nodes: this.nodes.map(n => initializeNode(n)),
-      clusters: this.clusters.map(n => initializeNode(n)),
-      compoundNodes: this.compoundNodes.map(n => initializeNode(n)),
-      edges: this.links.map(e => initializeEdge(e))
+      nodes: this.nodes().map(n => initializeNode(n)),
+      clusters: this.clusters().map(n => initializeNode(n)),
+      compoundNodes: this.compoundNodes().map(n => initializeNode(n)),
+      edges: this.links().map(e => initializeEdge(e))
     };
 
     this.applyVisualContinuityBeforeLayout(nextGraph, priorGraph);
@@ -649,7 +657,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         if (!n.data) {
           n.data = {};
         }
-        n.data.color = this.colors.getColor(this.groupResultsBy(n));
+        n.data.color = this.colors.getColor(this.groupResultsBy()(n));
         this.updateNodeGroupTransform(n);
       }
     };
@@ -664,7 +672,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Merged ELK `properties` from the active layout (defaults + instance settings). */
   private elkMergedProperties(): Record<string, string | undefined> {
-    const L = this.layout as {
+    const L = this.layout() as {
       defaultSettings?: { properties?: Record<string, string> };
       settings?: { properties?: Record<string, string> };
     };
@@ -759,7 +767,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   draw(): void {
     // Recalculate the layout
-    const result = (this.layout as Layout)?.run(this.graph);
+    const result = (this.layout() as Layout)?.run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
     this.graphSubscription.add(
       result$.subscribe(graph => {
@@ -781,7 +789,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Prefers `Layout.parseTranslate` on the resolved layout object when present. */
   public resolveTranslateFromTransform(transformStr: string | undefined): { tx: number; ty: number } {
-    const L = this.layout;
+    const L = this.layout();
     if (L && typeof L !== 'string' && typeof (L as Layout).parseTranslate === 'function') {
       return (L as Layout).parseTranslate!(transformStr);
     }
@@ -797,10 +805,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Matches layout engines that merge `defaultSettings` with `settings` (e.g. DagreNodesOnly multigraph). */
   private isLayoutMultigraph(): boolean {
-    if (!this.layout || typeof this.layout === 'string') {
+    const layoutValue = this.layout();
+    if (!layoutValue || typeof layoutValue === 'string') {
       return false;
     }
-    const layout = this.layout as { defaultSettings?: { multigraph?: boolean }; settings?: { multigraph?: boolean } };
+    const layout = layoutValue as { defaultSettings?: { multigraph?: boolean }; settings?: { multigraph?: boolean } };
     const merged = Object.assign({}, layout.defaultSettings ?? {}, layout.settings ?? {});
     return !!merged.multigraph;
   }
@@ -853,7 +862,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Resample count for edge polylines (layout, morph, drag). */
   private effectiveEdgePathSampleCount(): number {
-    const raw = this.edgePathSampleCount;
+    const raw = this.edgePathSampleCount();
     const n = typeof raw === 'number' && Number.isFinite(raw) ? Math.floor(raw) : 48;
     return Math.min(512, Math.max(2, n));
   }
@@ -888,7 +897,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   private translateFromLayoutPositionForNode(n: Node): { tx: number; ty: number } {
-    const center = this.centerNodesOnPositionChange;
+    const center = this.centerNodesOnPositionChange();
     const dx = center ? (n.dimension?.width ?? 0) / 2 : 0;
     const dy = center ? (n.dimension?.height ?? 0) / 2 : 0;
     const px = n.position?.x ?? 0;
@@ -1324,10 +1333,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       if (!nodeTweenActive) {
         this.syncNodeTransformsFromLayoutPositions();
       }
-      if (this.animate || this.layoutJsMorphEnabled) {
+      const animateValue = this.animate();
+      if (animateValue || this.layoutJsMorphEnabled) {
         this.cd.detectChanges();
       }
-      this.scheduleRedrawLinesAfterView(this.animate || this.layoutJsMorphEnabled, tickId);
+      this.scheduleRedrawLinesAfterView(animateValue || this.layoutJsMorphEnabled, tickId);
       if (this.hasGraphNodeLikeContent() && !nodeTweenActive) {
         this.updateGraphDims();
       }
@@ -1336,9 +1346,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
 
       if (!nodeTweenActive) {
-        if (this.autoZoom) {
-          this.zoomToFit({ autoCenter: this.autoCenter ? this.autoCenter : false });
-        } else if (this.autoCenter && !this.autoZoom) {
+        const autoZoom = this.autoZoom();
+        if (autoZoom) {
+          const autoCenter = this.autoCenter();
+          this.zoomToFit({ autoCenter: autoCenter ? autoCenter : false });
+        } else if (this.autoCenter() && !autoZoom) {
           this.center();
         }
       }
@@ -1353,7 +1365,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       if (!n.data) {
         n.data = {};
       }
-      n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      n.data.color = this.colors.getColor(this.groupResultsBy()(n));
       // Pre-layout hooks may set `hidden` (e.g. `applyVisualContinuityBeforeLayout` for incremental smooth transitions,
       // or `initializeNode` when `deferDisplayUntilPosition`). `tick` runs after layout positions exist — show nodes.
       n.hidden = false;
@@ -1363,7 +1375,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** `translate` for `<g class="node-group">` from `position` (center when `centerNodesOnPositionChange`). */
   private updateNodeGroupTransform(n: Node): void {
-    const center = this.centerNodesOnPositionChange;
+    const center = this.centerNodesOnPositionChange();
     const dx = center ? (n.dimension?.width ?? 0) / 2 : 0;
     const dy = center ? (n.dimension?.height ?? 0) / 2 : 0;
     const px = n.position?.x ?? 0;
@@ -1466,7 +1478,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   getMinimapTransform(): string {
-    switch (this.miniMapPosition) {
+    switch (this.miniMapPosition()) {
       case MiniMapPosition.UpperLeft: {
         return '';
       }
@@ -1497,7 +1509,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     let minY = +Infinity;
     let maxY = -Infinity;
 
-    const center = this.centerNodesOnPositionChange;
+    const center = this.centerNodesOnPositionChange();
     const accumulate = (items: Node[] | undefined) => {
       if (!items?.length) {
         return;
@@ -1567,14 +1579,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (this.hasGraphNodeLikeContent()) {
       this.updateGraphDims();
 
-      if (this.miniMapMaxWidth) {
-        this.minimapScaleCoefficient = this.graphDims.width / this.miniMapMaxWidth;
+      const miniMapMaxWidth = this.miniMapMaxWidth();
+      if (miniMapMaxWidth) {
+        this.minimapScaleCoefficient = this.graphDims.width / miniMapMaxWidth;
       }
-      if (this.miniMapMaxHeight) {
-        this.minimapScaleCoefficient = Math.max(
-          this.minimapScaleCoefficient,
-          this.graphDims.height / this.miniMapMaxHeight
-        );
+      const miniMapMaxHeight = this.miniMapMaxHeight();
+      if (miniMapMaxHeight) {
+        this.minimapScaleCoefficient = Math.max(this.minimapScaleCoefficient, this.graphDims.height / miniMapMaxHeight);
       }
 
       this.minimapTransform = this.getMinimapTransform();
@@ -1607,22 +1618,25 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       // Skip drawing if element is not displayed - Firefox would throw an error here
       return;
     }
-    if (this.nodeHeight) {
-      node.dimension.height =
-        node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
+    const nodeHeight = this.nodeHeight();
+    if (nodeHeight) {
+      node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : nodeHeight;
     } else {
       node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
     }
 
-    if (this.nodeMaxHeight) {
-      node.dimension.height = Math.max(node.dimension.height, this.nodeMaxHeight);
+    const nodeMaxHeight = this.nodeMaxHeight();
+    if (nodeMaxHeight) {
+      node.dimension.height = Math.max(node.dimension.height, nodeMaxHeight);
     }
-    if (this.nodeMinHeight) {
-      node.dimension.height = Math.min(node.dimension.height, this.nodeMinHeight);
+    const nodeMinHeight = this.nodeMinHeight();
+    if (nodeMinHeight) {
+      node.dimension.height = Math.min(node.dimension.height, nodeMinHeight);
     }
 
-    if (this.nodeWidth) {
-      node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
+    const nodeWidth = this.nodeWidth();
+    if (nodeWidth) {
+      node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : nodeWidth;
     } else {
       // calculate the width
       if (nativeElement.getElementsByTagName('text').length) {
@@ -1655,11 +1669,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
     }
 
-    if (this.nodeMaxWidth) {
-      node.dimension.width = Math.max(node.dimension.width, this.nodeMaxWidth);
+    const nodeMaxWidth = this.nodeMaxWidth();
+    if (nodeMaxWidth) {
+      node.dimension.width = Math.max(node.dimension.width, nodeMaxWidth);
     }
-    if (this.nodeMinWidth) {
-      node.dimension.width = Math.min(node.dimension.width, this.nodeMinWidth);
+    const nodeMinWidth = this.nodeMinWidth();
+    if (nodeMinWidth) {
+      node.dimension.width = Math.min(node.dimension.width, nodeMinWidth);
     }
   }
 
@@ -1669,7 +1685,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   applyNodeDimensions(): void {
-    const measureRefs = (refs: QueryList<ElementRef> | undefined) => {
+    const measureRefs = (refs: readonly ElementRef[] | undefined) => {
       refs?.forEach(elem => {
         const nativeElement = elem.nativeElement as SVGGraphicsElement;
         const node = this.findLayoutNodeByElementId(nativeElement.id);
@@ -1679,8 +1695,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         this.applyNodeDimensionFromSvgGroup(nativeElement, node);
       });
     };
-    measureRefs(this.nodeElements);
-    measureRefs(this.clusterElements);
+    measureRefs(this.nodeElements());
+    measureRefs(this.clusterElements());
   }
 
   /**
@@ -1709,7 +1725,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Imperative paint from `edge.line` / `edge.textPath` only — does not cancel unified layout morph or per-edge rAF.
    */
   private repaintLinkPathsDomFromModel(): void {
-    this.linkElements?.forEach(linkEl => {
+    this.linkElements()?.forEach(linkEl => {
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
       if (!edge) {
         return;
@@ -1750,7 +1766,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.repaintLinkPathsDomFromModel();
     }
     const expected = this.graph.edges?.length ?? 0;
-    const got = this.linkElements?.length ?? 0;
+    const got = this.linkElements()?.length ?? 0;
     const linksReady = expected === 0 || got === expected;
     if (linksReady) {
       this.finalizeTickOutput(tickId);
@@ -1781,6 +1797,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       return;
     }
     this.stateChange.emit({ state: NgxGraphStates.Output });
+    // TODO: The 'emit' function requires a mandatory void argument
     this.drawComplete.emit();
   }
 
@@ -1915,7 +1932,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
                 this.updateGraphDims();
               }
               this.updateMinimap();
-              if (this.autoCenter && !this.autoZoom) {
+              if (this.autoCenter() && !this.autoZoom()) {
                 this.center();
               }
             }
@@ -1992,7 +2009,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  redrawLines(_animate = this.animate): void {
+  redrawLines(_animate = this.animate()): void {
     const lt = this.effectiveLayoutTransition;
     const duration = !_animate || !this.layoutMorphActive ? 0 : Math.max(0, lt.durationMs);
 
@@ -2024,7 +2041,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         resampledNext: Array<{ x: number; y: number }>;
       }> = [];
 
-      this.linkElements?.forEach(linkEl => {
+      this.linkElements()?.forEach(linkEl => {
         const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
         if (!edge) {
@@ -2092,7 +2109,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       return;
     }
 
-    this.linkElements?.forEach(linkEl => {
+    this.linkElements()?.forEach(linkEl => {
       const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
 
       if (!edge) {
@@ -2265,7 +2282,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Layout-space node center from a prior `translate(tx,ty)` (inverse of {@link updateNodeGroupTransform}).
    */
   private layoutCenterFromPreviousTransform(node: Node, prev: { tx: number; ty: number }): { x: number; y: number } {
-    const center = this.centerNodesOnPositionChange;
+    const center = this.centerNodesOnPositionChange();
     const dx = center ? (node.dimension?.width ?? 0) / 2 : 0;
     const dy = center ? (node.dimension?.height ?? 0) / 2 : 0;
     return { x: prev.tx + dx, y: prev.ty + dy };
@@ -2370,7 +2387,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       .line<any>()
       .x(d => d.x)
       .y(d => d.y)
-      .curve(this.curve);
+      .curve(this.curve());
     return lineFunction(points);
   }
 
@@ -2393,25 +2410,25 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onZoom($event: WheelEvent, direction: string): void {
-    if (this.enableTrackpadSupport && !$event.ctrlKey) {
+    if (this.enableTrackpadSupport() && !$event.ctrlKey) {
       this.pan($event.deltaX * -1, $event.deltaY * -1);
       return;
     }
 
-    const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
+    const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed() : -this.zoomSpeed());
 
     // Check that zooming wouldn't put us out of bounds
     const newZoomLevel = this.zoomLevel * zoomFactor;
-    if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
+    if (newZoomLevel <= this.minZoomLevel() || newZoomLevel >= this.maxZoomLevel()) {
       return;
     }
 
     // Check if zooming is enabled or not
-    if (!this.enableZoom) {
+    if (!this.enableZoom()) {
       return;
     }
 
-    if (this.panOnZoom === true && $event) {
+    if (this.panOnZoom() === true && $event) {
       // Absolute mouse X/Y on the screen
       const mouseX = $event.clientX;
       const mouseY = $event.clientY;
@@ -2484,7 +2501,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
     this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
     this.zoomChange.emit(this.zoomLevel);
-    if (this.enablePreUpdateTransform) {
+    if (this.enablePreUpdateTransform()) {
       this.updateTransform();
     }
     this.update();
@@ -2496,20 +2513,21 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onDrag(event: MouseEvent): void {
-    if (!this.draggingEnabled) {
+    if (!this.draggingEnabled()) {
       return;
     }
     const node = this.draggingNode;
-    if (this.layout && typeof this.layout !== 'string' && this.layout.onDrag) {
-      this.layout.onDrag(node, event);
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string' && layout.onDrag) {
+      layout.onDrag(node, event);
     }
 
     node.position.x += event.movementX / this.zoomLevel;
     node.position.y += event.movementY / this.zoomLevel;
 
     // move the node
-    const x = node.position.x - (this.centerNodesOnPositionChange ? node.dimension.width / 2 : 0);
-    const y = node.position.y - (this.centerNodesOnPositionChange ? node.dimension.height / 2 : 0);
+    const x = node.position.x - (this.centerNodesOnPositionChange() ? node.dimension.width / 2 : 0);
+    const y = node.position.y - (this.centerNodesOnPositionChange() ? node.dimension.height / 2 : 0);
     node.transform = `translate(${x}, ${y})`;
 
     for (const link of this.graph.edges) {
@@ -2519,8 +2537,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         (link.target as any).id === node.id ||
         (link.source as any).id === node.id
       ) {
-        if (this.layout && typeof this.layout !== 'string') {
-          const result = this.layout.updateEdge(this.graph, link);
+        if (layout && typeof layout !== 'string') {
+          const result = layout.updateEdge(this.graph, link);
           const result$ = result instanceof Observable ? result : of(result);
           this.graphSubscription.add(
             result$.subscribe(graph => {
@@ -2584,11 +2602,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onActivate(event): void {
-    if (this.activeEntries.indexOf(event) > -1) {
+    if (this.activeEntries().indexOf(event) > -1) {
       return;
     }
-    this.activeEntries = [event, ...this.activeEntries];
-    this.activate.emit({ value: event, entries: this.activeEntries });
+    this.activeEntries.set([event, ...this.activeEntries()]);
+    this.activate.emit({ value: event, entries: this.activeEntries() });
   }
 
   /**
@@ -2597,12 +2615,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onDeactivate(event): void {
-    const idx = this.activeEntries.indexOf(event);
+    const idx = this.activeEntries().indexOf(event);
 
-    this.activeEntries.splice(idx, 1);
-    this.activeEntries = [...this.activeEntries];
+    const next = [...this.activeEntries()];
+    next.splice(idx, 1);
+    this.activeEntries.set(next);
 
-    this.deactivate.emit({ value: event, entries: this.activeEntries });
+    this.deactivate.emit({ value: event, entries: this.activeEntries() });
   }
 
   /**
@@ -2611,8 +2630,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   getSeriesDomain(): any[] {
-    return this.nodes
-      .map(d => this.groupResultsBy(d))
+    return this.nodes()
+      .map(d => this.groupResultsBy()(d))
       .reduce((nodes: string[], node): any[] => (nodes.indexOf(node) !== -1 ? nodes : nodes.concat([node])), [])
       .sort();
   }
@@ -2644,7 +2663,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, this.seriesDomain, this.customColors);
+    this.colors = new ColorHelper(this.scheme(), this.seriesDomain, this.customColors());
   }
 
   /**
@@ -2655,9 +2674,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
     this.isMouseMoveCalled = true;
-    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled) {
-      this.panWithConstraints(this.panningAxis, $event);
-    } else if (this.isDragging && this.draggingEnabled) {
+    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled()) {
+      this.panWithConstraints(this.panningAxis(), $event);
+    } else if (this.isDragging && this.draggingEnabled()) {
       this.onDrag($event);
     }
   }
@@ -2691,7 +2710,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   @HostListener('document:touchmove', ['$event'])
   onTouchMove($event: any): void {
-    if (this.isPanning && this.panningEnabled) {
+    if (this.isPanning && this.panningEnabled()) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
       const movementX = clientX - this._touchLastX;
@@ -2722,8 +2741,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.isDragging = false;
     this.isPanning = false;
     this.isMinimapPanning = false;
-    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragEnd) {
-      this.layout.onDragEnd(this.draggingNode, event);
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string' && layout.onDragEnd) {
+      layout.onDragEnd(this.draggingNode, event);
     }
   }
 
@@ -2733,14 +2753,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onNodeMouseDown(event: MouseEvent, node: any): void {
-    if (!this.draggingEnabled) {
+    if (!this.draggingEnabled()) {
       return;
     }
     this.isDragging = true;
     this.draggingNode = node;
 
-    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragStart) {
-      this.layout.onDragStart(node, event);
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string' && layout.onDragStart) {
+      layout.onDragStart(node, event);
     }
   }
 
@@ -2816,16 +2837,16 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const widthZoom = this.dims.width / this.graphDims.width;
     let zoomLevel = Math.min(heightZoom, widthZoom, 1);
 
-    if (zoomLevel < this.minZoomLevel) {
-      zoomLevel = this.minZoomLevel;
+    if (zoomLevel < this.minZoomLevel()) {
+      zoomLevel = this.minZoomLevel();
     }
 
-    if (zoomLevel > this.maxZoomLevel) {
-      zoomLevel = this.maxZoomLevel;
+    if (zoomLevel > this.maxZoomLevel()) {
+      zoomLevel = this.maxZoomLevel();
     }
 
     if (zoomOptions?.force === true || zoomLevel !== this.zoomLevel) {
-      this.zoomLevel = zoomLevel;
+      this.zoomTo(zoomLevel);
 
       if (zoomOptions?.autoCenter !== true) {
         this.updateTransform();
@@ -2851,7 +2872,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   getCompoundNodeChildren(ids: Array<string>) {
-    return this.nodes.filter(node => ids.includes(node.id));
+    return this.nodes().filter(node => ids.includes(node.id));
   }
 
   private panWithConstraints(key: string, event: MouseEvent) {
@@ -2884,7 +2905,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
       // Checking if the current layout is Elk
-      if ((this.layout as Layout)?.settings?.properties?.['elk.direction']) {
+      if ((this.layout() as Layout)?.settings?.properties?.['elk.direction']) {
         this._calcMidPointElk(edge, points);
       } else {
         const _first = points[points.length / 2];
@@ -2902,7 +2923,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     let _secondX = null;
     let _firstY = null;
     let _secondY = null;
-    const orientation = (this.layout as Layout).settings?.properties['elk.direction'];
+    const orientation = (this.layout() as Layout).settings?.properties['elk.direction'];
     const hasBend =
       orientation === 'RIGHT' ? points.some(p => p.y !== points[0].y) : points.some(p => p.x !== points[0].x);
 
@@ -2933,9 +2954,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   public basicUpdate(): void {
-    if (this.view) {
-      this.width = this.view[0];
-      this.height = this.view[1];
+    const view = this.view();
+    if (view) {
+      this.width = view[0];
+      this.height = view[1];
     } else {
       const dims = this.getContainerDims();
       if (dims) {
@@ -3015,8 +3037,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     return (
       this.hasGraphDims() &&
       this.hasNodeDims() &&
-      ((this.compoundNodes?.length ? this.hasCompoundNodeDims() : true) ||
-        (this.clusters?.length ? this.hasClusterDims() : true))
+      ((this.compoundNodes()?.length ? this.hasCompoundNodeDims() : true) ||
+        (this.clusters()?.length ? this.hasClusterDims() : true))
     );
   }
 

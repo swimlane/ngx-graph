@@ -8,7 +8,6 @@ import { Layout } from '../models/layout.model';
 import { Edge } from '../models/edge.model';
 import { ClusterNode, CompoundNode, Node } from '../models/node.model';
 import { GraphComponent } from './graph.component';
-import { GraphModule } from './graph.module';
 
 /** Synchronous layout for tests: positions nodes/clusters/compound nodes and assigns edge polylines. */
 class TestSyncLayout implements Layout {
@@ -70,7 +69,7 @@ class TestLayoutWithCustomParseTranslate extends TestSyncLayout {
       (drawComplete)="onDrawComplete()"
     ></ngx-graph>
   `,
-  standalone: false
+  imports: [GraphComponent]
 })
 class TestGraphDrawCompleteHostComponent {
   syncLayout = new TestSyncLayout();
@@ -93,8 +92,7 @@ class TestGraphDrawCompleteHostComponent {
 describe('GraphComponent drawComplete', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GraphModule],
-      declarations: [TestGraphDrawCompleteHostComponent]
+      imports: [TestGraphDrawCompleteHostComponent]
     }).compileComponents();
   });
 
@@ -113,9 +111,9 @@ describe('GraphComponent drawComplete', () => {
     const graph = graphEl.componentInstance as GraphComponent;
 
     expect(graph.graph.edges.length).toBe(1);
-    expect(graph.linkElements?.length ?? 0).toBe(graph.graph.edges.length);
+    expect(graph.linkElements()?.length ?? 0).toBe(graph.graph.edges.length);
 
-    for (const linkRef of graph.linkElements ?? []) {
+    for (const linkRef of graph.linkElements() ?? []) {
       const g = linkRef.nativeElement as SVGGElement;
       const path = g.querySelector('path');
       expect(path?.getAttribute('d')?.length).toBeGreaterThan(0);
@@ -147,7 +145,7 @@ describe('GraphComponent drawComplete', () => {
       [useLayoutTransitions]="useLayoutTransitions"
     ></ngx-graph>
   `,
-  standalone: false
+  imports: [GraphComponent]
 })
 class TestGraphLayoutJsHostComponent {
   syncLayout = new TestSyncLayout();
@@ -164,7 +162,7 @@ class TestGraphLayoutJsHostComponent {
   template: `
     <ngx-graph [view]="[400, 300]" [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
   `,
-  standalone: false
+  imports: [GraphComponent]
 })
 class TestGraphParseTranslateHostComponent {
   syncLayout = new TestLayoutWithCustomParseTranslate();
@@ -178,8 +176,7 @@ class TestGraphParseTranslateHostComponent {
 describe('GraphComponent layout-js-driven host class', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GraphModule],
-      declarations: [TestGraphLayoutJsHostComponent]
+      imports: [TestGraphLayoutJsHostComponent]
     }).compileComponents();
   });
 
@@ -217,8 +214,7 @@ const DEFAULT_EDGE_PATH_SAMPLE_COUNT = 48;
 describe('GraphComponent redrawEdge (curve + resampling)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GraphModule],
-      declarations: [TestGraphLayoutJsHostComponent]
+      imports: [TestGraphLayoutJsHostComponent]
     }).compileComponents();
   });
 
@@ -310,8 +306,7 @@ describe('GraphComponent redrawEdge (curve + resampling)', () => {
 describe('GraphComponent resolveTranslateFromTransform', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GraphModule],
-      declarations: [TestGraphParseTranslateHostComponent]
+      imports: [TestGraphParseTranslateHostComponent]
     }).compileComponents();
   });
 
@@ -332,8 +327,7 @@ describe('GraphComponent resolveTranslateFromTransform', () => {
 describe('GraphComponent layout anchor helpers (full-scope edge morph)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GraphModule],
-      declarations: [TestGraphLayoutJsHostComponent]
+      imports: [TestGraphLayoutJsHostComponent]
     }).compileComponents();
   });
 
