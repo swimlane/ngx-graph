@@ -1,0 +1,144 @@
+---
+description: Angular 20 best practices and coding standards for the projects/web application.
+globs: ['projects/web/**/*.{ts,html,scss,css}']
+---
+
+# Angular 20 Best Practices — `projects/web`
+
+## Project Structure
+
+- Source root: `projects/web/src/`
+- App code: `src/app/` (feature modules), `src/common/` (shared), `src/orchestration/`
+- Path aliases: `@app/*`, `@common/*`, `@api-clients/*`, `@assets/*`, `@tests/*`, `orchestration/*`
+- Always use path aliases for cross-directory imports; use relative imports only within the same feature folder.
+
+## TypeScript
+
+- **Strict mode is NOT enabled** — `tsconfig.json` has `strict: false`, `noImplicitAny: false`, `strictNullChecks: false`. Do not assume strict checks. Be defensive with null/undefined handling. Existing `any` usage exists but should not be introduced in new code.
+- For TypeScript guidelines (inference, avoid any, interfaces, no magic numbers, no console.log) see **code-quality** skill.
+
+## UI Library: `@swimlane/ngx-ui`
+
+**Always use Swimlane ngx-ui controls** — never recreate standard UI with raw `<div>`/`<span>` + ARIA when an ngx-ui component exists.
+Docs: [https://swimlane.github.io/ngx-ui/](https://swimlane.github.io/ngx-ui/)
+
+| Category          | Components                                                                                                                                                                                                                                                                                          |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Buttons**       | `ngx-button`, `ngx-button-toggle`, `ngx-button-toggle-group`, `ngx-long-press-button`, `ngx-plus-menu`                                                                                                                                                                                              |
+| **Form controls** | `ngx-input`, `ngx-input-prefix`, `ngx-input-suffix`, `ngx-input-hint`, `ngx-select`, `ngx-select-option`, `ngx-checkbox`, `ngx-toggle`, `ngx-radiobutton`, `ngx-radiobutton-group`, `ngx-slider`, `ngx-datetime`, `ngx-date-range-picker`, `ngx-codemirror`                                         |
+| **Layout**        | `ngx-card` (+ `ngx-card-header`, `ngx-card-body`, `ngx-card-footer`, `ngx-card-title`, `ngx-card-subtitle`, `ngx-card-avatar`, `ngx-card-tag`, `ngx-card-section`), `ngx-section`, `ngx-section-header`, `ngx-tabs`, `ngx-tab`, `ngx-toolbar`, `ngx-toolbar-content`, `ngx-split`, `ngx-split-area` |
+| **Navigation**    | `ngx-dropdown` (+ `ngx-dropdown-toggle`, `ngx-dropdown-menu`), `ngx-navbar`, `ngx-navbar-item`, `ngx-nav-menu`, `ngx-stepper`, `ngx-step`                                                                                                                                                           |
+| **Overlays**      | `ngx-dialog`, `ngx-large-format-dialog-content`, `ngx-large-format-dialog-footer`, `ngx-drawer`, `ngx-dialog-drawer-content`, `ngx-overlay`                                                                                                                                                         |
+| **Feedback**      | `ngx-notification`, `ngx-nag`, `ngx-loading`, `ngx-progress-spinner`, `ngx-tip`, `ngx-alert`                                                                                                                                                                                                        |
+| **Data**          | `ngx-datatable`, `ngx-datatable-column`, `ngx-tree`, `ngx-tree-node`, `ngx-list`, `ngx-json-editor`, `ngx-json-editor-flat`                                                                                                                                                                         |
+| **Directives**    | `ngx-tooltip` (attribute), `[autosize]`, `[dblClickCopy]`, `[long-press]`, `[resizeObserver]`                                                                                                                                                                                                       |
+| **Icons**         | `ngx-icon` (726 usages — the most used component)                                                                                                                                                                                                                                                   |
+
+- If an ngx-ui component exists for the need, **use it**. Do not build custom buttons, inputs, dropdowns, dialogs, or tabs from scratch.
+- Import components from `@swimlane/ngx-ui` in the component's `imports` array.
+
+## Components
+
+- **Any new component is standalone** — do not create non-standalone components or add new components to `NgModules`. Declare dependencies in the component’s `imports` array and import the component where it is used (or via a barrel that re-exports it).
+- **Implicit standalone** — do NOT set `standalone: true` in the decorator; it is the default in Angular 20.
+- **`ChangeDetectionStrategy.OnPush`** — required on all components.
+- **External templates** — use `templateUrl` with a separate `.html` file. Inline templates are not the convention here.
+- **Host bindings** — use the `host` object in the decorator, NOT `@HostBinding` / `@HostListener`.
+- **No `ngClass` / `ngStyle`** — use native `[class.active]="flag"` and `[style.font-size.px]="size"` bindings.
+- For structure and signal inputs/outputs see **angular-component** skill.
+
+## Code Style
+
+See **code-quality** skill (max ~30 lines per method, max 3 parameters, `private`, single responsibility, no business logic in components).
+
+## Dependency Injection
+
+- **New code:** prefer the `inject()` function. Mark injected services as `private readonly`.
+- **Existing code:** constructor injection is prevalent (~460 components). Do not rewrite working constructor injection unless refactoring the component.
+- **Do not mix** `inject()` and constructor injection within the same class.
+- See **angular-di** skill for tokens and providers.
+
+## Signals & Reactivity
+
+- **`input()` / `output()`** — use signal-based inputs and outputs for new components.
+- **`signal()` / `computed()`** — use for local component state and derived values.
+- **`effect()`** — use for signal-based side effects (e.g., logging, syncing to localStorage). Avoid heavy logic inside effects; keep them lean.
+- **`viewChild()` / `viewChildren()` / `contentChild()` / `contentChildren()`** — use signal-based queries instead of the `@ViewChild` / `@ContentChild` decorators.
+- **`linkedSignal()`** — available in Angular 20 for two-way derived signals (e.g. a writable signal that resets when a parent signal changes).
+- **`resource()`** — available in Angular 20 for declarative async data loading tied to signals.
+- **Signal updates** — use `set()` or `update()`, never `mutate()`.
+- Adoption is growing (~30 components). Prefer signals for all new component state.
+- See **angular-signals** skill for patterns.
+
+## Templates
+
+- **No inline logic in templates** — do not put expressions or method calls directly in template bindings. Always define a method in the component `.ts` file with a meaningful name and call it from the template. This keeps templates readable and logic testable.
+- **Native control flow** — always use `@if`, `@for`, `@switch`, `@empty`. **Never** use `*ngIf`, `*ngFor`, `*ngSwitch`, or any structural directive syntax in new code. The codebase has fully migrated (~4,400 usages, <25 legacy instances remaining — do not add more).
+- Do NOT import `CommonModule`, `NgIf`, `NgFor`, or `NgSwitch` in new components — they are not needed with built-in control flow.
+- **`@for` track** — always provide a `track` expression. Prefer `track item.id` over `track $index`.
+- **`@defer`** — use for lazy-loading heavy template sections.
+- **Async pipe or `toSignal()`** — never manually subscribe in templates. Use `async` pipe for observables or convert with `toSignal()`.
+- **Accessibility** — see the dedicated `accessibility.mdc` rule for full WCAG 2.2 AA standards.
+- See **angular-component** and **angular-signals** skills for template patterns.
+
+## Subscriptions
+
+- Never subscribe manually in components — use `async` pipe or `toSignal()`.
+- If you must subscribe in a service, always clean up with `takeUntilDestroyed()` or `DestroyRef`.
+
+## Async: Prefer RxJS over Promises
+
+Prefer RxJS Observables over Promises for all async APIs, data flows, and service methods. The codebase has undergone significant refactoring to eliminate Promise-based APIs; do not introduce new ones. See **angular-http** skill (references: Prefer Observables over Promises).
+
+## Services & HTTP
+
+- **`providedIn: 'root'`** for singleton services.
+- **Single responsibility** — one service, one concern.
+- **`inject()` function** preferred for new services.
+- **`HttpClient`** — use with typed responses. Handle errors with RxJS `catchError` or `tapResponse` in stores.
+- **Interceptors** — use `HttpInterceptorFn` (functional) for cross-cutting concerns (auth headers, error handling, CSRF).
+- **Caching** — use `shareReplay({ bufferSize: 1, refCount: true })` for shared observables that shouldn't re-fetch.
+- See **angular-http** and **angular-di** skills.
+
+## Reactive Forms
+
+- Prefer Reactive Forms (`FormGroup`, `FormControl`) over template-driven forms.
+- Use typed forms (`FormGroup<{ name: FormControl<string> }>`).
+- Use built-in and custom `ValidatorFn` / `AsyncValidatorFn` for validation — keep validation logic in the form definition, not the template.
+- See **angular-forms** skill (including Signal Forms reference).
+
+## Testing
+
+- **Framework:** Jasmine + Karma (NOT Jest). This project uses Karma + Jasmine.
+- **Always generate tests with new code:** for every new component, service, directive, pipe, store, guard, or resolver, create the co-located `*.spec.ts` file in the same edit. Do not deliver new production code without corresponding tests.
+- **Code coverage:** maintain >80% coverage for `projects/web`. New and modified code must include tests that cover main behavior and important edge cases so coverage stays above this target.
+- Test behavior, not implementation details.
+- Test file path alias: `@tests/*` → `projects/web/tests/*`.
+- See **angular-testing** skill for patterns (TestBed, mocking, HTTP testing, signal component tests). See **web-testing** rule for runner, coverage config, and project test utilities.
+
+## Routing & Lazy Loading
+
+- Lazy-load feature routes with `loadComponent` / `loadChildren`.
+- Heavy components can be lazy-loaded in templates with `@defer`.
+- Use functional route guards (`CanActivateFn`, `CanDeactivateFn`) for authentication and authorization.
+- Avoid direct DOM manipulation — use Angular's templating and renderer APIs instead.
+- See **angular-routing** skill.
+
+## Format and lint after editing
+
+- **After modifying any file under `projects/web`**, run format-check, then format only if needed, then lint. Use as **few files as possible** — only the files you actually changed. All commands from the **workspace root**; paths space-separated, relative to the workspace root.
+- **1. Check if format is required** (same file list as modified files):
+  ```bash
+  npx nx run web:format-check --files="projects/web/src/app/foo/foo.component.ts projects/web/src/app/foo/foo.component.html"
+  ```
+  If this fails (exit non-zero), formatting is required for those files.
+- **2. Format** only when format-check indicated format is needed. Use the same file list:
+  ```bash
+  npx nx run web:format --files="projects/web/src/app/foo/foo.component.ts projects/web/src/app/foo/foo.component.html"
+  ```
+  If you modified many files and listing them is impractical, use `npx nx run web:format-check` then `npx nx run web:format` (whole project). Prefer listing the specific files.
+- **3. Lint:** Always run lint with auto-fix after any format step:
+  ```bash
+  npx nx run web:lint --fix
+  ```
+- Summary: run `format-check --files="..."` for the modified files; if format is required, run `format --files="..."` with the same list; then always run `npx nx run web:lint --fix`.

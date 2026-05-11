@@ -5,6 +5,7 @@ import * as dagre from 'dagre';
 import { Edge } from '../../models/edge.model';
 import { Node, ClusterNode } from '../../models/node.model';
 import { DagreSettings, Orientation } from './dagre';
+import { dagreDragPolyline, rankOrderAxesFromDagreRankdir, resolveDagreDragEdgeStyle } from './edge-geometry';
 
 export class DagreClusterLayout implements Layout {
   defaultSettings: DagreSettings = {
@@ -14,6 +15,7 @@ export class DagreClusterLayout implements Layout {
     edgePadding: 100,
     rankPadding: 100,
     nodePadding: 50,
+    curveDistance: 20,
     multigraph: true,
     compound: true
   };
@@ -54,20 +56,14 @@ export class DagreClusterLayout implements Layout {
   updateEdge(graph: Graph, edge: Edge): Graph {
     const sourceNode = graph.nodes.find(n => n.id === edge.source);
     const targetNode = graph.nodes.find(n => n.id === edge.target);
-
-    // determine new arrow position
-    const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
-    const startingPoint = {
-      x: sourceNode.position.x,
-      y: sourceNode.position.y - dir * (sourceNode.dimension.height / 2)
-    };
-    const endingPoint = {
-      x: targetNode.position.x,
-      y: targetNode.position.y + dir * (targetNode.dimension.height / 2)
-    };
-
-    // generate new points
-    edge.points = [startingPoint, endingPoint];
+    if (!sourceNode?.position || !targetNode?.position) {
+      return graph;
+    }
+    const settings = Object.assign({}, this.defaultSettings, this.settings);
+    const axes = rankOrderAxesFromDagreRankdir(settings.orientation);
+    const curveDistance = settings.curveDistance ?? 20;
+    const resolved = resolveDagreDragEdgeStyle(settings.dragEdgeStyle ?? 'auto', edge.points);
+    edge.points = dagreDragPolyline(sourceNode, targetNode, axes, curveDistance, resolved);
     return graph;
   }
 

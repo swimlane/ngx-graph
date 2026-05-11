@@ -1,4 +1,4 @@
-import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
+import { Directive, HostListener, output } from '@angular/core';
 
 /**
  * Mousewheel directive
@@ -8,14 +8,11 @@ import { Directive, Output, HostListener, EventEmitter } from '@angular/core';
  */
 // tslint:disable-next-line: directive-selector
 @Directive({
-  selector: '[mouseWheel]',
-  standalone: false
+  selector: '[mouseWheel]'
 })
 export class MouseWheelDirective {
-  @Output()
-  mouseWheelUp = new EventEmitter();
-  @Output()
-  mouseWheelDown = new EventEmitter();
+  readonly mouseWheelUp = output<WheelEvent>();
+  readonly mouseWheelDown = output<WheelEvent>();
 
   @HostListener('mousewheel', ['$event'])
   onMouseWheelChrome(event: any): void {

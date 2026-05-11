@@ -1,18 +1,32 @@
+/* Replaces legacy @angular/animations :enter (see animate.enter in graph.component.html). */
+.ngx-graph-outer-fade {
+  animation: ngx-graph-outer-fade-in 500ms 100ms ease both;
+}
+
+@keyframes ngx-graph-outer-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .minimap {
   .minimap-background {
-    fill: rgba(0, 0, 0, 0.1);
+    fill: rgba(33, 38, 49, 0.5);
   }
 
   .minimap-drag {
-    fill: rgba(0, 0, 0, 0.2);
-    stroke: rgba(255, 255, 255, 1);
+    fill: rgba(0, 0, 0, 0.1);
+    stroke: rgba(114, 129, 159, 1);
     stroke-width: 1px;
     stroke-dasharray: 2px;
     stroke-dashoffset: 2px;
     cursor: pointer;
 
     &.panning {
-      fill: rgba(0, 0, 0, 0.3);
+      fill: rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -20,6 +34,16 @@
     opacity: 0.5;
     pointer-events: none;
   }
+}
+
+/* Layout morph: JS rAF drives transforms; disable CSS so it does not fight imperative updates.
+ * `.layout-js-driven` is always on the host when `useLayoutTransitions` is true (default); set that input false
+ * to apply this class only while `transitionAfterChanges` tweening is active. */
+.layout-js-driven .graph .node-group,
+.layout-js-driven .minimap .node-group,
+.smooth-layout .graph .node-group,
+.smooth-layout .minimap .node-group {
+  transition: none;
 }
 
 .graph {
@@ -41,11 +65,8 @@
     cursor: move;
   }
 
+  /* Node motion is driven by graph.component.ts (rAF / unified layout), not CSS transition on transform. */
   .node-group {
-    &.old-node {
-      transition: transform 0.5s ease-in-out;
-    }
-
     .node {
       &:focus {
         outline: none;

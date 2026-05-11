@@ -1,0 +1,33 @@
+<div class="demo">
+  <div class="toolbar">
+    <p class="hint">
+      Smooth <strong>translation</strong> of nodes and edges on layout updates uses
+      <code>transitionAfterChanges</code> (<code>mode: 'tween'</code>, <code>scope: 'full'</code>,
+      <code>durationMs: 2000</code>) — there is no separate <code>translateOnChanges</code> input.
+      <strong>Randomize layout</strong> keeps the same nodes and edges and only changes Dagre orientation, ranker, and
+      spacing — edge paths tween because the same <code>(source, target)</code> pairs existed on the previous layout.
+      <strong>New random graph</strong> may add or remove nodes (between 4 and 10) and rebuild edges as a random DAG;
+      most edges are new pairs vs the prior tick, so paths may <strong>snap</strong> while nodes still tween. The shell
+      stays hidden until the first <code>drawComplete</code>; <code>autoCenter</code> runs only then so nodes do not
+      animate from the corner on every change.
+    </p>
+    <div class="toolbar-actions">
+      <button type="button" (click)="randomizeLayoutOnly()">Randomize layout</button>
+      <button type="button" (click)="randomizeGraphTopology()">New random graph</button>
+    </div>
+  </div>
+  <div class="graph-shell" [class.graph-shell--visible]="chartVisible">
+    <ngx-graph
+      [view]="[1200, 800]"
+      layout="dagre"
+      [nodes]="nodes"
+      [links]="links"
+      [groupResultsBy]="groupByNodeId"
+      [layoutSettings]="layoutSettings"
+      [transitionAfterChanges]="{ mode: 'tween', scope: 'full', durationMs: 2000 }"
+      [animate]="false"
+      [autoCenter]="recenterOnLayout"
+      (drawComplete)="onGraphDrawComplete()"
+    ></ngx-graph>
+  </div>
+</div>

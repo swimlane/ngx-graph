@@ -1,0 +1,31 @@
+<div class="demo">
+  <div class="toolbar">
+    <p class="hint">
+      <strong>ColaForceDirectedLayout</strong> positions nodes with straight links between node bounds (not ELK-style
+      splines or orthogonal routing). Dragging restarts the force simulation rather than applying Dagre/ELK drag
+      polyline rules. <strong>transitionAfterChanges</strong> (tween, additive scope) only tweens new nodes and edges.
+      First segment has no motion; use <strong>Add segment</strong> or <strong>Auto-play</strong>.
+    </p>
+    <div class="actions">
+      <button type="button" (click)="addSegment()" [disabled]="atEnd">Add segment</button>
+      <button type="button" (click)="toggleAuto()">{{ autoLabel }}</button>
+      <button type="button" (click)="reset()">Reset</button>
+    </div>
+    <p class="meta">Step {{ stepIndex + 1 }} / {{ maxStep + 1 }} (click Add segment to begin)</p>
+  </div>
+  @if (nodes.length && links.length) {
+    <ngx-graph
+      [view]="[720, 480]"
+      [layout]="layout"
+      [nodes]="nodes"
+      [links]="links"
+      [curve]="curve"
+      [layoutSettings]="layoutSettings"
+      [transitionAfterChanges]="{ mode: 'tween', scope: 'additive', durationMs: 0 }"
+      [animate]="false"
+      [autoCenter]="true"
+    ></ngx-graph>
+  } @else {
+    <p class="placeholder">Click <strong>Add segment</strong> to grow the branching graph.</p>
+  }
+</div>

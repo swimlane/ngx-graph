@@ -13,9 +13,6 @@ import {
 } from 'msagl-js';
 import type { GeomEdge } from 'msagl-js';
 
-const DEFAULT_EDGE_NAME = '\x00';
-const EDGE_KEY_DELIM = '\x01';
-
 export class MSAGLLayout implements Layout {
   public run(graph: Graph): Graph {
     const g = this.createGeomGraph(graph);
@@ -29,8 +26,6 @@ export class MSAGLLayout implements Layout {
 
     g.layoutSettings = ss;
     layoutGraphWithSugiayma(g);
-
-    graph.edgeLabels = [];
 
     for (const node of g.shallowNodes()) {
       const graphNode = graph.nodes.find(n => n.id === node.id);
@@ -46,8 +41,11 @@ export class MSAGLLayout implements Layout {
 
     const geomEdges = Array.from(g.edges());
     for (const edge of graph.edges) {
-      this.updateGraphEdge(graph, edge, geomEdges);
+      this.updateGraphEdge(edge, geomEdges);
     }
+
+    // Match ELK / GraphComponent.tick array branch: `edgeLabels` must list edges with `points` or tick iterates zero links.
+    graph.edgeLabels = graph.edges;
 
     return graph;
   }
@@ -80,21 +78,14 @@ export class MSAGLLayout implements Layout {
     return g;
   }
 
-  public updateGraphEdge(graph: Graph, edge: Edge, geomEdges: any): Graph {
-    const geoEdge = geomEdges.find(e => e.source.id === edge.source && e.target.id === edge.target);
-    edge.points = this.getPointsFromGeoEdge(geoEdge);
-
-    const edgeLabelId = `${edge.source}${EDGE_KEY_DELIM}${edge.target}${EDGE_KEY_DELIM}${DEFAULT_EDGE_NAME}`;
-    const matchingEdgeLabel = graph.edgeLabels[edgeLabelId];
-    if (matchingEdgeLabel) {
-      matchingEdgeLabel.points = edge.points;
-    } else {
-      graph.edgeLabels[edgeLabelId] = { points: edge.points };
-    }
-    return graph;
+  public updateGraphEdge(edge: Edge, geomEdges: GeomEdge[]): void {
+    const src = String(edge.source);
+    const tgt = String(edge.target);
+    const geoEdge = geomEdges.find(e => e.source.id === src && e.target.id === tgt);
+    edge.points = geoEdge ? this.getPointsFromGeoEdge(geoEdge) : [];
   }
 
-  private getPointsFromGeoEdge(e: GeomEdge): any {
+  private getPointsFromGeoEdge(e: GeomEdge): Array<{ x: number; y: number }> {
     const result = [];
     const points = interpolateICurve(e.curve, e.curve.end.sub(e.curve.start).length / 20);
 

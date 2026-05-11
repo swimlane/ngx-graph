@@ -1,45 +1,59 @@
 // rename transition due to conflict with d3 transition
-import { animate, style, transition as ngTransition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChild,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
+  inject,
+  Injector,
   OnDestroy,
   OnInit,
-  Output,
-  QueryList,
   TemplateRef,
-  ViewChildren,
   ViewEncapsulation,
   NgZone,
   ChangeDetectorRef,
   OnChanges,
-  SimpleChanges
+  SimpleChanges,
+  afterNextRender,
+  isDevMode,
+  effect,
+  input,
+  model,
+  output,
+  contentChild,
+  viewChildren
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
-import * as ease from 'd3-ease';
-import 'd3-transition';
 import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
-import { first, debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
+import { LAYERED_NODE_NODE_BETWEEN_LAYERS_PX } from './layouts/layout-layered-constants';
 import { Edge } from '../models/edge.model';
 import { Node, ClusterNode, CompoundNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
-import { MiniMapPosition } from '../enums/mini-map-position.enum';
+import { MiniMapPosition, DefaultMiniMapMargin, MiniMapMargin } from '../enums/mini-map-position.enum';
 import { throttleable } from '../utils/throttle';
 import { ColorHelper } from '../utils/color.helper';
 import { ViewDimensions, calculateViewDimensions } from '../utils/view-dimensions.helper';
 import { VisibilityObserver } from '../utils/visibility-observer';
+import { MouseWheelDirective } from './mouse-wheel.directive';
+import {
+  mergeGraphLayoutTransition,
+  mergeViewportTransition,
+  mergeLayoutEffect,
+  resolveGraphTransitionEasing,
+  type GraphLayoutTransition,
+  type LayoutMorphCapture,
+  type ViewportTranslationTransition,
+  type LayoutTransitionEffect
+} from './transition.model';
 
 /**
  * Matrix
@@ -70,76 +84,116 @@ export interface NgxGraphStateChangeEvent {
   state: NgxGraphStates;
 }
 
+/**
+ * Root graph component (`ngx-graph`).
+ *
+ * **Layout transitions:** JS-driven morphing (`transitionAfterChanges` with `mode: 'tween'`) is **opt-in**; if the input is
+ * omitted, merged defaults use `mode: 'instant'` (no rAF tween). The host may carry `layout-js-driven` (see
+ * {@link useLayoutTransitions}): when present, styles set `transition: none` on `.node-group` so imperative
+ * `transform` updates do not fight CSS. **`smooth-layout`** is set only while tweening is active.
+ *
+ * **Template outlets:** `ngTemplateOutletContext` includes `transitionAfterChangesActive` when JS-driven layout morphing is active.
+ */
 @Component({
   selector: 'ngx-graph',
   styleUrls: ['./graph.component.scss'],
   templateUrl: 'graph.component.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('animationState', [
-      ngTransition(':enter', [style({ opacity: 0 }), animate('500ms 100ms', style({ opacity: 1 }))])
-    ])
-  ],
-  standalone: false
+  imports: [NgTemplateOutlet, MouseWheelDirective]
 })
 export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @Input() nodes: Node[] = [];
-  @Input() clusters: ClusterNode[] = [];
-  @Input() compoundNodes: CompoundNode[] = [];
-  @Input() links: Edge[] = [];
-  @Input() activeEntries: any[] = [];
-  @Input() curve: any;
-  @Input() draggingEnabled = true;
-  @Input() nodeHeight: number;
-  @Input() nodeMaxHeight: number;
-  @Input() nodeMinHeight: number;
-  @Input() nodeWidth: number;
-  @Input() nodeMinWidth: number;
-  @Input() nodeMaxWidth: number;
-  @Input() panningEnabled: boolean = true;
-  @Input() panningAxis: PanningAxis = PanningAxis.Both;
-  @Input() enableZoom = true;
-  @Input() zoomSpeed = 0.1;
-  @Input() minZoomLevel = 0.1;
-  @Input() maxZoomLevel = 4.0;
-  @Input() autoZoom = false;
-  @Input() panOnZoom = true;
-  @Input() animate? = false;
-  @Input() autoCenter = false;
-  @Input() update$: Observable<any>;
-  @Input() center$: Observable<any>;
-  @Input() zoomToFit$: Observable<NgxGraphZoomOptions>;
-  @Input() panToNode$: Observable<any>;
-  @Input() layout: string | Layout;
-  @Input() layoutSettings: any;
-  @Input() enableTrackpadSupport = false;
-  @Input() showMiniMap: boolean = false;
-  @Input() miniMapMaxWidth: number = 100;
-  @Input() miniMapMaxHeight: number;
-  @Input() miniMapPosition: MiniMapPosition = MiniMapPosition.UpperRight;
-  @Input() view: [number, number];
-  @Input() scheme: any = 'cool';
-  @Input() customColors: any;
-  @Input() deferDisplayUntilPosition: boolean = false;
-  @Input() centerNodesOnPositionChange = true;
-  @Input() enablePreUpdateTransform = true;
+  private readonly injector = inject(Injector);
 
-  @Output() select = new EventEmitter();
-  @Output() activate: EventEmitter<any> = new EventEmitter();
-  @Output() deactivate: EventEmitter<any> = new EventEmitter();
-  @Output() zoomChange: EventEmitter<number> = new EventEmitter();
-  @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter();
-  @Output() stateChange: EventEmitter<NgxGraphStateChangeEvent> = new EventEmitter();
+  readonly nodes = input<Node[]>([]);
+  readonly clusters = input<ClusterNode[]>([]);
+  readonly compoundNodes = input<CompoundNode[]>([]);
+  readonly links = input<Edge[]>([]);
+  readonly activeEntries = model<any[]>([]);
+  readonly curve = model<any>(undefined);
+  readonly draggingEnabled = input(true);
+  readonly nodeHeight = input<number>(undefined);
+  readonly nodeMaxHeight = input<number>(undefined);
+  readonly nodeMinHeight = input<number>(undefined);
+  readonly nodeWidth = input<number>(undefined);
+  readonly nodeMinWidth = input<number>(undefined);
+  readonly nodeMaxWidth = input<number>(undefined);
+  readonly panningEnabled = input<boolean>(true);
+  readonly panningAxis = input<PanningAxis>(PanningAxis.Both);
+  readonly enableZoom = input(true);
+  readonly zoomSpeed = input(0.1);
+  readonly minZoomLevel = input(0.1);
+  readonly maxZoomLevel = input(4.0);
+  readonly autoZoom = input(false);
+  readonly panOnZoom = input(true);
+  readonly animate = input<boolean>(false);
+  readonly autoCenter = input(false);
+  readonly update$ = input<Observable<any>>(undefined);
+  readonly center$ = input<Observable<any>>(undefined);
+  readonly zoomToFit$ = input<Observable<NgxGraphZoomOptions>>(undefined);
+  readonly panToNode$ = input<Observable<any>>(undefined);
+  readonly layout = model<string | Layout>(undefined);
+  readonly layoutSettings = input<any>(undefined);
+  readonly enableTrackpadSupport = input(false);
+  readonly showMiniMap = input<boolean>(false);
+  readonly miniMapMaxWidth = input<number>(100);
+  readonly miniMapMaxHeight = input<number>(undefined);
+  readonly miniMapPosition = input<MiniMapPosition>(MiniMapPosition.UpperRight);
+  readonly miniMapMargin = input<MiniMapMargin>(DefaultMiniMapMargin);
+  readonly view = input<[number, number]>(undefined);
+  readonly scheme = input<any>('cool');
+  readonly customColors = input<any>(undefined);
+  readonly deferDisplayUntilPosition = input<boolean>(false);
+  readonly centerNodesOnPositionChange = input(true);
+  readonly enablePreUpdateTransform = input(true);
+  /**
+   * Layout transition after nodes/links change. Merged with defaults via {@link mergeGraphLayoutTransition}; when omitted or
+   * empty, defaults apply (`mode: 'instant'`). Use `{ mode: 'tween', scope: 'full' }` for full-graph interpolation, or
+   * `{ mode: 'tween', scope: 'additive', durationMs: 0 }` for additive-only tweening.
+   *
+   * **`mode: 'tween'` is opt-in** (no tween unless you pass a partial that resolves to tween after merge).
+   */
+  readonly transitionAfterChanges = input<Partial<GraphLayoutTransition>>(undefined);
+  /**
+   * Number of samples along each edge polyline when building `line` / morph segments (layout tick, drag
+   * {@link redrawEdge}, unified morph). Clamped to `[2, 512]`; default `48` when unset or non-finite.
+   */
+  readonly edgePathSampleCount = input<number>(undefined);
+  /**
+   * When `true` (default), the host always has the `layout-js-driven` class so CSS does not animate `.node-group`
+   * `transform` (matches historical behavior). When `false`, `layout-js-driven` is applied only while JS layout morphing
+   * is active ({@link layoutJsMorphEnabled}), allowing host CSS transitions on node groups when not using `mode: 'tween'`.
+   */
+  readonly useLayoutTransitions = input(true);
+  /** Optional eased translation for programmatic pan only (`panTo`, `center`, minimap, `zoomToFit` autoCenter). Zoom scale is never animated. */
+  readonly transitionDuringTransform = input<Partial<ViewportTranslationTransition>>(undefined);
+  /** Optional perspective / rotate flair during layout morph only (`mode: 'tween'`). */
+  readonly layoutTransitionEffect = input<Partial<LayoutTransitionEffect>>(undefined);
 
-  @ContentChild('linkTemplate') linkTemplate: TemplateRef<any>;
-  @ContentChild('nodeTemplate') nodeTemplate: TemplateRef<any>;
-  @ContentChild('clusterTemplate') clusterTemplate: TemplateRef<any>;
-  @ContentChild('defsTemplate') defsTemplate: TemplateRef<any>;
-  @ContentChild('miniMapNodeTemplate') miniMapNodeTemplate: TemplateRef<any>;
+  /** Template alias `zoomLevel` — imperatively sets zoom; see {@link zoomTo}. */
+  readonly zoomLevelInput = input<number | undefined>(undefined, { alias: 'zoomLevel' });
+  /** Template alias `panOffsetX` — imperatively pans; see {@link panTo}. */
+  readonly panOffsetXInput = input<number | undefined>(undefined, { alias: 'panOffsetX' });
+  /** Template alias `panOffsetY` — imperatively pans; see {@link panTo}. */
+  readonly panOffsetYInput = input<number | undefined>(undefined, { alias: 'panOffsetY' });
 
-  @ViewChildren('nodeElement') nodeElements: QueryList<ElementRef>;
-  @ViewChildren('linkElement') linkElements: QueryList<ElementRef>;
+  readonly select = output();
+  readonly activate = output<any>();
+  readonly deactivate = output<any>();
+  readonly zoomChange = output<number>();
+  readonly clickHandler = output<MouseEvent>();
+  readonly stateChange = output<NgxGraphStateChangeEvent>();
+  readonly drawComplete = output<void>();
+
+  readonly linkTemplate = contentChild<TemplateRef<any>>('linkTemplate');
+  readonly nodeTemplate = contentChild<TemplateRef<any>>('nodeTemplate');
+  readonly clusterTemplate = contentChild<TemplateRef<any>>('clusterTemplate');
+  readonly defsTemplate = contentChild<TemplateRef<any>>('defsTemplate');
+  readonly miniMapNodeTemplate = contentChild<TemplateRef<any>>('miniMapNodeTemplate');
+
+  readonly nodeElements = viewChildren<ElementRef>('nodeElement');
+  readonly clusterElements = viewChildren<ElementRef>('clusterElement');
+  readonly linkElements = viewChildren<ElementRef>('linkElement');
 
   public chartWidth: any;
 
@@ -160,6 +214,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   oldNodes: Set<string> = new Set();
   oldClusters: Set<string> = new Set();
   oldCompoundNodes: Set<string> = new Set();
+  /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
+  private drawCompleteTickId = 0;
+  private _graphDestroyed = false;
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
@@ -173,31 +230,102 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   visibilityObserver: VisibilityObserver;
+  private waitForGraphDims: ReturnType<typeof setInterval>;
   private destroy$ = new Subject<void>();
+
+  /** Latest requestAnimationFrame id per edge for imperative path morphing (cancel on relayout / drag). */
+  private readonly edgePathRafIds = new Map<string, number>();
+
+  /** Single rAF when layout morph unifies node transforms + edge paths. */
+  private layoutUnifiedRafId: number | null = null;
+
+  /** rAF for programmatic viewport pan easing (translation only). */
+  private viewportPanAnimRafId: number | null = null;
+
+  /** CSS `transform` on `.ngx-graph-outer` during optional layout flair (perspective / rotate). */
+  layoutOuterTransform: string | null = null;
+
+  /** `transform-origin` for {@link layoutOuterTransform} when using rotate pivot modes. */
+  layoutEffectTransformOrigin = '50% 50%';
+
+  /** Parsed `translate(tx,ty)` from the graph before a new layout is applied. */
+  private previousLayoutTransforms: Map<string, { tx: number; ty: number }> | null = null;
+
+  /** Target `translate(tx,ty)` after tick applyTransforms (before reset to previous for animation). */
+  private layoutAnimationTargets: Map<string, { tx: number; ty: number }> | null = null;
+
+  /** Node ids present after the previous completed `tick` (for additive smooth transitions). */
+  private priorTickGraphNodeIds = new Set<string>();
+  /** Edge keys present after the previous completed `tick` (aligned with {@link linkKeyForLookup}). */
+  private priorTickEdgeKeys = new Set<string>();
+  /** Snapshot of {@link priorTickEdgeKeys} at the start of the current `tick` (for classifying new edges). */
+  private edgeKeysAtLayoutTickStart = new Set<string>();
 
   constructor(
     private el: ElementRef,
     public zone: NgZone,
     public cd: ChangeDetectorRef,
     private layoutService: LayoutService
-  ) {}
+  ) {
+    effect(() => {
+      const level = this.zoomLevelInput();
+      if (level == null || isNaN(Number(level))) {
+        return;
+      }
+      this.zoomTo(Number(level));
+    });
+    effect(() => {
+      const x = this.panOffsetXInput();
+      if (x == null || isNaN(Number(x))) {
+        return;
+      }
+      this.panTo(Number(x), null);
+    });
+    effect(() => {
+      const y = this.panOffsetYInput();
+      if (y == null || isNaN(Number(y))) {
+        return;
+      }
+      this.panTo(null, Number(y));
+    });
+  }
 
-  @Input()
-  groupResultsBy: (node: any) => string = node => node.label;
+  /** Coloring domain key; default coalesces `label`, then `id`, then `''` so {@link ColorHelper} never receives null/undefined. */
+  readonly groupResultsBy = input<(node: any) => string>(node => node.label ?? node.id ?? '');
+
+  /** Merged layout transition config from {@link transitionAfterChanges} and defaults. */
+  get effectiveLayoutTransition(): GraphLayoutTransition {
+    return mergeGraphLayoutTransition(this.transitionAfterChanges());
+  }
+
+  /** `true` when rAF morph should run after layout (`mode: 'tween'`). */
+  get layoutMorphActive(): boolean {
+    return this.effectiveLayoutTransition.mode === 'tween';
+  }
+
+  /** Whether layout morphing is active (`transitionAfterChanges` resolved to `mode: 'tween'`). Exposed on template outlets as `transitionAfterChangesActive`. */
+  get layoutJsMorphEnabled(): boolean {
+    return this.layoutMorphActive;
+  }
+
+  /** Host `layout-js-driven` class: always on when {@link useLayoutTransitions} is `true`; otherwise only when {@link layoutJsMorphEnabled}. */
+  get layoutJsDrivenHostClass(): boolean {
+    return this.useLayoutTransitions() ? true : this.layoutJsMorphEnabled;
+  }
+
+  get effectiveViewportTransition() {
+    return mergeViewportTransition(this.transitionDuringTransform());
+  }
+
+  get effectiveLayoutEffect(): LayoutTransitionEffect {
+    return mergeLayoutEffect(this.layoutTransitionEffect());
+  }
 
   /**
    * Get the current zoom level
    */
   get zoomLevel() {
     return this.transformationMatrix.a;
-  }
-
-  /**
-   * Set the current zoom level
-   */
-  @Input('zoomLevel')
-  set zoomLevel(level) {
-    this.zoomTo(Number(level));
   }
 
   /**
@@ -208,26 +336,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
-   * Set the current `x` position of the graph
-   */
-  @Input('panOffsetX')
-  set panOffsetX(x) {
-    this.panTo(Number(x), null);
-  }
-
-  /**
    * Get the current `y` position of the graph
    */
   get panOffsetY() {
     return this.transformationMatrix.f;
-  }
-
-  /**
-   * Set the current `y` position of the graph
-   */
-  @Input('panOffsetY')
-  set panOffsetY(y) {
-    this.panTo(null, Number(y));
   }
 
   /**
@@ -237,29 +349,40 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   ngOnInit(): void {
-    if (this.update$) {
-      this.update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const update$ = this.update$();
+    if (update$) {
+      update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.update();
       });
     }
 
-    if (this.center$) {
-      this.center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const center$ = this.center$();
+    if (center$) {
+      center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.center();
       });
     }
 
-    if (this.zoomToFit$) {
-      this.zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(options => {
+    const zoomToFit$ = this.zoomToFit$();
+    if (zoomToFit$) {
+      zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(options => {
         this.zoomToFit(options ? options : {});
       });
     }
 
-    if (this.panToNode$) {
-      this.panToNode$.pipe(takeUntil(this.destroy$)).subscribe((nodeId: string) => {
+    const panToNode$ = this.panToNode$();
+    if (panToNode$) {
+      panToNode$.pipe(takeUntil(this.destroy$)).subscribe((nodeId: string) => {
         this.panToNodeId(nodeId);
       });
     }
+
+    this.waitForGraphDims = setInterval(() => {
+      if (this.hasDims()) {
+        clearInterval(this.waitForGraphDims);
+        this.drawComplete.emit();
+      }
+    }, 1000);
 
     this.minimapClipPathId = `minimapClip${id()}`;
     this.stateChange.emit({ state: NgxGraphStates.Subscribe });
@@ -268,29 +391,37 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   ngOnChanges(changes: SimpleChanges): void {
     this.basicUpdate();
     const { layoutSettings } = changes;
-    this.setLayout(this.layout);
+    const layout = this.layout();
+    this.setLayout(layout, !!changes['layout']);
     if (layoutSettings) {
-      this.setLayoutSettings(this.layoutSettings);
+      this.setLayoutSettings(this.layoutSettings());
     }
-    if (this.layout && this.nodes.length && this.links.length) {
+    if (layout && this.nodes().length && this.links().length) {
       this.update();
     }
   }
 
-  setLayout(layout: string | Layout): void {
-    this.initialized = false;
+  /**
+   * @param layoutInputChanged - When true, clears `initialized` so `@if (initialized && graph)` does not
+   * flash empty on unrelated input updates (nodes/links only). Only layout identity changes should reset.
+   */
+  setLayout(layout: string | Layout, layoutInputChanged = false): void {
+    if (layoutInputChanged) {
+      this.initialized = false;
+    }
     if (!layout) {
       layout = 'dagre';
     }
     if (typeof layout === 'string') {
-      this.layout = this.layoutService.getLayout(layout);
-      this.setLayoutSettings(this.layoutSettings);
+      this.layout.set(this.layoutService.getLayout(layout));
+      this.setLayoutSettings(this.layoutSettings());
     }
   }
 
   setLayoutSettings(settings: any): void {
-    if (this.layout && typeof this.layout !== 'string') {
-      this.layout.settings = settings;
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string') {
+      layout.settings = settings;
     }
   }
 
@@ -301,10 +432,17 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   ngOnDestroy(): void {
+    this._graphDestroyed = true;
+    this.cancelLayoutUnifiedAnimation();
+    this.cancelAllEdgePathAnimations();
+    this.cancelViewportPanAnimation();
     this.unbindEvents();
     if (this.visibilityObserver) {
       this.visibilityObserver.visible.unsubscribe();
       this.visibilityObserver.destroy();
+    }
+    if (this.waitForGraphDims) {
+      clearInterval(this.waitForGraphDims);
     }
     this.destroy$.next();
     this.destroy$.complete();
@@ -333,8 +471,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   update(): void {
     this.basicUpdate();
-    if (!this.curve) {
-      this.curve = shape.curveBundle.beta(1);
+    if (!this.curve()) {
+      this.curve.set(shape.curveBundle.beta(1));
     }
 
     this.zone.run(() => {
@@ -371,9 +509,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.id = id();
       }
       if (!n.dimension) {
+        const nodeWidth = this.nodeWidth();
+        const nodeHeight = this.nodeHeight();
         n.dimension = {
-          width: this.nodeWidth ? this.nodeWidth : 30,
-          height: this.nodeHeight ? this.nodeHeight : 30
+          width: nodeWidth ? nodeWidth : 30,
+          height: nodeHeight ? nodeHeight : 30
         };
         n.meta.forceDimensions = false;
       } else {
@@ -384,7 +524,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           x: 0,
           y: 0
         };
-        if (this.deferDisplayUntilPosition) {
+        if (this.deferDisplayUntilPosition()) {
           n.hidden = true;
         }
       }
@@ -399,14 +539,236 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       return e;
     };
 
-    this.graph = {
-      nodes: this.nodes.map(n => initializeNode(n)),
-      clusters: this.clusters.map(n => initializeNode(n)),
-      compoundNodes: this.compoundNodes.map(n => initializeNode(n)),
-      edges: this.links.map(e => initializeEdge(e))
+    const priorGraph = this.graph;
+
+    const nextGraph: Graph = {
+      nodes: this.nodes().map(n => initializeNode(n)),
+      clusters: this.clusters().map(n => initializeNode(n)),
+      compoundNodes: this.compoundNodes().map(n => initializeNode(n)),
+      edges: this.links().map(e => initializeEdge(e))
     };
 
-    requestAnimationFrame(() => this.draw());
+    this.applyVisualContinuityBeforeLayout(nextGraph, priorGraph);
+
+    this.graph = nextGraph;
+    this.draw();
+  }
+
+  /**
+   * While async layout (e.g. ELK) runs, keep showing the previous snapshot's positions and edge routes
+   * so inputs without x/y do not flash to (0,0). Seeds `capturePreviousLayoutTransforms` with real geometry.
+   */
+  private applyVisualContinuityBeforeLayout(next: Graph, prior: Graph | undefined): void {
+    if (!prior?.nodes?.length) {
+      this.markDefaultOriginNodesHiddenUntilLayout(next.nodes);
+      this.markDefaultOriginNodesHiddenUntilLayout(next.clusters as Node[] | undefined);
+      this.markDefaultOriginNodesHiddenUntilLayout(next.compoundNodes as Node[] | undefined);
+      this.setDisplayTransformsFromPositions(next.nodes, next.clusters ?? [], next.compoundNodes ?? []);
+      return;
+    }
+
+    const incremental = this._oldLinks.length > 0;
+    const prevNodeById = new Map(prior.nodes.map(n => [n.id, n]));
+    const mergeNodes = (items: Node[] | undefined) => {
+      if (!items) {
+        return;
+      }
+      for (const n of items) {
+        const p = prevNodeById.get(n.id);
+        if (p?.position) {
+          n.position = { ...p.position };
+        }
+        if (p?.dimension) {
+          n.dimension = { ...p.dimension };
+        }
+        if (incremental && !prevNodeById.has(n.id)) {
+          n.hidden = true;
+        }
+      }
+    };
+    mergeNodes(next.nodes);
+    if (incremental) {
+      for (const n of next.nodes ?? []) {
+        if (!prevNodeById.has(n.id)) {
+          this.seedProvisionalPositionFromParentEdge(n, next.edges, prevNodeById);
+        }
+      }
+    }
+    if (prior.clusters?.length && next.clusters?.length) {
+      const m = new Map(prior.clusters.map(n => [n.id, n]));
+      for (const n of next.clusters) {
+        const p = m.get(n.id);
+        if (p?.position) {
+          n.position = { ...p.position };
+        }
+        if (p?.dimension) {
+          n.dimension = { ...p.dimension };
+        }
+      }
+    }
+    if (prior.compoundNodes?.length && next.compoundNodes?.length) {
+      const m = new Map(prior.compoundNodes.map(n => [n.id, n]));
+      for (const n of next.compoundNodes) {
+        const p = m.get(n.id);
+        if (p?.position) {
+          n.position = { ...p.position };
+        }
+        if (p?.dimension) {
+          n.dimension = { ...p.dimension };
+        }
+      }
+    }
+
+    const mg = this.isLayoutMultigraph();
+    if (this._oldLinks.length > 0 && next.edges?.length) {
+      const prevEdgeByKey = new Map<string, Edge>();
+      for (const e of this._oldLinks) {
+        prevEdgeByKey.set(this.linkKeyForLookup(e, mg), e);
+      }
+      for (const e of next.edges) {
+        const pe = prevEdgeByKey.get(this.linkKeyForLookup(e, mg));
+        if (pe?.points && pe.points.length >= 2) {
+          e.points = this.clonePoints(pe.points as Array<{ x: number; y: number }>);
+          if (pe.line) {
+            e.line = pe.line;
+          }
+          if (pe.oldLine) {
+            e.oldLine = pe.oldLine;
+          }
+          if (pe.textPath) {
+            e.textPath = pe.textPath;
+          }
+        }
+      }
+    }
+
+    this.setDisplayTransformsFromPositions(next.nodes, next.clusters ?? [], next.compoundNodes ?? []);
+
+    // Do not pass heuristic `position` into ELK (`...node` in elk createNodeTree). With semiInteractive layout, a wrong
+    // hint skews the first solve; the next segment masks it. `hidden` + transform already set for pre-layout paint.
+    if (incremental) {
+      for (const n of next.nodes ?? []) {
+        if (!prevNodeById.has(n.id)) {
+          delete n.position;
+        }
+      }
+    }
+  }
+
+  /** Transforms + colors for display before `tick()` (matches {@link applyTransforms} without new-id tracking). */
+  private setDisplayTransformsFromPositions(
+    nodes: Node[],
+    clusters: ClusterNode[] | undefined,
+    compoundNodes: CompoundNode[] | undefined
+  ): void {
+    const apply = (items: Node[] | undefined) => {
+      if (!items) {
+        return;
+      }
+      for (const n of items) {
+        if (!n.data) {
+          n.data = {};
+        }
+        n.data.color = this.colors.getColor(this.groupResultsBy()(n));
+        this.updateNodeGroupTransform(n);
+      }
+    };
+    apply(nodes);
+    apply(clusters);
+    apply(compoundNodes);
+  }
+
+  private edgeEndpointNodeId(ref: Edge['source'] | Edge['target']): string {
+    return typeof ref === 'string' ? ref : String((ref as { id?: string }).id ?? '');
+  }
+
+  /** Merged ELK `properties` from the active layout (defaults + instance settings). */
+  private elkMergedProperties(): Record<string, string | undefined> {
+    const L = this.layout() as {
+      defaultSettings?: { properties?: Record<string, string> };
+      settings?: { properties?: Record<string, string> };
+    };
+    return { ...L?.defaultSettings?.properties, ...L?.settings?.properties };
+  }
+
+  /**
+   * Inter-layer gap for provisional seeding. Graph-level merged props often carry `20` from ElkLayout defaults while
+   * `createNodeTree` applies {@link LAYERED_NODE_NODE_BETWEEN_LAYERS_PX} per-node — match the latter for seed math.
+   */
+  private getElkLayerSpacingGapPx(): number {
+    const raw = this.elkMergedProperties()['elk.layered.spacing.nodeNodeBetweenLayers'];
+    if (raw == null || raw === '') {
+      return LAYERED_NODE_NODE_BETWEEN_LAYERS_PX;
+    }
+    const n = parseFloat(String(raw));
+    if (!Number.isFinite(n)) {
+      return LAYERED_NODE_NODE_BETWEEN_LAYERS_PX;
+    }
+    if (n === 20) {
+      return LAYERED_NODE_NODE_BETWEEN_LAYERS_PX;
+    }
+    return n;
+  }
+
+  private elkDirectionOrDown(): string {
+    const d = this.elkMergedProperties()['elk.direction'];
+    return typeof d === 'string' && d.length ? d : 'DOWN';
+  }
+
+  /**
+   * Place the new node center where layered ELK will approximately put it: half parent + inter-layer gap + half child,
+   * along the layout axis. Aligns with `buildFallbackEdgePoints` (center-to-center) better than a flat pixel delta.
+   */
+  private seedProvisionalPositionFromParentEdge(
+    n: Node,
+    edges: Edge[] | undefined,
+    prevNodeById: Map<string, Node>
+  ): void {
+    if (!edges?.length) {
+      return;
+    }
+    const edge = edges.find(e => this.edgeEndpointNodeId(e.target) === n.id);
+    if (!edge) {
+      return;
+    }
+    const src = prevNodeById.get(this.edgeEndpointNodeId(edge.source));
+    if (!src?.position) {
+      return;
+    }
+    const gap = this.getElkLayerSpacingGapPx();
+    const sw = src.dimension?.width ?? 30;
+    const sh = src.dimension?.height ?? 30;
+    const tw = n.dimension?.width ?? 30;
+    const th = n.dimension?.height ?? 30;
+    const sx = src.position.x;
+    const sy = src.position.y;
+    switch (this.elkDirectionOrDown()) {
+      case 'RIGHT':
+        n.position = { x: sx + sw / 2 + gap + tw / 2, y: sy };
+        break;
+      case 'LEFT':
+        n.position = { x: sx - sw / 2 - gap - tw / 2, y: sy };
+        break;
+      case 'UP':
+        n.position = { x: sx, y: sy - sh / 2 - gap - th / 2 };
+        break;
+      default:
+        n.position = { x: sx, y: sy + sh / 2 + gap + th / 2 };
+    }
+  }
+
+  /** Bootstrap: hide nodes still at default origin until first ELK `tick()` supplies real positions. */
+  private markDefaultOriginNodesHiddenUntilLayout(items: Node[] | undefined): void {
+    if (!items?.length) {
+      return;
+    }
+    for (const n of items) {
+      const x = n.position?.x ?? 0;
+      const y = n.position?.y ?? 0;
+      if (x === 0 && y === 0) {
+        n.hidden = true;
+      }
+    }
   }
 
   /**
@@ -417,129 +779,546 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   draw(): void {
     // Recalculate the layout
-    const result = (this.layout as Layout).run(this.graph);
+    const result = (this.layout() as Layout)?.run(this.graph);
     const result$ = result instanceof Observable ? result : of(result);
     this.graphSubscription.add(
       result$.subscribe(graph => {
+        this.capturePreviousLayoutTransforms();
         this.graph = graph;
         this.tick();
       })
     );
   }
 
+  /** Default: first `translate(a, b)` in the node-group transform string. */
+  private parseTranslateDefault(transformStr: string | undefined): { tx: number; ty: number } {
+    const m = /translate\(\s*([\d.-]+)\s*,\s*([\d.-]+)\s*\)/.exec(transformStr || '');
+    if (m) {
+      return { tx: +m[1], ty: +m[2] };
+    }
+    return { tx: 0, ty: 0 };
+  }
+
+  /** Prefers `Layout.parseTranslate` on the resolved layout object when present. */
+  public resolveTranslateFromTransform(transformStr: string | undefined): { tx: number; ty: number } {
+    const L = this.layout();
+    if (L && typeof L !== 'string' && typeof (L as Layout).parseTranslate === 'function') {
+      return (L as Layout).parseTranslate!(transformStr);
+    }
+    return this.parseTranslateDefault(transformStr);
+  }
+
+  /** Same key shape as dagre/graphlib `_edgeLabels` keys and as used in tick edge maps. */
+  private linkKeyForLookup(edge: Pick<Edge, 'source' | 'target' | 'id'>, multigraph: boolean): string {
+    const source = typeof edge.source === 'string' ? edge.source : String((edge.source as { id?: string }).id ?? '');
+    const target = typeof edge.target === 'string' ? edge.target : String((edge.target as { id?: string }).id ?? '');
+    return multigraph ? `${source}${target}${edge.id ?? ''}` : `${source}${target}`;
+  }
+
+  /** Matches layout engines that merge `defaultSettings` with `settings` (e.g. DagreNodesOnly multigraph). */
+  private isLayoutMultigraph(): boolean {
+    const layoutValue = this.layout();
+    if (!layoutValue || typeof layoutValue === 'string') {
+      return false;
+    }
+    const layout = layoutValue as { defaultSettings?: { multigraph?: boolean }; settings?: { multigraph?: boolean } };
+    const merged = Object.assign({}, layout.defaultSettings ?? {}, layout.settings ?? {});
+    return !!merged.multigraph;
+  }
+
+  /**
+   * graphlib `edgeArgsToId`: v + \\x01 + w + \\x01 + name (name defaults to \\x00).
+   * Aligns with {@link linkKeyForLookup}; falls back to legacy regex when the id is not graphlib-shaped.
+   */
+  private graphlibEdgeLabelIdToLookupKey(edgeLabelId: string, multigraph: boolean): string {
+    const EDGE_KEY_DELIM = '\x01';
+    const DEFAULT_EDGE_NAME = '\x00';
+    const parts = edgeLabelId.split(EDGE_KEY_DELIM);
+    if (parts.length >= 2) {
+      const v = parts[0];
+      const w = parts[1];
+      if (!multigraph) {
+        return `${v}${w}`;
+      }
+      const name = parts.length >= 3 ? parts[2] : DEFAULT_EDGE_NAME;
+      if (name === DEFAULT_EDGE_NAME || name === '') {
+        return `${v}${w}`;
+      }
+      return `${v}${w}${name}`;
+    }
+    return edgeLabelId.replace(/[^\w-]*/g, '');
+  }
+
+  /** Snapshot current node group translates before replacing `graph` (layout morph animation). */
+  public capturePreviousLayoutTransforms(): void {
+    if (!this.initialized || !this.graph) {
+      this.previousLayoutTransforms = null;
+      return;
+    }
+    // No prior tick edges: first paint should not run unified layout tween.
+    if (!this._oldLinks.length) {
+      this.previousLayoutTransforms = null;
+      return;
+    }
+    const morph = this.effectiveLayoutTransition.morphCapture;
+    const source = morph.previousSource ?? 'model-transform';
+    if (source === 'model-transform') {
+      this.previousLayoutTransforms = this.collectPreviousTranslatesFromModelTransforms();
+      return;
+    }
+    const chartG = this.getMainChartGroupElement();
+    this.previousLayoutTransforms = chartG
+      ? this.collectPreviousTranslatesFromDom(chartG, morph, source === 'dom-with-model-fallback')
+      : this.collectPreviousTranslatesFromModelTransforms();
+  }
+
+  /** Resample count for edge polylines (layout, morph, drag). */
+  private effectiveEdgePathSampleCount(): number {
+    const raw = this.edgePathSampleCount();
+    const n = typeof raw === 'number' && Number.isFinite(raw) ? Math.floor(raw) : 48;
+    return Math.min(512, Math.max(2, n));
+  }
+
+  private collectPreviousTranslatesFromModelTransforms(): Map<string, { tx: number; ty: number }> {
+    const m = new Map<string, { tx: number; ty: number }>();
+    const collect = (items: Node[] | undefined) => {
+      items?.forEach(n => {
+        if (n.transform) {
+          m.set(n.id, this.resolveTranslateFromTransform(n.transform));
+        }
+      });
+    };
+    collect(this.graph.nodes);
+    collect(this.graph.clusters);
+    collect(this.graph.compoundNodes);
+    return m;
+  }
+
+  private getMainChartGroupElement(): SVGGElement | null {
+    const g = (this.el.nativeElement as HTMLElement).querySelector('g.graph.chart');
+    return g instanceof SVGGElement ? g : null;
+  }
+
+  /** Main-chart `g.node-group` only (not minimap duplicates). */
+  private findMainChartNodeGroup(chartG: SVGGElement, nodeId: string): SVGGElement | null {
+    const el = chartG.querySelector(`g.node-group#${CSS.escape(nodeId)}`);
+    if (!(el instanceof SVGGElement) || el.closest('.minimap')) {
+      return null;
+    }
+    return el;
+  }
+
+  private translateFromLayoutPositionForNode(n: Node): { tx: number; ty: number } {
+    const center = this.centerNodesOnPositionChange();
+    const dx = center ? (n.dimension?.width ?? 0) / 2 : 0;
+    const dy = center ? (n.dimension?.height ?? 0) / 2 : 0;
+    const px = n.position?.x ?? 0;
+    const py = n.position?.y ?? 0;
+    return { tx: px - dx || 0, ty: py - dy || 0 };
+  }
+
+  private findMorphNodeById(
+    nodeId: string,
+    order: NonNullable<LayoutMorphCapture['modelResolutionOrder']>
+  ): Node | undefined {
+    for (const kind of order) {
+      if (kind === 'compound') {
+        const hit = this.graph.compoundNodes?.find(x => x.id === nodeId);
+        if (hit) {
+          return hit;
+        }
+      } else if (kind === 'cluster') {
+        const hit = this.graph.clusters?.find(x => x.id === nodeId);
+        if (hit) {
+          return hit;
+        }
+      } else {
+        const hit = this.graph.nodes.find(x => x.id === nodeId);
+        if (hit) {
+          return hit;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private modelTranslateForMorphFallback(nodeId: string, morph: LayoutMorphCapture): { tx: number; ty: number } {
+    const order = morph.modelResolutionOrder ?? ['compound', 'cluster', 'node'];
+    const n = this.findMorphNodeById(nodeId, order);
+    if (!n) {
+      return { tx: 0, ty: 0 };
+    }
+    if (n.transform) {
+      return this.resolveTranslateFromTransform(n.transform);
+    }
+    return this.translateFromLayoutPositionForNode(n);
+  }
+
+  private isDegenerateTranslate(t: { tx: number; ty: number }, eps: number): boolean {
+    return Math.hypot(t.tx, t.ty) <= eps;
+  }
+
+  /** `translate` of `nodeEl`'s origin in `chartG` user space (pan/zoom excluded from node-local chain). */
+  private translateNodeGroupInChartUserSpace(
+    nodeEl: SVGGElement,
+    chartG: SVGGElement
+  ): { tx: number; ty: number } | null {
+    try {
+      const nodeCtm = nodeEl.getCTM();
+      const chartCtm = chartG.getCTM();
+      if (!nodeCtm || !chartCtm) {
+        return null;
+      }
+      const m = chartCtm.inverse().multiply(nodeCtm);
+      return { tx: m.e, ty: m.f };
+    } catch {
+      return null;
+    }
+  }
+
+  private collectPreviousTranslatesFromDom(
+    chartG: SVGGElement,
+    morph: LayoutMorphCapture,
+    hybrid: boolean
+  ): Map<string, { tx: number; ty: number }> {
+    const eps = morph.degenerateEpsilon ?? 1e-3;
+    const m = new Map<string, { tx: number; ty: number }>();
+    const forNode = (n: Node) => {
+      const nodeEl = this.findMainChartNodeGroup(chartG, n.id);
+      const attr = nodeEl?.getAttribute('transform')?.trim() ?? '';
+      let t: { tx: number; ty: number };
+
+      if (nodeEl && attr.length > 0) {
+        t = this.resolveTranslateFromTransform(attr);
+        if (hybrid && this.isDegenerateTranslate(t, eps)) {
+          t = this.modelTranslateForMorphFallback(n.id, morph);
+        }
+      } else if (nodeEl && attr.length === 0 && hybrid) {
+        const ctmT = this.translateNodeGroupInChartUserSpace(nodeEl, chartG);
+        t = ctmT && !this.isDegenerateTranslate(ctmT, eps) ? ctmT : this.modelTranslateForMorphFallback(n.id, morph);
+      } else if (n.transform) {
+        t = this.resolveTranslateFromTransform(n.transform);
+      } else {
+        t = this.translateFromLayoutPositionForNode(n);
+      }
+      m.set(n.id, t);
+    };
+    this.graph.nodes.forEach(forNode);
+    this.graph.clusters?.forEach(forNode);
+    this.graph.compoundNodes?.forEach(forNode);
+    return m;
+  }
+
+  /** When {@link LayoutMorphCapture.syncTargetsFromPositionAfterTick} is on, recompute targets from `position`. */
+  private syncLayoutAnimationTargetsFromPositions(): void {
+    const targets = this.layoutAnimationTargets;
+    if (!targets?.size) {
+      return;
+    }
+    const sync = (items: Node[] | undefined) => {
+      items?.forEach(n => {
+        if (targets.has(n.id)) {
+          targets.set(n.id, this.translateFromLayoutPositionForNode(n));
+        }
+      });
+    };
+    sync(this.graph.nodes);
+    sync(this.graph.clusters);
+    sync(this.graph.compoundNodes);
+  }
+
+  /** When {@link LayoutMorphCapture.snapAddedNodeIds} is on, new ids do not tween from a stale origin. */
+  private snapMorphPreviousForAddedNodes(nodeIdsAtLayoutTickStart: Set<string>): void {
+    const prevs = this.previousLayoutTransforms;
+    const targets = this.layoutAnimationTargets;
+    if (!prevs?.size || !targets?.size) {
+      return;
+    }
+    const snap = (items: Node[] | undefined) => {
+      items?.forEach(n => {
+        if (!nodeIdsAtLayoutTickStart.has(n.id)) {
+          const tgt = targets.get(n.id);
+          if (tgt) {
+            prevs.set(n.id, { tx: tgt.tx, ty: tgt.ty });
+          }
+        }
+      });
+    };
+    snap(this.graph.nodes);
+    snap(this.graph.clusters);
+    snap(this.graph.compoundNodes);
+  }
+
+  public applyAdditiveSmoothTransitionFilters(
+    targets: Map<string, { tx: number; ty: number }>,
+    nodeIdsAtLayoutTickStart: Set<string>
+  ): void {
+    if (
+      this.effectiveLayoutTransition.scope !== 'additive' ||
+      nodeIdsAtLayoutTickStart.size === 0 ||
+      !this.previousLayoutTransforms
+    ) {
+      return;
+    }
+    const prevs = this.previousLayoutTransforms;
+    const allIds = new Set<string>();
+    for (const coll of [this.graph.nodes, this.graph.clusters, this.graph.compoundNodes]) {
+      coll?.forEach(n => allIds.add(n.id));
+    }
+    for (const id of allIds) {
+      if (nodeIdsAtLayoutTickStart.has(id)) {
+        targets.delete(id);
+        prevs.delete(id);
+      } else if (!prevs.has(id)) {
+        const tgt = targets.get(id);
+        if (tgt) {
+          // New nodes: do not tween from parent anchor (or a bad 0,0) — appear at final layout coordinates. Edge routes
+          // still morph via `runUnifiedLayoutAnimation` / `redrawLines` when maps stay populated.
+          prevs.set(id, { tx: tgt.tx, ty: tgt.ty });
+        }
+      }
+    }
+  }
+
+  private refreshPriorTickGraphIds(multigraph: boolean): void {
+    const ids = new Set<string>();
+    const collect = (items: Node[] | undefined) => {
+      items?.forEach(n => ids.add(n.id));
+    };
+    collect(this.graph.nodes);
+    collect(this.graph.clusters);
+    collect(this.graph.compoundNodes);
+    this.priorTickGraphNodeIds = ids;
+
+    const keys = new Set<string>();
+    for (const e of this.graph.edges ?? []) {
+      keys.add(this.linkKeyForLookup(e, multigraph));
+    }
+    this.priorTickEdgeKeys = keys;
+  }
+
+  /**
+   * Builds one edge entry for {@link tick}. `lookupKey` / `legacyKey` must match {@link linkKeyForLookup} /
+   * `_oldLinks` (graphlib uses string ids; ELK uses array `edgeLabels` and real keys from the edge).
+   */
+  private pushTickEdgeLink(
+    newLinks: Edge[],
+    edgeLabel: Edge,
+    lookupKey: string,
+    legacyKey: string,
+    oldLinkMap: Map<string, Edge>,
+    graphEdgeMap: Map<string, Edge>,
+    mg: boolean
+  ): void {
+    let oldLink = oldLinkMap.get(lookupKey) ?? oldLinkMap.get(legacyKey);
+    const linkFromGraph = graphEdgeMap.get(lookupKey) ?? graphEdgeMap.get(legacyKey);
+
+    if (!oldLink) {
+      // Prefer a prior tick edge (has route data) over the fresh graph stub, which often has no `points`.
+      oldLink =
+        this._oldLinks.find(ol => {
+          const k = this.linkKeyForLookup(ol, mg);
+          return k === lookupKey || k === legacyKey;
+        }) ??
+        linkFromGraph ??
+        edgeLabel;
+    } else if (
+      oldLink.data &&
+      linkFromGraph &&
+      linkFromGraph.data &&
+      JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)
+    ) {
+      oldLink.data = linkFromGraph.data;
+    }
+
+    oldLink.oldLine = oldLink.line;
+
+    const baseEdge = (oldLink || linkFromGraph || edgeLabel) as Edge;
+    let points = edgeLabel.points as Array<{ x: number; y: number }>;
+    if (!points || points.length < 2) {
+      const fb = this.buildFallbackEdgePoints(baseEdge);
+      if (fb.length >= 2) {
+        points = fb;
+      }
+    }
+    if (!points || points.length < 2) {
+      points = [
+        { x: 0, y: 0 },
+        { x: 0, y: 0 }
+      ];
+    }
+
+    // Build `line` from resampled geometry so static paths match drag and morph (same curve + sample count).
+    const { line, displayPoints } = this.lineAndDisplayFromRoutePoints(points);
+
+    const newLink = Object.assign({}, oldLink);
+    newLink.line = line;
+    newLink.points = points;
+    const hadPreviousRoute = oldLink?.points && Array.isArray(oldLink.points) && (oldLink.points as any[]).length >= 2;
+    // Raw prior layout polyline; redrawLines resamples to N for morphing (single resampling site).
+    let previousPoints: Array<{ x: number; y: number }> | undefined = hadPreviousRoute
+      ? this.clonePoints(oldLink.points as Array<{ x: number; y: number }>)
+      : undefined;
+    if (
+      this.effectiveLayoutTransition.scope === 'additive' &&
+      this.layoutMorphActive &&
+      !hadPreviousRoute &&
+      points.length >= 2 &&
+      this.edgeKeysAtLayoutTickStart.size > 0
+    ) {
+      const ek = this.linkKeyForLookup(baseEdge, mg);
+      if (!this.edgeKeysAtLayoutTickStart.has(ek)) {
+        const s = points[0];
+        previousPoints = [
+          { x: s.x, y: s.y },
+          { x: s.x, y: s.y }
+        ];
+      }
+    }
+    if (
+      this.effectiveLayoutTransition.scope === 'additive' &&
+      this.layoutMorphActive &&
+      this.edgeKeysAtLayoutTickStart.size > 0
+    ) {
+      const ekStable = this.linkKeyForLookup(baseEdge, mg);
+      if (this.edgeKeysAtLayoutTickStart.has(ekStable)) {
+        previousPoints = undefined;
+      }
+    }
+    if (
+      this.layoutMorphActive &&
+      this.effectiveLayoutTransition.scope === 'full' &&
+      this.previousLayoutTransforms?.size &&
+      !this.edgeKeysAtLayoutTickStart.has(this.linkKeyForLookup(baseEdge, mg))
+    ) {
+      const syn = this.syntheticPreviousEdgePointsFromPriorTransforms(baseEdge);
+      if (syn && syn.length >= 2) {
+        previousPoints = this.clonePoints(syn);
+      }
+    }
+    newLink.previousPoints = previousPoints;
+
+    this.updateMidpointOnEdge(newLink, points);
+
+    const textPos = points[Math.floor(points.length / 2)];
+    if (textPos) {
+      newLink.textTransform = `translate(${textPos.x || 0},${textPos.y || 0})`;
+    }
+
+    newLink.textAngle = 0;
+    if (!newLink.oldLine) {
+      newLink.oldLine = newLink.line;
+    }
+
+    this.calcDominantBaseline(newLink, displayPoints);
+    newLinks.push(newLink);
+  }
+
   tick() {
-    // Transposes view options to the node
-    const oldNodes: Set<string> = new Set();
-    const oldClusters: Set<string> = new Set();
-    const oldCompoundNodes: Set<string> = new Set();
+    const tickId = ++this.drawCompleteTickId;
+    this.edgeKeysAtLayoutTickStart = new Set(this.priorTickEdgeKeys);
+    const nodeIdsAtLayoutTickStart = new Set(this.priorTickGraphNodeIds);
+    const mg = this.isLayoutMultigraph();
 
-    this.graph.nodes.forEach(n => {
-      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
-        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
-      })`;
-      if (!n.data) {
-        n.data = {};
+    const previousNodes = this.oldNodes;
+    const previousClusters = this.oldClusters;
+    const previousCompoundNodes = this.oldCompoundNodes;
+
+    const newNodeIds: Set<string> = new Set();
+    const newClusterIds: Set<string> = new Set();
+    const newCompoundNodeIds: Set<string> = new Set();
+
+    this.applyTransforms(this.graph.nodes, newNodeIds);
+    this.applyTransforms(this.graph.clusters || [], newClusterIds);
+    this.applyTransforms(this.graph.compoundNodes || [], newCompoundNodeIds);
+
+    this.layoutAnimationTargets = null;
+    if (!this.isDragging && this.layoutMorphActive && this.previousLayoutTransforms?.size && this._oldLinks.length) {
+      const targets = new Map<string, { tx: number; ty: number }>();
+      const captureTargets = (items: Node[] | undefined) => {
+        if (!items) {
+          return;
+        }
+        for (const n of items) {
+          targets.set(n.id, this.resolveTranslateFromTransform(n.transform));
+        }
+      };
+      captureTargets(this.graph.nodes);
+      captureTargets(this.graph.clusters);
+      captureTargets(this.graph.compoundNodes);
+      this.layoutAnimationTargets = targets;
+
+      this.applyAdditiveSmoothTransitionFilters(targets, nodeIdsAtLayoutTickStart);
+
+      const resetToPrevious = (items: Node[] | undefined) => {
+        if (!items) {
+          return;
+        }
+        const prevs = this.previousLayoutTransforms!;
+        for (const n of items) {
+          if (prevs.has(n.id)) {
+            const prev = prevs.get(n.id)!;
+            n.transform = `translate(${prev.tx},${prev.ty})`;
+          }
+        }
+      };
+      resetToPrevious(this.graph.nodes);
+      resetToPrevious(this.graph.clusters);
+      resetToPrevious(this.graph.compoundNodes);
+    }
+
+    this.oldNodes = previousNodes;
+    this.oldClusters = previousClusters;
+    this.oldCompoundNodes = previousCompoundNodes;
+
+    const oldLinkMap = new Map<string, Edge>();
+    for (const ol of this._oldLinks) {
+      const key = this.linkKeyForLookup(ol, mg);
+      oldLinkMap.set(key, ol);
+    }
+
+    const graphEdgeMap = new Map<string, Edge>();
+    for (const nl of this.graph.edges) {
+      const key = this.linkKeyForLookup(nl, mg);
+      graphEdgeMap.set(key, nl);
+    }
+
+    const newLinks: Edge[] = [];
+    if (Array.isArray(this.graph.edgeLabels)) {
+      for (const edgeLabel of this.graph.edgeLabels) {
+        const lookupKey = this.linkKeyForLookup(edgeLabel, mg);
+        const legacyKey = String(edgeLabel.id ?? '').replace(/[^\w-]*/g, '');
+        this.pushTickEdgeLink(newLinks, edgeLabel, lookupKey, legacyKey, oldLinkMap, graphEdgeMap, mg);
       }
-      n.data.color = this.colors.getColor(this.groupResultsBy(n));
-      if (this.deferDisplayUntilPosition) {
-        n.hidden = false;
+    } else if (this.graph.edgeLabels != null) {
+      for (const edgeLabelId in this.graph.edgeLabels) {
+        const edgeLabel = this.graph.edgeLabels[edgeLabelId];
+        const lookupKey = this.graphlibEdgeLabelIdToLookupKey(edgeLabelId, mg);
+        const legacyKey = edgeLabelId.replace(/[^\w-]*/g, '');
+        this.pushTickEdgeLink(newLinks, edgeLabel, lookupKey, legacyKey, oldLinkMap, graphEdgeMap, mg);
       }
-      oldNodes.add(n.id);
-    });
-
-    (this.graph.clusters || []).forEach(n => {
-      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
-        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
-      })`;
-      if (!n.data) {
-        n.data = {};
+    } else {
+      for (const edgeLabel of this.graph.edges ?? []) {
+        const lookupKey = this.linkKeyForLookup(edgeLabel, mg);
+        const legacyKey = String(edgeLabel.id ?? '').replace(/[^\w-]*/g, '');
+        this.pushTickEdgeLink(newLinks, edgeLabel, lookupKey, legacyKey, oldLinkMap, graphEdgeMap, mg);
       }
-      n.data.color = this.colors.getColor(this.groupResultsBy(n));
-      if (this.deferDisplayUntilPosition) {
-        n.hidden = false;
-      }
-      oldClusters.add(n.id);
-    });
-
-    (this.graph.compoundNodes || []).forEach(n => {
-      n.transform = `translate(${n.position.x - (this.centerNodesOnPositionChange ? n.dimension.width / 2 : 0) || 0}, ${
-        n.position.y - (this.centerNodesOnPositionChange ? n.dimension.height / 2 : 0) || 0
-      })`;
-      if (!n.data) {
-        n.data = {};
-      }
-      n.data.color = this.colors.getColor(this.groupResultsBy(n));
-      if (this.deferDisplayUntilPosition) {
-        n.hidden = false;
-      }
-      oldCompoundNodes.add(n.id);
-    });
-
-    // Prevent animations on new nodes
-    setTimeout(() => {
-      this.oldNodes = oldNodes;
-      this.oldClusters = oldClusters;
-      this.oldCompoundNodes = oldCompoundNodes;
-    }, 500);
-
-    // Update the labels to the new positions
-    const newLinks = [];
-    for (const edgeLabelId in this.graph.edgeLabels) {
-      const edgeLabel = this.graph.edgeLabels[edgeLabelId];
-
-      const normKey = edgeLabelId.replace(/[^\w-]*/g, '');
-
-      const isMultigraph =
-        this.layout && typeof this.layout !== 'string' && this.layout.settings && this.layout.settings.multigraph;
-
-      let oldLink = isMultigraph
-        ? this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey)
-        : this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
-
-      const linkFromGraph = isMultigraph
-        ? this.graph.edges.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey)
-        : this.graph.edges.find(nl => `${nl.source}${nl.target}` === normKey);
-
-      if (!oldLink) {
-        oldLink = linkFromGraph || edgeLabel;
-      } else if (
-        oldLink.data &&
-        linkFromGraph &&
-        linkFromGraph.data &&
-        JSON.stringify(oldLink.data) !== JSON.stringify(linkFromGraph.data)
-      ) {
-        // Compare old link to new link and replace if not equal
-        oldLink.data = linkFromGraph.data;
-      }
-
-      oldLink.oldLine = oldLink.line;
-
-      const points = edgeLabel.points;
-      const line = this.generateLine(points);
-
-      const newLink = Object.assign({}, oldLink);
-      newLink.line = line;
-      newLink.points = points;
-
-      this.updateMidpointOnEdge(newLink, points);
-
-      const textPos = points[Math.floor(points.length / 2)];
-      if (textPos) {
-        newLink.textTransform = `translate(${textPos.x || 0},${textPos.y || 0})`;
-      }
-
-      newLink.textAngle = 0;
-      if (!newLink.oldLine) {
-        newLink.oldLine = newLink.line;
-      }
-
-      this.calcDominantBaseline(newLink);
-      newLinks.push(newLink);
     }
 
     this.graph.edges = newLinks;
 
-    // Map the old links for animations
+    this.refreshPriorTickGraphIds(mg);
+
+    const morph = this.effectiveLayoutTransition.morphCapture;
+    if (this.layoutMorphActive && this.layoutAnimationTargets) {
+      if (morph.syncTargetsFromPositionAfterTick && this.effectiveLayoutTransition.scope === 'full') {
+        this.syncLayoutAnimationTargetsFromPositions();
+      }
+      if (morph.snapAddedNodeIds && this.previousLayoutTransforms) {
+        this.snapMorphPreviousForAddedNodes(nodeIdsAtLayoutTickStart);
+      }
+    }
+
     if (this.graph.edges) {
       this._oldLinks = this.graph.edges.map(l => {
         const newL = Object.assign({}, l);
@@ -548,34 +1327,199 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     }
 
-    this.applyNodeDimensions();
-    this.redrawLines();
-    this.updateMinimap();
-
     requestAnimationFrame(() => {
-      this.applyNodeDimensions();
-      this.redrawLines();
-      this.updateMinimap();
+      this.oldNodes = newNodeIds;
+      this.oldClusters = newClusterIds;
+      this.oldCompoundNodes = newCompoundNodeIds;
 
-      if (this.autoZoom) {
-        this.zoomToFit({ autoCenter: this.autoCenter ? this.autoCenter : false });
-      } else if (this.autoCenter) {
-        // Auto-center when rendering
-        this.center();
+      // Full-scope morph keeps `node.transform` at previous layout until unified rAF; do not sync from `position` or
+      // refresh bounds/pan from the new layout here — that would wipe `resetToPrevious` and desync the viewport.
+      const nodeTweenActive =
+        !!this.layoutAnimationTargets && this.layoutMorphActive && this.effectiveLayoutTransition.scope !== 'additive';
+      if (!nodeTweenActive) {
+        this.applyNodeDimensions();
       }
-      this.stateChange.emit({ state: NgxGraphStates.Output });
+      // `applyTransforms` used ELK dimensions; `applyNodeDimensions` may change width/height from the DOM.
+      // Recompute `translate` so the layout center (`position`) stays fixed while the box grows — otherwise edges
+      // (anchored to ELK geometry) stop meeting the node glyph.
+      if (!nodeTweenActive) {
+        this.syncNodeTransformsFromLayoutPositions();
+      }
+      const animateValue = this.animate();
+      if (animateValue || this.layoutJsMorphEnabled) {
+        this.cd.detectChanges();
+      }
+      this.scheduleRedrawLinesAfterView(animateValue || this.layoutJsMorphEnabled, tickId);
+      if (this.hasGraphNodeLikeContent() && !nodeTweenActive) {
+        this.updateGraphDims();
+      }
+      if (!nodeTweenActive) {
+        this.updateMinimap();
+      }
+
+      if (!nodeTweenActive) {
+        const autoZoom = this.autoZoom();
+        if (autoZoom) {
+          const autoCenter = this.autoCenter();
+          this.zoomToFit({ autoCenter: autoCenter ? autoCenter : false });
+        } else if (this.autoCenter() && !autoZoom) {
+          this.center();
+        }
+      }
     });
 
     this.cd.markForCheck();
   }
 
+  private applyTransforms(items: Node[], idCollector: Set<string>): void {
+    for (const n of items) {
+      this.updateNodeGroupTransform(n);
+      if (!n.data) {
+        n.data = {};
+      }
+      n.data.color = this.colors.getColor(this.groupResultsBy()(n));
+      // Pre-layout hooks may set `hidden` (e.g. `applyVisualContinuityBeforeLayout` for incremental smooth transitions,
+      // or `initializeNode` when `deferDisplayUntilPosition`). `tick` runs after layout positions exist — show nodes.
+      n.hidden = false;
+      idCollector.add(n.id);
+    }
+  }
+
+  /** `translate` for `<g class="node-group">` from `position` (center when `centerNodesOnPositionChange`). */
+  private updateNodeGroupTransform(n: Node): void {
+    const center = this.centerNodesOnPositionChange();
+    const dx = center ? (n.dimension?.width ?? 0) / 2 : 0;
+    const dy = center ? (n.dimension?.height ?? 0) / 2 : 0;
+    const px = n.position?.x ?? 0;
+    const py = n.position?.y ?? 0;
+    n.transform = `translate(${px - dx || 0}, ${py - dy || 0})`;
+  }
+
+  /** Call after `applyNodeDimensions` when node box size changes but `position` (center) must stay fixed. */
+  private syncNodeTransformsFromLayoutPositions(): void {
+    const sync = (items: Node[] | undefined) => {
+      items?.forEach(n => this.updateNodeGroupTransform(n));
+    };
+    sync(this.graph.nodes);
+    sync(this.graph.clusters);
+    sync(this.graph.compoundNodes);
+  }
+
+  /** Optional CSS transform on the chart host during layout morph (`layoutTransitionEffect`). */
+  private applyLayoutOuterEffect(tscalar: number): void {
+    const eff = this.effectiveLayoutEffect;
+    const lt = this.effectiveLayoutTransition;
+    if (eff.kind === 'none' || lt.mode !== 'tween') {
+      this.layoutOuterTransform = null;
+      return;
+    }
+    const peak = eff.peakDegrees ?? 12;
+    const w = Math.sin(Math.PI * tscalar) * peak;
+    if (eff.kind === 'perspectiveFlip') {
+      this.layoutOuterTransform = `perspective(900px) rotateX(${w}deg)`;
+      return;
+    }
+    if (eff.kind === 'rotate') {
+      const pivot = eff.rotatePivot;
+      if (pivot === 'graphCenter' && this.graphDims?.width) {
+        this.layoutEffectTransformOrigin = `${(this.graphDims.width / 2 / Math.max(this.width || 1, 1)) * 100}% ${(this.graphDims.height / 2 / Math.max(this.height || 1, 1)) * 100}%`;
+      } else if (typeof pivot === 'object' && pivot?.nodeId) {
+        const n = this.graph?.nodes?.find(nd => nd.id === pivot.nodeId);
+        if (n?.position && this.width && this.height) {
+          this.layoutEffectTransformOrigin = `${(n.position.x / this.width) * 100}% ${(n.position.y / this.height) * 100}%`;
+        } else {
+          this.layoutEffectTransformOrigin = '50% 50%';
+        }
+      } else {
+        this.layoutEffectTransformOrigin = '50% 50%';
+      }
+      this.layoutOuterTransform = `rotate(${w}deg)`;
+      return;
+    }
+    this.layoutOuterTransform = null;
+  }
+
+  private cancelViewportPanAnimation(): void {
+    if (this.viewportPanAnimRafId != null) {
+      cancelAnimationFrame(this.viewportPanAnimRafId);
+      this.viewportPanAnimRafId = null;
+    }
+  }
+
+  /** Applies one programmatic pan step with optional viewport easing (translation only). */
+  private animateViewportPanDelta(dx: number, dy: number): void {
+    const cfg = this.effectiveViewportTransition;
+    if (!cfg.enabled || cfg.durationMs <= 0) {
+      this.transformationMatrix = transform(this.transformationMatrix, translate(dx, dy));
+      this.updateTransform();
+      return;
+    }
+    this.cancelViewportPanAnimation();
+    const easeFn = resolveGraphTransitionEasing(cfg.easing);
+    const startE = this.transformationMatrix.e;
+    const startF = this.transformationMatrix.f;
+    const endE = startE + dx;
+    const endF = startF + dy;
+    const duration = cfg.durationMs;
+    const startMs = performance.now();
+    const step = () => {
+      const u = Math.min(1, (performance.now() - startMs) / duration);
+      const t = easeFn(u);
+      this.transformationMatrix.e = startE + t * (endE - startE);
+      this.transformationMatrix.f = startF + t * (endF - startF);
+      this.updateTransform();
+      if (u >= 1) {
+        this.viewportPanAnimRafId = null;
+        return;
+      }
+      this.viewportPanAnimRafId = requestAnimationFrame(step);
+    };
+    this.viewportPanAnimRafId = requestAnimationFrame(step);
+  }
+
+  /**
+   * Default node template: circle inscribed in the layout box so ELK/Dagre edge ports (box edges) meet the glyph.
+   */
+  defaultNodeCircleRadius(node: Node): number {
+    const w = node.dimension?.width ?? 0;
+    const h = node.dimension?.height ?? 0;
+    if (w > 0 && h > 0) {
+      return Math.min(w, h) / 2;
+    }
+    return 10;
+  }
+
   getMinimapTransform(): string {
-    switch (this.miniMapPosition) {
+    switch (this.miniMapPosition()) {
       case MiniMapPosition.UpperLeft: {
-        return '';
+        return 'translate(' + this.miniMapMargin().left + ',' + this.miniMapMargin().top + ')';
       }
       case MiniMapPosition.UpperRight: {
-        return 'translate(' + (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient) + ',' + 0 + ')';
+        return (
+          'translate(' +
+          (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient - this.miniMapMargin().right) +
+          ',' +
+          this.miniMapMargin().top +
+          ')'
+        );
+      }
+      case MiniMapPosition.LowerLeft: {
+        return (
+          'translate(' +
+          this.miniMapMargin().left +
+          ',' +
+          (this.dims.height - this.graphDims.height / this.minimapScaleCoefficient - this.miniMapMargin().bottom) +
+          ')'
+        );
+      }
+      case MiniMapPosition.LowerRight: {
+        return (
+          'translate(' +
+          (this.dims.width - this.graphDims.width / this.minimapScaleCoefficient - this.miniMapMargin().right) +
+          ',' +
+          (this.dims.height - this.graphDims.height / this.minimapScaleCoefficient - this.miniMapMargin().bottom) +
+          ')'
+        );
       }
       default: {
         return '';
@@ -589,13 +1533,50 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     let minY = +Infinity;
     let maxY = -Infinity;
 
-    for (let i = 0; i < this.graph.nodes.length; i++) {
-      const node = this.graph.nodes[i];
-      minX = node.position.x < minX ? node.position.x : minX;
-      minY = node.position.y < minY ? node.position.y : minY;
-      maxX = node.position.x + node.dimension.width > maxX ? node.position.x + node.dimension.width : maxX;
-      maxY = node.position.y + node.dimension.height > maxY ? node.position.y + node.dimension.height : maxY;
+    const center = this.centerNodesOnPositionChange();
+    const accumulate = (items: Node[] | undefined) => {
+      if (!items?.length) {
+        return;
+      }
+      for (let i = 0; i < items.length; i++) {
+        const node = items[i];
+        const w = node.dimension?.width ?? 0;
+        const h = node.dimension?.height ?? 0;
+        const px = node.position?.x ?? 0;
+        const py = node.position?.y ?? 0;
+        let left: number;
+        let right: number;
+        let top: number;
+        let bottom: number;
+        if (center) {
+          left = px - w / 2;
+          right = px + w / 2;
+          top = py - h / 2;
+          bottom = py + h / 2;
+        } else {
+          left = px;
+          right = px + w;
+          top = py;
+          bottom = py + h;
+        }
+        minX = left < minX ? left : minX;
+        maxX = right > maxX ? right : maxX;
+        minY = top < minY ? top : minY;
+        maxY = bottom > maxY ? bottom : maxY;
+      }
+    };
+    accumulate(this.graph.nodes);
+    accumulate(this.graph.compoundNodes);
+    accumulate(this.graph.clusters);
+
+    if (!isFinite(minX) || !isFinite(maxX) || !isFinite(minY) || !isFinite(maxY)) {
+      this.graphDims.width = 0;
+      this.graphDims.height = 0;
+      this.minimapOffsetX = 0;
+      this.minimapOffsetY = 0;
+      return;
     }
+
     minX -= 100;
     minY -= 100;
     maxX += 100;
@@ -606,23 +1587,119 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.minimapOffsetY = minY;
   }
 
+  /** True when the graph has at least one node, compound node, or cluster (for bounds / minimap). */
+  private hasGraphNodeLikeContent(): boolean {
+    return (
+      (this.graph?.nodes?.length ?? 0) +
+        (this.graph?.compoundNodes?.length ?? 0) +
+        (this.graph?.clusters?.length ?? 0) >
+      0
+    );
+  }
+
   @throttleable(500)
   updateMinimap() {
-    // Calculate the height/width total, but only if we have any nodes
-    if (this.graph.nodes && this.graph.nodes.length) {
+    // Calculate the height/width total when there is drawable graph content
+    if (this.hasGraphNodeLikeContent()) {
       this.updateGraphDims();
 
-      if (this.miniMapMaxWidth) {
-        this.minimapScaleCoefficient = this.graphDims.width / this.miniMapMaxWidth;
+      const miniMapMaxWidth = this.miniMapMaxWidth();
+      if (miniMapMaxWidth) {
+        this.minimapScaleCoefficient = this.graphDims.width / miniMapMaxWidth;
       }
-      if (this.miniMapMaxHeight) {
-        this.minimapScaleCoefficient = Math.max(
-          this.minimapScaleCoefficient,
-          this.graphDims.height / this.miniMapMaxHeight
-        );
+      const miniMapMaxHeight = this.miniMapMaxHeight();
+      if (miniMapMaxHeight) {
+        this.minimapScaleCoefficient = Math.max(this.minimapScaleCoefficient, this.graphDims.height / miniMapMaxHeight);
       }
 
       this.minimapTransform = this.getMinimapTransform();
+    }
+  }
+
+  /**
+   * Resolves a layout node, compound node, or cluster by the `<g>` element `id`.
+   */
+  private findLayoutNodeByElementId(elementId: string): Node | undefined {
+    return (
+      this.graph.nodes.find(n => n.id === elementId) ??
+      this.graph.compoundNodes?.find(n => n.id === elementId) ??
+      this.graph.clusters?.find(c => c.id === elementId)
+    );
+  }
+
+  /**
+   * Measures one node-group SVG element and writes `dimension` on the model node.
+   */
+  private applyNodeDimensionFromSvgGroup(nativeElement: SVGGraphicsElement, node: Node): void {
+    // calculate the height
+    let dims: DOMRect;
+    try {
+      dims = nativeElement.getBBox();
+      if (!dims.width || !dims.height) {
+        return;
+      }
+    } catch {
+      // Skip drawing if element is not displayed - Firefox would throw an error here
+      return;
+    }
+    const nodeHeight = this.nodeHeight();
+    if (nodeHeight) {
+      node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : nodeHeight;
+    } else {
+      node.dimension.height = node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
+    }
+
+    const nodeMaxHeight = this.nodeMaxHeight();
+    if (nodeMaxHeight) {
+      node.dimension.height = Math.max(node.dimension.height, nodeMaxHeight);
+    }
+    const nodeMinHeight = this.nodeMinHeight();
+    if (nodeMinHeight) {
+      node.dimension.height = Math.min(node.dimension.height, nodeMinHeight);
+    }
+
+    const nodeWidth = this.nodeWidth();
+    if (nodeWidth) {
+      node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : nodeWidth;
+    } else {
+      // calculate the width
+      if (nativeElement.getElementsByTagName('text').length) {
+        let maxTextDims: { width: number; height: number } | undefined;
+        try {
+          for (const textElem of nativeElement.getElementsByTagName('text')) {
+            const currentBBox = textElem.getBBox();
+            if (!maxTextDims) {
+              maxTextDims = currentBBox;
+            } else {
+              if (currentBBox.width > maxTextDims.width) {
+                maxTextDims.width = currentBBox.width;
+              }
+              if (currentBBox.height > maxTextDims.height) {
+                maxTextDims.height = currentBBox.height;
+              }
+            }
+          }
+        } catch {
+          // Skip drawing if element is not displayed - Firefox would throw an error here
+          return;
+        }
+        if (!maxTextDims) {
+          return;
+        }
+        node.dimension.width =
+          node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
+      } else {
+        node.dimension.width = node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
+      }
+    }
+
+    const nodeMaxWidth = this.nodeMaxWidth();
+    if (nodeMaxWidth) {
+      node.dimension.width = Math.max(node.dimension.width, nodeMaxWidth);
+    }
+    const nodeMinWidth = this.nodeMinWidth();
+    if (nodeMinWidth) {
+      node.dimension.width = Math.min(node.dimension.width, nodeMinWidth);
     }
   }
 
@@ -632,81 +1709,321 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   applyNodeDimensions(): void {
-    if (this.nodeElements && this.nodeElements.length) {
-      this.nodeElements.forEach(elem => {
-        const nativeElement = elem.nativeElement;
-        const node = this.graph.nodes.find(n => n.id === nativeElement.id);
+    const measureRefs = (refs: readonly ElementRef[] | undefined) => {
+      refs?.forEach(elem => {
+        const nativeElement = elem.nativeElement as SVGGraphicsElement;
+        const node = this.findLayoutNodeByElementId(nativeElement.id);
         if (!node) {
           return;
         }
+        this.applyNodeDimensionFromSvgGroup(nativeElement, node);
+      });
+    };
+    measureRefs(this.nodeElements());
+    measureRefs(this.clusterElements());
+  }
 
-        // calculate the height
-        let dims;
-        try {
-          dims = nativeElement.getBBox();
-          if (!dims.width || !dims.height) {
-            return;
-          }
-        } catch (ex) {
-          // Skip drawing if element is not displayed - Firefox would throw an error here
+  /**
+   * Runs after Angular commits the template so D3 binds to the live link `<path>` elements
+   * (OnPush + rAF alone can run too early). Retries once after `requestAnimationFrame` if link
+   * groups are not ready yet — avoids two immediate `afterNextRender` passes that cancel unified RAF.
+   */
+  private scheduleRedrawLinesAfterView(morph: boolean, tickId: number): void {
+    afterNextRender(
+      () => {
+        this.tryRedrawLinesAfterView(morph, 0, tickId);
+      },
+      { injector: this.injector }
+    );
+  }
+
+  /**
+   * d3 `select('#…')` for a host subtree element by HTML `id`. Raw ids may contain `--`, leading digits, etc., which are
+   * invalid in unescaped CSS id selectors.
+   */
+  private selectTextPathInHostById(id: string): any {
+    return select(this.el.nativeElement).select(`#${CSS.escape(id)}`);
+  }
+
+  /**
+   * Imperative paint from `edge.line` / `edge.textPath` only — does not cancel unified layout morph or per-edge rAF.
+   */
+  private repaintLinkPathsDomFromModel(): void {
+    this.linkElements()?.forEach(linkEl => {
+      const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
+      if (!edge) {
+        return;
+      }
+      let pathSelection: any = select(linkEl.nativeElement).select('path.edge, path.line');
+      if (pathSelection.empty()) {
+        pathSelection = select(linkEl.nativeElement).select('path');
+      }
+      const textPathEl = edge.id ? this.selectTextPathInHostById(edge.id) : null;
+      if (!pathSelection.empty()) {
+        pathSelection.attr('d', edge.line);
+      }
+      if (textPathEl && !textPathEl.empty()) {
+        textPathEl.attr('d', edge.textPath);
+      }
+      this.updateMidpointOnEdge(edge, edge.points);
+    });
+  }
+
+  /**
+   * Binds D3 to link `<path>` elements, then emits {@link stateChange} (Output) and {@link drawComplete}
+   * when link groups match edge count (or after bounded retries).
+   *
+   * Observable layouts (Cola, D3 force) can emit faster than `afterNextRender`; callbacks may run with a
+   * superseded `tickId`. Those passes must not call {@link redrawLines} with morph enabled — it would
+   * {@link cancelLayoutUnifiedAnimation} and interrupt full-graph layout morphs. Instead, repaint paths
+   * from the current model when no rAF tween owns the paths; the latest `tickId` still runs full {@link redrawLines}.
+   * {@link finalizeTickOutput} alone enforces `drawCompleteTickId`.
+   */
+  private tryRedrawLinesAfterView(morph: boolean, retryDepth: number, tickId: number): void {
+    if (this._graphDestroyed) {
+      return;
+    }
+    const currentPass = tickId === this.drawCompleteTickId;
+    if (currentPass) {
+      this.redrawLines(morph);
+    } else if (this.layoutUnifiedRafId == null && this.edgePathRafIds.size === 0) {
+      this.repaintLinkPathsDomFromModel();
+    }
+    const expected = this.graph.edges?.length ?? 0;
+    const got = this.linkElements()?.length ?? 0;
+    const linksReady = expected === 0 || got === expected;
+    if (linksReady) {
+      this.finalizeTickOutput(tickId);
+      return;
+    }
+    if (retryDepth < 2) {
+      requestAnimationFrame(() => {
+        afterNextRender(
+          () => {
+            this.tryRedrawLinesAfterView(morph, retryDepth + 1, tickId);
+          },
+          { injector: this.injector }
+        );
+      });
+      return;
+    }
+    if (isDevMode()) {
+      console.warn(
+        '[ngx-graph] Link group count did not match edge count after retries; emitting drawComplete anyway.',
+        { expected, got }
+      );
+    }
+    this.finalizeTickOutput(tickId);
+  }
+
+  private finalizeTickOutput(tickId: number): void {
+    if (this._graphDestroyed || tickId !== this.drawCompleteTickId) {
+      return;
+    }
+    this.stateChange.emit({ state: NgxGraphStates.Output });
+  }
+
+  private cancelEdgePathAnimation(edgeId: string): void {
+    const rafId = this.edgePathRafIds.get(edgeId);
+    if (rafId != null) {
+      cancelAnimationFrame(rafId);
+      this.edgePathRafIds.delete(edgeId);
+    }
+  }
+
+  private cancelAllEdgePathAnimations(): void {
+    for (const rafId of this.edgePathRafIds.values()) {
+      cancelAnimationFrame(rafId);
+    }
+    this.edgePathRafIds.clear();
+  }
+
+  private cancelLayoutUnifiedAnimation(): void {
+    if (this.layoutUnifiedRafId != null) {
+      cancelAnimationFrame(this.layoutUnifiedRafId);
+      this.layoutUnifiedRafId = null;
+    }
+  }
+
+  /**
+   * One rAF driver: same eased t for node transforms (lerp) and edge path d (interpolatePinnedEdgeRoute).
+   * In `additive` mode, only edges morph; node transforms stay at layout output from `tick()` (no positional tween).
+   */
+  private runUnifiedLayoutAnimation(
+    edgeMorphs: Array<{
+      pathSelection: any;
+      textPathEl: any;
+      prevRaw: Array<{ x: number; y: number }>;
+      nextRaw: Array<{ x: number; y: number }>;
+      resampledPrev: Array<{ x: number; y: number }>;
+      resampledNext: Array<{ x: number; y: number }>;
+    }>,
+    durationMs: number
+  ): void {
+    const targets = this.layoutAnimationTargets!;
+    const prevs = this.previousLayoutTransforms!;
+    const easeFn = resolveGraphTransitionEasing(this.effectiveLayoutTransition.easing);
+    const skipNodePositionTween = this.effectiveLayoutTransition.scope === 'additive';
+
+    this.zone.runOutsideAngular(() => {
+      for (const m of edgeMorphs) {
+        const pts0 = this.interpolatePinnedEdgeRoute(m.prevRaw, m.nextRaw, m.resampledPrev, m.resampledNext, 0);
+        m.pathSelection.attr('d', this.generateLine(pts0));
+        if (m.textPathEl && !m.textPathEl.empty()) {
+          const { textPath } = this.lineAndTextPathFromPoints(pts0);
+          m.textPathEl.attr('d', textPath);
+        }
+      }
+      this.applyLayoutOuterEffect(0);
+
+      const startMs = performance.now();
+
+      const applyNodeTransforms = (tscalar: number) => {
+        if (skipNodePositionTween) {
           return;
         }
-        if (this.nodeHeight) {
-          node.dimension.height =
-            node.dimension.height && node.meta.forceDimensions ? node.dimension.height : this.nodeHeight;
-        } else {
-          node.dimension.height =
-            node.dimension.height && node.meta.forceDimensions ? node.dimension.height : dims.height;
-        }
-
-        if (this.nodeMaxHeight) {
-          node.dimension.height = Math.max(node.dimension.height, this.nodeMaxHeight);
-        }
-        if (this.nodeMinHeight) {
-          node.dimension.height = Math.min(node.dimension.height, this.nodeMinHeight);
-        }
-
-        if (this.nodeWidth) {
-          node.dimension.width =
-            node.dimension.width && node.meta.forceDimensions ? node.dimension.width : this.nodeWidth;
-        } else {
-          // calculate the width
-          if (nativeElement.getElementsByTagName('text').length) {
-            let maxTextDims: { width: number; height: number };
-            try {
-              for (const textElem of nativeElement.getElementsByTagName('text')) {
-                const currentBBox = textElem.getBBox();
-                if (!maxTextDims) {
-                  maxTextDims = currentBBox;
-                } else {
-                  if (currentBBox.width > maxTextDims.width) {
-                    maxTextDims.width = currentBBox.width;
-                  }
-                  if (currentBBox.height > maxTextDims.height) {
-                    maxTextDims.height = currentBBox.height;
-                  }
-                }
-              }
-            } catch (ex) {
-              // Skip drawing if element is not displayed - Firefox would throw an error here
-              return;
+        const apply = (items: Node[] | undefined) => {
+          if (!items) {
+            return;
+          }
+          for (const n of items) {
+            const tgt = targets.get(n.id);
+            const prv = prevs.get(n.id);
+            if (tgt && prv) {
+              const tx = prv.tx + tscalar * (tgt.tx - prv.tx);
+              const ty = prv.ty + tscalar * (tgt.ty - prv.ty);
+              n.transform = `translate(${tx},${ty})`;
             }
-            node.dimension.width =
-              node.dimension.width && node.meta.forceDimensions ? node.dimension.width : maxTextDims.width + 20;
-          } else {
-            node.dimension.width =
-              node.dimension.width && node.meta.forceDimensions ? node.dimension.width : dims.width;
+          }
+        };
+        apply(this.graph.nodes);
+        apply(this.graph.clusters);
+        apply(this.graph.compoundNodes);
+      };
+
+      const step = () => {
+        const elapsed = performance.now() - startMs;
+        const u = durationMs <= 0 ? 1 : Math.min(1, elapsed / durationMs);
+        const tscalar = easeFn(u);
+
+        for (const m of edgeMorphs) {
+          const pts = this.interpolatePinnedEdgeRoute(m.prevRaw, m.nextRaw, m.resampledPrev, m.resampledNext, tscalar);
+          m.pathSelection.attr('d', this.generateLine(pts));
+          if (m.textPathEl && !m.textPathEl.empty()) {
+            const { textPath } = this.lineAndTextPathFromPoints(pts);
+            m.textPathEl.attr('d', textPath);
           }
         }
 
-        if (this.nodeMaxWidth) {
-          node.dimension.width = Math.max(node.dimension.width, this.nodeMaxWidth);
+        // Apply node transforms in the same synchronous turn as D3 path updates so one paint
+        // shows edges and nodes at the same eased t (avoids nodes leading or lagging edge splines).
+        applyNodeTransforms(tscalar);
+        this.applyLayoutOuterEffect(tscalar);
+        this.zone.run(() => {
+          this.cd.markForCheck();
+        });
+
+        if (u >= 1) {
+          this.zone.run(() => {
+            if (!skipNodePositionTween) {
+              const finalize = (items: Node[] | undefined) => {
+                if (!items) {
+                  return;
+                }
+                for (const n of items) {
+                  const tgt = targets.get(n.id);
+                  if (tgt) {
+                    n.transform = `translate(${tgt.tx},${tgt.ty})`;
+                  }
+                }
+              };
+              finalize(this.graph.nodes);
+              finalize(this.graph.clusters);
+              finalize(this.graph.compoundNodes);
+            }
+            for (const e of this.graph.edges) {
+              e.previousPoints = undefined;
+            }
+            this.layoutAnimationTargets = null;
+            this.previousLayoutTransforms = null;
+            this.layoutOuterTransform = null;
+            this.repaintLinkPathsDomFromModel();
+            this.cd.markForCheck();
+            if (!skipNodePositionTween) {
+              if (this.hasGraphNodeLikeContent()) {
+                this.updateGraphDims();
+              }
+              this.updateMinimap();
+              if (this.autoCenter() && !this.autoZoom()) {
+                this.center();
+              }
+            }
+          });
+          this.layoutUnifiedRafId = null;
+          return;
         }
-        if (this.nodeMinWidth) {
-          node.dimension.width = Math.min(node.dimension.width, this.nodeMinWidth);
+
+        this.layoutUnifiedRafId = requestAnimationFrame(step);
+      };
+
+      this.layoutUnifiedRafId = requestAnimationFrame(step);
+    });
+  }
+
+  /**
+   * Imperative path morph: D3 transitions do not reliably repaint `d` under Zone; rAF does.
+   */
+  private runEdgePathMorphAnimation(
+    edgeKey: string,
+    pathSelection: any,
+    textPathEl: any,
+    edge: Edge,
+    prevRaw: Array<{ x: number; y: number }>,
+    nextRaw: Array<{ x: number; y: number }>,
+    resampledPrev: Array<{ x: number; y: number }>,
+    resampledNext: Array<{ x: number; y: number }>,
+    durationMs: number,
+    startLine: string,
+    startText: string
+  ): void {
+    this.cancelEdgePathAnimation(edgeKey);
+
+    const easeFn = resolveGraphTransitionEasing(this.effectiveLayoutTransition.easing);
+
+    this.zone.runOutsideAngular(() => {
+      pathSelection.attr('d', startLine);
+      if (textPathEl && !textPathEl.empty()) {
+        textPathEl.attr('d', startText);
+      }
+
+      const startMs = performance.now();
+
+      const step = () => {
+        const elapsed = performance.now() - startMs;
+        const u = durationMs <= 0 ? 1 : Math.min(1, elapsed / durationMs);
+        const t = easeFn(u);
+        const pts = this.interpolatePinnedEdgeRoute(prevRaw, nextRaw, resampledPrev, resampledNext, t);
+        pathSelection.attr('d', this.generateLine(pts));
+        if (textPathEl && !textPathEl.empty()) {
+          const { textPath } = this.lineAndTextPathFromPoints(pts);
+          textPathEl.attr('d', textPath);
         }
-      });
-    }
+
+        if (u >= 1) {
+          this.edgePathRafIds.delete(edgeKey);
+          this.zone.run(() => {
+            edge.previousPoints = undefined;
+          });
+          return;
+        }
+
+        const rafId = requestAnimationFrame(step);
+        this.edgePathRafIds.set(edgeKey, rafId);
+      };
+
+      const rafId = requestAnimationFrame(step);
+      this.edgePathRafIds.set(edgeKey, rafId);
+    });
   }
 
   /**
@@ -714,30 +2031,350 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  redrawLines(_animate = this.animate): void {
-    this.linkElements?.forEach(linkEl => {
-      const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
+  redrawLines(_animate = this.animate()): void {
+    const lt = this.effectiveLayoutTransition;
+    const duration = !_animate || !this.layoutMorphActive ? 0 : Math.max(0, lt.durationMs);
 
-      if (edge) {
-        const linkSelection: any = select(linkEl.nativeElement).select('.line');
-        linkSelection
-          .attr('d', edge.oldLine)
-          .transition()
-          .ease(ease.easeSinInOut)
-          .duration(_animate ? 500 : 0)
-          .attr('d', edge.line);
+    if (!_animate) {
+      this.cancelLayoutUnifiedAnimation();
+      this.cancelAllEdgePathAnimations();
+      this.layoutAnimationTargets = null;
+      this.previousLayoutTransforms = null;
+    }
 
-        const textPathSelection: any = select(this.el.nativeElement).select(`#${edge.id}`);
-        textPathSelection
-          .attr('d', edge.oldTextPath)
-          .transition()
-          .ease(ease.easeSinInOut)
-          .duration(_animate ? 500 : 0)
-          .attr('d', edge.textPath);
+    const unifiedLayout =
+      _animate &&
+      this.layoutMorphActive &&
+      !!this.layoutAnimationTargets?.size &&
+      !!this.previousLayoutTransforms?.size;
+
+    if (unifiedLayout) {
+      this.cancelLayoutUnifiedAnimation();
+      this.cancelAllEdgePathAnimations();
+
+      const mgUnified = this.isLayoutMultigraph();
+
+      const edgeMorphs: Array<{
+        pathSelection: any;
+        textPathEl: any;
+        prevRaw: Array<{ x: number; y: number }>;
+        nextRaw: Array<{ x: number; y: number }>;
+        resampledPrev: Array<{ x: number; y: number }>;
+        resampledNext: Array<{ x: number; y: number }>;
+      }> = [];
+
+      this.linkElements()?.forEach(linkEl => {
+        const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
+
+        if (!edge) {
+          return;
+        }
+
+        let pathSelection: any = select(linkEl.nativeElement).select('path.edge, path.line');
+        if (pathSelection.empty()) {
+          pathSelection = select(linkEl.nativeElement).select('path');
+        }
+
+        const textPathEl = edge.id ? this.selectTextPathInHostById(edge.id) : null;
+
+        const prevRaw = edge.previousPoints;
+        const nextRaw = edge.points;
+        const n = this.effectiveEdgePathSampleCount();
+        const hasPrev = !!(prevRaw && prevRaw.length >= 2);
+        const prevN = hasPrev ? this.resamplePolyline(prevRaw, n) : [];
+        const nextN = nextRaw && nextRaw.length >= 2 ? this.resamplePolyline(nextRaw, n) : [];
+
+        let skipStableEdgeMorph = false;
+        if (
+          this.effectiveLayoutTransition.scope === 'additive' &&
+          this.edgeKeysAtLayoutTickStart.size > 0 &&
+          _animate
+        ) {
+          const ek = this.linkKeyForLookup(edge, mgUnified);
+          skipStableEdgeMorph = this.edgeKeysAtLayoutTickStart.has(ek);
+        }
+
+        const canMorph =
+          !skipStableEdgeMorph &&
+          hasPrev &&
+          nextRaw &&
+          nextRaw.length >= 2 &&
+          prevN.length >= 2 &&
+          nextN.length >= 2 &&
+          prevN.length === nextN.length;
+
+        if (!pathSelection.empty()) {
+          if (canMorph) {
+            edgeMorphs.push({
+              pathSelection,
+              textPathEl,
+              prevRaw: this.clonePoints(prevRaw as Array<{ x: number; y: number }>),
+              nextRaw,
+              resampledPrev: prevN,
+              resampledNext: nextN
+            });
+          } else {
+            // Keep prior route on the path while node `<g>` transforms still reflect `resetToPrevious`; snapping to
+            // `edge.line` here desyncs edges from nodes for the whole tween (Elk orientation full-scope blip).
+            pathSelection.attr('d', edge.oldLine ?? edge.line);
+          }
+        }
+
+        if (textPathEl && !textPathEl.empty() && !canMorph) {
+          textPathEl.attr('d', edge.oldTextPath ?? edge.textPath);
+        }
 
         this.updateMidpointOnEdge(edge, edge.points);
+      });
+
+      this.runUnifiedLayoutAnimation(edgeMorphs, duration);
+      return;
+    }
+
+    this.linkElements()?.forEach(linkEl => {
+      const edge = this.graph.edges.find(lin => lin.id === linkEl.nativeElement.id);
+
+      if (!edge) {
+        return;
       }
+
+      const edgeKey = String(edge.id ?? linkEl.nativeElement.id);
+
+      let pathSelection: any = select(linkEl.nativeElement).select('path.edge, path.line');
+      if (pathSelection.empty()) {
+        pathSelection = select(linkEl.nativeElement).select('path');
+      }
+
+      const textPathEl = edge.id ? this.selectTextPathInHostById(edge.id) : null;
+
+      const prevRaw = edge.previousPoints;
+      const nextRaw = edge.points;
+      const n = this.effectiveEdgePathSampleCount();
+      const hasPrev = !!(prevRaw && prevRaw.length >= 2);
+      const prevN = hasPrev ? this.resamplePolyline(prevRaw, n) : [];
+      const nextN = nextRaw && nextRaw.length >= 2 ? this.resamplePolyline(nextRaw, n) : [];
+
+      const canMorph =
+        _animate &&
+        hasPrev &&
+        nextRaw &&
+        nextRaw.length >= 2 &&
+        prevN.length >= 2 &&
+        nextN.length >= 2 &&
+        prevN.length === nextN.length;
+
+      const resampledPrev = canMorph ? prevN : [];
+      const resampledNext = canMorph ? nextN : [];
+
+      if (!pathSelection.empty()) {
+        if (canMorph) {
+          const startLine = this.generateLine(
+            this.interpolatePinnedEdgeRoute(prevRaw!, nextRaw, resampledPrev, resampledNext, 0)
+          );
+          const startText = edge.oldTextPath ?? edge.textPath ?? '';
+          this.runEdgePathMorphAnimation(
+            edgeKey,
+            pathSelection,
+            textPathEl,
+            edge,
+            prevRaw!,
+            nextRaw,
+            resampledPrev,
+            resampledNext,
+            duration,
+            startLine,
+            startText
+          );
+        } else {
+          pathSelection.attr('d', edge.line);
+        }
+      }
+
+      if (textPathEl && !textPathEl.empty() && !canMorph) {
+        textPathEl.attr('d', edge.textPath);
+      }
+
+      this.updateMidpointOnEdge(edge, edge.points);
     });
+  }
+
+  private clonePoints(points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> {
+    return points.map(p => ({ x: p.x, y: p.y }));
+  }
+
+  /** Resample a polyline to `count` points along cumulative arc length. */
+  private resamplePolyline(points: Array<{ x: number; y: number }>, count: number): Array<{ x: number; y: number }> {
+    if (!points?.length || count < 2) {
+      return points?.length ? this.clonePoints(points) : [];
+    }
+    if (points.length === 1) {
+      return Array.from({ length: count }, () => ({ ...points[0] }));
+    }
+
+    const segLens: number[] = [];
+    let total = 0;
+    for (let i = 1; i < points.length; i++) {
+      const d = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+      segLens.push(d);
+      total += d;
+    }
+    if (total === 0) {
+      return Array.from({ length: count }, () => ({ ...points[0] }));
+    }
+
+    const result: Array<{ x: number; y: number }> = [];
+    for (let k = 0; k < count; k++) {
+      const targetDist = (k / (count - 1)) * total;
+      let acc = 0;
+      for (let s = 0; s < segLens.length; s++) {
+        const sl = segLens[s];
+        if (acc + sl >= targetDist || s === segLens.length - 1) {
+          const t = sl === 0 ? 0 : Math.min(1, Math.max(0, (targetDist - acc) / sl));
+          const a = points[s];
+          const b = points[s + 1];
+          result.push({
+            x: a.x + t * (b.x - a.x),
+            y: a.y + t * (b.y - a.y)
+          });
+          break;
+        }
+        acc += sl;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Interpolate between two layout snapshots. The first and last points always follow
+   * the raw layout endpoints (ports on source/target nodes); interior points blend the
+   * arc-length–resampled routes so straight, orthogonal, and curved polylines all morph smoothly.
+   */
+  private interpolatePinnedEdgeRoute(
+    prev: Array<{ x: number; y: number }>,
+    next: Array<{ x: number; y: number }>,
+    resampledPrev: Array<{ x: number; y: number }>,
+    resampledNext: Array<{ x: number; y: number }>,
+    s: number
+  ): Array<{ x: number; y: number }> {
+    const n = resampledPrev.length;
+    if (n < 2 || resampledNext.length !== n) {
+      return prev?.length ? this.clonePoints(prev) : [];
+    }
+    const start = {
+      x: prev[0].x + s * (next[0].x - prev[0].x),
+      y: prev[0].y + s * (next[0].y - prev[0].y)
+    };
+    const pe = prev[prev.length - 1];
+    const ne = next[next.length - 1];
+    const end = {
+      x: pe.x + s * (ne.x - pe.x),
+      y: pe.y + s * (ne.y - pe.y)
+    };
+    const out: Array<{ x: number; y: number }> = [];
+    for (let i = 0; i < n; i++) {
+      const a = resampledPrev[i];
+      const b = resampledNext[i];
+      out.push({
+        x: a.x + s * (b.x - a.x),
+        y: a.y + s * (b.y - a.y)
+      });
+    }
+    out[0] = start;
+    out[n - 1] = end;
+    return out;
+  }
+
+  private lineAndTextPathFromPoints(points: Array<{ x: number; y: number }>): {
+    line: string;
+    textPath: string;
+  } {
+    if (!points?.length) {
+      return { line: '', textPath: '' };
+    }
+    const line = this.generateLine(points);
+    const firstPoint = points[0];
+    const lastPoint = points[points.length - 1];
+    if (lastPoint.x < firstPoint.x) {
+      return { line, textPath: this.generateLine([...points].reverse()) };
+    }
+    return { line, textPath: line };
+  }
+
+  /**
+   * Layout-space node center from a prior `translate(tx,ty)` (inverse of {@link updateNodeGroupTransform}).
+   */
+  private layoutCenterFromPreviousTransform(node: Node, prev: { tx: number; ty: number }): { x: number; y: number } {
+    const center = this.centerNodesOnPositionChange();
+    const dx = center ? (node.dimension?.width ?? 0) / 2 : 0;
+    const dy = center ? (node.dimension?.height ?? 0) / 2 : 0;
+    return { x: prev.tx + dx, y: prev.ty + dy };
+  }
+
+  /** Same curve template as {@link buildFallbackEdgePoints} — smooth polyline between two layout centers. */
+  private polylineBetweenLayoutCenters(
+    s: { x: number; y: number },
+    t: { x: number; y: number }
+  ): Array<{ x: number; y: number }> {
+    const dx = t.x - s.x;
+    const dy = t.y - s.y;
+    const dist = Math.hypot(dx, dy) || 1;
+    const ox = (dx / dist) * Math.min(dist * 0.35, 120);
+    const oy = (dy / dist) * Math.min(dist * 0.35, 120);
+    return [s, { x: s.x + ox, y: s.y + oy }, { x: t.x - ox, y: t.y - oy }, t];
+  }
+
+  /**
+   * Prior-tick polyline for a brand-new edge key so full-scope morph starts from anchors aligned with
+   * `previousLayoutTransforms` (and current position for endpoints without a prior transform).
+   */
+  private syntheticPreviousEdgePointsFromPriorTransforms(edge: Edge): Array<{ x: number; y: number }> | undefined {
+    const prevs = this.previousLayoutTransforms;
+    if (!prevs?.size) {
+      return undefined;
+    }
+    const srcId = typeof edge.source === 'string' ? edge.source : (edge.source as { id?: string })?.id;
+    const tgtId = typeof edge.target === 'string' ? edge.target : (edge.target as { id?: string })?.id;
+    const src = this.graph.nodes?.find(n => n.id === srcId);
+    const tgt = this.graph.nodes?.find(n => n.id === tgtId);
+    const s = this.layoutCenterForSyntheticEdgeEndpoint(src, prevs);
+    const t = this.layoutCenterForSyntheticEdgeEndpoint(tgt, prevs);
+    if (s === undefined || t === undefined) {
+      return undefined;
+    }
+    return this.polylineBetweenLayoutCenters(s, t);
+  }
+
+  private layoutCenterForSyntheticEdgeEndpoint(
+    node: Node | undefined,
+    prevs: Map<string, { tx: number; ty: number }>
+  ): { x: number; y: number } | undefined {
+    if (!node) {
+      return undefined;
+    }
+    const p = prevs.get(node.id);
+    if (p) {
+      return this.layoutCenterFromPreviousTransform(node, p);
+    }
+    if (node.position) {
+      return { x: node.position.x, y: node.position.y };
+    }
+    return undefined;
+  }
+
+  /**
+   * When layout does not provide edge routes, build a smooth polyline between node centers (Bezier-friendly).
+   */
+  private buildFallbackEdgePoints(edge: Edge): Array<{ x: number; y: number }> {
+    const srcId = typeof edge.source === 'string' ? edge.source : (edge.source as any)?.id;
+    const tgtId = typeof edge.target === 'string' ? edge.target : (edge.target as any)?.id;
+    const src = this.graph.nodes.find(n => n.id === srcId);
+    const tgt = this.graph.nodes.find(n => n.id === tgtId);
+    if (!src?.position || !tgt?.position) {
+      return [];
+    }
+    const s = { x: src.position.x, y: src.position.y };
+    const t = { x: tgt.position.x, y: tgt.position.y };
+    return this.polylineBetweenLayoutCenters(s, t);
   }
 
   /**
@@ -745,7 +2382,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    * @memberOf GraphComponent
    */
-  calcDominantBaseline(link: any): void {
+  calcDominantBaseline(link: any, displayPoints?: Array<{ x: number; y: number }>): void {
     const firstPoint = link.points[0];
     const lastPoint = link.points[link.points.length - 1];
     link.oldTextPath = link.textPath;
@@ -753,8 +2390,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (lastPoint.x < firstPoint.x) {
       link.dominantBaseline = 'text-before-edge';
 
-      // reverse text path for when its flipped upside down
-      link.textPath = this.generateLine([...link.points].reverse());
+      const rev =
+        displayPoints && displayPoints.length >= 2 ? [...displayPoints].reverse() : [...link.points].reverse();
+      link.textPath = this.generateLine(rev);
     } else {
       link.dominantBaseline = 'text-after-edge';
       link.textPath = link.line;
@@ -771,8 +2409,21 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       .line<any>()
       .x(d => d.x)
       .y(d => d.y)
-      .curve(this.curve);
+      .curve(this.curve());
     return lineFunction(points);
+  }
+
+  /**
+   * Resamples the route polyline to {@link edgePathSampleCount} (via {@link effectiveEdgePathSampleCount}) and builds
+   * the stroke with {@link generateLine} so drag-time paths match layout ticks and morphs (same d3 `curve` + density).
+   */
+  private lineAndDisplayFromRoutePoints(points: Array<{ x: number; y: number }>): {
+    line: string;
+    displayPoints: Array<{ x: number; y: number }>;
+  } {
+    const n = this.effectiveEdgePathSampleCount();
+    const displayPoints = this.resamplePolyline(points, n);
+    return { line: this.generateLine(displayPoints), displayPoints };
   }
 
   /**
@@ -781,25 +2432,25 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onZoom($event: WheelEvent, direction: string): void {
-    if (this.enableTrackpadSupport && !$event.ctrlKey) {
+    if (this.enableTrackpadSupport() && !$event.ctrlKey) {
       this.pan($event.deltaX * -1, $event.deltaY * -1);
       return;
     }
 
-    const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed : -this.zoomSpeed);
+    const zoomFactor = 1 + (direction === 'in' ? this.zoomSpeed() : -this.zoomSpeed());
 
     // Check that zooming wouldn't put us out of bounds
     const newZoomLevel = this.zoomLevel * zoomFactor;
-    if (newZoomLevel <= this.minZoomLevel || newZoomLevel >= this.maxZoomLevel) {
+    if (newZoomLevel <= this.minZoomLevel() || newZoomLevel >= this.maxZoomLevel()) {
       return;
     }
 
     // Check if zooming is enabled or not
-    if (!this.enableZoom) {
+    if (!this.enableZoom()) {
       return;
     }
 
-    if (this.panOnZoom === true && $event) {
+    if (this.panOnZoom() === true && $event) {
       // Absolute mouse X/Y on the screen
       const mouseX = $event.clientX;
       const mouseY = $event.clientY;
@@ -829,6 +2480,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @param y
    */
   pan(x: number, y: number, ignoreZoomLevel: boolean = false): void {
+    this.cancelViewportPanAnimation();
     const zoomLevel = ignoreZoomLevel ? 1 : this.zoomLevel;
     this.transformationMatrix = transform(this.transformationMatrix, translate(x / zoomLevel, y / zoomLevel));
 
@@ -847,12 +2499,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const panX = -this.panOffsetX - x * this.zoomLevel + this.dims.width / 2;
     const panY = -this.panOffsetY - y * this.zoomLevel + this.dims.height / 2;
 
-    this.transformationMatrix = transform(
-      this.transformationMatrix,
-      translate(panX / this.zoomLevel, panY / this.zoomLevel)
-    );
-
-    this.updateTransform();
+    const dx = panX / this.zoomLevel;
+    const dy = panY / this.zoomLevel;
+    this.animateViewportPanDelta(dx, dy);
   }
 
   /**
@@ -860,6 +2509,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    *
    */
   zoom(factor: number): void {
+    this.cancelViewportPanAnimation();
     this.transformationMatrix = transform(this.transformationMatrix, scale(factor, factor));
     this.zoomChange.emit(this.zoomLevel);
     this.updateTransform();
@@ -873,7 +2523,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.transformationMatrix.a = isNaN(level) ? this.transformationMatrix.a : Number(level);
     this.transformationMatrix.d = isNaN(level) ? this.transformationMatrix.d : Number(level);
     this.zoomChange.emit(this.zoomLevel);
-    if (this.enablePreUpdateTransform) {
+    if (this.enablePreUpdateTransform()) {
       this.updateTransform();
     }
     this.update();
@@ -885,20 +2535,21 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onDrag(event: MouseEvent): void {
-    if (!this.draggingEnabled) {
+    if (!this.draggingEnabled()) {
       return;
     }
     const node = this.draggingNode;
-    if (this.layout && typeof this.layout !== 'string' && this.layout.onDrag) {
-      this.layout.onDrag(node, event);
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string' && layout.onDrag) {
+      layout.onDrag(node, event);
     }
 
     node.position.x += event.movementX / this.zoomLevel;
     node.position.y += event.movementY / this.zoomLevel;
 
     // move the node
-    const x = node.position.x - (this.centerNodesOnPositionChange ? node.dimension.width / 2 : 0);
-    const y = node.position.y - (this.centerNodesOnPositionChange ? node.dimension.height / 2 : 0);
+    const x = node.position.x - (this.centerNodesOnPositionChange() ? node.dimension.width / 2 : 0);
+    const y = node.position.y - (this.centerNodesOnPositionChange() ? node.dimension.height / 2 : 0);
     node.transform = `translate(${x}, ${y})`;
 
     for (const link of this.graph.edges) {
@@ -908,8 +2559,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         (link.target as any).id === node.id ||
         (link.source as any).id === node.id
       ) {
-        if (this.layout && typeof this.layout !== 'string') {
-          const result = this.layout.updateEdge(this.graph, link);
+        if (layout && typeof layout !== 'string') {
+          const result = layout.updateEdge(this.graph, link);
           const result$ = result instanceof Observable ? result : of(result);
           this.graphSubscription.add(
             result$.subscribe(graph => {
@@ -926,10 +2577,23 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   redrawEdge(edge: Edge) {
-    const line = this.generateLine(edge.points);
-    this.calcDominantBaseline(edge);
+    let points = edge.points as Array<{ x: number; y: number }>;
+    if (!points || points.length < 2) {
+      const fb = this.buildFallbackEdgePoints(edge);
+      if (fb.length >= 2) {
+        points = fb;
+      }
+    }
+    if (!points || points.length < 2) {
+      points = [
+        { x: 0, y: 0 },
+        { x: 0, y: 0 }
+      ];
+    }
+    const { line, displayPoints } = this.lineAndDisplayFromRoutePoints(points);
     edge.oldLine = edge.line;
     edge.line = line;
+    this.calcDominantBaseline(edge, displayPoints);
   }
 
   /**
@@ -960,11 +2624,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onActivate(event): void {
-    if (this.activeEntries.indexOf(event) > -1) {
+    if (this.activeEntries().indexOf(event) > -1) {
       return;
     }
-    this.activeEntries = [event, ...this.activeEntries];
-    this.activate.emit({ value: event, entries: this.activeEntries });
+    this.activeEntries.set([event, ...this.activeEntries()]);
+    this.activate.emit({ value: event, entries: this.activeEntries() });
   }
 
   /**
@@ -973,12 +2637,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onDeactivate(event): void {
-    const idx = this.activeEntries.indexOf(event);
+    const idx = this.activeEntries().indexOf(event);
 
-    this.activeEntries.splice(idx, 1);
-    this.activeEntries = [...this.activeEntries];
+    const next = [...this.activeEntries()];
+    next.splice(idx, 1);
+    this.activeEntries.set(next);
 
-    this.deactivate.emit({ value: event, entries: this.activeEntries });
+    this.deactivate.emit({ value: event, entries: this.activeEntries() });
   }
 
   /**
@@ -987,8 +2652,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   getSeriesDomain(): any[] {
-    return this.nodes
-      .map(d => this.groupResultsBy(d))
+    return this.nodes()
+      .map(d => this.groupResultsBy()(d))
       .reduce((nodes: string[], node): any[] => (nodes.indexOf(node) !== -1 ? nodes : nodes.concat([node])), [])
       .sort();
   }
@@ -1020,7 +2685,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, this.seriesDomain, this.customColors);
+    this.colors = new ColorHelper(this.scheme(), this.seriesDomain, this.customColors());
   }
 
   /**
@@ -1031,9 +2696,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
     this.isMouseMoveCalled = true;
-    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled) {
-      this.panWithConstraints(this.panningAxis, $event);
-    } else if (this.isDragging && this.draggingEnabled) {
+    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled()) {
+      this.panWithConstraints(this.panningAxis(), $event);
+    } else if (this.isDragging && this.draggingEnabled()) {
       this.onDrag($event);
     }
   }
@@ -1054,6 +2719,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onTouchStart(event: any): void {
+    this.cancelViewportPanAnimation();
     this._touchLastX = event.changedTouches[0].clientX;
     this._touchLastY = event.changedTouches[0].clientY;
 
@@ -1066,7 +2732,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   @HostListener('document:touchmove', ['$event'])
   onTouchMove($event: any): void {
-    if (this.isPanning && this.panningEnabled) {
+    if (this.isPanning && this.panningEnabled()) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
       const movementX = clientX - this._touchLastX;
@@ -1097,8 +2763,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.isDragging = false;
     this.isPanning = false;
     this.isMinimapPanning = false;
-    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragEnd) {
-      this.layout.onDragEnd(this.draggingNode, event);
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string' && layout.onDragEnd) {
+      layout.onDragEnd(this.draggingNode, event);
     }
   }
 
@@ -1108,14 +2775,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onNodeMouseDown(event: MouseEvent, node: any): void {
-    if (!this.draggingEnabled) {
+    if (!this.draggingEnabled()) {
       return;
     }
     this.isDragging = true;
     this.draggingNode = node;
 
-    if (this.layout && typeof this.layout !== 'string' && this.layout.onDragStart) {
-      this.layout.onDragStart(node, event);
+    const layout = this.layout();
+    if (layout && typeof layout !== 'string' && layout.onDragStart) {
+      layout.onDragStart(node, event);
     }
   }
 
@@ -1129,17 +2797,46 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   /**
-   * On minimap pan event. Pans the graph to the clicked position
+   * On minimap pan event. Pans the graph to the clicked position.
+   * Uses screen→local conversion so it works for any `miniMapPosition` (the old formula assumed UpperRight).
    *
    * @memberOf GraphComponent
    */
   onMinimapPanTo(event: MouseEvent): void {
-    const x =
-      event.offsetX - (this.dims.width - (this.graphDims.width + this.minimapOffsetX) / this.minimapScaleCoefficient);
-    const y = event.offsetY + this.minimapOffsetY / this.minimapScaleCoefficient;
-
-    this.panTo(x * this.minimapScaleCoefficient, y * this.minimapScaleCoefficient);
+    const p = this.minimapClientEventToGraphCoords(event);
+    if (!p) {
+      return;
+    }
+    this.panTo(p.gx, p.gy);
     this.isMinimapPanning = true;
+  }
+
+  /**
+   * Map a click on the minimap background to graph (world) coordinates. `minimapTransform` is applied on the host
+   * `<g class="minimap">`; `getScreenCTM()` on the target rect includes that transform so all corners behave the same.
+   */
+  private minimapClientEventToGraphCoords(event: MouseEvent): { gx: number; gy: number } | null {
+    const el = event.currentTarget;
+    if (!(el instanceof SVGGraphicsElement)) {
+      return null;
+    }
+    const svg = el.ownerSVGElement;
+    if (!svg) {
+      return null;
+    }
+    const pt = svg.createSVGPoint();
+    pt.x = event.clientX;
+    pt.y = event.clientY;
+    const ctm = el.getScreenCTM();
+    if (!ctm) {
+      return null;
+    }
+    const local = pt.matrixTransform(ctm.inverse());
+    const s = this.minimapScaleCoefficient;
+    return {
+      gx: this.minimapOffsetX + local.x * s,
+      gy: this.minimapOffsetY + local.y * s
+    };
   }
 
   /**
@@ -1162,16 +2859,16 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const widthZoom = this.dims.width / this.graphDims.width;
     let zoomLevel = Math.min(heightZoom, widthZoom, 1);
 
-    if (zoomLevel < this.minZoomLevel) {
-      zoomLevel = this.minZoomLevel;
+    if (zoomLevel < this.minZoomLevel()) {
+      zoomLevel = this.minZoomLevel();
     }
 
-    if (zoomLevel > this.maxZoomLevel) {
-      zoomLevel = this.maxZoomLevel;
+    if (zoomLevel > this.maxZoomLevel()) {
+      zoomLevel = this.maxZoomLevel();
     }
 
     if (zoomOptions?.force === true || zoomLevel !== this.zoomLevel) {
-      this.zoomLevel = zoomLevel;
+      this.zoomTo(zoomLevel);
 
       if (zoomOptions?.autoCenter !== true) {
         this.updateTransform();
@@ -1197,7 +2894,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   getCompoundNodeChildren(ids: Array<string>) {
-    return this.nodes.filter(node => ids.includes(node.id));
+    return this.nodes().filter(node => ids.includes(node.id));
   }
 
   private panWithConstraints(key: string, event: MouseEvent) {
@@ -1230,7 +2927,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       edge.midPoint = points[Math.floor(points.length / 2)];
     } else {
       // Checking if the current layout is Elk
-      if ((this.layout as Layout)?.settings?.properties?.['elk.direction']) {
+      if ((this.layout() as Layout)?.settings?.properties?.['elk.direction']) {
         this._calcMidPointElk(edge, points);
       } else {
         const _first = points[points.length / 2];
@@ -1248,7 +2945,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     let _secondX = null;
     let _firstY = null;
     let _secondY = null;
-    const orientation = (this.layout as Layout).settings?.properties['elk.direction'];
+    const orientation = (this.layout() as Layout).settings?.properties['elk.direction'];
     const hasBend =
       orientation === 'RIGHT' ? points.some(p => p.y !== points[0].y) : points.some(p => p.x !== points[0].x);
 
@@ -1279,9 +2976,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   public basicUpdate(): void {
-    if (this.view) {
-      this.width = this.view[0];
-      this.height = this.view[1];
+    const view = this.view();
+    if (view) {
+      this.width = view[0];
+      this.height = view[1];
     } else {
       const dims = this.getContainerDims();
       if (dims) {
@@ -1361,8 +3059,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     return (
       this.hasGraphDims() &&
       this.hasNodeDims() &&
-      ((this.compoundNodes?.length ? this.hasCompoundNodeDims() : true) ||
-        (this.clusters?.length ? this.hasClusterDims() : true))
+      ((this.compoundNodes()?.length ? this.hasCompoundNodeDims() : true) ||
+        (this.clusters()?.length ? this.hasClusterDims() : true))
     );
   }
 
