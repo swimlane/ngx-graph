@@ -2,6 +2,8 @@
 
 ## HEAD (unreleased)
 
+## 12.0.0-alpha.1
+
 - Breaking: `GraphComponent` is now a standalone component built on signal APIs (`input`, `output`, `model`, `contentChild`, `viewChildren`) instead of decorator-based `@Input` / `@Output` and classic queries. The published `NgxGraphModule` and `GraphModule` wrappers are still there so existing NgModule-based applications can import the graph as before, but those modules are deprecated; new code should import `GraphComponent` (and add it to the consuming component or route `imports` array) the same way you would any other standalone piece.
 - Breaking: From TypeScript, inputs behave like signal readers: for example, read the current node list with `graph.nodes()` rather than `graph.nodes`. The `layout`, `curve`, and `activeEntries` bindings use `model()` where the graph needs to write back internally; consumers generally keep using normal property bindings, while code inside the component updates via `.set()`.
 - Breaking: Outputs are `OutputRef` values, not `EventEmitter`, so they do not offer `.pipe()`. To keep using RxJS operators, turn an output into an observable with `outputToObservable` from `@angular/core/rxjs-interop` (in an appropriate injection context), or subscribe to the ref directly. Payload types (such as `NgxGraphStateChangeEvent`) are unchanged; only the subscription shape differs.
