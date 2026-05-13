@@ -2,6 +2,11 @@
 
 ## HEAD (unreleased)
 
+- Breaking: `draggingEnabled`, `panningEnabled` renamed to `enableDrag` and `enablePan`.
+- Breaking: `draggingEnabled`, `panningEnabled`, `enableZoom` converted to model.
+- Enhancement: `setViewportInteraction` allows toggling pan, drag, and zoom in one imperative method.
+- Fix: `CompoundNode` and `Cluster` should transition size and position when animations are enabled.
+
 ## 12.0.0-alpha.1
 
 - Breaking: `GraphComponent` is now a standalone component built on signal APIs (`input`, `output`, `model`, `contentChild`, `viewChildren`) instead of decorator-based `@Input` / `@Output` and classic queries. The published `NgxGraphModule` and `GraphModule` wrappers are still there so existing NgModule-based applications can import the graph as before, but those modules are deprecated; new code should import `GraphComponent` (and add it to the consuming component or route `imports` array) the same way you would any other standalone piece.

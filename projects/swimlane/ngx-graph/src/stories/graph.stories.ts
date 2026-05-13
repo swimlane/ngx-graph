@@ -140,10 +140,10 @@ Demo.parameters = {
     curve: {
       control: { type: 'string' }
     },
-    draggingEnabled: {
+    enableDrag: {
       control: { type: 'boolean' }
     },
-    panningEnabled: {
+    enablePan: {
       control: { type: 'boolean' }
     },
     panningAxis: {
