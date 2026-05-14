@@ -7,6 +7,8 @@ export interface Edge {
   label?: string;
   data?: any;
   points?: any;
+  /** Raw layout polyline from before the latest tick; morphing resamples this in redrawLines. */
+  previousPoints?: Array<{ x: number; y: number }>;
   line?: string;
   textTransform?: string;
   textAngle?: number;

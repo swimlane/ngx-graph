@@ -7,11 +7,11 @@ describe('NgxGraphOrgTreeComponent', () => {
   let component: NgxGraphOrgTreeComponent;
   let fixture: ComponentFixture<NgxGraphOrgTreeComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [NgxGraphOrgTreeComponent]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [NgxGraphOrgTreeComponent]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NgxGraphOrgTreeComponent);

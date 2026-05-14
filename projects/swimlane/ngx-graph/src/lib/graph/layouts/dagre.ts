@@ -3,6 +3,12 @@ import { Graph } from '../../models/graph.model';
 import { id } from '../../utils/id';
 import * as dagre from 'dagre';
 import { Edge } from '../../models/edge.model';
+import {
+  dagreDragPolyline,
+  rankOrderAxesFromDagreRankdir,
+  resolveDagreDragEdgeStyle,
+  type DagreDragEdgeStyle
+} from './edge-geometry';
 
 export enum Orientation {
   LEFT_TO_RIGHT = 'LR',
@@ -30,6 +36,13 @@ export interface DagreSettings {
   ranker?: 'network-simplex' | 'tight-tree' | 'longest-path';
   multigraph?: boolean;
   compound?: boolean;
+  /** Offset along rank axis for drag-time edge control points (default 20). */
+  curveDistance?: number;
+  /**
+   * How to rebuild edge polylines while dragging: `auto` infers from the last laid-out `edge.points`,
+   * or set explicitly (`orthogonal` / `smooth` / `straight`).
+   */
+  dragEdgeStyle?: DagreDragEdgeStyle;
 }
 
 export class DagreLayout implements Layout {
@@ -40,6 +53,7 @@ export class DagreLayout implements Layout {
     edgePadding: 100,
     rankPadding: 100,
     nodePadding: 50,
+    curveDistance: 20,
     multigraph: true,
     compound: true
   };
@@ -74,20 +88,14 @@ export class DagreLayout implements Layout {
   updateEdge(graph: Graph, edge: Edge): Graph {
     const sourceNode = graph.nodes.find(n => n.id === edge.source);
     const targetNode = graph.nodes.find(n => n.id === edge.target);
-
-    // determine new arrow position
-    const dir = sourceNode.position.y <= targetNode.position.y ? -1 : 1;
-    const startingPoint = {
-      x: sourceNode.position.x,
-      y: sourceNode.position.y - dir * (sourceNode.dimension.height / 2)
-    };
-    const endingPoint = {
-      x: targetNode.position.x,
-      y: targetNode.position.y + dir * (targetNode.dimension.height / 2)
-    };
-
-    // generate new points
-    edge.points = [startingPoint, endingPoint];
+    if (!sourceNode?.position || !targetNode?.position) {
+      return graph;
+    }
+    const settings = Object.assign({}, this.defaultSettings, this.settings);
+    const axes = rankOrderAxesFromDagreRankdir(settings.orientation);
+    const curveDistance = settings.curveDistance ?? 20;
+    const resolved = resolveDagreDragEdgeStyle(settings.dragEdgeStyle ?? 'auto', edge.points);
+    edge.points = dagreDragPolyline(sourceNode, targetNode, axes, curveDistance, resolved);
     return graph;
   }
 

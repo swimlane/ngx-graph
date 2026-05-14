@@ -42,13 +42,11 @@
         </textPath>
       </svg:text>
     </svg:g>
-    <svg:g
-      class="linkMidpoint"
-      *ngIf="link.midPoint"
-      [attr.transform]="'translate(' + link.midPoint.x + ',' + link.midPoint.y + ')'"
-    >
+    @if (link.midPoint) {
+    <svg:g class="linkMidpoint" [attr.transform]="'translate(' + link.midPoint.x + ',' + link.midPoint.y + ')'">
       <ellipse rx="30" ry="10" />
       <svg:text alignment-baseline="central">{{ link.data.linkText }}</svg:text>
     </svg:g>
+    }
   </ng-template>
 </ngx-graph>

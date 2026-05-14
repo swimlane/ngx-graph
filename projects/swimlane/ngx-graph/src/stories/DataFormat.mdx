@@ -1,34 +1,38 @@
-import { Meta } from '@storybook/blocks';
+import { Meta } from '@storybook/addon-docs/blocks';
 
 <Meta title="Documentation/Data Format" />
 <div className="sb-container">
 
 # Data Format
 
-The graph data is passed through 3 inputs of the component: `nodes`, `edges`, and `clusters`. All of the interfaces for these inputs can be imported from the npm package.
+The graph data is passed through the component inputs **`nodes`**, **`links`**, **`clusters`**, and optionally **`compoundNodes`**. All of the interfaces for these inputs can be imported from the npm package.
 
 ## Nodes
 
 The `nodes` input accepts an array of items of type `Node`.
 
-## Edges
+## Links
 
-The `edges` input accepts an array of items of type `Edge`.
+The `links` input accepts an array of items of type `Edge` (edges in the graph model).
 
 ## Clusters (Optional)
 
 The `clusters` input accepts an array of items of type `ClusterNode`. This input will only be used by layouts that support it (Dagre). Other layouts will ignore it. Clusters are regions denoted by a background behind other nodes.
 
-## Container Nodes (Optional)
+## Compound nodes (Optional)
 
-The `containerNodes` input accepts an array of items of type `ContainerNode`. This input will only be used by layouts that support it (Elk). Other layouts will ignore it. Compound Nodes are containers of nodes.
+The **`compoundNodes`** input accepts an array of items of type **`CompoundNode`**. This input is only used by layouts that support compound containers (e.g. **`ElkLayout`** for elkjs`). Other layouts ignore it. Compound nodes are containers of other nodes.
 
-- Container Nodes and Clusters share the same API, although behave differently based on the provided layout.
+- **`compoundNodes`** and **`clusters`** share a similar shape in the model, but behave differently depending on the layout.
+
+### Edge fields for layout morph
+
+Optional **`previousPoints`** on **`Edge`** can help layout morphing resample edge paths between ticks. For ELK drag routing, you can also set routing hints on **`edge.data`** (see **Documentation / Interface** and ELK layout docs).
 
 ## Example
 
 ```js
-this.edges = [
+this.links = [
   {
     id: 'a',
     source: '1',

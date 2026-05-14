@@ -1,0 +1,32 @@
+.demo {
+  padding: 1rem;
+}
+
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.hint {
+  margin: 0 0 0.75rem;
+  max-width: 48rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.graph-shell {
+  min-height: 800px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.graph-shell--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}

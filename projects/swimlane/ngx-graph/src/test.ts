@@ -1,18 +1,17 @@
-// This file is required by karma.conf.js and loads recursively all the .spec and framework files
+// This file is required by karma.conf.js and loads all spec modules (explicit imports; Karma/Electron may not provide webpack require.context).
 
-import 'core-js/es7/reflect';
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
-declare const require: any;
-
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting(), {
   teardown: { destroyAfterEach: false }
 });
-// Then we find all the tests.
-const context = require.context('./', true, /\.spec\.ts$/);
-// And load the modules.
-context.keys().map(context);
+
+// Load each spec explicitly — add new files here when you add *.spec.ts under this project.
+import './lib/graph/graph.component.spec';
+import './lib/graph/transition.model.spec';
+import './lib/graph/layouts/edge-geometry.spec';
+import './stories/demos/components/ngx-graph-org-tree/ngx-graph-org-tree.component.spec';

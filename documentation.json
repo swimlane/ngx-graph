@@ -9,7 +9,11 @@
     "components": [],
     "modules": [],
     "miscellaneous": [],
-    "routes": [],
+    "routes": {
+        "name": "<root>",
+        "kind": "module",
+        "children": []
+    },
     "coverage": {
         "count": 0,
         "status": "low",

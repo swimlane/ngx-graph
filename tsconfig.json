@@ -18,7 +18,6 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
-    "lib": ["ES2022", "dom"],
     "paths": {
       "@swimlane/ngx-graph": ["projects/swimlane/ngx-graph/src/public_api"],
       "@swimlane/ngx-graph/*": ["projects/swimlane/ngx-graph/src/*"]

@@ -11,6 +11,7 @@ export * from './lib/models/node.model';
 
 export * from './lib/graph/graph.component';
 export * from './lib/graph/graph.module';
+export * from './lib/graph/transition.model';
 
 export * from './lib/graph/mouse-wheel.directive';
 export * from './lib/graph/layouts/colaForceDirected';
@@ -19,6 +20,8 @@ export * from './lib/graph/layouts/d3ForceDirected';
 export * from './lib/graph/layouts/dagre';
 export * from './lib/graph/layouts/dagreCluster';
 export * from './lib/graph/layouts/dagreNodesOnly';
+export * from './lib/graph/layouts/layout-layered-constants';
+export * from './lib/graph/layouts/edge-geometry';
 
 export * from './lib/enums/mini-map-position.enum';
 export * from './lib/enums/panning.enum';

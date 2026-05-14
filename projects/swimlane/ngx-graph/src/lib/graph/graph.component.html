@@ -1,134 +1,147 @@
 <div
   class="ngx-graph-outer"
+  [class.layout-js-driven]="layoutJsDrivenHostClass"
+  [class.smooth-layout]="layoutJsMorphEnabled"
+  [style.transform]="layoutOuterTransform"
+  [style.transform-origin]="layoutEffectTransformOrigin"
   [style.width.px]="width"
-  [@animationState]="'active'"
-  [@.disabled]="!animate"
+  [animate.enter]="animate() ? 'ngx-graph-outer-fade' : null"
   (mouseWheelUp)="onZoom($event, 'in')"
   (mouseWheelDown)="onZoom($event, 'out')"
   mouseWheel
 >
   <svg:svg class="ngx-graph" [attr.width]="width" [attr.height]="height">
-    <svg:g
-      *ngIf="initialized && graph"
-      [attr.transform]="transform"
-      (touchstart)="onTouchStart($event)"
-      (touchend)="onTouchEnd()"
-      class="graph chart"
-    >
-      <defs>
-        <ng-container *ngIf="defsTemplate" [ngTemplateOutlet]="defsTemplate"></ng-container>
-        <svg:path
-          class="text-path"
-          *ngFor="let link of graph.edges"
-          [attr.d]="link.textPath"
-          [attr.id]="link.id"
-        ></svg:path>
-      </defs>
-
-      <svg:rect
-        class="panning-rect"
-        [attr.width]="dims.width * 100"
-        [attr.height]="dims.height * 100"
-        [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
-        (mousedown)="isPanning = true"
-      />
-
-      <ng-content></ng-content>
-
-      <svg:g class="clusters">
-        <svg:g
-          #clusterElement
-          *ngFor="let node of graph.clusters; trackBy: trackNodeBy"
-          class="node-group"
-          [class.old-node]="animate && oldClusters.has(node.id)"
-          [id]="node.id"
-          [attr.transform]="node.transform"
-          (click)="onClick(node)"
-        >
-          <ng-container
-            *ngIf="clusterTemplate && !node.hidden"
-            [ngTemplateOutlet]="clusterTemplate"
-            [ngTemplateOutletContext]="{ $implicit: node }"
-          ></ng-container>
-          <svg:g *ngIf="!clusterTemplate" class="node cluster">
-            <svg:rect
-              [attr.width]="node.dimension.width"
-              [attr.height]="node.dimension.height"
-              [attr.fill]="node.data?.color"
-            />
-            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
-              {{ node.label }}
-            </svg:text>
-          </svg:g>
+    @if (initialized && graph) {
+      <svg:g
+        [attr.transform]="transform"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd()"
+        class="graph chart"
+      >
+        <defs>
+          @if (defsTemplate()) {
+            <ng-container [ngTemplateOutlet]="defsTemplate()"></ng-container>
+          }
+          @for (link of graph.edges; track trackLinkBy($index, link)) {
+            <svg:path class="text-path" [attr.id]="link.id"></svg:path>
+          }
+        </defs>
+        <svg:rect
+          class="panning-rect"
+          [attr.width]="dims.width * 100"
+          [attr.height]="dims.height * 100"
+          [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
+          (mousedown)="onPanningSurfaceMouseDown()"
+        />
+        <ng-content></ng-content>
+        <svg:g class="clusters">
+          @for (node of graph.clusters; track trackNodeBy($index, node)) {
+            <svg:g
+              #clusterElement
+              class="node-group"
+              [class.old-node]="(animate() || layoutJsMorphEnabled) && oldClusters.has(node.id)"
+              [id]="node.id"
+              [attr.transform]="node.transform"
+              (click)="onClick(node)"
+            >
+              @if (clusterTemplate() && !node.hidden) {
+                <ng-container
+                  [ngTemplateOutlet]="clusterTemplate()"
+                  [ngTemplateOutletContext]="outletContextCluster(node)"
+                ></ng-container>
+              }
+              @if (!clusterTemplate() && !node.hidden) {
+                <svg:g class="node cluster">
+                  <svg:rect
+                    [attr.width]="node.dimension.width"
+                    [attr.height]="node.dimension.height"
+                    [attr.fill]="node.data?.color"
+                  />
+                  <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
+                    {{ node.label }}
+                  </svg:text>
+                </svg:g>
+              }
+            </svg:g>
+          }
+        </svg:g>
+        <svg:g class="compound-nodes">
+          @for (node of graph.compoundNodes; track trackNodeBy($index, node)) {
+            <svg:g
+              #nodeElement
+              class="node-group"
+              [class.old-node]="(animate() || layoutJsMorphEnabled) && oldCompoundNodes.has(node.id)"
+              [id]="node.id"
+              [attr.transform]="node.transform"
+              (click)="onClick(node)"
+              (mousedown)="onNodeMouseDown($event, node)"
+            >
+              @if (nodeTemplate() && !node.hidden) {
+                <ng-container
+                  [ngTemplateOutlet]="nodeTemplate()"
+                  [ngTemplateOutletContext]="outletContextCompoundNode(node)"
+                ></ng-container>
+              }
+              @if (!nodeTemplate() && !node.hidden) {
+                <svg:g class="node compound-node">
+                  <svg:rect
+                    [attr.width]="node.dimension.width"
+                    [attr.height]="node.dimension.height"
+                    [attr.fill]="node.data?.color"
+                  />
+                  <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
+                    {{ node.label }}
+                  </svg:text>
+                </svg:g>
+              }
+            </svg:g>
+          }
+        </svg:g>
+        <svg:g class="links">
+          @for (link of graph.edges; track trackLinkBy($index, link)) {
+            <svg:g #linkElement class="link-group" [id]="link.id">
+              @if (linkTemplate()) {
+                <ng-container
+                  [ngTemplateOutlet]="linkTemplate()"
+                  [ngTemplateOutletContext]="outletContextLink(link)"
+                ></ng-container>
+              }
+              @if (!linkTemplate()) {
+                <svg:path class="edge line" />
+              }
+            </svg:g>
+          }
+        </svg:g>
+        <svg:g class="nodes" #nodeGroup>
+          @for (node of graph.nodes; track trackNodeBy($index, node)) {
+            <svg:g
+              #nodeElement
+              class="node-group"
+              [class.old-node]="(animate() || layoutJsMorphEnabled) && oldNodes.has(node.id)"
+              [id]="node.id"
+              [attr.transform]="node.transform"
+              (click)="onClick(node)"
+              (mousedown)="onNodeMouseDown($event, node)"
+            >
+              @if (nodeTemplate() && !node.hidden) {
+                <ng-container
+                  [ngTemplateOutlet]="nodeTemplate()"
+                  [ngTemplateOutletContext]="outletContextGraphNode(node)"
+                ></ng-container>
+              }
+              @if (!nodeTemplate() && !node.hidden) {
+                <svg:circle
+                  [attr.r]="defaultNodeCircleRadius(node)"
+                  [attr.cx]="(node.dimension?.width ?? 0) / 2"
+                  [attr.cy]="(node.dimension?.height ?? 0) / 2"
+                  [attr.fill]="node.data?.color"
+                />
+              }
+            </svg:g>
+          }
         </svg:g>
       </svg:g>
-
-      <svg:g class="compound-nodes">
-        <svg:g
-          #nodeElement
-          *ngFor="let node of graph.compoundNodes; trackBy: trackNodeBy"
-          class="node-group"
-          [class.old-node]="animate && oldCompoundNodes.has(node.id)"
-          [id]="node.id"
-          [attr.transform]="node.transform"
-          (click)="onClick(node)"
-          (mousedown)="onNodeMouseDown($event, node)"
-        >
-          <ng-container
-            *ngIf="nodeTemplate && !node.hidden"
-            [ngTemplateOutlet]="nodeTemplate"
-            [ngTemplateOutletContext]="{ $implicit: node }"
-          ></ng-container>
-          <svg:g *ngIf="!nodeTemplate" class="node compound-node">
-            <svg:rect
-              [attr.width]="node.dimension.width"
-              [attr.height]="node.dimension.height"
-              [attr.fill]="node.data?.color"
-            />
-            <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.dimension.height / 2">
-              {{ node.label }}
-            </svg:text>
-          </svg:g>
-        </svg:g>
-      </svg:g>
-
-      <svg:g class="links">
-        <svg:g #linkElement *ngFor="let link of graph.edges; trackBy: trackLinkBy" class="link-group" [id]="link.id">
-          <ng-container
-            *ngIf="linkTemplate"
-            [ngTemplateOutlet]="linkTemplate"
-            [ngTemplateOutletContext]="{ $implicit: link }"
-          ></ng-container>
-          <svg:path *ngIf="!linkTemplate" class="edge" [attr.d]="link.line" />
-        </svg:g>
-      </svg:g>
-
-      <svg:g class="nodes" #nodeGroup>
-        <svg:g
-          #nodeElement
-          *ngFor="let node of graph.nodes; trackBy: trackNodeBy"
-          class="node-group"
-          [class.old-node]="animate && oldNodes.has(node.id)"
-          [id]="node.id"
-          [attr.transform]="node.transform"
-          (click)="onClick(node)"
-          (mousedown)="onNodeMouseDown($event, node)"
-        >
-          <ng-container
-            *ngIf="nodeTemplate && !node.hidden"
-            [ngTemplateOutlet]="nodeTemplate"
-            [ngTemplateOutletContext]="{ $implicit: node }"
-          ></ng-container>
-          <svg:circle
-            *ngIf="!nodeTemplate"
-            r="10"
-            [attr.cx]="node.dimension.width / 2"
-            [attr.cy]="node.dimension.height / 2"
-            [attr.fill]="node.data?.color"
-          />
-        </svg:g>
-      </svg:g>
-    </svg:g>
+    }
 
     <svg:clipPath [attr.id]="minimapClipPathId">
       <svg:rect
@@ -137,72 +150,71 @@
       ></svg:rect>
     </svg:clipPath>
 
-    <svg:g
-      class="minimap"
-      *ngIf="showMiniMap"
-      [attr.transform]="minimapTransform"
-      [attr.clip-path]="'url(#' + minimapClipPathId + ')'"
-    >
-      <svg:rect
-        class="minimap-background"
-        [attr.width]="graphDims.width / minimapScaleCoefficient"
-        [attr.height]="graphDims.height / minimapScaleCoefficient"
-        (mousedown)="onMinimapPanTo($event)"
-      ></svg:rect>
-
-      <svg:g
-        [style.transform]="
-          'translate(' +
-          -minimapOffsetX / minimapScaleCoefficient +
-          'px,' +
-          -minimapOffsetY / minimapScaleCoefficient +
-          'px)'
-        "
-      >
-        <svg:g class="minimap-nodes" [style.transform]="'scale(' + 1 / minimapScaleCoefficient + ')'">
-          <svg:g
-            #nodeElement
-            *ngFor="let node of graph.nodes; trackBy: trackNodeBy"
-            class="node-group"
-            [class.old-node]="animate && oldNodes.has(node.id)"
-            [id]="node.id"
-            [attr.transform]="node.transform"
-          >
-            <ng-container
-              *ngIf="miniMapNodeTemplate"
-              [ngTemplateOutlet]="miniMapNodeTemplate"
-              [ngTemplateOutletContext]="{ $implicit: node }"
-            ></ng-container>
-            <ng-container
-              *ngIf="!miniMapNodeTemplate && nodeTemplate"
-              [ngTemplateOutlet]="nodeTemplate"
-              [ngTemplateOutletContext]="{ $implicit: node }"
-            ></ng-container>
-            <svg:circle
-              *ngIf="!nodeTemplate && !miniMapNodeTemplate"
-              r="10"
-              [attr.cx]="node.dimension.width / 2 / minimapScaleCoefficient"
-              [attr.cy]="node.dimension.height / 2 / minimapScaleCoefficient"
-              [attr.fill]="node.data?.color"
-            />
-          </svg:g>
-        </svg:g>
-
+    @if (showMiniMap()) {
+      <svg:g class="minimap" [attr.transform]="minimapTransform" [attr.clip-path]="'url(#' + minimapClipPathId + ')'">
         <svg:rect
-          [attr.transform]="
-            'translate(' +
-            panOffsetX / zoomLevel / -minimapScaleCoefficient +
-            ',' +
-            panOffsetY / zoomLevel / -minimapScaleCoefficient +
-            ')'
-          "
-          class="minimap-drag"
-          [class.panning]="isMinimapPanning"
-          [attr.width]="width / minimapScaleCoefficient / zoomLevel"
-          [attr.height]="height / minimapScaleCoefficient / zoomLevel"
-          (mousedown)="onMinimapDragMouseDown()"
+          class="minimap-background"
+          [attr.width]="graphDims.width / minimapScaleCoefficient"
+          [attr.height]="graphDims.height / minimapScaleCoefficient"
+          (mousedown)="onMinimapPanTo($event)"
         ></svg:rect>
+        <svg:g
+          [style.transform]="
+            'translate(' +
+            -minimapOffsetX / minimapScaleCoefficient +
+            'px,' +
+            -minimapOffsetY / minimapScaleCoefficient +
+            'px)'
+          "
+        >
+          <svg:g class="minimap-nodes" [style.transform]="'scale(' + 1 / minimapScaleCoefficient + ')'">
+            @for (node of graph?.nodes ?? []; track trackNodeBy($index, node)) {
+              <svg:g
+                #nodeElement
+                class="node-group"
+                [class.old-node]="(animate() || layoutJsMorphEnabled) && oldNodes.has(node.id)"
+                [id]="node.id"
+                [attr.transform]="node.transform"
+              >
+                @if (miniMapNodeTemplate()) {
+                  <ng-container
+                    [ngTemplateOutlet]="miniMapNodeTemplate()"
+                    [ngTemplateOutletContext]="outletContextMinimapNode(node)"
+                  ></ng-container>
+                }
+                @if (!miniMapNodeTemplate() && nodeTemplate()) {
+                  <ng-container
+                    [ngTemplateOutlet]="nodeTemplate()"
+                    [ngTemplateOutletContext]="outletContextMinimapNode(node)"
+                  ></ng-container>
+                }
+                @if (!nodeTemplate() && !miniMapNodeTemplate() && !node.hidden) {
+                  <svg:circle
+                    [attr.r]="defaultNodeCircleRadius(node) / minimapScaleCoefficient"
+                    [attr.cx]="(node.dimension?.width ?? 0) / 2 / minimapScaleCoefficient"
+                    [attr.cy]="(node.dimension?.height ?? 0) / 2 / minimapScaleCoefficient"
+                    [attr.fill]="node.data?.color"
+                  />
+                }
+              </svg:g>
+            }
+          </svg:g>
+          <svg:rect
+            [attr.transform]="
+              'translate(' +
+              panOffsetX / zoomLevel / -minimapScaleCoefficient +
+              ',' +
+              panOffsetY / zoomLevel / -minimapScaleCoefficient +
+              ')'
+            "
+            class="minimap-drag"
+            [class.panning]="isMinimapPanning"
+            [attr.width]="width / minimapScaleCoefficient / zoomLevel"
+            [attr.height]="height / minimapScaleCoefficient / zoomLevel"
+            (mousedown)="onMinimapDragMouseDown()"
+          ></svg:rect>
+        </svg:g>
       </svg:g>
-    </svg:g>
+    }
   </svg:svg>
 </div>
