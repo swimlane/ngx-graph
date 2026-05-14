@@ -664,9 +664,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
       for (const n of items) {
         const p = prevNodeById.get(n.id);
-        if (p) {
-          n.hidden = false;
-        }
         if (p?.position) {
           n.position = { ...p.position };
         }
@@ -690,9 +687,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (next.clusters?.length) {
       for (const n of next.clusters) {
         const p = prevClusterById.get(n.id);
-        if (p) {
-          n.hidden = false;
-        }
         if (p?.position) {
           n.position = { ...p.position };
         }
@@ -708,9 +702,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (next.compoundNodes?.length) {
       for (const n of next.compoundNodes) {
         const p = prevCompoundById.get(n.id);
-        if (p) {
-          n.hidden = false;
-        }
         if (p?.position) {
           n.position = { ...p.position };
         }
