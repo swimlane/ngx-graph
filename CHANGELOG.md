@@ -6,6 +6,9 @@
 - Breaking: `draggingEnabled`, `panningEnabled`, `enableZoom` converted to model.
 - Enhancement: `setViewportInteraction` allows toggling pan, drag, and zoom in one imperative method.
 - Fix: `CompoundNode` and `Cluster` should transition size and position when animations are enabled.
+- Fix: `tick()` assigns `oldNodes` / `oldClusters` / `oldCompoundNodes` from the current graph **before** the post-tick `requestAnimationFrame`, so `[class.old-node]` is consistent for newly added ids on the same tick (fixes flash on zoom with `mode: 'tween'`, including additive + `snapAddedNodeIds`).
+- Fix: `#nodeTemplate` / `#linkTemplate` / `#clusterTemplate` outlets reuse a stable `ngTemplateOutletContext` object per graph id (pruned each `tick()`) so consumer templates (e.g. tooltips) are not torn down and recreated on viewport-only updates such as zoom.
+- Fix: `applyVisualContinuityBeforeLayout` clears `hidden` on nodes/clusters/compound nodes whose id existed in the prior graph so host-owned `[nodes]` references do not keep stale `hidden: true` after `tick()` ran on a different layout object graph (reduces template blink when `update()` runs again).
 
 ## 12.0.0-alpha.1
 

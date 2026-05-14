@@ -79,7 +79,7 @@ Equivalent: `graph.enablePan.set(...)`, `graph.enableZoom.set(...)`, and `graph.
 - **`scope`:** **`full`** interpolates the whole graph; **`additive`** only tweens new ids while stable nodes/edges snap—useful for growing graphs (see **Example / NgxGraphColaBranching**).
 - **`useLayoutTransitions`:** coordinates host classes `layout-js-driven` and `smooth-layout` with JS morph so CSS and imperative `transform` updates do not fight.
 - **`morphCapture`:** tune **`previousSource`** (model vs DOM) when prior positions are wrong; **`syncTargetsFromPositionAfterTick`** / **`snapAddedNodeIds`** for full-scope or newly-added nodes.
-- **Custom templates:** `ngTemplateOutletContext` includes **`transitionAfterChangesActive`** when JS-driven layout morphing is active.
+- **Custom templates:** `ngTemplateOutletContext` includes **`transitionAfterChangesActive`** when JS-driven layout morphing is active. The graph reuses one context object per node/link/cluster id (updated in place each CD) so nested components are not recreated on pan/zoom-only updates.
 
 See **Example / NgxGraphDagreLayoutTransition**, **Example / NgxGraphTranslateOnChanges**, and **Example / NgxGraphColaBranching** for `(drawComplete)`, rank-direction changes, and additive growth patterns.
 

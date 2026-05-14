@@ -92,7 +92,7 @@ export interface NgxGraphStateChangeEvent {
  * {@link useLayoutTransitions}): when present, styles set `transition: none` on `.node-group` so imperative
  * `transform` updates do not fight CSS. **`smooth-layout`** is set only while tweening is active.
  *
- * **Template outlets:** `ngTemplateOutletContext` includes `transitionAfterChangesActive` when JS-driven layout morphing is active.
+ * **Template outlets:** Context objects are stable per graph id (see `outletContextGraphNode` / `outletContextLink` / …): `transitionAfterChangesActive` and `$implicit` are updated in place so consumer templates are not recreated on viewport-only CD.
  */
 @Component({
   selector: 'ngx-graph',
@@ -234,6 +234,28 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Latest requestAnimationFrame id per edge for imperative path morphing (cancel on relayout / drag). */
   private readonly edgePathRafIds = new Map<string, number>();
+
+  /**
+   * Stable {@link NgTemplateOutlet} context objects keyed by graph id so consumer templates (tooltips, nested
+   * directives) are not destroyed/recreated every CD when only the viewport or `$implicit` reference changes.
+   */
+  private readonly graphMainNodeOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphMinimapNodeOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphClusterOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphCompoundOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphLinkOutletCtx = new Map<string, { $implicit: Edge; transitionAfterChangesActive: boolean }>();
 
   /** Single rAF when layout morph unifies node transforms + edge paths. */
   private layoutUnifiedRafId: number | null = null;
@@ -506,6 +528,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
     this.destroy$.next();
     this.destroy$.complete();
+    this.graphMainNodeOutletCtx.clear();
+    this.graphMinimapNodeOutletCtx.clear();
+    this.graphClusterOutletCtx.clear();
+    this.graphCompoundOutletCtx.clear();
+    this.graphLinkOutletCtx.clear();
   }
 
   /**
@@ -637,6 +664,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
       for (const n of items) {
         const p = prevNodeById.get(n.id);
+        if (p) {
+          n.hidden = false;
+        }
         if (p?.position) {
           n.position = { ...p.position };
         }
@@ -660,6 +690,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (next.clusters?.length) {
       for (const n of next.clusters) {
         const p = prevClusterById.get(n.id);
+        if (p) {
+          n.hidden = false;
+        }
         if (p?.position) {
           n.position = { ...p.position };
         }
@@ -675,6 +708,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (next.compoundNodes?.length) {
       for (const n of next.compoundNodes) {
         const p = prevCompoundById.get(n.id);
+        if (p) {
+          n.hidden = false;
+        }
         if (p?.position) {
           n.position = { ...p.position };
         }
@@ -733,8 +769,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
     }
   }
-
-  /** Transforms + colors for display before `tick()` (matches {@link applyTransforms} without new-id tracking). */
   private setDisplayTransformsFromPositions(
     nodes: Node[],
     clusters: ClusterNode[] | undefined,
@@ -1404,16 +1438,127 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     newLinks.push(newLink);
   }
 
+  /** Drop outlet contexts for ids no longer in the graph so templates do not retain stale references. */
+  private pruneTemplateOutletContextCaches(): void {
+    const g = this.graph;
+    if (!g) {
+      this.graphMainNodeOutletCtx.clear();
+      this.graphMinimapNodeOutletCtx.clear();
+      this.graphClusterOutletCtx.clear();
+      this.graphCompoundOutletCtx.clear();
+      this.graphLinkOutletCtx.clear();
+      return;
+    }
+    const nodeIds = new Set(g.nodes?.map(n => n.id) ?? []);
+    const clusterIds = new Set(g.clusters?.map(c => c.id) ?? []);
+    const compoundIds = new Set(g.compoundNodes?.map(c => c.id) ?? []);
+    const linkIds = new Set(g.edges?.map(e => e.id) ?? []);
+
+    for (const id of [...this.graphMainNodeOutletCtx.keys()]) {
+      if (!nodeIds.has(id)) {
+        this.graphMainNodeOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphMinimapNodeOutletCtx.keys()]) {
+      if (!nodeIds.has(id)) {
+        this.graphMinimapNodeOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphClusterOutletCtx.keys()]) {
+      if (!clusterIds.has(id)) {
+        this.graphClusterOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphCompoundOutletCtx.keys()]) {
+      if (!compoundIds.has(id)) {
+        this.graphCompoundOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphLinkOutletCtx.keys()]) {
+      if (!linkIds.has(id)) {
+        this.graphLinkOutletCtx.delete(id);
+      }
+    }
+  }
+
+  /** Stable context for `#nodeTemplate` on the main chart (see {@link graphMainNodeOutletCtx}). */
+  outletContextGraphNode(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphMainNodeOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphMainNodeOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#nodeTemplate` / `#miniMapNodeTemplate` on the minimap. */
+  outletContextMinimapNode(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphMinimapNodeOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphMinimapNodeOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#clusterTemplate`. */
+  outletContextCluster(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphClusterOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphClusterOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#nodeTemplate` on compound nodes. */
+  outletContextCompoundNode(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphCompoundOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphCompoundOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#linkTemplate`. */
+  outletContextLink(link: Edge): { $implicit: Edge; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    const id = link.id;
+    let o = this.graphLinkOutletCtx.get(id);
+    if (!o) {
+      o = { $implicit: link, transitionAfterChangesActive: morph };
+      this.graphLinkOutletCtx.set(id, o);
+    } else {
+      o.$implicit = link;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
   tick() {
+    this.pruneTemplateOutletContextCaches();
     const tickId = ++this.drawCompleteTickId;
     this.edgeKeysAtLayoutTickStart = new Set(this.priorTickEdgeKeys);
     const priorTickGraphIds = new Set(this.priorTickGraphNodeIds);
     const priorTickGraphKinds = new Map(this.priorTickGraphKindById);
     const mg = this.isLayoutMultigraph();
-
-    const previousNodes = this.oldNodes;
-    const previousClusters = this.oldClusters;
-    const previousCompoundNodes = this.oldCompoundNodes;
 
     const newNodeIds: Set<string> = new Set();
     const newClusterIds: Set<string> = new Set();
@@ -1500,10 +1645,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
     }
 
-    this.oldNodes = previousNodes;
-    this.oldClusters = previousClusters;
-    this.oldCompoundNodes = previousCompoundNodes;
-
     const oldLinkMap = new Map<string, Edge>();
     for (const ol of this._oldLinks) {
       const key = this.linkKeyForLookup(ol, mg);
@@ -1550,11 +1691,12 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     }
 
-    requestAnimationFrame(() => {
-      this.oldNodes = newNodeIds;
-      this.oldClusters = newClusterIds;
-      this.oldCompoundNodes = newCompoundNodeIds;
+    // Before post-tick rAF so `[class.old-node]` matches every current id (avoids new-only flicker on zoom CD with tween).
+    this.oldNodes = newNodeIds;
+    this.oldClusters = newClusterIds;
+    this.oldCompoundNodes = newCompoundNodeIds;
 
+    requestAnimationFrame(() => {
       // Full-scope morph keeps `node.transform` at previous layout until unified rAF; do not sync from `position` or
       // refresh bounds/pan from the new layout here — that would wipe `resetToPrevious` and desync the viewport.
       const nodeTweenActive =
