@@ -5,18 +5,31 @@ export type GraphTransitionEasingName = 'linear' | 'cubicIn' | 'cubicOut' | 'cub
 
 export type GraphLayoutTransitionMode = 'none' | 'instant' | 'tween';
 
-/** Where “previous” node-group translates come from before `graph` is replaced (layout morph). */
+/**
+ * Where **previous** `translate(tx,ty)` values come from before the graph model is replaced (layout morph).
+ * Applies to **nodes, clusters, and compound nodes** equally (`g.node-group[id]` under `.graph.chart`).
+ * Does **not** affect cluster/compound **size** morph: prior width/height for that tween always come from the
+ * graph model at capture time, not from the DOM.
+ */
 export type LayoutMorphPreviousSource =
-  /** Current behavior: read `transform` on the incoming graph model only. */
+  /** Read `transform` on the graph model only (backward compatible). */
   | 'model-transform'
   /** Read `g.node-group[id]` under `.graph.chart` (excludes minimap). */
   | 'dom-svg'
   /** DOM first; if translate is near zero, use model `position` / `transform` (see `degenerateEpsilon`). */
   | 'dom-with-model-fallback';
 
-/** Options for capturing prior node translates when `mode: 'tween'`. */
+/**
+ * Options for capturing prior node-group translates when `mode: 'tween'`.
+ * With `scope: 'full'`, the same unified rAF tween drives **nodes, clusters, and compounds** (translate lerp plus,
+ * for clusters/compounds only, optional width/height lerp from model snapshots).
+ */
 export interface LayoutMorphCapture {
-  /** Default `model-transform` (backward compatible). */
+  /**
+   * Default `model-transform` (backward compatible).
+   * DOM modes read the same `g.node-group` elements used for regular nodes; clusters and compounds use the same
+   * `class="node-group"` + `id` wiring in the graph template.
+   */
   previousSource?: LayoutMorphPreviousSource;
   /** Used with `dom-with-model-fallback`. Default `1e-3`. */
   degenerateEpsilon?: number;
@@ -25,9 +38,19 @@ export interface LayoutMorphCapture {
    * Default `['compound', 'cluster', 'node']`.
    */
   modelResolutionOrder?: Array<'compound' | 'cluster' | 'node'>;
-  /** After `tick()`, refresh `layoutAnimationTargets` from layout `position` for full-scope tween. Default false. */
+  /**
+   * After `tick()`, for `scope: 'full'` only, recompute `layoutAnimationTargets` from layout `position` (and
+   * `dimension` via `centerNodesOnPositionChange`) for every id already in the target map — **including clusters and
+   * compounds**. Runs before transforms are reset to “previous” for the tween, so endpoints match the new layout.
+   * Default false.
+   */
   syncTargetsFromPositionAfterTick?: boolean;
-  /** For ids added since last tick, set previous = target so they do not tween from origin. Default false. */
+  /**
+   * When true: new **node** ids also get `previousLayoutTransforms` snapped to the current target so they do not tween
+   * from a missing or bogus origin; plus degenerate-stable snap for clusters/compounds (see `degenerateEpsilon`).
+   * Role changes (same id moving between `nodes` / `clusters` / `compoundNodes`) and **new** cluster/compound ids snap
+   * even when this flag is false. Default false.
+   */
   snapAddedNodeIds?: boolean;
 }
 
@@ -46,7 +69,9 @@ export function mergeLayoutMorphCapture(partial: LayoutMorphCapture | null | und
 /**
  * Layout transition after graph model / layout output changes.
  * - `none` / `instant`: keep prior snapshot for continuity, then snap to final layout in one frame (no rAF morph).
- * - `tween`: interpolate node translates and edge paths over `durationMs` with `easing`.
+ * - `tween`: interpolate node-group translates and edge paths over `durationMs` with `easing`. Full scope tweens
+ *   **nodes, clusters, and compounds** together; cluster/compound rects can also tween width/height from prior model
+ *   dimensions to the new layout’s dimensions (`scope: 'additive'` skips positional and size tweens on groups).
  */
 export interface GraphLayoutTransition {
   mode: GraphLayoutTransitionMode;
@@ -54,7 +79,7 @@ export interface GraphLayoutTransition {
   scope: 'full' | 'additive';
   durationMs: number;
   easing: GraphTransitionEasingName | ((t: number) => number);
-  /** When `mode: 'tween'`, how prior node translates are captured (DOM vs model). */
+  /** When `mode: 'tween'`, how **prior translates** are captured; see {@link LayoutMorphPreviousSource}. */
   morphCapture?: LayoutMorphCapture;
 }
 

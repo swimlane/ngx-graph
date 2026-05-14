@@ -22,7 +22,7 @@
           @if (defsTemplate()) {
             <ng-container [ngTemplateOutlet]="defsTemplate()"></ng-container>
           }
-          @for (link of graph.edges; track link) {
+          @for (link of graph.edges; track trackLinkBy($index, link)) {
             <svg:path class="text-path" [attr.id]="link.id"></svg:path>
           }
         </defs>
@@ -31,7 +31,7 @@
           [attr.width]="dims.width * 100"
           [attr.height]="dims.height * 100"
           [attr.transform]="'translate(' + (-dims.width || 0) * 50 + ',' + (-dims.height || 0) * 50 + ')'"
-          (mousedown)="isPanning = true"
+          (mousedown)="onPanningSurfaceMouseDown()"
         />
         <ng-content></ng-content>
         <svg:g class="clusters">
@@ -47,7 +47,7 @@
               @if (clusterTemplate() && !node.hidden) {
                 <ng-container
                   [ngTemplateOutlet]="clusterTemplate()"
-                  [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
+                  [ngTemplateOutletContext]="outletContextCluster(node)"
                 ></ng-container>
               }
               @if (!clusterTemplate() && !node.hidden) {
@@ -79,7 +79,7 @@
               @if (nodeTemplate() && !node.hidden) {
                 <ng-container
                   [ngTemplateOutlet]="nodeTemplate()"
-                  [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
+                  [ngTemplateOutletContext]="outletContextCompoundNode(node)"
                 ></ng-container>
               }
               @if (!nodeTemplate() && !node.hidden) {
@@ -103,7 +103,7 @@
               @if (linkTemplate()) {
                 <ng-container
                   [ngTemplateOutlet]="linkTemplate()"
-                  [ngTemplateOutletContext]="{ $implicit: link, transitionAfterChangesActive: layoutJsMorphEnabled }"
+                  [ngTemplateOutletContext]="outletContextLink(link)"
                 ></ng-container>
               }
               @if (!linkTemplate()) {
@@ -126,14 +126,14 @@
               @if (nodeTemplate() && !node.hidden) {
                 <ng-container
                   [ngTemplateOutlet]="nodeTemplate()"
-                  [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
+                  [ngTemplateOutletContext]="outletContextGraphNode(node)"
                 ></ng-container>
               }
               @if (!nodeTemplate() && !node.hidden) {
                 <svg:circle
                   [attr.r]="defaultNodeCircleRadius(node)"
-                  [attr.cx]="node.dimension.width / 2"
-                  [attr.cy]="node.dimension.height / 2"
+                  [attr.cx]="(node.dimension?.width ?? 0) / 2"
+                  [attr.cy]="(node.dimension?.height ?? 0) / 2"
                   [attr.fill]="node.data?.color"
                 />
               }
@@ -179,20 +179,20 @@
                 @if (miniMapNodeTemplate()) {
                   <ng-container
                     [ngTemplateOutlet]="miniMapNodeTemplate()"
-                    [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
+                    [ngTemplateOutletContext]="outletContextMinimapNode(node)"
                   ></ng-container>
                 }
                 @if (!miniMapNodeTemplate() && nodeTemplate()) {
                   <ng-container
                     [ngTemplateOutlet]="nodeTemplate()"
-                    [ngTemplateOutletContext]="{ $implicit: node, transitionAfterChangesActive: layoutJsMorphEnabled }"
+                    [ngTemplateOutletContext]="outletContextMinimapNode(node)"
                   ></ng-container>
                 }
                 @if (!nodeTemplate() && !miniMapNodeTemplate() && !node.hidden) {
                   <svg:circle
                     [attr.r]="defaultNodeCircleRadius(node) / minimapScaleCoefficient"
-                    [attr.cx]="node.dimension.width / 2 / minimapScaleCoefficient"
-                    [attr.cy]="node.dimension.height / 2 / minimapScaleCoefficient"
+                    [attr.cx]="(node.dimension?.width ?? 0) / 2 / minimapScaleCoefficient"
+                    [attr.cy]="(node.dimension?.height ?? 0) / 2 / minimapScaleCoefficient"
                     [attr.fill]="node.data?.color"
                   />
                 }

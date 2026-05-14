@@ -92,7 +92,7 @@ export interface NgxGraphStateChangeEvent {
  * {@link useLayoutTransitions}): when present, styles set `transition: none` on `.node-group` so imperative
  * `transform` updates do not fight CSS. **`smooth-layout`** is set only while tweening is active.
  *
- * **Template outlets:** `ngTemplateOutletContext` includes `transitionAfterChangesActive` when JS-driven layout morphing is active.
+ * **Template outlets:** Context objects are stable per graph id (see `outletContextGraphNode` / `outletContextLink` / …): `transitionAfterChangesActive` and `$implicit` are updated in place so consumer templates are not recreated on viewport-only CD.
  */
 @Component({
   selector: 'ngx-graph',
@@ -104,23 +104,22 @@ export interface NgxGraphStateChangeEvent {
 })
 export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private readonly injector = inject(Injector);
-
   readonly nodes = input<Node[]>([]);
   readonly clusters = input<ClusterNode[]>([]);
   readonly compoundNodes = input<CompoundNode[]>([]);
   readonly links = input<Edge[]>([]);
   readonly activeEntries = model<any[]>([]);
   readonly curve = model<any>(undefined);
-  readonly draggingEnabled = input(true);
+  readonly enableDrag = model(true);
   readonly nodeHeight = input<number>(undefined);
   readonly nodeMaxHeight = input<number>(undefined);
   readonly nodeMinHeight = input<number>(undefined);
   readonly nodeWidth = input<number>(undefined);
   readonly nodeMinWidth = input<number>(undefined);
   readonly nodeMaxWidth = input<number>(undefined);
-  readonly panningEnabled = input<boolean>(true);
+  readonly enablePan = model<boolean>(true);
   readonly panningAxis = input<PanningAxis>(PanningAxis.Both);
-  readonly enableZoom = input(true);
+  readonly enableZoom = model(true);
   readonly zoomSpeed = input(0.1);
   readonly minZoomLevel = input(0.1);
   readonly maxZoomLevel = input(4.0);
@@ -236,6 +235,28 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   /** Latest requestAnimationFrame id per edge for imperative path morphing (cancel on relayout / drag). */
   private readonly edgePathRafIds = new Map<string, number>();
 
+  /**
+   * Stable {@link NgTemplateOutlet} context objects keyed by graph id so consumer templates (tooltips, nested
+   * directives) are not destroyed/recreated every CD when only the viewport or `$implicit` reference changes.
+   */
+  private readonly graphMainNodeOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphMinimapNodeOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphClusterOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphCompoundOutletCtx = new Map<
+    string,
+    { $implicit: Node; transitionAfterChangesActive: boolean }
+  >();
+  private readonly graphLinkOutletCtx = new Map<string, { $implicit: Edge; transitionAfterChangesActive: boolean }>();
+
   /** Single rAF when layout morph unifies node transforms + edge paths. */
   private layoutUnifiedRafId: number | null = null;
 
@@ -254,8 +275,30 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   /** Target `translate(tx,ty)` after tick applyTransforms (before reset to previous for animation). */
   private layoutAnimationTargets: Map<string, { tx: number; ty: number }> | null = null;
 
+  /**
+   * Prior layout `dimension` for cluster and compound ids (single map; compounds overwrite clusters on id clash).
+   * Always taken from the **graph model** at {@link capturePreviousLayoutTransforms} time — not from the DOM, even
+   * when {@link LayoutMorphCapture.previousSource} uses DOM for translates. Cleared with {@link previousLayoutTransforms}.
+   */
+  private previousLayoutClusterCompoundDimensions: Map<string, { width: number; height: number }> | null = null;
+
+  /**
+   * Target dimensions after `applyTransforms` for the current morph tick (clusters then compounds). Cleared with
+   * {@link layoutAnimationTargets}. Only set for non-`additive` scope. During the tween, translate is lerped between
+   * fixed endpoints while dimensions interpolate separately; with {@link centerNodesOnPositionChange} and large size
+   * changes, the visual center can drift slightly mid-tween though start and end states match layout.
+   */
+  private layoutAnimationClusterCompoundDimensions: Map<string, { width: number; height: number }> | null = null;
+
   /** Node ids present after the previous completed `tick` (for additive smooth transitions). */
   private priorTickGraphNodeIds = new Set<string>();
+  /**
+   * Which graph collection owned each id after the previous `tick` (`nodes`, `clusters`, or `compoundNodes`).
+   * Used with {@link priorTickGraphNodeIds} so layout morph does not treat an id as “stable” when it moved between
+   * collections (e.g. same id reused for a node then a compound). Duplicate ids across lists are resolved like
+   * {@link collectPreviousTranslatesFromModelTransforms}: later collections overwrite earlier ones.
+   */
+  private priorTickGraphKindById = new Map<string, 'node' | 'cluster' | 'compound'>();
   /** Edge keys present after the previous completed `tick` (aligned with {@link linkKeyForLookup}). */
   private priorTickEdgeKeys = new Set<string>();
   /** Snapshot of {@link priorTickEdgeKeys} at the start of the current `tick` (for classifying new edges). */
@@ -288,6 +331,45 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
       this.panTo(null, Number(y));
     });
+    effect(() => {
+      if (!this.enablePan()) {
+        this.isPanning = false;
+        this.isMinimapPanning = false;
+      }
+    });
+    effect(() => {
+      if (!this.enableDrag() && this.isDragging) {
+        this.isDragging = false;
+        const layout = this.layout();
+        if (layout && typeof layout !== 'string' && layout.onDragEnd) {
+          layout.onDragEnd(this.draggingNode, new MouseEvent('mouseup'));
+        }
+      }
+    });
+  }
+
+  /**
+   * Updates pan, zoom, and/or node-drag interaction flags in one call. Only keys present are applied.
+   *
+   * @example graph.setViewportInteractions({ pan: false, zoom: false, drag: false })
+   */
+  setViewportInteractions(options: { pan?: boolean; zoom?: boolean; drag?: boolean }): void {
+    if (options.pan !== undefined) {
+      this.enablePan.set(options.pan);
+    }
+    if (options.zoom !== undefined) {
+      this.enableZoom.set(options.zoom);
+    }
+    if (options.drag !== undefined) {
+      this.enableDrag.set(options.drag);
+    }
+  }
+
+  /** Starts canvas pan on mouse down only when {@link enablePan} is true. */
+  onPanningSurfaceMouseDown(): void {
+    if (this.enablePan()) {
+      this.isPanning = true;
+    }
   }
 
   /** Coloring domain key; default coalesces `label`, then `id`, then `''` so {@link ColorHelper} never receives null/undefined. */
@@ -446,6 +528,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
     this.destroy$.next();
     this.destroy$.complete();
+    this.graphMainNodeOutletCtx.clear();
+    this.graphMinimapNodeOutletCtx.clear();
+    this.graphClusterOutletCtx.clear();
+    this.graphCompoundOutletCtx.clear();
+    this.graphLinkOutletCtx.clear();
   }
 
   /**
@@ -569,6 +656,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
     const incremental = this._oldLinks.length > 0;
     const prevNodeById = new Map(prior.nodes.map(n => [n.id, n]));
+    const prevClusterById = new Map((prior.clusters ?? []).map(n => [n.id, n]));
+    const prevCompoundById = new Map((prior.compoundNodes ?? []).map(n => [n.id, n]));
     const mergeNodes = (items: Node[] | undefined) => {
       if (!items) {
         return;
@@ -594,27 +683,34 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         }
       }
     }
-    if (prior.clusters?.length && next.clusters?.length) {
-      const m = new Map(prior.clusters.map(n => [n.id, n]));
+    const nextNodeById = new Map(next.nodes.map(n => [n.id, n]));
+    if (next.clusters?.length) {
       for (const n of next.clusters) {
-        const p = m.get(n.id);
+        const p = prevClusterById.get(n.id);
         if (p?.position) {
           n.position = { ...p.position };
         }
         if (p?.dimension) {
           n.dimension = { ...p.dimension };
+        }
+        if (incremental && !prevClusterById.has(n.id)) {
+          n.hidden = true;
+          this.seedProvisionalGroupPositionFromChildren(n, nextNodeById);
         }
       }
     }
-    if (prior.compoundNodes?.length && next.compoundNodes?.length) {
-      const m = new Map(prior.compoundNodes.map(n => [n.id, n]));
+    if (next.compoundNodes?.length) {
       for (const n of next.compoundNodes) {
-        const p = m.get(n.id);
+        const p = prevCompoundById.get(n.id);
         if (p?.position) {
           n.position = { ...p.position };
         }
         if (p?.dimension) {
           n.dimension = { ...p.dimension };
+        }
+        if (incremental && !prevCompoundById.has(n.id)) {
+          n.hidden = true;
+          this.seedProvisionalGroupPositionFromChildren(n, nextNodeById);
         }
       }
     }
@@ -652,10 +748,18 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           delete n.position;
         }
       }
+      for (const n of next.clusters ?? []) {
+        if (!prevClusterById.has(n.id)) {
+          delete n.position;
+        }
+      }
+      for (const n of next.compoundNodes ?? []) {
+        if (!prevCompoundById.has(n.id)) {
+          delete n.position;
+        }
+      }
     }
   }
-
-  /** Transforms + colors for display before `tick()` (matches {@link applyTransforms} without new-id tracking). */
   private setDisplayTransformsFromPositions(
     nodes: Node[],
     clusters: ClusterNode[] | undefined,
@@ -757,6 +861,34 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
   }
 
+  /**
+   * For a new cluster/compound before layout, approximate group center from child node positions already merged
+   * onto `next.nodes` (avoids a (0,0) flash at the top-left).
+   */
+  private seedProvisionalGroupPositionFromChildren(
+    n: Node & { childNodeIds?: string[] },
+    nodeById: Map<string, Node>
+  ): void {
+    const ids = n.childNodeIds;
+    if (!ids?.length) {
+      return;
+    }
+    let sx = 0;
+    let sy = 0;
+    let count = 0;
+    for (const cid of ids) {
+      const ch = nodeById.get(cid);
+      if (ch?.position) {
+        sx += ch.position.x;
+        sy += ch.position.y;
+        count++;
+      }
+    }
+    if (count > 0) {
+      n.position = { x: sx / count, y: sy / count };
+    }
+  }
+
   /** Bootstrap: hide nodes still at default origin until first ELK `tick()` supplies real positions. */
   private markDefaultOriginNodesHiddenUntilLayout(items: Node[] | undefined): void {
     if (!items?.length) {
@@ -849,27 +981,36 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     return edgeLabelId.replace(/[^\w-]*/g, '');
   }
 
-  /** Snapshot current node group translates before replacing `graph` (layout morph animation). */
+  /**
+   * Snapshot current node-group translates (and cluster/compound dimensions) before replacing `graph` for layout morph.
+   * {@link LayoutMorphCapture.previousSource} controls **translates only** (`previousLayoutTransforms`): DOM modes read
+   * `g.node-group[id]` for nodes, clusters, and compounds. Prior cluster/compound size always use the model
+   * (`previousLayoutClusterCompoundDimensions`). Requires `_oldLinks` so the first paint does not run an empty morph.
+   */
   public capturePreviousLayoutTransforms(): void {
     if (!this.initialized || !this.graph) {
       this.previousLayoutTransforms = null;
+      this.previousLayoutClusterCompoundDimensions = null;
       return;
     }
     // No prior tick edges: first paint should not run unified layout tween.
     if (!this._oldLinks.length) {
       this.previousLayoutTransforms = null;
+      this.previousLayoutClusterCompoundDimensions = null;
       return;
     }
     const morph = this.effectiveLayoutTransition.morphCapture;
     const source = morph.previousSource ?? 'model-transform';
     if (source === 'model-transform') {
       this.previousLayoutTransforms = this.collectPreviousTranslatesFromModelTransforms();
+      this.previousLayoutClusterCompoundDimensions = this.collectPreviousClusterCompoundDimensionsFromModel();
       return;
     }
     const chartG = this.getMainChartGroupElement();
     this.previousLayoutTransforms = chartG
       ? this.collectPreviousTranslatesFromDom(chartG, morph, source === 'dom-with-model-fallback')
       : this.collectPreviousTranslatesFromModelTransforms();
+    this.previousLayoutClusterCompoundDimensions = this.collectPreviousClusterCompoundDimensionsFromModel();
   }
 
   /** Resample count for edge polylines (layout, morph, drag). */
@@ -889,6 +1030,23 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     };
     collect(this.graph.nodes);
+    collect(this.graph.clusters);
+    collect(this.graph.compoundNodes);
+    return m;
+  }
+
+  /** Prior `dimension` for clusters then compounds (model graph; used with layout morph size tween). */
+  private collectPreviousClusterCompoundDimensionsFromModel(): Map<string, { width: number; height: number }> {
+    const m = new Map<string, { width: number; height: number }>();
+    const collect = (items: Node[] | undefined) => {
+      items?.forEach(n => {
+        const w = n.dimension?.width;
+        const h = n.dimension?.height;
+        if (w != null && h != null && Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) {
+          m.set(n.id, { width: w, height: h });
+        }
+      });
+    };
     collect(this.graph.clusters);
     collect(this.graph.compoundNodes);
     return m;
@@ -1027,46 +1185,98 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     sync(this.graph.compoundNodes);
   }
 
-  /** When {@link LayoutMorphCapture.snapAddedNodeIds} is on, new ids do not tween from a stale origin. */
-  private snapMorphPreviousForAddedNodes(nodeIdsAtLayoutTickStart: Set<string>): void {
+  /**
+   * Aligns `previousLayoutTransforms` with layout targets before `resetToPrevious` when:
+   * - The same `id` moved between `nodes` / `clusters` / `compoundNodes` (always; does not require
+   *   {@link LayoutMorphCapture.snapAddedNodeIds}),
+   * - A cluster or compound id is new since the last tick (always, so new groups do not tween from a missing origin),
+   * - With {@link LayoutMorphCapture.snapAddedNodeIds}: any new id (including plain nodes), plus degenerate-stable snap
+   *   for clusters/compounds (see {@link isDegenerateTranslate} and `morphCapture.degenerateEpsilon`).
+   */
+  private snapMorphPreviousForAddedNodes(
+    priorTickGraphIds: Set<string>,
+    priorTickGraphKindById: Map<string, 'node' | 'cluster' | 'compound'>,
+    snapAddedNodeIds: boolean
+  ): void {
     const prevs = this.previousLayoutTransforms;
     const targets = this.layoutAnimationTargets;
     if (!prevs?.size || !targets?.size) {
       return;
     }
-    const snap = (items: Node[] | undefined) => {
-      items?.forEach(n => {
-        if (!nodeIdsAtLayoutTickStart.has(n.id)) {
-          const tgt = targets.get(n.id);
-          if (tgt) {
-            prevs.set(n.id, { tx: tgt.tx, ty: tgt.ty });
-          }
-        }
-      });
+    const morph = this.effectiveLayoutTransition.morphCapture;
+    const eps = morph.degenerateEpsilon ?? 1e-3;
+
+    const snapOne = (n: Node, kind: 'node' | 'cluster' | 'compound', degenerateStableClusterOrCompound: boolean) => {
+      const tgt = targets.get(n.id);
+      if (!tgt) {
+        return;
+      }
+      const priorKind = priorTickGraphKindById.get(n.id);
+      const inPriorIds = priorTickGraphIds.has(n.id);
+      const sameIdRoleChanged = inPriorIds && priorKind !== undefined && priorKind !== kind;
+      const snapAsNewIdWithFlag = snapAddedNodeIds && !inPriorIds;
+      const snapNewClusterOrCompoundWithoutFlag =
+        !snapAddedNodeIds && !inPriorIds && (kind === 'cluster' || kind === 'compound');
+      const prev = prevs.get(n.id);
+      const snapDegenerateStableClusterOrCompound =
+        snapAddedNodeIds &&
+        degenerateStableClusterOrCompound &&
+        inPriorIds &&
+        priorKind === kind &&
+        prev !== undefined &&
+        this.isDegenerateTranslate(prev, eps);
+      if (
+        sameIdRoleChanged ||
+        snapAsNewIdWithFlag ||
+        snapNewClusterOrCompoundWithoutFlag ||
+        snapDegenerateStableClusterOrCompound
+      ) {
+        prevs.set(n.id, { tx: tgt.tx, ty: tgt.ty });
+      }
     };
-    snap(this.graph.nodes);
-    snap(this.graph.clusters);
-    snap(this.graph.compoundNodes);
+
+    const snap = (
+      items: Node[] | undefined,
+      kind: 'node' | 'cluster' | 'compound',
+      degenerateStableClusterOrCompound: boolean
+    ) => {
+      items?.forEach(n => snapOne(n, kind, degenerateStableClusterOrCompound));
+    };
+    snap(this.graph.nodes, 'node', false);
+    snap(this.graph.clusters, 'cluster', true);
+    snap(this.graph.compoundNodes, 'compound', true);
   }
 
   public applyAdditiveSmoothTransitionFilters(
     targets: Map<string, { tx: number; ty: number }>,
-    nodeIdsAtLayoutTickStart: Set<string>
+    priorTickGraphIds: Set<string>,
+    priorTickGraphKindById: Map<string, 'node' | 'cluster' | 'compound'>
   ): void {
     if (
       this.effectiveLayoutTransition.scope !== 'additive' ||
-      nodeIdsAtLayoutTickStart.size === 0 ||
+      priorTickGraphIds.size === 0 ||
       !this.previousLayoutTransforms
     ) {
       return;
     }
     const prevs = this.previousLayoutTransforms;
+    const currentKindById = new Map<string, 'node' | 'cluster' | 'compound'>();
+    const register = (items: Node[] | undefined, kind: 'node' | 'cluster' | 'compound') => {
+      items?.forEach(n => currentKindById.set(n.id, kind));
+    };
+    register(this.graph.nodes, 'node');
+    register(this.graph.clusters, 'cluster');
+    register(this.graph.compoundNodes, 'compound');
+
     const allIds = new Set<string>();
     for (const coll of [this.graph.nodes, this.graph.clusters, this.graph.compoundNodes]) {
       coll?.forEach(n => allIds.add(n.id));
     }
     for (const id of allIds) {
-      if (nodeIdsAtLayoutTickStart.has(id)) {
+      const currentKind = currentKindById.get(id)!;
+      const priorKind = priorTickGraphKindById.get(id);
+      const stableSameRole = priorTickGraphIds.has(id) && priorKind === currentKind;
+      if (stableSameRole) {
         targets.delete(id);
         prevs.delete(id);
       } else if (!prevs.has(id)) {
@@ -1082,13 +1292,18 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   private refreshPriorTickGraphIds(multigraph: boolean): void {
     const ids = new Set<string>();
-    const collect = (items: Node[] | undefined) => {
-      items?.forEach(n => ids.add(n.id));
+    const kindById = new Map<string, 'node' | 'cluster' | 'compound'>();
+    const collect = (items: Node[] | undefined, kind: 'node' | 'cluster' | 'compound') => {
+      items?.forEach(n => {
+        ids.add(n.id);
+        kindById.set(n.id, kind);
+      });
     };
-    collect(this.graph.nodes);
-    collect(this.graph.clusters);
-    collect(this.graph.compoundNodes);
+    collect(this.graph.nodes, 'node');
+    collect(this.graph.clusters, 'cluster');
+    collect(this.graph.compoundNodes, 'compound');
     this.priorTickGraphNodeIds = ids;
+    this.priorTickGraphKindById = kindById;
 
     const keys = new Set<string>();
     for (const e of this.graph.edges ?? []) {
@@ -1214,15 +1429,127 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     newLinks.push(newLink);
   }
 
+  /** Drop outlet contexts for ids no longer in the graph so templates do not retain stale references. */
+  private pruneTemplateOutletContextCaches(): void {
+    const g = this.graph;
+    if (!g) {
+      this.graphMainNodeOutletCtx.clear();
+      this.graphMinimapNodeOutletCtx.clear();
+      this.graphClusterOutletCtx.clear();
+      this.graphCompoundOutletCtx.clear();
+      this.graphLinkOutletCtx.clear();
+      return;
+    }
+    const nodeIds = new Set(g.nodes?.map(n => n.id) ?? []);
+    const clusterIds = new Set(g.clusters?.map(c => c.id) ?? []);
+    const compoundIds = new Set(g.compoundNodes?.map(c => c.id) ?? []);
+    const linkIds = new Set(g.edges?.map(e => e.id) ?? []);
+
+    for (const id of [...this.graphMainNodeOutletCtx.keys()]) {
+      if (!nodeIds.has(id)) {
+        this.graphMainNodeOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphMinimapNodeOutletCtx.keys()]) {
+      if (!nodeIds.has(id)) {
+        this.graphMinimapNodeOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphClusterOutletCtx.keys()]) {
+      if (!clusterIds.has(id)) {
+        this.graphClusterOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphCompoundOutletCtx.keys()]) {
+      if (!compoundIds.has(id)) {
+        this.graphCompoundOutletCtx.delete(id);
+      }
+    }
+    for (const id of [...this.graphLinkOutletCtx.keys()]) {
+      if (!linkIds.has(id)) {
+        this.graphLinkOutletCtx.delete(id);
+      }
+    }
+  }
+
+  /** Stable context for `#nodeTemplate` on the main chart (see {@link graphMainNodeOutletCtx}). */
+  outletContextGraphNode(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphMainNodeOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphMainNodeOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#nodeTemplate` / `#miniMapNodeTemplate` on the minimap. */
+  outletContextMinimapNode(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphMinimapNodeOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphMinimapNodeOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#clusterTemplate`. */
+  outletContextCluster(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphClusterOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphClusterOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#nodeTemplate` on compound nodes. */
+  outletContextCompoundNode(node: Node): { $implicit: Node; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    let o = this.graphCompoundOutletCtx.get(node.id);
+    if (!o) {
+      o = { $implicit: node, transitionAfterChangesActive: morph };
+      this.graphCompoundOutletCtx.set(node.id, o);
+    } else {
+      o.$implicit = node;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
+  /** Stable context for `#linkTemplate`. */
+  outletContextLink(link: Edge): { $implicit: Edge; transitionAfterChangesActive: boolean } {
+    const morph = this.layoutJsMorphEnabled;
+    const id = link.id;
+    let o = this.graphLinkOutletCtx.get(id);
+    if (!o) {
+      o = { $implicit: link, transitionAfterChangesActive: morph };
+      this.graphLinkOutletCtx.set(id, o);
+    } else {
+      o.$implicit = link;
+      o.transitionAfterChangesActive = morph;
+    }
+    return o;
+  }
+
   tick() {
+    this.pruneTemplateOutletContextCaches();
     const tickId = ++this.drawCompleteTickId;
     this.edgeKeysAtLayoutTickStart = new Set(this.priorTickEdgeKeys);
-    const nodeIdsAtLayoutTickStart = new Set(this.priorTickGraphNodeIds);
+    const priorTickGraphIds = new Set(this.priorTickGraphNodeIds);
+    const priorTickGraphKinds = new Map(this.priorTickGraphKindById);
     const mg = this.isLayoutMultigraph();
-
-    const previousNodes = this.oldNodes;
-    const previousClusters = this.oldClusters;
-    const previousCompoundNodes = this.oldCompoundNodes;
 
     const newNodeIds: Set<string> = new Set();
     const newClusterIds: Set<string> = new Set();
@@ -1233,6 +1560,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.applyTransforms(this.graph.compoundNodes || [], newCompoundNodeIds);
 
     this.layoutAnimationTargets = null;
+    this.layoutAnimationClusterCompoundDimensions = null;
     if (!this.isDragging && this.layoutMorphActive && this.previousLayoutTransforms?.size && this._oldLinks.length) {
       const targets = new Map<string, { tx: number; ty: number }>();
       const captureTargets = (items: Node[] | undefined) => {
@@ -1248,7 +1576,34 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       captureTargets(this.graph.compoundNodes);
       this.layoutAnimationTargets = targets;
 
-      this.applyAdditiveSmoothTransitionFilters(targets, nodeIdsAtLayoutTickStart);
+      if (this.effectiveLayoutTransition.scope !== 'additive') {
+        const dimTargets = new Map<string, { width: number; height: number }>();
+        const captureDimTargets = (items: Node[] | undefined) => {
+          if (!items) {
+            return;
+          }
+          for (const n of items) {
+            const w = n.dimension?.width;
+            const h = n.dimension?.height;
+            if (w != null && h != null && Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) {
+              dimTargets.set(n.id, { width: w, height: h });
+            }
+          }
+        };
+        captureDimTargets(this.graph.clusters);
+        captureDimTargets(this.graph.compoundNodes);
+        this.layoutAnimationClusterCompoundDimensions = dimTargets;
+      }
+
+      this.applyAdditiveSmoothTransitionFilters(targets, priorTickGraphIds, priorTickGraphKinds);
+
+      const morph = this.effectiveLayoutTransition.morphCapture;
+      if (morph.syncTargetsFromPositionAfterTick && this.effectiveLayoutTransition.scope === 'full') {
+        this.syncLayoutAnimationTargetsFromPositions();
+      }
+      if (this.previousLayoutTransforms) {
+        this.snapMorphPreviousForAddedNodes(priorTickGraphIds, priorTickGraphKinds, !!morph.snapAddedNodeIds);
+      }
 
       const resetToPrevious = (items: Node[] | undefined) => {
         if (!items) {
@@ -1265,11 +1620,21 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       resetToPrevious(this.graph.nodes);
       resetToPrevious(this.graph.clusters);
       resetToPrevious(this.graph.compoundNodes);
-    }
 
-    this.oldNodes = previousNodes;
-    this.oldClusters = previousClusters;
-    this.oldCompoundNodes = previousCompoundNodes;
+      if (this.effectiveLayoutTransition.scope !== 'additive' && this.previousLayoutClusterCompoundDimensions?.size) {
+        const dimPrevs = this.previousLayoutClusterCompoundDimensions;
+        const seedDims = (items: Node[] | undefined) => {
+          items?.forEach(n => {
+            const d = dimPrevs.get(n.id);
+            if (d) {
+              n.dimension = { width: d.width, height: d.height };
+            }
+          });
+        };
+        seedDims(this.graph.clusters);
+        seedDims(this.graph.compoundNodes);
+      }
+    }
 
     const oldLinkMap = new Map<string, Edge>();
     for (const ol of this._oldLinks) {
@@ -1309,16 +1674,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
     this.refreshPriorTickGraphIds(mg);
 
-    const morph = this.effectiveLayoutTransition.morphCapture;
-    if (this.layoutMorphActive && this.layoutAnimationTargets) {
-      if (morph.syncTargetsFromPositionAfterTick && this.effectiveLayoutTransition.scope === 'full') {
-        this.syncLayoutAnimationTargetsFromPositions();
-      }
-      if (morph.snapAddedNodeIds && this.previousLayoutTransforms) {
-        this.snapMorphPreviousForAddedNodes(nodeIdsAtLayoutTickStart);
-      }
-    }
-
     if (this.graph.edges) {
       this._oldLinks = this.graph.edges.map(l => {
         const newL = Object.assign({}, l);
@@ -1327,11 +1682,12 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     }
 
-    requestAnimationFrame(() => {
-      this.oldNodes = newNodeIds;
-      this.oldClusters = newClusterIds;
-      this.oldCompoundNodes = newCompoundNodeIds;
+    // Before post-tick rAF so `[class.old-node]` matches every current id (avoids new-only flicker on zoom CD with tween).
+    this.oldNodes = newNodeIds;
+    this.oldClusters = newClusterIds;
+    this.oldCompoundNodes = newCompoundNodeIds;
 
+    requestAnimationFrame(() => {
       // Full-scope morph keeps `node.transform` at previous layout until unified rAF; do not sync from `position` or
       // refresh bounds/pan from the new layout here — that would wipe `resetToPrevious` and desync the viewport.
       const nodeTweenActive =
@@ -1848,6 +2204,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   /**
    * One rAF driver: same eased t for node transforms (lerp) and edge path d (interpolatePinnedEdgeRoute).
    * In `additive` mode, only edges morph; node transforms stay at layout output from `tick()` (no positional tween).
+   * Full scope lerps translates for nodes, clusters, and compounds; clusters/compounds also lerp `dimension` when both
+   * prior and target dimension maps are populated (see {@link layoutAnimationClusterCompoundDimensions}).
    */
   private runUnifiedLayoutAnimation(
     edgeMorphs: Array<{
@@ -1862,6 +2220,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   ): void {
     const targets = this.layoutAnimationTargets!;
     const prevs = this.previousLayoutTransforms!;
+    const dimPrevs = this.previousLayoutClusterCompoundDimensions;
+    const dimTgts = this.layoutAnimationClusterCompoundDimensions;
     const easeFn = resolveGraphTransitionEasing(this.effectiveLayoutTransition.easing);
     const skipNodePositionTween = this.effectiveLayoutTransition.scope === 'additive';
 
@@ -1899,6 +2259,26 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         apply(this.graph.nodes);
         apply(this.graph.clusters);
         apply(this.graph.compoundNodes);
+
+        if (dimPrevs?.size && dimTgts?.size) {
+          const lerpDims = (items: Node[] | undefined) => {
+            if (!items) {
+              return;
+            }
+            for (const n of items) {
+              const pv = dimPrevs.get(n.id);
+              const tg = dimTgts.get(n.id);
+              if (pv && tg) {
+                n.dimension = {
+                  width: pv.width + tscalar * (tg.width - pv.width),
+                  height: pv.height + tscalar * (tg.height - pv.height)
+                };
+              }
+            }
+          };
+          lerpDims(this.graph.clusters);
+          lerpDims(this.graph.compoundNodes);
+        }
       };
 
       const step = () => {
@@ -1940,12 +2320,30 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
               finalize(this.graph.nodes);
               finalize(this.graph.clusters);
               finalize(this.graph.compoundNodes);
+
+              if (dimTgts?.size) {
+                const finalizeDims = (items: Node[] | undefined) => {
+                  if (!items) {
+                    return;
+                  }
+                  for (const n of items) {
+                    const d = dimTgts.get(n.id);
+                    if (d) {
+                      n.dimension = { width: d.width, height: d.height };
+                    }
+                  }
+                };
+                finalizeDims(this.graph.clusters);
+                finalizeDims(this.graph.compoundNodes);
+              }
             }
             for (const e of this.graph.edges) {
               e.previousPoints = undefined;
             }
             this.layoutAnimationTargets = null;
             this.previousLayoutTransforms = null;
+            this.layoutAnimationClusterCompoundDimensions = null;
+            this.previousLayoutClusterCompoundDimensions = null;
             this.layoutOuterTransform = null;
             this.repaintLinkPathsDomFromModel();
             this.cd.markForCheck();
@@ -2040,6 +2438,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.cancelAllEdgePathAnimations();
       this.layoutAnimationTargets = null;
       this.previousLayoutTransforms = null;
+      this.layoutAnimationClusterCompoundDimensions = null;
+      this.previousLayoutClusterCompoundDimensions = null;
     }
 
     const unifiedLayout =
@@ -2535,7 +2935,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onDrag(event: MouseEvent): void {
-    if (!this.draggingEnabled()) {
+    if (!this.enableDrag()) {
       return;
     }
     const node = this.draggingNode;
@@ -2696,9 +3096,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @HostListener('document:mousemove', ['$event'])
   onMouseMove($event: MouseEvent): void {
     this.isMouseMoveCalled = true;
-    if ((this.isPanning || this.isMinimapPanning) && this.panningEnabled()) {
+    if ((this.isPanning || this.isMinimapPanning) && this.enablePan()) {
       this.panWithConstraints(this.panningAxis(), $event);
-    } else if (this.isDragging && this.draggingEnabled()) {
+    } else if (this.isDragging && this.enableDrag()) {
       this.onDrag($event);
     }
   }
@@ -2719,6 +3119,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onTouchStart(event: any): void {
+    if (!this.enablePan()) {
+      return;
+    }
     this.cancelViewportPanAnimation();
     this._touchLastX = event.changedTouches[0].clientX;
     this._touchLastY = event.changedTouches[0].clientY;
@@ -2732,7 +3135,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   @HostListener('document:touchmove', ['$event'])
   onTouchMove($event: any): void {
-    if (this.isPanning && this.panningEnabled()) {
+    if (this.isPanning && this.enablePan()) {
       const clientX = $event.changedTouches[0].clientX;
       const clientY = $event.changedTouches[0].clientY;
       const movementX = clientX - this._touchLastX;
@@ -2775,7 +3178,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onNodeMouseDown(event: MouseEvent, node: any): void {
-    if (!this.draggingEnabled()) {
+    if (!this.enableDrag()) {
       return;
     }
     this.isDragging = true;
@@ -2793,6 +3196,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onMinimapDragMouseDown(): void {
+    if (!this.enablePan()) {
+      return;
+    }
     this.isMinimapPanning = true;
   }
 
@@ -2803,6 +3209,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   onMinimapPanTo(event: MouseEvent): void {
+    if (!this.enablePan()) {
+      return;
+    }
     const p = this.minimapClientEventToGraphCoords(event);
     if (!p) {
       return;

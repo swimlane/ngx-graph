@@ -9,7 +9,7 @@ describe('NgxGraphOrgTreeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [NgxGraphOrgTreeComponent]
+      imports: [NgxGraphOrgTreeComponent]
     }).compileComponents();
   });
 
