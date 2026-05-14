@@ -2,6 +2,8 @@
 
 ## HEAD (unreleased)
 
+## 12.0.0-alpha.2
+
 - Breaking: `draggingEnabled`, `panningEnabled` renamed to `enableDrag` and `enablePan`.
 - Breaking: `draggingEnabled`, `panningEnabled`, `enableZoom` converted to model.
 - Enhancement: `setViewportInteraction` allows toggling pan, drag, and zoom in one imperative method.
@@ -18,6 +20,8 @@
 - Breaking: `@ViewChildren` / `@ContentChild` style access is replaced with signal query functions, so in component code you call `graph.linkElements()` (or the other query methods) instead of keeping a `QueryList` on a property.
 - Breaking: The in-component `animations: [ trigger(...) ]` definition was removed. Enter styling on the root now uses the framework’s `animate.enter` class binding together with keyframes in the graph stylesheet, which replaces the old opacity `:enter` transition and avoids the deprecated `trigger` API. Angular does not support mixing the legacy `animations` metadata and `animate.enter` / `animate.leave` on the same component. The old `[@.disabled]` host binding for the legacy tree is also gone; it was scoped to the previous animation system and did not drive node positions, but projected templates that relied on that subtree being disabled for their own `[@...]` triggers may need a different approach.
 - Breaking: Optional viewport inputs `zoomLevel`, `panOffsetX`, and `panOffsetY` are now signal inputs wired through `effect()` to `zoomTo` and `panTo`, so the graph no longer assigns those via a property setter, and the effects run when the parent binding’s value actually changes. If a parent expression changes on every data refresh, you may see extra viewport updates; binding stable values (or leaving these inputs unset) matches the old mental model. Automatic fit and centering still come from the documented `autoZoom`, `autoCenter`, and `zoomToFit$` behavior. If you use `transitionAfterChanges` with full-scope layout morph, whether the post-tick block runs `zoomToFit` or `center` can differ from the additive or instant paths, as before.
+- Breaking: If node.position is undefined, could cause a template error, ensure node has position via layout or proper handling in template.
+- Breaking: When using new transitions, any condition wrappers in Angular templates for node and edges could interfere with animations if the condition wraps a container node.
 - Enhancement: `transitionAfterChanges`, `transitionDuringTransform`, `layoutTransitionEffect`, and `applyVisualContinuityBeforeLayout` inputs configure rich continuity when a prior graph had nodes, allowing for animations between graph updates.
 - Breaking: `useLayoutTransitions` (default `true` controls `layout-js-driven`; when `false` it applies only during JS `mode: 'tween'`);
 - Enhancement: `GraphComponent` `edgePathSampleCount` input (default 48, clamped 2–512) for edge resampling in layout, morph, and `redrawEdge`
