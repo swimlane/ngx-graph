@@ -8,7 +8,7 @@
     "build:storybook": "ng run @swimlane/ngx-graph:build-storybook",
     "build:lib": "ng build @swimlane/ngx-graph --configuration production",
     "test": "ng test @swimlane/ngx-graph --no-watch",
-    "test:watch": "cross-env BROWSER=ChromeHeadless ng test @swimlane/ngx-graph",
+    "test:watch": "ng test @swimlane/ngx-graph",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "prettier": "prettier --write \"projects/**/*.{js,ts,scss,css,md,mdx,json}\"",
