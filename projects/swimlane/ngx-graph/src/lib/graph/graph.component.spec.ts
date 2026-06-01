@@ -986,6 +986,75 @@ describe('GraphComponent viewport interactions', () => {
     graph.onZoom(new WheelEvent('wheel', { clientX: 200, clientY: 150, deltaY: -100 }), 'in');
     expect(graph.zoomLevel).toBe(level);
   }));
+
+  it('zoomTo without layout does not call update', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+    graph.zoomTo(1.5, { layout: false });
+    tick();
+    expect(graph.zoomLevel).toBeCloseTo(1.5, 5);
+    expect(updateSpy).not.toHaveBeenCalled();
+  }));
+
+  it('suppressLayoutMorphThisTick skips layoutAnimationTargets', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any)._oldLinks = graph.graph.edges.map((e: Edge) => ({ ...e, points: [...(e.points ?? [])] }));
+    (graph as any).previousLayoutTransforms = new Map([['n1', { tx: 10, ty: 20 }]]);
+    (graph as any).suppressLayoutMorphThisTick = true;
+    (graph as any).tick();
+    expect((graph as any).layoutAnimationTargets).toBeNull();
+    expect((graph as any).previousLayoutTransforms).toBeNull();
+  }));
+
+  it('arms suppressLayoutMorphThisTick when input topology unchanged despite ELK internal split', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any).lastInputTopologySignature = (graph as any).buildInputTopology();
+    graph.graph = {
+      nodes: [{ id: 'n1', label: 'A', position: { x: 0, y: 0 }, dimension: { width: 30, height: 30 } }],
+      clusters: [],
+      compoundNodes: [{ id: 'n2', label: 'B', position: { x: 100, y: 0 }, dimension: { width: 30, height: 30 } }],
+      edges: graph.graph.edges
+    };
+    (graph as any).setViewportMorphSuppress();
+    let suppressWhenArmed = false;
+    spyOn(graph as any, 'draw').and.callFake(function (this: GraphComponent) {
+      suppressWhenArmed = (this as any).suppressLayoutMorphThisTick;
+    });
+    (graph as any).createGraph();
+    expect(suppressWhenArmed).toBe(true);
+  }));
+
+  it('update fast path skips createGraph when input topology unchanged and suppress active', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any).lastInputTopologySignature = (graph as any).buildInputTopology();
+    (graph as any).setViewportMorphSuppress();
+    const createGraphSpy = spyOn(graph as any, 'createGraph').and.callThrough();
+    graph.update();
+    tick();
+    expect(createGraphSpy).not.toHaveBeenCalled();
+  }));
+
+  it('buildInputTopology, createGraph, and getSeriesDomain tolerate undefined inputs on load', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    spyOn(graph, 'nodes').and.returnValue(undefined as unknown as Node[]);
+    spyOn(graph, 'clusters').and.returnValue(undefined as unknown as ClusterNode[]);
+    spyOn(graph, 'compoundNodes').and.returnValue(undefined as unknown as CompoundNode[]);
+    spyOn(graph, 'links').and.returnValue(undefined as unknown as Edge[]);
+    const emptySig = JSON.stringify({ nodeIds: [], clusterIds: [], compoundIds: [], edgeKeys: [] });
+    expect((graph as any).buildInputTopology()).toBe(emptySig);
+    expect(graph.getSeriesDomain()).toEqual([]);
+    spyOn(graph as any, 'draw').and.stub();
+    expect(() => (graph as any).createGraph()).not.toThrow();
+    expect(graph.graph.nodes).toEqual([]);
+    expect(graph.graph.clusters).toEqual([]);
+    expect(graph.graph.compoundNodes).toEqual([]);
+    expect(graph.graph.edges).toEqual([]);
+  }));
 });
 
 describe('GraphComponent panning axis constraints', () => {
