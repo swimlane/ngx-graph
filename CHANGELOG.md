@@ -2,6 +2,9 @@
 
 ## HEAD (unreleased)
 
+- Fix: Suppress layout animation on zoom.
+- Fix: Tests should honor BROWSER env.
+
 ## 12.0.0-alpha.2
 
 - Breaking: `draggingEnabled`, `panningEnabled` renamed to `enableDrag` and `enablePan`.
