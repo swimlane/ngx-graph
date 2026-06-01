@@ -306,11 +306,16 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Skip layout morph on the next `tick()` when an update follows viewport-only zoom (unchanged host inputs). */
   private suppressLayoutMorphThisTick = false;
+  /** True for the current {@link tick} when node/edge layout morph is suppressed (viewport-only zoom). */
+  private morphSuppressedThisTick = false;
   /** Until this timestamp, `createGraph` may set {@link suppressLayoutMorphThisTick} when inputs are unchanged. */
   private viewportZoomMorphSuppressUntilMs = 0;
   private static readonly WHEEL_ZOOM_MORPH_SUPPRESS_MS = 700;
   /** Sorted host-input id/edge signature; used for viewport-only zoom morph suppress. */
   private lastInputTopologySignature = '';
+  /** Container size from the last full `update()` (not viewport-only fast path). */
+  private lastFullUpdateWidth = 0;
+  private lastFullUpdateHeight = 0;
 
   constructor(
     private el: ElementRef,
@@ -327,7 +332,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       if (Math.abs(n - this.zoomLevel) < 1e-6) {
         return;
       }
-      this.setViewportMorphSuppress();
       this.zoomTo(n, { layout: false });
     });
     effect(() => {
@@ -567,9 +571,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   /**
    * Base class update implementation for the dag graph
    *
+   * @param options.forceRelayout When true, always run the full layout path (used by {@link zoomTo} with `layout: true`).
    * @memberOf GraphComponent
    */
-  update(): void {
+  update(options?: { forceRelayout?: boolean }): void {
     this.basicUpdate();
     if (!this.curve()) {
       this.curve.set(shape.curveBundle.beta(1));
@@ -578,7 +583,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const inputSig = this.buildInputTopology();
     const inputTopologyUnchanged =
       this.lastInputTopologySignature !== '' && inputSig === this.lastInputTopologySignature;
-    if (this.initialized && inputTopologyUnchanged && this.isViewportMorphSuppressActive()) {
+    if (
+      !options?.forceRelayout &&
+      this.initialized &&
+      inputTopologyUnchanged &&
+      !this.hasContainerSizeChangedSinceLastFullUpdate() &&
+      this.isViewportMorphSuppressActive()
+    ) {
       this.zone.run(() => {
         this.updateTransform();
       });
@@ -600,6 +611,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         this.stateChange.emit({ state: NgxGraphStates.Init });
       }
       this.initialized = true;
+      this.lastFullUpdateWidth = this.width;
+      this.lastFullUpdateHeight = this.height;
     });
   }
 
@@ -611,6 +624,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   createGraph(): void {
     this.graphSubscription.unsubscribe();
     this.graphSubscription = new Subscription();
+    // Prior async layout's tick() may never run after unsubscribe; do not carry suppress forward.
+    this.suppressLayoutMorphThisTick = false;
     const initializeNode = (n: Node) => {
       if (!n.meta) {
         n.meta = {};
@@ -659,10 +674,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     };
 
     const incomingInputSig = this.buildInputTopology();
-    const inputTopologyUnchanged =
-      this.lastInputTopologySignature !== '' && incomingInputSig === this.lastInputTopologySignature;
-    const suppressActive = this.isViewportMorphSuppressActive();
-    if (inputTopologyUnchanged && suppressActive) {
+    if (this.shouldSuppressLayoutMorphForViewport(incomingInputSig)) {
       this.suppressLayoutMorphThisTick = true;
     }
 
@@ -684,6 +696,20 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   private isViewportMorphSuppressActive(): boolean {
     return performance.now() < this.viewportZoomMorphSuppressUntilMs;
+  }
+
+  private hasContainerSizeChangedSinceLastFullUpdate(): boolean {
+    return this.width !== this.lastFullUpdateWidth || this.height !== this.lastFullUpdateHeight;
+  }
+
+  /** Host-input topology unchanged while the post-zoom morph-suppress window is active. */
+  private shouldSuppressLayoutMorphForViewport(inputSig?: string): boolean {
+    const sig = inputSig ?? this.buildInputTopology();
+    return (
+      this.lastInputTopologySignature !== '' &&
+      sig === this.lastInputTopologySignature &&
+      this.isViewportMorphSuppressActive()
+    );
   }
 
   private setViewportMorphSuppress(): void {
@@ -1460,6 +1486,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         previousPoints = this.clonePoints(syn);
       }
     }
+    if (this.morphSuppressedThisTick) {
+      previousPoints = undefined;
+    }
     newLink.previousPoints = previousPoints;
 
     this.updateMidpointOnEdge(newLink, points);
@@ -1595,7 +1624,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   tick() {
     this.pruneTemplateOutletContextCaches();
     const tickId = ++this.drawCompleteTickId;
-    const suppressThisTick = this.suppressLayoutMorphThisTick;
+    const suppressThisTick = this.suppressLayoutMorphThisTick || this.shouldSuppressLayoutMorphForViewport();
+    this.morphSuppressedThisTick = suppressThisTick;
     this.edgeKeysAtLayoutTickStart = new Set(this.priorTickEdgeKeys);
     const priorTickGraphIds = new Set(this.priorTickGraphNodeIds);
     const priorTickGraphKinds = new Map(this.priorTickGraphKindById);
@@ -1692,6 +1722,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       }
     } else if (suppressThisTick) {
       this.suppressLayoutMorphThisTick = false;
+      this.cancelLayoutUnifiedAnimation();
+      this.cancelAllEdgePathAnimations();
       this.previousLayoutTransforms = null;
       this.layoutAnimationTargets = null;
       this.layoutAnimationClusterCompoundDimensions = null;
@@ -1764,10 +1796,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         this.syncNodeTransformsFromLayoutPositions();
       }
       const animateValue = this.animate();
+      const layoutMorphAfterView = (animateValue || this.layoutJsMorphEnabled) && !suppressThisTick;
       if (animateValue || this.layoutJsMorphEnabled) {
         this.cd.detectChanges();
       }
-      this.scheduleRedrawLinesAfterView(animateValue || this.layoutJsMorphEnabled, tickId);
+      this.scheduleRedrawLinesAfterView(layoutMorphAfterView, tickId);
       if (this.hasGraphNodeLikeContent() && !nodeTweenActive) {
         this.updateGraphDims();
       }
@@ -1790,6 +1823,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.lastInputTopologySignature = this.buildInputTopology();
     }
 
+    this.morphSuppressedThisTick = false;
     this.cd.markForCheck();
   }
 
@@ -2996,8 +3030,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       if (this.enablePreUpdateTransform()) {
         this.updateTransform();
       }
-      this.update();
+      this.update({ forceRelayout: true });
     } else {
+      this.setViewportMorphSuppress();
       this.updateTransform();
     }
   }

@@ -997,6 +997,13 @@ describe('GraphComponent viewport interactions', () => {
     expect(updateSpy).not.toHaveBeenCalled();
   }));
 
+  it('zoomTo without layout arms viewport morph suppress', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    graph.zoomTo(1.5, { layout: false });
+    expect((graph as any).isViewportMorphSuppressActive()).toBe(true);
+  }));
+
   it('suppressLayoutMorphThisTick skips layoutAnimationTargets', fakeAsync(() => {
     const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
     const graph = bootstrap(fixture);
@@ -1027,6 +1034,16 @@ describe('GraphComponent viewport interactions', () => {
     expect(suppressWhenArmed).toBe(true);
   }));
 
+  it('createGraph clears stale suppressLayoutMorphThisTick when suppress is not re-armed', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any).suppressLayoutMorphThisTick = true;
+    spyOn(graph as any, 'shouldSuppressLayoutMorphForViewport').and.returnValue(false);
+    spyOn(graph as any, 'draw').and.stub();
+    (graph as any).createGraph();
+    expect((graph as any).suppressLayoutMorphThisTick).toBe(false);
+  }));
+
   it('update fast path skips createGraph when input topology unchanged and suppress active', fakeAsync(() => {
     const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
     const graph = bootstrap(fixture);
@@ -1036,6 +1053,54 @@ describe('GraphComponent viewport interactions', () => {
     graph.update();
     tick();
     expect(createGraphSpy).not.toHaveBeenCalled();
+  }));
+
+  it('zoomTo with default layout runs full update during suppress window', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any).lastInputTopologySignature = (graph as any).buildInputTopology();
+    (graph as any).setViewportMorphSuppress();
+    const createGraphSpy = spyOn(graph as any, 'createGraph').and.callThrough();
+    graph.zoomTo(1.5);
+    tick();
+    expect(createGraphSpy).toHaveBeenCalled();
+  }));
+
+  it('tick suppresses morph when viewport suppress active and topology unchanged without createGraph', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any).lastInputTopologySignature = (graph as any).buildInputTopology();
+    (graph as any).previousLayoutTransforms = new Map([
+      ['n1', { tx: 10, ty: 20 }],
+      ['n2', { tx: 110, ty: 20 }]
+    ]);
+    (graph as any)._oldLinks = graph.graph.edges.map((e: Edge) => ({ ...e, points: [...(e.points ?? [])] }));
+    (graph as any).suppressLayoutMorphThisTick = false;
+    (graph as any).setViewportMorphSuppress();
+    spyOnProperty(graph, 'layoutMorphActive', 'get').and.returnValue(true);
+    const redrawLinesSpy = spyOn(graph, 'redrawLines').and.callThrough();
+    (graph as any).tick();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+    expect((graph as any).layoutAnimationTargets).toBeNull();
+    expect((graph as any).previousLayoutTransforms).toBeNull();
+    expect(redrawLinesSpy).toHaveBeenCalled();
+    expect(redrawLinesSpy.calls.mostRecent().args[0]).toBe(false);
+    expect(graph.graph.edges.every((e: Edge) => e.previousPoints == null)).toBe(true);
+  }));
+
+  it('update runs full path when suppress active but container size changed', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    (graph as any).lastInputTopologySignature = (graph as any).buildInputTopology();
+    (graph as any).setViewportMorphSuppress();
+    spyOn(graph, 'view').and.returnValue([500, 350]);
+    const createGraphSpy = spyOn(graph as any, 'createGraph').and.callThrough();
+    graph.update();
+    tick();
+    expect(createGraphSpy).toHaveBeenCalled();
   }));
 
   it('buildInputTopology, createGraph, and getSeriesDomain tolerate undefined inputs on load', fakeAsync(() => {
