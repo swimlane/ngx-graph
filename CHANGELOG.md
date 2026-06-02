@@ -2,6 +2,8 @@
 
 ## HEAD (unreleased)
 
+## 12.0.0-alpha.3
+
 - Fix: Suppress layout animation on zoom.
 - Fix: Tests should honor BROWSER env.
 
