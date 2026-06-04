@@ -2,6 +2,8 @@
 
 ## HEAD (unreleased)
 
+- Fix: possible console error when nodes or edges are not available during ngOnChanges.
+
 ## 12.0.0-alpha.3
 
 - Fix: Suppress layout animation on zoom.

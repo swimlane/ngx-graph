@@ -1120,6 +1120,17 @@ describe('GraphComponent viewport interactions', () => {
     expect(graph.graph.compoundNodes).toEqual([]);
     expect(graph.graph.edges).toEqual([]);
   }));
+
+  it('ngOnChanges tolerates null nodes/links inputs without calling update', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestViewportInteractionsHostComponent);
+    const graph = bootstrap(fixture);
+    spyOn(graph, 'nodes').and.returnValue(null as unknown as Node[]);
+    spyOn(graph, 'links').and.returnValue(null as unknown as Edge[]);
+    spyOn(graph, 'layout').and.returnValue('dagre');
+    const updateSpy = spyOn(graph, 'update').and.stub();
+    expect(() => graph.ngOnChanges({})).not.toThrow();
+    expect(updateSpy).not.toHaveBeenCalled();
+  }));
 });
 
 describe('GraphComponent panning axis constraints', () => {
