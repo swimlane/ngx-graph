@@ -2,8 +2,6 @@
 
 ## HEAD (unreleased)
 
-## 12.0.0-alpha.4
-
 - Fix: possible console error when nodes or edges are not available during ngOnChanges.
 
 ## 12.0.0-alpha.3
