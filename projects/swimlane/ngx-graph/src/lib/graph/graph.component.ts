@@ -228,6 +228,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   width: number;
   height: number;
   resizeSubscription: any;
+  private containerResizeObserver: ResizeObserver | null = null;
+  private containerResizeRafId: number | null = null;
   visibilityObserver: VisibilityObserver;
   private waitForGraphDims: ReturnType<typeof setInterval>;
   private destroy$ = new Subject<void>();
@@ -562,6 +564,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   ngAfterViewInit(): void {
     this.bindWindowResizeEvent();
+    this.bindContainerResizeEvent();
 
     // listen for visibility of the element for hidden by default scenario
     this.visibilityObserver = new VisibilityObserver(this.el, this.zone);
@@ -3494,6 +3497,43 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     };
   }
 
+  /**
+   * Remeasures the parent container and updates SVG viewport size without re-running layout.
+   * Invoked automatically when the parent element resizes (e.g. side panels opening or closing).
+   */
+  public refreshViewportDimensions(): void {
+    if (this.view()) {
+      return;
+    }
+
+    const previousWidth = this.width;
+    const previousHeight = this.height;
+
+    this.basicUpdate();
+
+    if (this.width === previousWidth && this.height === previousHeight) {
+      return;
+    }
+
+    this.dims = calculateViewDimensions({
+      width: this.width,
+      height: this.height
+    });
+
+    this.updateTransform();
+
+    if (this.showMiniMap()) {
+      this.updateMinimap();
+    }
+
+    this.lastFullUpdateWidth = this.width;
+    this.lastFullUpdateHeight = this.height;
+
+    if (this.cd) {
+      this.cd.markForCheck();
+    }
+  }
+
   public basicUpdate(): void {
     const view = this.view();
     if (view) {
@@ -3587,6 +3627,41 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
     }
+    if (this.containerResizeObserver) {
+      this.containerResizeObserver.disconnect();
+      this.containerResizeObserver = null;
+    }
+    if (this.containerResizeRafId != null) {
+      cancelAnimationFrame(this.containerResizeRafId);
+      this.containerResizeRafId = null;
+    }
+  }
+
+  private scheduleContainerResizeRefresh(): void {
+    if (this.containerResizeRafId != null) {
+      return;
+    }
+
+    this.containerResizeRafId = requestAnimationFrame(() => {
+      this.containerResizeRafId = null;
+      this.zone.run(() => this.refreshViewportDimensions());
+    });
+  }
+
+  private bindContainerResizeEvent(): void {
+    if (typeof ResizeObserver === 'undefined' || this.view()) {
+      return;
+    }
+
+    const parent = this.el.nativeElement.parentNode as HTMLElement | null;
+    if (!parent) {
+      return;
+    }
+
+    this.containerResizeObserver = new ResizeObserver(() => {
+      this.scheduleContainerResizeRefresh();
+    });
+    this.containerResizeObserver.observe(parent);
   }
 
   private bindWindowResizeEvent(): void {
