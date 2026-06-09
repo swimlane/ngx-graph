@@ -1755,3 +1755,117 @@ describe('GraphComponent snapAddedNodeIds before resetToPrevious', () => {
     expect(parsed.ty).toBeCloseTo(120, 5);
   }));
 });
+
+@Component({
+  selector: 'test-graph-container-resize-host',
+  template: `
+    <div class="graph-container" [style.width.px]="containerWidth" [style.height.px]="containerHeight">
+      <ngx-graph [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
+    </div>
+  `,
+  imports: [GraphComponent]
+})
+class TestGraphContainerResizeHostComponent {
+  syncLayout = new TestSyncLayout();
+  containerWidth = 600;
+  containerHeight = 400;
+  nodes: Node[] = [
+    { id: 'n1', label: 'A' },
+    { id: 'n2', label: 'B' }
+  ];
+  links: Edge[] = [{ id: 'e1', source: 'n1', target: 'n2' }];
+}
+
+@Component({
+  selector: 'test-graph-fixed-view-host',
+  template: `<ngx-graph [nodes]="nodes" [links]="links" [layout]="syncLayout" [view]="[800, 600]"></ngx-graph>`,
+  imports: [GraphComponent]
+})
+class TestGraphFixedViewHostComponent {
+  syncLayout = new TestSyncLayout();
+  nodes: Node[] = [{ id: 'n1', label: 'A' }];
+  links: Edge[] = [];
+}
+
+describe('GraphComponent container resize', () => {
+  let resizeObserverCallback: ResizeObserverCallback | undefined;
+  let OriginalResizeObserver: typeof ResizeObserver;
+
+  beforeEach(async () => {
+    OriginalResizeObserver = window.ResizeObserver;
+    resizeObserverCallback = undefined;
+    class ResizeObserverMock {
+      constructor(callback: ResizeObserverCallback) {
+        resizeObserverCallback = callback;
+      }
+      observe(): void {}
+      disconnect(): void {}
+      unobserve(): void {}
+    }
+    (window as any).ResizeObserver = ResizeObserverMock;
+
+    await TestBed.configureTestingModule({
+      imports: [TestGraphContainerResizeHostComponent, TestGraphFixedViewHostComponent],
+      providers: [LayoutService]
+    }).compileComponents();
+  });
+
+  afterEach(() => {
+    window.ResizeObserver = OriginalResizeObserver;
+  });
+
+  it('refreshViewportDimensions updates width and height without re-running layout', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const createGraphSpy = spyOn(graph, 'createGraph').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 960, height: 500 });
+
+    graph.refreshViewportDimensions();
+
+    expect(graph.width).toBe(960);
+    expect(graph.height).toBe(500);
+    expect(createGraphSpy).not.toHaveBeenCalled();
+  }));
+
+  it('observes the parent container and refreshes viewport dimensions on resize', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    expect(resizeObserverCallback).toBeDefined();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const createGraphSpy = spyOn(graph, 'createGraph').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(16);
+    fixture.detectChanges();
+
+    expect(graph.width).toBe(840);
+    expect(createGraphSpy).not.toHaveBeenCalled();
+  }));
+
+  it('refreshViewportDimensions is a no-op when [view] supplies explicit dimensions', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphFixedViewHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    graph.refreshViewportDimensions();
+    expect(graph.width).toBe(800);
+    expect(graph.height).toBe(600);
+  }));
+});
