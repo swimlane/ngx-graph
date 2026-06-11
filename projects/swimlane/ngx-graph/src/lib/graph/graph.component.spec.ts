@@ -107,6 +107,7 @@ class TestLayoutWithCustomParseTranslate extends TestSyncLayout {
       [view]="[800, 600]"
       [animate]="false"
       (drawComplete)="onDrawComplete()"
+      (stateChange)="onStateChange($event)"
     ></ngx-graph>
   `,
   imports: [GraphComponent]
@@ -123,9 +124,16 @@ class TestGraphDrawCompleteHostComponent {
   links: Edge[] = [{ id: 'e1', source: 'n1', target: 'n2' }];
 
   drawCompleteCount = 0;
+  outputStateCount = 0;
 
   onDrawComplete(): void {
     this.drawCompleteCount++;
+  }
+
+  onStateChange(event: { state: NgxGraphStates }): void {
+    if (event.state === NgxGraphStates.Output) {
+      this.outputStateCount++;
+    }
   }
 }
 
@@ -145,15 +153,14 @@ describe('GraphComponent drawComplete', () => {
     tick(16);
     fixture.detectChanges();
     flush();
-    tick(1000);
-    fixture.detectChanges();
-    flush();
 
     expect(host.drawCompleteCount).toBe(1);
+    expect(host.outputStateCount).toBeGreaterThanOrEqual(1);
 
     const graphEl = fixture.debugElement.query(By.directive(GraphComponent));
     const graph = graphEl.componentInstance as GraphComponent;
 
+    expect(graph.graph.nodes.length).toBeGreaterThan(0);
     expect(graph.graph.edges.length).toBe(1);
     expect(graph.linkElements()?.length ?? 0).toBe(graph.graph.edges.length);
 
@@ -179,6 +186,51 @@ describe('GraphComponent drawComplete', () => {
     graph.graph.nodes.forEach(n => assertBBoxMatchesModel(n.id, n));
     graph.graph.clusters?.forEach(c => assertBBoxMatchesModel(c.id, c));
     graph.graph.compoundNodes?.forEach(c => assertBBoxMatchesModel(c.id, c));
+  }));
+
+  it('emits drawComplete once but stateChange Output on each ready layout update', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphDrawCompleteHostComponent);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    expect(host.drawCompleteCount).toBe(1);
+    const outputAfterFirst = host.outputStateCount;
+
+    host.nodes = [...host.nodes, { id: 'n3', label: 'C' }];
+    host.links = [...host.links, { id: 'e2', source: 'n2', target: 'n3' }];
+    fixture.detectChanges();
+    flush();
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    graph.update();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    expect(host.drawCompleteCount).toBe(1);
+    expect(host.outputStateCount).toBeGreaterThan(outputAfterFirst);
+  }));
+
+  it('does not emit drawComplete or Output when nodes and links are empty', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphEmptyViewHostComponent);
+    fixture.detectChanges();
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const drawSpy = jasmine.createSpy('drawCompleteSpy');
+    const stateSpy = jasmine.createSpy('stateSpy');
+    graph.drawComplete.subscribe(drawSpy);
+    graph.stateChange.subscribe(stateSpy);
+
+    flush();
+    tick(5000);
+    fixture.detectChanges();
+    flush();
+
+    expect(drawSpy).not.toHaveBeenCalled();
+    expect(stateSpy).not.toHaveBeenCalledWith({ state: NgxGraphStates.Output });
   }));
 
   it('tick assigns oldNodes for newly added ids synchronously before post-tick rAF', fakeAsync(() => {

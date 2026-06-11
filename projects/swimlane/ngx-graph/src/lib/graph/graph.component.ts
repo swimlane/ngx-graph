@@ -213,9 +213,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   oldNodes: Set<string> = new Set();
   oldClusters: Set<string> = new Set();
   oldCompoundNodes: Set<string> = new Set();
-  /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
-  private drawCompleteTickId = 0;
-  private _graphDestroyed = false;
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
@@ -229,7 +226,12 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   visibilityObserver: VisibilityObserver;
-  private waitForGraphDims: ReturnType<typeof setInterval>;
+  /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
+  private drawCompleteTickId = 0;
+  /** True after the first {@link drawComplete} emission for this component instance. */
+  private drawCompleteEmitted = false;
+  private static readonly TICK_FINALIZE_MAX_RETRIES = 5;
+  private _graphDestroyed = false;
   private destroy$ = new Subject<void>();
 
   /** Latest requestAnimationFrame id per edge for imperative path morphing (cancel on layout / drag). */
@@ -476,13 +478,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       });
     }
 
-    this.waitForGraphDims = setInterval(() => {
-      if (this.hasDims()) {
-        clearInterval(this.waitForGraphDims);
-        this.drawComplete.emit();
-      }
-    }, 1000);
-
     this.minimapClipPathId = `minimapClip${id()}`;
     this.stateChange.emit({ state: NgxGraphStates.Subscribe });
   }
@@ -541,9 +536,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (this.visibilityObserver) {
       this.visibilityObserver.visible.unsubscribe();
       this.visibilityObserver.destroy();
-    }
-    if (this.waitForGraphDims) {
-      clearInterval(this.waitForGraphDims);
     }
     this.destroy$.next();
     this.destroy$.complete();
@@ -2183,8 +2175,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /**
    * Runs after Angular commits the template so D3 binds to the live link `<path>` elements
-   * (OnPush + rAF alone can run too early). Retries once after `requestAnimationFrame` if link
-   * groups are not ready yet — avoids two immediate `afterNextRender` passes that cancel unified RAF.
+   * (OnPush + rAF alone can run too early). Retries with bounded `afterNextRender` passes until
+   * {@link isGraphDrawReady} — avoids finalizing before link paths and dimensions are bound.
    */
   private scheduleRedrawLinesAfterView(morph: boolean, tickId: number): void {
     afterNextRender(
@@ -2229,13 +2221,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /**
    * Binds D3 to link `<path>` elements, then emits {@link stateChange} (Output) and {@link drawComplete}
-   * when link groups match edge count (or after bounded retries).
+   * when {@link isGraphDrawReady} passes (paths bound, model positions/dims reflected).
    *
    * Observable layouts (Cola, D3 force) can emit faster than `afterNextRender`; callbacks may run with a
    * superseded `tickId`. Those passes must not call {@link redrawLines} with morph enabled — it would
    * {@link cancelLayoutUnifiedAnimation} and interrupt full-graph layout morphs. Instead, repaint paths
    * from the current model when no rAF tween owns the paths; the latest `tickId` still runs full {@link redrawLines}.
-   * {@link finalizeTickOutput} alone enforces `drawCompleteTickId`.
+   * {@link finalizeTickOutput} alone enforces `drawCompleteTickId` and readiness.
    */
   private tryRedrawLinesAfterView(morph: boolean, retryDepth: number, tickId: number): void {
     if (this._graphDestroyed) {
@@ -2247,14 +2239,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     } else if (this.layoutUnifiedRafId == null && this.edgePathRafIds.size === 0) {
       this.repaintLinkPathsDomFromModel();
     }
-    const expected = this.graph.edges?.length ?? 0;
-    const got = this.linkElements()?.length ?? 0;
-    const linksReady = expected === 0 || got === expected;
-    if (linksReady) {
+    if (this.isGraphDrawReady(tickId)) {
       this.finalizeTickOutput(tickId);
       return;
     }
-    if (retryDepth < 2) {
+    if (retryDepth < GraphComponent.TICK_FINALIZE_MAX_RETRIES) {
       requestAnimationFrame(() => {
         afterNextRender(
           () => {
@@ -2266,19 +2255,121 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       return;
     }
     if (isDevMode()) {
-      console.warn(
-        '[ngx-graph] Link group count did not match edge count after retries; emitting drawComplete anyway.',
-        { expected, got }
-      );
+      const expected = this.graph?.edges?.length ?? 0;
+      const got = this.linkElements()?.length ?? 0;
+      console.warn('[ngx-graph] Graph not ready after retries; deferring stateChange and drawComplete.', {
+        expected,
+        got,
+        tickId,
+        latestTickId: this.drawCompleteTickId
+      });
     }
-    this.finalizeTickOutput(tickId);
   }
 
+  /**
+   * Emits {@link stateChange} Output and first-load {@link drawComplete} when the internal graph model and
+   * DOM reflect layout readiness for `tickId`.
+   */
   private finalizeTickOutput(tickId: number): void {
     if (this._graphDestroyed || tickId !== this.drawCompleteTickId) {
       return;
     }
+    if (!this.isGraphDrawReady(tickId)) {
+      return;
+    }
     this.stateChange.emit({ state: NgxGraphStates.Output });
+    if (!this.drawCompleteEmitted) {
+      this.drawComplete.emit();
+      this.drawCompleteEmitted = true;
+    }
+  }
+
+  /** Attempt finalize when async morph completes after an earlier tick pass deferred emission. */
+  private maybeFinalizeTickOutput(tickId: number): void {
+    if (this.isGraphDrawReady(tickId)) {
+      this.finalizeTickOutput(tickId);
+    }
+  }
+
+  /**
+   * True when `tickId` is the latest tick and the internal {@link graph} plus bound link paths match host inputs
+   * (positions, dimensions, edges) — safe point for {@link drawComplete} and Output {@link stateChange}.
+   */
+  private isGraphDrawReady(tickId: number): boolean {
+    if (tickId !== this.drawCompleteTickId || !this.initialized || !this.graph) {
+      return false;
+    }
+    if (this.layoutUnifiedRafId != null || this.edgePathRafIds.size > 0) {
+      return false;
+    }
+    const inputNodeCount = this.nodes()?.length ?? 0;
+    const inputLinkCount = this.links()?.length ?? 0;
+    if (inputNodeCount === 0 && inputLinkCount === 0) {
+      return false;
+    }
+    if (inputNodeCount > 0 && !(this.graph.nodes?.length > 0)) {
+      return false;
+    }
+    if (inputLinkCount > 0 && !(this.graph.edges?.length > 0)) {
+      return false;
+    }
+    const inputClusterCount = this.clusters()?.length ?? 0;
+    const inputCompoundCount = this.compoundNodes()?.length ?? 0;
+    if (inputClusterCount > 0 && !(this.graph.clusters?.length > 0)) {
+      return false;
+    }
+    if (inputCompoundCount > 0 && !(this.graph.compoundNodes?.length > 0)) {
+      return false;
+    }
+    if (
+      !this.areNodeLikePositionsReady(this.graph.nodes) ||
+      !this.areNodeLikePositionsReady(this.graph.clusters) ||
+      !this.areNodeLikePositionsReady(this.graph.compoundNodes)
+    ) {
+      return false;
+    }
+    if (!this.hasDims() || !this.areLinkPathsBound()) {
+      return false;
+    }
+    return true;
+  }
+
+  /** Nodes/clusters/compounds are not still hidden at bootstrap origin waiting for layout. */
+  private areNodeLikePositionsReady(items: Node[] | undefined): boolean {
+    if (!items?.length) {
+      return true;
+    }
+    for (const n of items) {
+      if (!n.position) {
+        return false;
+      }
+      const atOrigin = (n.position.x ?? 0) === 0 && (n.position.y ?? 0) === 0;
+      if (atOrigin && n.hidden) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Link `<path>` groups exist for every edge and each path has a non-empty `d`. */
+  private areLinkPathsBound(): boolean {
+    const expected = this.graph?.edges?.length ?? 0;
+    if (expected === 0) {
+      return (this.links()?.length ?? 0) === 0;
+    }
+    const linkEls = this.linkElements() ?? [];
+    if (linkEls.length !== expected) {
+      return false;
+    }
+    for (const linkRef of linkEls) {
+      const g = linkRef.nativeElement as SVGGElement;
+      const path = g.querySelector('path.edge, path.line') ?? g.querySelector('path');
+      const d = path?.getAttribute('d');
+      if (!d || d.length === 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private cancelEdgePathAnimation(edgeId: string): void {
@@ -2460,6 +2551,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
             }
           });
           this.layoutUnifiedRafId = null;
+          this.maybeFinalizeTickOutput(this.drawCompleteTickId);
           return;
         }
 
@@ -2513,6 +2605,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           this.edgePathRafIds.delete(edgeKey);
           this.zone.run(() => {
             edge.previousPoints = undefined;
+            this.maybeFinalizeTickOutput(this.drawCompleteTickId);
           });
           return;
         }
@@ -3554,33 +3647,53 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Checks if all nodes have dimension
    */
   public hasNodeDims(): boolean {
-    return this.graph.nodes?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+    if (!this.graph?.nodes?.length) {
+      return (this.nodes()?.length ?? 0) === 0;
+    }
+    return this.graph.nodes.every(node => (node.dimension?.width ?? 0) > 0 && (node.dimension?.height ?? 0) > 0);
   }
 
   /**
    * Checks if all compound nodes have dimension
    */
   public hasCompoundNodeDims(): boolean {
-    return this.graph.compoundNodes?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+    if (!this.graph?.compoundNodes?.length) {
+      return true;
+    }
+    return this.graph.compoundNodes.every(
+      node => (node.dimension?.width ?? 0) > 0 && (node.dimension?.height ?? 0) > 0
+    );
   }
 
   /**
    * Checks if all clusters have dimension
    */
   public hasClusterDims(): boolean {
-    return this.graph.clusters?.every(node => node.dimension.width > 0 && node.dimension.height > 0);
+    if (!this.graph?.clusters?.length) {
+      return true;
+    }
+    return this.graph.clusters.every(node => (node.dimension?.width ?? 0) > 0 && (node.dimension?.height ?? 0) > 0);
   }
 
   /**
    * Checks if the graph and all nodes have dimension.
    */
   public hasDims(): boolean {
-    return (
-      this.hasGraphDims() &&
-      this.hasNodeDims() &&
-      ((this.compoundNodes()?.length ? this.hasCompoundNodeDims() : true) ||
-        (this.clusters()?.length ? this.hasClusterDims() : true))
-    );
+    if (!this.graph) {
+      return false;
+    }
+    if (!this.hasGraphDims() || !this.hasNodeDims()) {
+      return false;
+    }
+    const hasCompounds = (this.compoundNodes()?.length ?? 0) > 0;
+    const hasClusters = (this.clusters()?.length ?? 0) > 0;
+    if (hasCompounds && !this.hasCompoundNodeDims()) {
+      return false;
+    }
+    if (hasClusters && !this.hasClusterDims()) {
+      return false;
+    }
+    return true;
   }
 
   protected unbindEvents(): void {
