@@ -1776,6 +1776,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.oldCompoundNodes = newCompoundNodeIds;
 
     requestAnimationFrame(() => {
+      if (this._graphDestroyed) {
+        return;
+      }
       // Full-scope morph keeps `node.transform` at previous layout until unified rAF; do not sync from `position` or
       // refresh bounds/pan from the new layout here — that would wipe `resetToPrevious` and desync the viewport.
       const nodeTweenActive =
@@ -2179,8 +2182,14 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * {@link isGraphDrawReady} — avoids finalizing before link paths and dimensions are bound.
    */
   private scheduleRedrawLinesAfterView(morph: boolean, tickId: number): void {
+    if (this._graphDestroyed || tickId !== this.drawCompleteTickId) {
+      return;
+    }
     afterNextRender(
       () => {
+        if (this._graphDestroyed) {
+          return;
+        }
         this.tryRedrawLinesAfterView(morph, 0, tickId);
       },
       { injector: this.injector }
@@ -2241,6 +2250,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
     if (this.isGraphDrawReady(tickId)) {
       this.finalizeTickOutput(tickId);
+      return;
+    }
+    if (tickId !== this.drawCompleteTickId) {
       return;
     }
     if (retryDepth < GraphComponent.TICK_FINALIZE_MAX_RETRIES) {

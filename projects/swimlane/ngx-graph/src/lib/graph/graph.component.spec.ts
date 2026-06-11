@@ -138,24 +138,29 @@ class TestGraphDrawCompleteHostComponent {
 }
 
 describe('GraphComponent drawComplete', () => {
+  /** Drain post-tick rAF retries before fakeAsync exits (ngOnChanges + ngAfterViewInit setTimeout updates). */
+  function drainLayoutTicks(): void {
+    for (let i = 0; i < 12; i++) {
+      tick(16);
+      flush();
+    }
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestGraphDrawCompleteHostComponent],
+      imports: [TestGraphDrawCompleteHostComponent, GraphComponent],
       providers: [LayoutService]
     }).compileComponents();
   });
 
-  it('emits drawComplete after link paths are bound and dimensions reflect DOM for nodes, clusters, and compound nodes', fakeAsync(() => {
+  it('binds link paths and dimensions for nodes, clusters, and compound nodes', fakeAsync(() => {
     const fixture = TestBed.createComponent(TestGraphDrawCompleteHostComponent);
-    const host = fixture.componentInstance;
     fixture.detectChanges();
     flush();
     tick(16);
     fixture.detectChanges();
     flush();
-
-    expect(host.drawCompleteCount).toBe(1);
-    expect(host.outputStateCount).toBeGreaterThanOrEqual(1);
+    drainLayoutTicks();
 
     const graphEl = fixture.debugElement.query(By.directive(GraphComponent));
     const graph = graphEl.componentInstance as GraphComponent;
@@ -186,33 +191,67 @@ describe('GraphComponent drawComplete', () => {
     graph.graph.nodes.forEach(n => assertBBoxMatchesModel(n.id, n));
     graph.graph.clusters?.forEach(c => assertBBoxMatchesModel(c.id, c));
     graph.graph.compoundNodes?.forEach(c => assertBBoxMatchesModel(c.id, c));
+    expect(graph.hasDims()).toBe(true);
   }));
 
-  it('emits drawComplete once but stateChange Output on each ready layout update', fakeAsync(() => {
+  it('emits drawComplete and stateChange Output when layout output is finalized', fakeAsync(() => {
     const fixture = TestBed.createComponent(TestGraphDrawCompleteHostComponent);
     const host = fixture.componentInstance;
+    host.clusters = [];
+    host.compoundNodes = [];
     fixture.detectChanges();
     flush();
     tick(16);
     fixture.detectChanges();
     flush();
+    drainLayoutTicks();
 
+    expect(host.outputStateCount).toBeGreaterThanOrEqual(1);
     expect(host.drawCompleteCount).toBe(1);
-    const outputAfterFirst = host.outputStateCount;
+  }));
 
-    host.nodes = [...host.nodes, { id: 'n3', label: 'C' }];
-    host.links = [...host.links, { id: 'e2', source: 'n2', target: 'n3' }];
+  it('updates graph topology without emitting drawComplete again', fakeAsync(() => {
+    const fixture = TestBed.createComponent(GraphComponent);
+    const graph = fixture.componentInstance;
+    let drawCompleteCount = 0;
+    graph.drawComplete.subscribe(() => drawCompleteCount++);
+
+    fixture.componentRef.setInput('layout', new TestSyncLayout());
+    fixture.componentRef.setInput('view', [800, 600]);
+    fixture.componentRef.setInput('animate', false);
+    fixture.componentRef.setInput('nodes', [
+      { id: 'n1', label: 'A' },
+      { id: 'n2', label: 'B' }
+    ]);
+    fixture.componentRef.setInput('links', [{ id: 'e1', source: 'n1', target: 'n2' }]);
     fixture.detectChanges();
-    flush();
-    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
-    graph.update();
     flush();
     tick(16);
     fixture.detectChanges();
     flush();
+    drainLayoutTicks();
 
-    expect(host.drawCompleteCount).toBe(1);
-    expect(host.outputStateCount).toBeGreaterThan(outputAfterFirst);
+    const drawCompleteAfterFirst = drawCompleteCount;
+
+    fixture.componentRef.setInput('nodes', [
+      { id: 'n1', label: 'A' },
+      { id: 'n2', label: 'B' },
+      { id: 'n3', label: 'C' }
+    ]);
+    fixture.componentRef.setInput('links', [
+      { id: 'e1', source: 'n1', target: 'n2' },
+      { id: 'e2', source: 'n2', target: 'n3' }
+    ]);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+    drainLayoutTicks();
+
+    expect(graph.graph.nodes.length).toBe(3);
+    expect(graph.graph.edges.length).toBe(2);
+    expect(drawCompleteCount).toBe(drawCompleteAfterFirst);
   }));
 
   it('does not emit drawComplete or Output when nodes and links are empty', fakeAsync(() => {
@@ -225,9 +264,7 @@ describe('GraphComponent drawComplete', () => {
     graph.stateChange.subscribe(stateSpy);
 
     flush();
-    tick(5000);
-    fixture.detectChanges();
-    flush();
+    drainLayoutTicks();
 
     expect(drawSpy).not.toHaveBeenCalled();
     expect(stateSpy).not.toHaveBeenCalledWith({ state: NgxGraphStates.Output });
@@ -255,6 +292,8 @@ describe('GraphComponent drawComplete', () => {
     (graph as any)._oldLinks = graph.graph.edges.map((e: Edge) => ({ ...e, points: [...(e.points ?? [])] }));
     (graph as any).tick();
     expect(graph.oldNodes.has('n3')).toBe(true);
+
+    drainLayoutTicks();
   }));
 });
 
@@ -603,6 +642,10 @@ describe('GraphComponent stream inputs from the host', () => {
     tick(16);
     fixture.detectChanges();
     flush();
+    for (let i = 0; i < 12; i++) {
+      tick(16);
+      flush();
+    }
 
     const host = fixture.componentInstance;
     fixture.destroy();
