@@ -120,7 +120,7 @@ class TestGraphDrawCompleteHostComponent {
     { id: 'n2', label: 'B' }
   ];
   clusters: ClusterNode[] = [{ id: 'cl1', label: 'Cluster' }];
-  compoundNodes: CompoundNode[] = [{ id: 'cp1', label: 'Compound', childNodeIds: ['n1'] }];
+  compoundNodes: CompoundNode[] = [];
   links: Edge[] = [{ id: 'e1', source: 'n1', target: 'n2' }];
 
   drawCompleteCount = 0;
@@ -137,6 +137,31 @@ class TestGraphDrawCompleteHostComponent {
   }
 }
 
+@Component({
+  selector: 'test-graph-draw-complete-compound-host',
+  template: `
+    <ngx-graph
+      [nodes]="nodes"
+      [compoundNodes]="compoundNodes"
+      [links]="links"
+      [layout]="syncLayout"
+      [view]="[800, 600]"
+      [animate]="false"
+    ></ngx-graph>
+  `,
+  imports: [GraphComponent]
+})
+class TestGraphDrawCompleteCompoundHostComponent {
+  syncLayout = new TestSyncLayout();
+
+  nodes: Node[] = [
+    { id: 'n1', label: 'A' },
+    { id: 'n2', label: 'B' }
+  ];
+  compoundNodes: CompoundNode[] = [{ id: 'cp1', label: 'Compound', childNodeIds: ['n1'] }];
+  links: Edge[] = [{ id: 'e1', source: 'n1', target: 'n2' }];
+}
+
 describe('GraphComponent drawComplete', () => {
   /** Drain post-tick rAF retries before fakeAsync exits (ngOnChanges + ngAfterViewInit setTimeout updates). */
   function drainLayoutTicks(): void {
@@ -148,23 +173,15 @@ describe('GraphComponent drawComplete', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestGraphDrawCompleteHostComponent, GraphComponent],
+      imports: [TestGraphDrawCompleteHostComponent, TestGraphDrawCompleteCompoundHostComponent, GraphComponent],
       providers: [LayoutService]
     }).compileComponents();
   });
 
-  it('binds link paths and dimensions for nodes, clusters, and compound nodes', fakeAsync(() => {
-    const fixture = TestBed.createComponent(TestGraphDrawCompleteHostComponent);
-    fixture.detectChanges();
-    flush();
-    tick(16);
-    fixture.detectChanges();
-    flush();
-    drainLayoutTicks();
-
-    const graphEl = fixture.debugElement.query(By.directive(GraphComponent));
-    const graph = graphEl.componentInstance as GraphComponent;
-
+  function assertLinkPathsAndBBoxMatchModel(
+    fixture: ComponentFixture<TestGraphDrawCompleteHostComponent | TestGraphDrawCompleteCompoundHostComponent>,
+    graph: GraphComponent
+  ): void {
     expect(graph.graph.nodes.length).toBeGreaterThan(0);
     expect(graph.graph.edges.length).toBe(1);
     expect(graph.linkElements()?.length ?? 0).toBe(graph.graph.edges.length);
@@ -192,6 +209,32 @@ describe('GraphComponent drawComplete', () => {
     graph.graph.clusters?.forEach(c => assertBBoxMatchesModel(c.id, c));
     graph.graph.compoundNodes?.forEach(c => assertBBoxMatchesModel(c.id, c));
     expect(graph.hasDims()).toBe(true);
+  }
+
+  it('binds link paths and dimensions for nodes and clusters', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphDrawCompleteHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+    drainLayoutTicks();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    assertLinkPathsAndBBoxMatchModel(fixture, graph);
+  }));
+
+  it('binds link paths and dimensions for nodes and compound nodes', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphDrawCompleteCompoundHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+    drainLayoutTicks();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    assertLinkPathsAndBBoxMatchModel(fixture, graph);
   }));
 
   it('emits drawComplete and stateChange Output when layout output is finalized', fakeAsync(() => {
@@ -550,6 +593,75 @@ describe('GraphComponent graph data and layout behavior', () => {
 
     const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
     expect(graph.hasGraphDims()).toBe(true);
+    expect(graph.hasDims()).toBe(true);
+  }));
+
+  it('hasDims returns false when clusters input is bound but graph.clusters is still empty', fakeAsync(() => {
+    const fixture = TestBed.createComponent(GraphComponent);
+    const graph = fixture.componentInstance;
+    fixture.componentRef.setInput('layout', new TestSyncLayout());
+    fixture.componentRef.setInput('view', [400, 300]);
+    fixture.componentRef.setInput('animate', false);
+    fixture.componentRef.setInput('nodes', [{ id: 'n1', label: 'A', dimension: { width: 48, height: 32 } }]);
+    fixture.componentRef.setInput('clusters', [{ id: 'c1', label: 'Cluster' }]);
+    fixture.componentRef.setInput('links', []);
+    fixture.detectChanges();
+
+    (graph as any).graph = {
+      nodes: [{ id: 'n1', label: 'A', dimension: { width: 48, height: 32 } }],
+      edges: [],
+      clusters: [],
+      compoundNodes: []
+    };
+    (graph as any).graphDims = { width: 400, height: 300 };
+
+    expect(graph.hasNodeDims()).toBe(true);
+    expect(graph.hasClusterDims()).toBe(false);
+    expect(graph.hasDims()).toBe(false);
+  }));
+
+  it('hasDims returns false when compoundNodes input is bound but graph.compoundNodes is still empty', fakeAsync(() => {
+    const fixture = TestBed.createComponent(GraphComponent);
+    const graph = fixture.componentInstance;
+    fixture.componentRef.setInput('layout', new TestSyncLayout());
+    fixture.componentRef.setInput('view', [400, 300]);
+    fixture.componentRef.setInput('animate', false);
+    fixture.componentRef.setInput('nodes', [{ id: 'n1', label: 'A', dimension: { width: 48, height: 32 } }]);
+    fixture.componentRef.setInput('compoundNodes', [{ id: 'cp1', label: 'Compound', childNodeIds: ['n1'] }]);
+    fixture.componentRef.setInput('links', []);
+    fixture.detectChanges();
+
+    (graph as any).graph = {
+      nodes: [{ id: 'n1', label: 'A', dimension: { width: 48, height: 32 } }],
+      edges: [],
+      clusters: [],
+      compoundNodes: []
+    };
+    (graph as any).graphDims = { width: 400, height: 300 };
+
+    expect(graph.hasNodeDims()).toBe(true);
+    expect(graph.hasCompoundNodeDims()).toBe(false);
+    expect(graph.hasDims()).toBe(false);
+  }));
+
+  it('hasDims returns true for nodes-only graphs without cluster or compound inputs', fakeAsync(() => {
+    const fixture = TestBed.createComponent(GraphComponent);
+    const graph = fixture.componentInstance;
+    fixture.componentRef.setInput('layout', new TestSyncLayout());
+    fixture.componentRef.setInput('view', [400, 300]);
+    fixture.componentRef.setInput('animate', false);
+    fixture.componentRef.setInput('nodes', [{ id: 'n1', label: 'A', dimension: { width: 48, height: 32 } }]);
+    fixture.componentRef.setInput('links', []);
+    fixture.detectChanges();
+
+    (graph as any).graph = {
+      nodes: [{ id: 'n1', label: 'A', dimension: { width: 48, height: 32 } }],
+      edges: [],
+      clusters: [],
+      compoundNodes: []
+    };
+    (graph as any).graphDims = { width: 400, height: 300 };
+
     expect(graph.hasDims()).toBe(true);
   }));
 

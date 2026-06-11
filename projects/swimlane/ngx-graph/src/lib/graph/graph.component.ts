@@ -231,6 +231,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   /** True after the first {@link drawComplete} emission for this component instance. */
   private drawCompleteEmitted = false;
   private static readonly TICK_FINALIZE_MAX_RETRIES = 5;
+  /** Extra afterNextRender passes when bounded retries exhaust but the same tick may still become ready. */
+  private static readonly TICK_FINALIZE_DEFERRED_MAX_RETRIES = 5;
+  /** Tick id for which passive finalize checks are armed after {@link TICK_FINALIZE_MAX_RETRIES}. */
+  private drawCompleteDeferredTickId: number | null = null;
+  private drawCompleteDeferredRetryDepth = 0;
   private _graphDestroyed = false;
   private destroy$ = new Subject<void>();
 
@@ -2280,6 +2285,101 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         latestTickId: this.drawCompleteTickId
       });
     }
+    if (tickId === this.drawCompleteTickId && this.canTickEmitDrawComplete(tickId)) {
+      this.armDeferredDrawCompleteCheck(tickId);
+    }
+  }
+
+  /** False when host inputs are empty — {@link isGraphDrawReady} cannot pass on this tick. */
+  private canTickEmitDrawComplete(tickId: number): boolean {
+    if (tickId !== this.drawCompleteTickId) {
+      return false;
+    }
+    const inputNodeCount = this.nodes()?.length ?? 0;
+    const inputLinkCount = this.links()?.length ?? 0;
+    return !(inputNodeCount === 0 && inputLinkCount === 0);
+  }
+
+  /** Arm passive finalize checks for `tickId` after bounded {@link tryRedrawLinesAfterView} retries exhaust. */
+  private armDeferredDrawCompleteCheck(tickId: number): void {
+    if (tickId !== this.drawCompleteTickId) {
+      return;
+    }
+    this.drawCompleteDeferredTickId = tickId;
+    this.drawCompleteDeferredRetryDepth = 0;
+    this.scheduleDeferredDrawCompleteCheck(tickId);
+  }
+
+  private clearDeferredDrawCompleteCheck(): void {
+    this.drawCompleteDeferredTickId = null;
+    this.drawCompleteDeferredRetryDepth = 0;
+  }
+
+  private scheduleDeferredDrawCompleteCheck(tickId: number): void {
+    if (
+      this._graphDestroyed ||
+      tickId !== this.drawCompleteTickId ||
+      this.drawCompleteDeferredTickId !== tickId
+    ) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      if (
+        this._graphDestroyed ||
+        tickId !== this.drawCompleteTickId ||
+        this.drawCompleteDeferredTickId !== tickId
+      ) {
+        return;
+      }
+      afterNextRender(
+        () => {
+          this.tryDeferredDrawCompleteCheck(tickId);
+        },
+        { injector: this.injector }
+      );
+    });
+  }
+
+  /**
+   * Passive readiness pass after morph or DOM settles on the same tick.
+   */
+  private tryDeferredDrawCompleteCheck(tickId: number): void {
+    if (
+      this._graphDestroyed ||
+      tickId !== this.drawCompleteTickId ||
+      this.drawCompleteDeferredTickId !== tickId
+    ) {
+      return;
+    }
+    if (this.layoutUnifiedRafId != null || this.edgePathRafIds.size > 0) {
+      return;
+    }
+    this.maybeFinalizeTickOutput(tickId);
+    if (this.drawCompleteDeferredTickId !== tickId) {
+      return;
+    }
+    if (!this.canTickEmitDrawComplete(tickId)) {
+      this.clearDeferredDrawCompleteCheck();
+      return;
+    }
+    if (this.drawCompleteDeferredRetryDepth >= GraphComponent.TICK_FINALIZE_DEFERRED_MAX_RETRIES) {
+      this.clearDeferredDrawCompleteCheck();
+      return;
+    }
+    this.drawCompleteDeferredRetryDepth++;
+    this.scheduleDeferredDrawCompleteCheck(tickId);
+  }
+
+  /** Re-arm passive checks after morph completes when bounded retries already deferred this tick. */
+  private resumeDeferredDrawCompleteCheckIfNeeded(tickId: number): void {
+    if (
+      this.drawCompleteDeferredTickId === tickId &&
+      tickId === this.drawCompleteTickId &&
+      this.layoutUnifiedRafId == null &&
+      this.edgePathRafIds.size === 0
+    ) {
+      this.scheduleDeferredDrawCompleteCheck(tickId);
+    }
   }
 
   /**
@@ -2293,6 +2393,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (!this.isGraphDrawReady(tickId)) {
       return;
     }
+    this.clearDeferredDrawCompleteCheck();
     this.stateChange.emit({ state: NgxGraphStates.Output });
     if (!this.drawCompleteEmitted) {
       this.drawComplete.emit();
@@ -2601,6 +2702,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           });
           this.layoutUnifiedRafId = null;
           this.maybeFinalizeTickOutput(this.drawCompleteTickId);
+          this.resumeDeferredDrawCompleteCheckIfNeeded(morphTickId);
           return;
         }
 
@@ -2667,6 +2769,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           this.zone.run(() => {
             edge.previousPoints = undefined;
             this.maybeFinalizeTickOutput(this.drawCompleteTickId);
+            this.resumeDeferredDrawCompleteCheckIfNeeded(morphTickId);
           });
           return;
         }
@@ -3722,7 +3825,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   public hasCompoundNodeDims(): boolean {
     if (!this.graph?.compoundNodes?.length) {
-      return true;
+      return (this.compoundNodes()?.length ?? 0) === 0;
     }
     return this.graph.compoundNodes.every(
       node => (node.dimension?.width ?? 0) > 0 && (node.dimension?.height ?? 0) > 0
@@ -3734,7 +3837,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    */
   public hasClusterDims(): boolean {
     if (!this.graph?.clusters?.length) {
-      return true;
+      return (this.clusters()?.length ?? 0) === 0;
     }
     return this.graph.clusters.every(node => (node.dimension?.width ?? 0) > 0 && (node.dimension?.height ?? 0) > 0);
   }
@@ -3749,12 +3852,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (!this.hasGraphDims() || !this.hasNodeDims()) {
       return false;
     }
-    const hasCompounds = (this.compoundNodes()?.length ?? 0) > 0;
-    const hasClusters = (this.clusters()?.length ?? 0) > 0;
-    if (hasCompounds && !this.hasCompoundNodeDims()) {
+    if ((this.compoundNodes()?.length ?? 0) > 0 && !this.hasCompoundNodeDims()) {
       return false;
     }
-    if (hasClusters && !this.hasClusterDims()) {
+    if ((this.clusters()?.length ?? 0) > 0 && !this.hasClusterDims()) {
       return false;
     }
     return true;

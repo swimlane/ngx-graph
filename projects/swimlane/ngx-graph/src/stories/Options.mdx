@@ -105,7 +105,7 @@ Methods exist on `GraphComponent` to check if the graph has dimension. This can 
 | hasGraphDims        | Returns true when the graph container has dimension.                                                                                                                 |
 | hasNodeDims         | Returns true when every node in the graph has dimension.                                                                                                             |
 | hasCompoundNodeDims | Returns true when every compound node in the graph has dimension.                                                                                                    |
-| hasDims             | Returns true when graph bounds and every relevant node/cluster/compound has positive dimensions (both cluster and compound checks apply when both inputs are bound). |
+| hasDims             | Returns true when graph bounds and all nodes have positive dimensions, and when the bound grouping input (clusters **or** compound nodes) has dimensions in the model — mutually exclusive grouping modes. |
 
 These methods can be used with the `stateChange @Output` to check when the graph has dimension. Suppose you had `GraphComponent` has a `ViewChild` in a parent `Component`.
 
