@@ -236,6 +236,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Latest requestAnimationFrame id per edge for imperative path morphing (cancel on layout / drag). */
   private readonly edgePathRafIds = new Map<string, number>();
+  /** Per-edge session id; bumped when that edge's morph is cancelled or restarted. */
+  private readonly edgePathMorphGeneration = new Map<string, number>();
 
   /**
    * Stable {@link NgTemplateOutlet} context objects keyed by graph id so consumer templates (tooltips, nested
@@ -261,6 +263,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** Single rAF when layout morph unifies node transforms + edge paths. */
   private layoutUnifiedRafId: number | null = null;
+  /** Bumped when unified layout morph is cancelled so stale rAF steps cannot finalize the current tick. */
+  private layoutUnifiedMorphGeneration = 0;
 
   /** rAF for programmatic viewport pan easing (translation only). */
   private viewportPanAnimRafId: number | null = null;
@@ -2384,25 +2388,50 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     return true;
   }
 
+  private edgePathMorphGen(edgeKey: string): number {
+    return this.edgePathMorphGeneration.get(edgeKey) ?? 0;
+  }
+
+  private bumpEdgePathMorphGeneration(edgeKey: string): number {
+    const next = this.edgePathMorphGen(edgeKey) + 1;
+    this.edgePathMorphGeneration.set(edgeKey, next);
+    return next;
+  }
+
+  /** Drop a superseded edge morph step and release its rAF slot so readiness can proceed. */
+  private abandonStaleEdgePathMorphStep(edgeKey: string, morphGeneration: number): boolean {
+    if (morphGeneration === this.edgePathMorphGen(edgeKey)) {
+      return false;
+    }
+    this.edgePathRafIds.delete(edgeKey);
+    return true;
+  }
+
   private cancelEdgePathAnimation(edgeId: string): void {
     const rafId = this.edgePathRafIds.get(edgeId);
     if (rafId != null) {
       cancelAnimationFrame(rafId);
       this.edgePathRafIds.delete(edgeId);
+      this.bumpEdgePathMorphGeneration(edgeId);
     }
   }
 
   private cancelAllEdgePathAnimations(): void {
+    const edgeKeys = [...this.edgePathRafIds.keys()];
     for (const rafId of this.edgePathRafIds.values()) {
       cancelAnimationFrame(rafId);
     }
     this.edgePathRafIds.clear();
+    for (const edgeKey of edgeKeys) {
+      this.bumpEdgePathMorphGeneration(edgeKey);
+    }
   }
 
   private cancelLayoutUnifiedAnimation(): void {
     if (this.layoutUnifiedRafId != null) {
       cancelAnimationFrame(this.layoutUnifiedRafId);
       this.layoutUnifiedRafId = null;
+      this.layoutUnifiedMorphGeneration++;
     }
   }
 
@@ -2429,6 +2458,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     const dimTgts = this.layoutAnimationClusterCompoundDimensions;
     const easeFn = resolveGraphTransitionEasing(this.effectiveLayoutTransition.easing);
     const skipNodePositionTween = this.effectiveLayoutTransition.scope === 'additive';
+    const morphTickId = this.drawCompleteTickId;
+    const morphGeneration = ++this.layoutUnifiedMorphGeneration;
 
     this.zone.runOutsideAngular(() => {
       for (const m of edgeMorphs) {
@@ -2487,6 +2518,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       };
 
       const step = () => {
+        if (this._graphDestroyed || morphGeneration !== this.layoutUnifiedMorphGeneration) {
+          return;
+        }
         const elapsed = performance.now() - startMs;
         const u = durationMs <= 0 ? 1 : Math.min(1, elapsed / durationMs);
         const tscalar = easeFn(u);
@@ -2509,6 +2543,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         });
 
         if (u >= 1) {
+          if (morphTickId !== this.drawCompleteTickId || morphGeneration !== this.layoutUnifiedMorphGeneration) {
+            return;
+          }
           this.zone.run(() => {
             if (!skipNodePositionTween) {
               const finalize = (items: Node[] | undefined) => {
@@ -2567,6 +2604,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           return;
         }
 
+        if (morphGeneration !== this.layoutUnifiedMorphGeneration) {
+          return;
+        }
         this.layoutUnifiedRafId = requestAnimationFrame(step);
       };
 
@@ -2593,6 +2633,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.cancelEdgePathAnimation(edgeKey);
 
     const easeFn = resolveGraphTransitionEasing(this.effectiveLayoutTransition.easing);
+    const morphTickId = this.drawCompleteTickId;
+    const morphGeneration = this.bumpEdgePathMorphGeneration(edgeKey);
 
     this.zone.runOutsideAngular(() => {
       pathSelection.attr('d', startLine);
@@ -2603,6 +2645,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       const startMs = performance.now();
 
       const step = () => {
+        if (this._graphDestroyed || this.abandonStaleEdgePathMorphStep(edgeKey, morphGeneration)) {
+          return;
+        }
         const elapsed = performance.now() - startMs;
         const u = durationMs <= 0 ? 1 : Math.min(1, elapsed / durationMs);
         const t = easeFn(u);
@@ -2614,6 +2659,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         }
 
         if (u >= 1) {
+          if (morphTickId !== this.drawCompleteTickId || morphGeneration !== this.edgePathMorphGen(edgeKey)) {
+            this.edgePathRafIds.delete(edgeKey);
+            return;
+          }
           this.edgePathRafIds.delete(edgeKey);
           this.zone.run(() => {
             edge.previousPoints = undefined;
@@ -2622,6 +2671,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           return;
         }
 
+        if (this.abandonStaleEdgePathMorphStep(edgeKey, morphGeneration)) {
+          return;
+        }
         const rafId = requestAnimationFrame(step);
         this.edgePathRafIds.set(edgeKey, rafId);
       };
