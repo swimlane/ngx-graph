@@ -100,11 +100,11 @@ The graph component accepts a `view` input, which is an array with two numeric e
 
 Methods exist on `GraphComponent` to check if the graph has dimension. This can be useful for waiting to display the entire graph after it has proper dimensions.
 
-| Method              | Description                                                                                                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| hasGraphDims        | Returns true when the graph container has dimension.                                                                                                                 |
-| hasNodeDims         | Returns true when every node in the graph has dimension.                                                                                                             |
-| hasCompoundNodeDims | Returns true when every compound node in the graph has dimension.                                                                                                    |
+| Method              | Description                                                                                                                                                                                                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| hasGraphDims        | Returns true when the graph container has dimension.                                                                                                                                                       |
+| hasNodeDims         | Returns true when every node in the graph has dimension.                                                                                                                                                   |
+| hasCompoundNodeDims | Returns true when every compound node in the graph has dimension.                                                                                                                                          |
 | hasDims             | Returns true when graph bounds and all nodes have positive dimensions, and when the bound grouping input (clusters **or** compound nodes) has dimensions in the model — mutually exclusive grouping modes. |
 
 These methods can be used with the `stateChange @Output` to check when the graph has dimension. Suppose you had `GraphComponent` has a `ViewChild` in a parent `Component`.

@@ -2316,19 +2316,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   }
 
   private scheduleDeferredDrawCompleteCheck(tickId: number): void {
-    if (
-      this._graphDestroyed ||
-      tickId !== this.drawCompleteTickId ||
-      this.drawCompleteDeferredTickId !== tickId
-    ) {
+    if (this._graphDestroyed || tickId !== this.drawCompleteTickId || this.drawCompleteDeferredTickId !== tickId) {
       return;
     }
     requestAnimationFrame(() => {
-      if (
-        this._graphDestroyed ||
-        tickId !== this.drawCompleteTickId ||
-        this.drawCompleteDeferredTickId !== tickId
-      ) {
+      if (this._graphDestroyed || tickId !== this.drawCompleteTickId || this.drawCompleteDeferredTickId !== tickId) {
         return;
       }
       afterNextRender(
@@ -2344,11 +2336,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * Passive readiness pass after morph or DOM settles on the same tick.
    */
   private tryDeferredDrawCompleteCheck(tickId: number): void {
-    if (
-      this._graphDestroyed ||
-      tickId !== this.drawCompleteTickId ||
-      this.drawCompleteDeferredTickId !== tickId
-    ) {
+    if (this._graphDestroyed || tickId !== this.drawCompleteTickId || this.drawCompleteDeferredTickId !== tickId) {
       return;
     }
     if (this.layoutUnifiedRafId != null || this.edgePathRafIds.size > 0) {
