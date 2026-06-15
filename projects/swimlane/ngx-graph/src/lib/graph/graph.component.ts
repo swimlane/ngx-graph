@@ -27,7 +27,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
-import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
+import { Observable, Subscription, of, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
@@ -226,7 +226,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   private containerResizeObserver: ResizeObserver | null = null;
-  private containerResizeRafId: number | null = null;
   visibilityObserver: VisibilityObserver;
   /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
   private drawCompleteTickId = 0;
@@ -564,7 +563,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   ngAfterViewInit(): void {
-    this.bindWindowResizeEvent();
     this.bindContainerResizeEvent();
 
     // listen for visibility of the element for hidden by default scenario
@@ -3747,7 +3745,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /**
    * Remeasures the parent container and updates SVG viewport size without re-running layout.
-   * Invoked automatically when the parent element resizes (e.g. side panels opening or closing).
+   * For automatic resize handling, the graph listens to parent container size via ResizeObserver
+   * and runs {@link update}; call this only when a viewport-only refresh is explicitly required.
    */
   public refreshViewportDimensions(): void {
     if (this.view()) {
@@ -3773,9 +3772,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (this.showMiniMap()) {
       this.updateMinimap();
     }
-
-    this.lastFullUpdateWidth = this.width;
-    this.lastFullUpdateHeight = this.height;
 
     if (this.cd) {
       this.cd.markForCheck();
@@ -3897,21 +3893,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.containerResizeObserver.disconnect();
       this.containerResizeObserver = null;
     }
-    if (this.containerResizeRafId != null) {
-      cancelAnimationFrame(this.containerResizeRafId);
-      this.containerResizeRafId = null;
-    }
-  }
-
-  private scheduleContainerResizeRefresh(): void {
-    if (this.containerResizeRafId != null) {
-      return;
-    }
-
-    this.containerResizeRafId = requestAnimationFrame(() => {
-      this.containerResizeRafId = null;
-      this.zone.run(() => this.refreshViewportDimensions());
-    });
   }
 
   private bindContainerResizeEvent(): void {
@@ -3924,20 +3905,17 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       return;
     }
 
-    this.containerResizeObserver = new ResizeObserver(() => {
-      this.scheduleContainerResizeRefresh();
-    });
-    this.containerResizeObserver.observe(parent);
-  }
-
-  private bindWindowResizeEvent(): void {
-    const source = observableFromEvent(window, 'resize');
-    const subscription = source.pipe(debounceTime(200)).subscribe(e => {
+    const resize$ = new Subject<void>();
+    this.resizeSubscription = resize$.pipe(debounceTime(200), takeUntil(this.destroy$)).subscribe(() => {
       this.update();
       if (this.cd) {
         this.cd.markForCheck();
       }
     });
-    this.resizeSubscription = subscription;
+
+    this.containerResizeObserver = new ResizeObserver(() => {
+      resize$.next();
+    });
+    this.containerResizeObserver.observe(parent);
   }
 }

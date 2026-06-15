@@ -2,6 +2,9 @@
 
 ## HEAD (unreleased)
 
+- Fix: Graph resizes when its parent container changes size (e.g. side panels, flex layouts) via `ResizeObserver`, matching the previous window-resize `update()` behavior including layout.
+- Breaking: `GraphComponent` no longer listens to `window` `resize`; automatic resize requires a parent element whose size reflects layout changes. When `[view]` is set, container resize is not observed (unchanged dimension source).
+
 ## 12.0.0-alpha.5
 
 - Fix: `drawComplete` and `stateChange` (`Output`) now emit from tick finalization only when the internal graph model and bound link paths are ready (removed `hasDims()` polling in `ngOnInit`). `drawComplete` still fires once on first ready draw; `Output` fires on every subsequent ready tick.

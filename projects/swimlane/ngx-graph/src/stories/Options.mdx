@@ -93,7 +93,7 @@ See **Example / NgxGraphDagreLayoutTransition**, **Example / NgxGraphTranslateOn
 
 ## Dimensions
 
-The graph component accepts a `view` input, which is an array with two numeric elements: `[width, height]` in pixels. If the `view` input is ommited or undefined, the graph will resize itself to fit the parent container.
+The graph component accepts a `view` input, which is an array with two numeric elements: `[width, height]` in pixels. If the `view` input is ommited or undefined, the graph will resize itself to fit the parent container. When `view` is omitted, the graph observes its parent element with `ResizeObserver` and runs `update()` on size changes (debounced 200ms), including relayout — the same behavior as the previous window-resize listener, but triggered by parent container size instead of the browser window.
 
 [[note | Note]]
 | The parent container must have a non-zero height defined, and no padding in order for the graph to properly fit its size.

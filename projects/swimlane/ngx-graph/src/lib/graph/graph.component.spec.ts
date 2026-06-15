@@ -1833,7 +1833,7 @@ describe('GraphComponent container resize', () => {
     expect(createGraphSpy).not.toHaveBeenCalled();
   }));
 
-  it('observes the parent container and refreshes viewport dimensions on resize', fakeAsync(() => {
+  it('observes the parent container and runs update on resize', fakeAsync(() => {
     const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
     fixture.detectChanges();
     flush();
@@ -1844,15 +1844,51 @@ describe('GraphComponent container resize', () => {
     expect(resizeObserverCallback).toBeDefined();
 
     const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
     const createGraphSpy = spyOn(graph, 'createGraph').and.callThrough();
     spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
 
     resizeObserverCallback!([], {} as ResizeObserver);
+    tick(200);
+    fixture.detectChanges();
+    flush();
+
+    expect(updateSpy).toHaveBeenCalled();
+    expect(graph.width).toBe(840);
+    expect(createGraphSpy).toHaveBeenCalled();
+  }));
+
+  it('debounces container resize updates', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
     tick(16);
     fixture.detectChanges();
+    flush();
 
-    expect(graph.width).toBe(840);
-    expect(createGraphSpy).not.toHaveBeenCalled();
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    resizeObserverCallback!([], {} as ResizeObserver);
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(199);
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+  }));
+
+  it('does not observe container resize when [view] supplies explicit dimensions', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphFixedViewHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    expect(resizeObserverCallback).toBeUndefined();
   }));
 
   it('refreshViewportDimensions is a no-op when [view] supplies explicit dimensions', fakeAsync(() => {
