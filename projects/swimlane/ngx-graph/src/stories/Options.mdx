@@ -65,13 +65,13 @@ Equivalent: `graph.enablePan.set(...)`, `graph.enableZoom.set(...)`, and `graph.
 
 ## Outputs
 
-| Event        | Description                                                                                                                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| activate     | element activation event (mouse enter)                                                                                                                             |
-| deactivate   | element deactivation event (mouse leave)                                                                                                                           |
-| zoomChange   | zoom change event, emits the new zoom level                                                                                                                        |
-| stateChange  | state change event, emits lifecycle events like `init`, `transform`, and `subscribe`                                                                               |
-| drawComplete | emits after a completed draw/tick pass (paths bound, graph ready). Use to hide loading UI or run one-shot center/`zoomToFit` without flashing before first layout. |
+| Event        | Description                                                                                                                                                                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| activate     | element activation event (mouse enter)                                                                                                                                                                                                               |
+| deactivate   | element deactivation event (mouse leave)                                                                                                                                                                                                             |
+| zoomChange   | zoom change event, emits the new zoom level                                                                                                                                                                                                          |
+| stateChange  | lifecycle events: `init`, `transform`, `subscribe`, and **`output`** when a tick finishes and the internal graph model plus bound link paths are ready (same gate as `drawComplete`)                                                                 |
+| drawComplete | emits **once** on the **first** tick that passes the readiness gate (paths bound, positions/dims on `graph`). Use to hide loading UI or run one-shot center/`zoomToFit`. For later layout updates, use `(stateChange)` with `NgxGraphStates.Output`. |
 
 ## Viewport zoom vs `zoomLevel` input
 
@@ -100,12 +100,12 @@ The graph component accepts a `view` input, which is an array with two numeric e
 
 Methods exist on `GraphComponent` to check if the graph has dimension. This can be useful for waiting to display the entire graph after it has proper dimensions.
 
-| Method              | Description                                                                                                                |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| hasGraphDims        | Returns true when the graph container has dimension.                                                                       |
-| hasNodeDims         | Returns true when every node in the graph has dimension.                                                                   |
-| hasCompoundNodeDims | Returns true when every compound node in the graph has dimension.                                                          |
-| hasDims             | Returns true when all of the above methods combined return true. This means entire graph is ready to be drawn and updated. |
+| Method              | Description                                                                                                                                                                                                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| hasGraphDims        | Returns true when the graph container has dimension.                                                                                                                                                       |
+| hasNodeDims         | Returns true when every node in the graph has dimension.                                                                                                                                                   |
+| hasCompoundNodeDims | Returns true when every compound node in the graph has dimension.                                                                                                                                          |
+| hasDims             | Returns true when graph bounds and all nodes have positive dimensions, and when the bound grouping input (clusters **or** compound nodes) has dimensions in the model — mutually exclusive grouping modes. |
 
 These methods can be used with the `stateChange @Output` to check when the graph has dimension. Suppose you had `GraphComponent` has a `ViewChild` in a parent `Component`.
 
@@ -122,7 +122,7 @@ In your template, bind the `stateChange @Output` of `GraphComponent` to a handle
     >
 ```
 
-In this callback, you can check for the `NgxGraphStates.Transform` state. `GraphComponent` emits this particular state whenever the graph is transformed. `NgxGraphStates` is an enum exported from @swimlane/ngx-graph. Upon a transform of the graph, check the graph has dimension with `hasDims()`. When `hasDims()` is `true`, it should be safe to zoom and center the graph on load, since these operations depend on the graph having proper dimensions. Additionally, if the parent `Component` implements a loading indicator (`this.isLoading`), the loading indicator can be removed since the graph is ready to display.
+In this callback, you can check for the `NgxGraphStates.Output` state (preferred after load) or `NgxGraphStates.Transform` when the viewport matrix changes. `GraphComponent` emits **`Output`** when a layout tick completes and the graph is ready (paths bound, model positions/dims reflected). Use `(drawComplete)` for first-load loading UI only; use **`Output`** for post-update hooks. When `hasDims()` is `true` at that point, it should be safe to zoom and center the graph on load. Additionally, if the parent `Component` implements a loading indicator (`this.isLoading`), the loading indicator can be removed on `(drawComplete)` or when `event.state === NgxGraphStates.Output`.
 
 ```javascript
 handleStateChange(event: NgxGraphStateChangeEvent) {

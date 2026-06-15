@@ -2,6 +2,9 @@
 
 ## HEAD (unreleased)
 
+- Fix: `drawComplete` and `stateChange` (`Output`) now emit from tick finalization only when the internal graph model and bound link paths are ready (removed `hasDims()` polling in `ngOnInit`). `drawComplete` still fires once on first ready draw; `Output` fires on every subsequent ready tick.
+- Fix: `hasClusterDims()` and `hasCompoundNodeDims()` mirror `hasNodeDims()` when the graph model list is empty (respect bound inputs). `hasDims()` checks dimensions only for the grouping input that is bound (clusters or compound nodes — mutually exclusive modes).
+
 ## 12.0.0-alpha.4
 
 - Fix: possible console error when nodes or edges are not available during ngOnChanges.

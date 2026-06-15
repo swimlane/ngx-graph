@@ -7,7 +7,7 @@ import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@ang
 
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting(), {
-  teardown: { destroyAfterEach: false }
+  teardown: { destroyAfterEach: true }
 });
 
 // Load each spec explicitly — add new files here when you add *.spec.ts under this project.
