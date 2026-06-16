@@ -232,6 +232,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   private isMouseMoveCalled: boolean = false;
   private containerResizeObserver: ResizeObserver | null = null;
   private containerResizeRafId: number | null = null;
+  private observedContainerDims: { width: number; height: number } | null = null;
   /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
   private drawCompleteTickId = 0;
   /** True after the first {@link drawComplete} emission for this component instance. */
@@ -3928,9 +3929,30 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     });
 
     this.containerResizeObserver = new ResizeObserver(() => {
-      this.scheduleViewportResizeRefresh();
-      resize$.next();
+      this.onContainerResizeObserved(resize$);
     });
     this.containerResizeObserver.observe(parent);
+  }
+
+  private onContainerResizeObserved(resize$: Subject<void>): void {
+    const dims = this.getContainerDims();
+    if (!dims) {
+      return;
+    }
+
+    const { width, height } = dims;
+
+    if (!this.observedContainerDims) {
+      this.observedContainerDims = { width, height };
+      return;
+    }
+
+    if (width === this.observedContainerDims.width && height === this.observedContainerDims.height) {
+      return;
+    }
+
+    this.observedContainerDims = { width, height };
+    this.scheduleViewportResizeRefresh();
+    resize$.next();
   }
 }
