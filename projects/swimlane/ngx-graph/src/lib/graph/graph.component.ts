@@ -221,6 +221,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   visibilityObserver: VisibilityObserver;
+  /** CSS `transform` on `.ngx-graph-outer` during optional layout flair (perspective / rotate). */
+  layoutOuterTransform: string | null = null;
+
+  /** `transform-origin` for {@link layoutOuterTransform} when using rotate pivot modes. */
+  layoutEffectTransformOrigin = '50% 50%';
 
   private _touchLastX = null;
   private _touchLastY = null;
@@ -274,12 +279,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** rAF for programmatic viewport pan easing (translation only). */
   private viewportPanAnimRafId: number | null = null;
-
-  /** CSS `transform` on `.ngx-graph-outer` during optional layout flair (perspective / rotate). */
-  private layoutOuterTransform: string | null = null;
-
-  /** `transform-origin` for {@link layoutOuterTransform} when using rotate pivot modes. */
-  private layoutEffectTransformOrigin = '50% 50%';
 
   /** Parsed `translate(tx,ty)` from the graph before a new layout is applied. */
   private previousLayoutTransforms: Map<string, { tx: number; ty: number }> | null = null;
