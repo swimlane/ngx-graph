@@ -194,10 +194,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   readonly clusterElements = viewChildren<ElementRef>('clusterElement');
   readonly linkElements = viewChildren<ElementRef>('linkElement');
 
-  public chartWidth: any;
-
-  private isMouseMoveCalled: boolean = false;
-
   graphSubscription: Subscription = new Subscription();
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -214,8 +210,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   oldClusters: Set<string> = new Set();
   oldCompoundNodes: Set<string> = new Set();
   transformationMatrix: Matrix = identity();
-  _touchLastX = null;
-  _touchLastY = null;
+
   minimapScaleCoefficient: number = 3;
   minimapTransform: string;
   minimapOffsetX: number = 0;
@@ -225,8 +220,13 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   width: number;
   height: number;
   resizeSubscription: any;
-  private containerResizeObserver: ResizeObserver | null = null;
   visibilityObserver: VisibilityObserver;
+
+  private _touchLastX = null;
+  private _touchLastY = null;
+  private isMouseMoveCalled: boolean = false;
+  private containerResizeObserver: ResizeObserver | null = null;
+  private containerResizeRafId: number | null = null;
   /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
   private drawCompleteTickId = 0;
   /** True after the first {@link drawComplete} emission for this component instance. */
@@ -276,10 +276,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   private viewportPanAnimRafId: number | null = null;
 
   /** CSS `transform` on `.ngx-graph-outer` during optional layout flair (perspective / rotate). */
-  layoutOuterTransform: string | null = null;
+  private layoutOuterTransform: string | null = null;
 
   /** `transform-origin` for {@link layoutOuterTransform} when using rotate pivot modes. */
-  layoutEffectTransformOrigin = '50% 50%';
+  private layoutEffectTransformOrigin = '50% 50%';
 
   /** Parsed `translate(tx,ty)` from the graph before a new layout is applied. */
   private previousLayoutTransforms: Map<string, { tx: number; ty: number }> | null = null;
@@ -3749,7 +3749,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * and runs {@link update}; call this only when a viewport-only refresh is explicitly required.
    */
   public refreshViewportDimensions(): void {
-    if (this.view()) {
+    if (this.view() || !this.initialized) {
       return;
     }
 
@@ -3893,6 +3893,21 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       this.containerResizeObserver.disconnect();
       this.containerResizeObserver = null;
     }
+    if (this.containerResizeRafId != null) {
+      cancelAnimationFrame(this.containerResizeRafId);
+      this.containerResizeRafId = null;
+    }
+  }
+
+  private scheduleViewportResizeRefresh(): void {
+    if (this.containerResizeRafId != null) {
+      cancelAnimationFrame(this.containerResizeRafId);
+    }
+
+    this.containerResizeRafId = requestAnimationFrame(() => {
+      this.containerResizeRafId = null;
+      this.zone.run(() => this.refreshViewportDimensions());
+    });
   }
 
   private bindContainerResizeEvent(): void {
@@ -3914,6 +3929,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     });
 
     this.containerResizeObserver = new ResizeObserver(() => {
+      this.scheduleViewportResizeRefresh();
       resize$.next();
     });
     this.containerResizeObserver.observe(parent);
