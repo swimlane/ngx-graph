@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, timer } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { Graph } from '../models/graph.model';
 import { Layout } from '../models/layout.model';
@@ -1753,5 +1754,335 @@ describe('GraphComponent snapAddedNodeIds before resetToPrevious', () => {
     const parsed = (graph as any).parseTranslateDefault(cp!.transform);
     expect(parsed.tx).toBeCloseTo(400, 5);
     expect(parsed.ty).toBeCloseTo(120, 5);
+  }));
+});
+
+@Component({
+  selector: 'test-graph-container-resize-host',
+  template: `
+    <div class="graph-container" [style.width.px]="containerWidth" [style.height.px]="containerHeight">
+      <ngx-graph [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
+    </div>
+  `,
+  imports: [GraphComponent]
+})
+class TestGraphContainerResizeHostComponent {
+  syncLayout = new TestSyncLayout();
+  containerWidth = 600;
+  containerHeight = 400;
+  nodes: Node[] = [
+    { id: 'n1', label: 'A' },
+    { id: 'n2', label: 'B' }
+  ];
+  links: Edge[] = [{ id: 'e1', source: 'n1', target: 'n2' }];
+}
+
+@Component({
+  selector: 'test-graph-fixed-view-host',
+  template: `<ngx-graph [nodes]="nodes" [links]="links" [layout]="syncLayout" [view]="[800, 600]"></ngx-graph>`,
+  imports: [GraphComponent]
+})
+class TestGraphFixedViewHostComponent {
+  syncLayout = new TestSyncLayout();
+  nodes: Node[] = [{ id: 'n1', label: 'A' }];
+  links: Edge[] = [];
+}
+
+@Component({
+  selector: 'test-graph-container-resize-uninit-host',
+  template: `
+    <div class="graph-container" [style.width.px]="600" [style.height.px]="400">
+      <ngx-graph [layout]="syncLayout"></ngx-graph>
+    </div>
+  `,
+  imports: [GraphComponent]
+})
+class TestGraphContainerResizeUninitHostComponent {
+  syncLayout = new TestSyncLayout();
+}
+
+/** Layout that completes after 500ms to exercise async in-flight cancellation. */
+class TestDelayedLayout implements Layout {
+  run(graph: Graph): Observable<Graph> {
+    return timer(500).pipe(
+      map(() => ({
+        ...graph,
+        nodes: graph.nodes.map((n, i) => ({
+          ...n,
+          position: { x: 120 + i * 100, y: 140 },
+          dimension: { width: n.dimension?.width ?? 48, height: n.dimension?.height ?? 32 }
+        })),
+        edges: graph.edges.map(e => ({
+          ...e,
+          points: [
+            { x: 50, y: 50 },
+            { x: 250, y: 150 }
+          ]
+        }))
+      }))
+    );
+  }
+
+  updateEdge(graph: Graph, _edge: Edge): Graph {
+    return graph;
+  }
+}
+
+@Component({
+  selector: 'test-graph-async-layout-resize-host',
+  template: `
+    <div class="graph-container" [style.width.px]="600" [style.height.px]="400">
+      <ngx-graph [nodes]="nodes" [links]="links" [layout]="delayedLayout" [animate]="false"></ngx-graph>
+    </div>
+  `,
+  imports: [GraphComponent]
+})
+class TestGraphAsyncLayoutResizeHostComponent {
+  delayedLayout = new TestDelayedLayout();
+  nodes: Node[] = [
+    { id: 'n1', label: 'A' },
+    { id: 'n2', label: 'B' }
+  ];
+  links: Edge[] = [{ id: 'e1', source: 'n1', target: 'n2' }];
+}
+
+describe('GraphComponent container resize', () => {
+  let resizeObserverCallback: ResizeObserverCallback | undefined;
+  let OriginalResizeObserver: typeof ResizeObserver;
+
+  beforeEach(async () => {
+    OriginalResizeObserver = window.ResizeObserver;
+    resizeObserverCallback = undefined;
+    class ResizeObserverMock {
+      constructor(callback: ResizeObserverCallback) {
+        resizeObserverCallback = callback;
+      }
+      observe(): void {
+        resizeObserverCallback!([], {} as ResizeObserver);
+      }
+      disconnect(): void {}
+      unobserve(): void {}
+    }
+    (window as any).ResizeObserver = ResizeObserverMock;
+
+    await TestBed.configureTestingModule({
+      imports: [
+        TestGraphContainerResizeHostComponent,
+        TestGraphFixedViewHostComponent,
+        TestGraphContainerResizeUninitHostComponent,
+        TestGraphAsyncLayoutResizeHostComponent
+      ],
+      providers: [LayoutService]
+    }).compileComponents();
+  });
+
+  afterEach(() => {
+    window.ResizeObserver = OriginalResizeObserver;
+  });
+
+  function drainGraphInit(fixture: ComponentFixture<unknown>): void {
+    fixture.detectChanges();
+    flush();
+    tick(0);
+    tick(16);
+    fixture.detectChanges();
+    flush();
+  }
+
+  it('does not schedule debounced update from initial observe notification', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    drainGraphInit(fixture);
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+
+    tick(200);
+    expect(updateSpy).not.toHaveBeenCalled();
+  }));
+
+  it('debounces update when container dimensions change after baseline', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    drainGraphInit(fixture);
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(199);
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+  }));
+
+  it('does not cancel in-flight async layout from initial observe notification', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphAsyncLayoutResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(0);
+    tick(16);
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const createGraphSpy = spyOn(graph, 'createGraph').and.callThrough();
+
+    tick(200);
+    expect(createGraphSpy).not.toHaveBeenCalled();
+
+    tick(300);
+    fixture.detectChanges();
+    flush();
+
+    expect(graph.graph.nodes[0].position).toEqual({ x: 120, y: 140 });
+  }));
+
+  it('refreshViewportDimensions updates width and height without re-running layout', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    expect(graph.initialized).toBe(true);
+    const createGraphSpy = spyOn(graph, 'createGraph').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 960, height: 500 });
+
+    graph.refreshViewportDimensions();
+
+    expect(graph.width).toBe(960);
+    expect(graph.height).toBe(500);
+    expect(createGraphSpy).not.toHaveBeenCalled();
+  }));
+
+  it('refreshViewportDimensions is a no-op before graph is initialized', () => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeUninitHostComponent);
+    fixture.detectChanges();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    expect(graph.initialized).toBe(false);
+    const widthBeforeResize = graph.width;
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 999, height: 500 });
+
+    graph.refreshViewportDimensions();
+
+    expect(graph.width).toBe(widthBeforeResize);
+  });
+
+  it('syncs viewport dimensions on each resize frame before debounced update', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(16);
+
+    expect(graph.width).toBe(840);
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    tick(200);
+    expect(updateSpy).toHaveBeenCalled();
+  }));
+
+  it('coalesces viewport refresh to one RAF per frame', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const refreshSpy = spyOn(graph, 'refreshViewportDimensions').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    resizeObserverCallback!([], {} as ResizeObserver);
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(16);
+
+    expect(refreshSpy).toHaveBeenCalledTimes(1);
+  }));
+
+  it('observes the parent container and runs update on resize', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    expect(resizeObserverCallback).toBeDefined();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+    const createGraphSpy = spyOn(graph, 'createGraph').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(16);
+    expect(graph.width).toBe(840);
+
+    tick(200);
+    fixture.detectChanges();
+    flush();
+
+    expect(updateSpy).toHaveBeenCalled();
+    expect(createGraphSpy).toHaveBeenCalled();
+  }));
+
+  it('debounces container resize updates', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphContainerResizeHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    const updateSpy = spyOn(graph, 'update').and.callThrough();
+    spyOn(graph, 'getContainerDims').and.returnValue({ width: 840, height: 400 });
+
+    resizeObserverCallback!([], {} as ResizeObserver);
+    resizeObserverCallback!([], {} as ResizeObserver);
+    resizeObserverCallback!([], {} as ResizeObserver);
+    tick(199);
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+  }));
+
+  it('does not observe container resize when [view] supplies explicit dimensions', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphFixedViewHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    expect(resizeObserverCallback).toBeUndefined();
+  }));
+
+  it('refreshViewportDimensions is a no-op when [view] supplies explicit dimensions', fakeAsync(() => {
+    const fixture = TestBed.createComponent(TestGraphFixedViewHostComponent);
+    fixture.detectChanges();
+    flush();
+    tick(16);
+    fixture.detectChanges();
+    flush();
+
+    const graph = fixture.debugElement.query(By.directive(GraphComponent)).componentInstance as GraphComponent;
+    graph.refreshViewportDimensions();
+    expect(graph.width).toBe(800);
+    expect(graph.height).toBe(600);
   }));
 });

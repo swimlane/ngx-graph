@@ -27,7 +27,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { select } from 'd3-selection';
 import * as shape from 'd3-shape';
-import { Observable, Subscription, of, fromEvent as observableFromEvent, Subject } from 'rxjs';
+import { Observable, Subscription, of, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'transformation-matrix';
 import { Layout } from '../models/layout.model';
@@ -194,10 +194,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   readonly clusterElements = viewChildren<ElementRef>('clusterElement');
   readonly linkElements = viewChildren<ElementRef>('linkElement');
 
-  public chartWidth: any;
-
-  private isMouseMoveCalled: boolean = false;
-
   graphSubscription: Subscription = new Subscription();
   colors: ColorHelper;
   dims: ViewDimensions;
@@ -214,8 +210,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   oldClusters: Set<string> = new Set();
   oldCompoundNodes: Set<string> = new Set();
   transformationMatrix: Matrix = identity();
-  _touchLastX = null;
-  _touchLastY = null;
+
   minimapScaleCoefficient: number = 3;
   minimapTransform: string;
   minimapOffsetX: number = 0;
@@ -226,6 +221,18 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   height: number;
   resizeSubscription: any;
   visibilityObserver: VisibilityObserver;
+  /** CSS `transform` on `.ngx-graph-outer` during optional layout flair (perspective / rotate). */
+  layoutOuterTransform: string | null = null;
+
+  /** `transform-origin` for {@link layoutOuterTransform} when using rotate pivot modes. */
+  layoutEffectTransformOrigin = '50% 50%';
+
+  private _touchLastX = null;
+  private _touchLastY = null;
+  private isMouseMoveCalled: boolean = false;
+  private containerResizeObserver: ResizeObserver | null = null;
+  private containerResizeRafId: number | null = null;
+  private observedContainerDims: { width: number; height: number } | null = null;
   /** Incremented at the start of each {@link tick}; completion callbacks only emit when this matches. */
   private drawCompleteTickId = 0;
   /** True after the first {@link drawComplete} emission for this component instance. */
@@ -273,12 +280,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
 
   /** rAF for programmatic viewport pan easing (translation only). */
   private viewportPanAnimRafId: number | null = null;
-
-  /** CSS `transform` on `.ngx-graph-outer` during optional layout flair (perspective / rotate). */
-  layoutOuterTransform: string | null = null;
-
-  /** `transform-origin` for {@link layoutOuterTransform} when using rotate pivot modes. */
-  layoutEffectTransformOrigin = '50% 50%';
 
   /** Parsed `translate(tx,ty)` from the graph before a new layout is applied. */
   private previousLayoutTransforms: Map<string, { tx: number; ty: number }> | null = null;
@@ -562,7 +563,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
    * @memberOf GraphComponent
    */
   ngAfterViewInit(): void {
-    this.bindWindowResizeEvent();
+    this.bindContainerResizeEvent();
 
     // listen for visibility of the element for hidden by default scenario
     this.visibilityObserver = new VisibilityObserver(this.el, this.zone);
@@ -3742,6 +3743,41 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     };
   }
 
+  /**
+   * Remeasures the parent container and updates SVG viewport size without re-running layout.
+   * For automatic resize handling, the graph listens to parent container size via ResizeObserver
+   * and runs {@link update}; call this only when a viewport-only refresh is explicitly required.
+   */
+  public refreshViewportDimensions(): void {
+    if (this.view() || !this.initialized) {
+      return;
+    }
+
+    const previousWidth = this.width;
+    const previousHeight = this.height;
+
+    this.basicUpdate();
+
+    if (this.width === previousWidth && this.height === previousHeight) {
+      return;
+    }
+
+    this.dims = calculateViewDimensions({
+      width: this.width,
+      height: this.height
+    });
+
+    this.updateTransform();
+
+    if (this.showMiniMap()) {
+      this.updateMinimap();
+    }
+
+    if (this.cd) {
+      this.cd.markForCheck();
+    }
+  }
+
   public basicUpdate(): void {
     const view = this.view();
     if (view) {
@@ -3853,16 +3889,70 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
     }
+    if (this.containerResizeObserver) {
+      this.containerResizeObserver.disconnect();
+      this.containerResizeObserver = null;
+    }
+    if (this.containerResizeRafId != null) {
+      cancelAnimationFrame(this.containerResizeRafId);
+      this.containerResizeRafId = null;
+    }
   }
 
-  private bindWindowResizeEvent(): void {
-    const source = observableFromEvent(window, 'resize');
-    const subscription = source.pipe(debounceTime(200)).subscribe(e => {
+  private scheduleViewportResizeRefresh(): void {
+    if (this.containerResizeRafId != null) {
+      cancelAnimationFrame(this.containerResizeRafId);
+    }
+
+    this.containerResizeRafId = requestAnimationFrame(() => {
+      this.containerResizeRafId = null;
+      this.zone.run(() => this.refreshViewportDimensions());
+    });
+  }
+
+  private bindContainerResizeEvent(): void {
+    if (typeof ResizeObserver === 'undefined' || this.view()) {
+      return;
+    }
+
+    const parent = this.el.nativeElement.parentNode as HTMLElement | null;
+    if (!parent) {
+      return;
+    }
+
+    const resize$ = new Subject<void>();
+    this.resizeSubscription = resize$.pipe(debounceTime(200), takeUntil(this.destroy$)).subscribe(() => {
       this.update();
       if (this.cd) {
         this.cd.markForCheck();
       }
     });
-    this.resizeSubscription = subscription;
+
+    this.containerResizeObserver = new ResizeObserver(() => {
+      this.onContainerResizeObserved(resize$);
+    });
+    this.containerResizeObserver.observe(parent);
+  }
+
+  private onContainerResizeObserved(resize$: Subject<void>): void {
+    const dims = this.getContainerDims();
+    if (!dims) {
+      return;
+    }
+
+    const { width, height } = dims;
+
+    if (!this.observedContainerDims) {
+      this.observedContainerDims = { width, height };
+      return;
+    }
+
+    if (width === this.observedContainerDims.width && height === this.observedContainerDims.height) {
+      return;
+    }
+
+    this.observedContainerDims = { width, height };
+    this.scheduleViewportResizeRefresh();
+    resize$.next();
   }
 }
