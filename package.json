@@ -76,7 +76,7 @@
     "@storybook/angular": "10.2.0",
     "@storybook/builder-webpack5": "10.2.0",
     "@swimlane/eslint-config": "^2.0.0",
-    "@swimlane/prettier-config-swimlane": "4.0.0-alpha.0",
+    "@swimlane/prettier-config-swimlane": "4.0.0",
     "@types/d3-array": "^3",
     "@types/d3-ease": "^1.0.8",
     "@types/d3-scale": "^4",
