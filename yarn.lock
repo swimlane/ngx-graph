@@ -520,17 +520,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/animations@npm:~21.1.1":
-  version: 21.1.1
-  resolution: "@angular/animations@npm:21.1.1"
-  dependencies:
-    tslib: "npm:^2.3.0"
-  peerDependencies:
-    "@angular/core": 21.1.1
-  checksum: 10c0/60dd58033b6c7370670c6ac5d4d9d4eb5986d94367d4070b424fae1603d6092aa62ed39e52fa48beb66d2ef9a33d61495a32052b9a60047d9e3e67c950522fb8
-  languageName: node
-  linkType: hard
-
 "@angular/build@npm:21.1.1":
   version: 21.1.1
   resolution: "@angular/build@npm:21.1.1"
@@ -12848,7 +12837,6 @@ __metadata:
     "@angular-eslint/eslint-plugin-template": "npm:~20.1.1"
     "@angular-eslint/schematics": "npm:~20.1.1"
     "@angular-eslint/template-parser": "npm:~20.1.1"
-    "@angular/animations": "npm:~21.1.1"
     "@angular/cdk": "npm:~20.0.3"
     "@angular/cli": "npm:21.1.1"
     "@angular/common": "npm:~21.1.1"
