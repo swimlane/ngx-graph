@@ -1,5 +1,5 @@
 import type { OnInit } from '@angular/core';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { Edge, Node, Layout } from '@swimlane/ngx-graph';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
@@ -19,6 +19,7 @@ export class Employee {
   selector: 'ngx-graph-org-tree',
   templateUrl: './ngx-graph-org-tree.component.html',
   styleUrls: ['./ngx-graph-org-tree.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgxGraphModule, CommonModule]
 })
 export class NgxGraphOrgTreeComponent implements OnInit {

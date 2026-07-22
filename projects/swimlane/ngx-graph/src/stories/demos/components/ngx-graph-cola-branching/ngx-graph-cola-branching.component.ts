@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import type { OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as shape from 'd3-shape';
@@ -69,6 +69,7 @@ const BRANCHING_STEPS: Array<{ nodes: Node[]; links: Edge[] }> = (() => {
   selector: 'ngx-graph-cola-branching-demo',
   templateUrl: './ngx-graph-cola-branching.component.html',
   styleUrls: ['./ngx-graph-cola-branching.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgxGraphModule, CommonModule]
 })
 export class NgxGraphColaBranchingDemoComponent implements OnDestroy {

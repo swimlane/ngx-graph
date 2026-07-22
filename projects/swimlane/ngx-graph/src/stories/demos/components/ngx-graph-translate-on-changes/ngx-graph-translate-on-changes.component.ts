@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { Edge, Node } from '@swimlane/ngx-graph';
 import { NgxGraphModule, Orientation } from '@swimlane/ngx-graph';
@@ -58,6 +58,7 @@ function edgeId(source: string, target: string): string {
   selector: 'ngx-graph-translate-on-changes-demo',
   templateUrl: './ngx-graph-translate-on-changes.component.html',
   styleUrls: ['./ngx-graph-translate-on-changes.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgxGraphModule, CommonModule]
 })
 export class NgxGraphTranslateOnChangesDemoComponent {

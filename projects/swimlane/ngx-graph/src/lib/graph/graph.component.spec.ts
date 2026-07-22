@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Observable, of, Subject, timer } from 'rxjs';
@@ -111,6 +111,7 @@ class TestLayoutWithCustomParseTranslate extends TestSyncLayout {
       (stateChange)="onStateChange($event)"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphDrawCompleteHostComponent {
@@ -150,6 +151,7 @@ class TestGraphDrawCompleteHostComponent {
       [animate]="false"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphDrawCompleteCompoundHostComponent {
@@ -346,6 +348,7 @@ describe('GraphComponent drawComplete', () => {
   template: `
     <ngx-graph [view]="[200, 150]" [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphEmptyViewHostComponent {
@@ -359,6 +362,7 @@ class TestGraphEmptyViewHostComponent {
   template: `
     <ngx-graph [view]="[400, 300]" [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphMutableDataHostComponent {
@@ -375,6 +379,7 @@ class TestGraphMutableDataHostComponent {
   template: `
     <ngx-graph [view]="[400, 300]" [nodes]="nodes" [links]="links" layout="dagre" [animate]="false"></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphDagreNameHostComponent {
@@ -397,6 +402,7 @@ class TestGraphDagreNameHostComponent {
       (stateChange)="recordState($event)"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphStateChangeCaptureHostComponent {
@@ -428,6 +434,7 @@ class TestGraphStateChangeCaptureHostComponent {
       [panToNode$]="panToNodeRequests"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphStreamInputsHostComponent {
@@ -455,6 +462,7 @@ class TestGraphStreamInputsHostComponent {
       [panningAxis]="panningAxis"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphPanningAxisHostComponent {
@@ -784,6 +792,7 @@ describe('GraphComponent stream inputs from the host', () => {
       [edgePathSampleCount]="edgePathSampleCount"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphLayoutJsHostComponent {
@@ -810,6 +819,7 @@ class TestGraphLayoutJsHostComponent {
       [transitionAfterChanges]="transitionAfterChanges"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class SnapMorphCompoundHostComponent {
@@ -845,6 +855,7 @@ class SnapMorphCompoundHostComponent {
       [transitionAfterChanges]="transitionAfterChanges"
     ></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class SnapMorphTwoPhaseCompoundHostComponent {
@@ -873,6 +884,7 @@ class SnapMorphTwoPhaseCompoundHostComponent {
   template: `
     <ngx-graph [view]="[400, 300]" [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphParseTranslateHostComponent {
@@ -1055,6 +1067,7 @@ describe('GraphComponent redrawEdge (curve + resampling)', () => {
   template: `
     <ngx-graph [view]="[400, 300]" [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestViewportInteractionsHostComponent {
@@ -1764,6 +1777,7 @@ describe('GraphComponent snapAddedNodeIds before resetToPrevious', () => {
       <ngx-graph [nodes]="nodes" [links]="links" [layout]="syncLayout" [animate]="false"></ngx-graph>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphContainerResizeHostComponent {
@@ -1780,6 +1794,7 @@ class TestGraphContainerResizeHostComponent {
 @Component({
   selector: 'test-graph-fixed-view-host',
   template: `<ngx-graph [nodes]="nodes" [links]="links" [layout]="syncLayout" [view]="[800, 600]"></ngx-graph>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphFixedViewHostComponent {
@@ -1795,6 +1810,7 @@ class TestGraphFixedViewHostComponent {
       <ngx-graph [layout]="syncLayout"></ngx-graph>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphContainerResizeUninitHostComponent {
@@ -1835,6 +1851,7 @@ class TestDelayedLayout implements Layout {
       <ngx-graph [nodes]="nodes" [links]="links" [layout]="delayedLayout" [animate]="false"></ngx-graph>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GraphComponent]
 })
 class TestGraphAsyncLayoutResizeHostComponent {

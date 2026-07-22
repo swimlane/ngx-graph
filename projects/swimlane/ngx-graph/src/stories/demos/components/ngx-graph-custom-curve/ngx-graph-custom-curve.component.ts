@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import type { Layout, Edge, Node } from '@swimlane/ngx-graph';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { DagreNodesOnlyLayout } from './customDagreNodesOnly';
@@ -7,6 +7,7 @@ import { stepRound } from './customStepCurved';
 @Component({
   selector: 'ngx-graph-custom-curve',
   templateUrl: './ngx-graph-custom-curve.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgxGraphModule]
 })
 export class NgxGraphCustomCurve {

@@ -76,7 +76,6 @@ export enum NgxGraphStates {
   Init = 'init',
   Subscribe = 'subscribe',
   Transform = 'transform',
-  /* eslint-disable @typescript-eslint/no-shadow */
   Output = 'output'
 }
 
