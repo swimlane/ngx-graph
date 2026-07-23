@@ -6430,16 +6430,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swimlane/eslint-config@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@swimlane/eslint-config@npm:2.0.0"
-  peerDependencies:
-    eslint: ">= 3"
-    eslint-plugin-security: ^1.4.0
-  checksum: 10c0/45334e37f5a178c9b33a71ceb33c83d5be9dc0b00420670aa7eea9992d8fda03b7e154fe60c123e31e40d4cd6482e7dea33ed06e2db85603772139dac357c0bd
-  languageName: node
-  linkType: hard
-
 "@swimlane/prettier-config-swimlane@npm:4.0.0":
   version: 4.0.0
   resolution: "@swimlane/prettier-config-swimlane@npm:4.0.0"
@@ -10681,15 +10671,6 @@ __metadata:
   bin:
     eslint-config-prettier: bin/cli.js
   checksum: 10c0/b5953cf7a86f685e1218b16707bf36643b525513d08495226a6820caccd8b7bfc6b9aa64ac7cb2415dbe2c1f7dc4995832148bdc53ad45777f75a8ded1073b29
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-security@npm:^4":
-  version: 4.0.1
-  resolution: "eslint-plugin-security@npm:4.0.1"
-  dependencies:
-    safe-regex: "npm:^2.1.1"
-  checksum: 10c0/5fdb3be0a1e3707198169f64635e1d904e0e31f53f008bdf99738210bdd9df62ba098015e165401d0a9a01eb958fe0fc69af3980008664af3b88a9b71cde18ed
   languageName: node
   linkType: hard
 
@@ -15153,7 +15134,6 @@ __metadata:
     "@storybook/addon-onboarding": "npm:10.5.3"
     "@storybook/angular": "npm:10.5.3"
     "@storybook/builder-webpack5": "npm:10.5.3"
-    "@swimlane/eslint-config": "npm:^2.0.0"
     "@swimlane/prettier-config-swimlane": "npm:4.0.0"
     "@types/d3-array": "npm:^3"
     "@types/d3-ease": "npm:^1.0.8"
@@ -15190,7 +15170,6 @@ __metadata:
     electron: "npm:42.0.1"
     eslint: "npm:^9"
     eslint-config-prettier: "npm:^8.5.0"
-    eslint-plugin-security: "npm:^4"
     eslint-plugin-storybook: "npm:^10.5.3"
     husky: "npm:^4.2.4"
     istanbul-lib-instrument: "npm:^6.0.3"
@@ -17046,15 +17025,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regexp-tree@npm:~0.1.1":
-  version: 0.1.27
-  resolution: "regexp-tree@npm:0.1.27"
-  bin:
-    regexp-tree: bin/regexp-tree
-  checksum: 10c0/f636f44b4a0d93d7d6926585ecd81f63e4ce2ac895bc417b2ead0874cd36b337dcc3d0fedc63f69bf5aaeaa4340f36ca7e750c9687cceaf8087374e5284e843c
-  languageName: node
-  linkType: hard
-
 "regexp.prototype.flags@npm:^1.5.4":
   version: 1.5.4
   resolution: "regexp.prototype.flags@npm:1.5.4"
@@ -17700,15 +17670,6 @@ __metadata:
     es-errors: "npm:^1.3.0"
     is-regex: "npm:^1.2.1"
   checksum: 10c0/f2c25281bbe5d39cddbbce7f86fca5ea9b3ce3354ea6cd7c81c31b006a5a9fff4286acc5450a3b9122c56c33eba69c56b9131ad751457b2b4a585825e6a10665
-  languageName: node
-  linkType: hard
-
-"safe-regex@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "safe-regex@npm:2.1.1"
-  dependencies:
-    regexp-tree: "npm:~0.1.1"
-  checksum: 10c0/53eb5d3ecf4b3c0954dff465eb179af4d2f5f77f74ba7b57489adbc4fa44454c3d391f37379cd28722d9ac6fa5b70be3f4645d4bd25df395fd99b934f6ec9265
   languageName: node
   linkType: hard
 
