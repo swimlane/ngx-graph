@@ -88,7 +88,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/mdast": "^3.0.3",
     "@types/mocha": "^10.0.9",
-    "@types/node": "^22.8.6",
+    "@types/node": "^24",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/unist": "^2.0.2",
@@ -133,7 +133,7 @@
     }
   },
   "volta": {
-    "node": "22.22.3",
+    "node": "24.18.0",
     "yarn": "4.9.2"
   },
   "packageManager": "yarn@4.9.2",
