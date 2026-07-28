@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'd3-layout',
   imports: [NgxGraphModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <ngx-graph
       [view]="[800, 300]"

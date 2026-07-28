@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 @Component({
   selector: 'cola-layout',
   imports: [NgxGraphModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <ngx-graph
       [view]="[800, 300]"
@@ -74,6 +75,7 @@ export class ColaLayoutComponent {}
 @Component({
   selector: 'cola-clusterlayout',
   imports: [NgxGraphModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <ngx-graph
       [view]="[800, 500]"

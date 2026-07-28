@@ -8,6 +8,14 @@
     "types": []
   },
   "exclude": ["src/test.ts", "**/*.spec.ts", "stories/**"],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  },
   "paths": {
     "@angular/*": ["node_modules/@angular/*"]
   }

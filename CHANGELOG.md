@@ -2,6 +2,11 @@
 
 ## HEAD (unreleased)
 
+## 13.0.0
+
+- Enhancement: Workspace and library peer dependencies support Angular 22 (`>=19.0.0 <23.0.0`).
+- Chore: Pin Node.js to 24.18.0 (Volta and CI).
+
 ## 12.0.0
 
 - Enhancement: `setViewportInteraction` allows toggling pan, drag, and zoom in one imperative method.

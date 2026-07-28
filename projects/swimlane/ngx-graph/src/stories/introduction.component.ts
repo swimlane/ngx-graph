@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import type { Edge, Node } from '@swimlane/ngx-graph';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
@@ -8,6 +8,7 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
   template: `
     <ngx-graph class="chart-container" [view]="view" [showMiniMap]="true" [links]="links" [nodes]="nodes"> </ngx-graph>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./introduction.css']
 })
 export class GraphIntroComponent {

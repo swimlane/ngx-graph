@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { Edge, Node } from '@swimlane/ngx-graph';
 import { NgxGraphModule, Orientation } from '@swimlane/ngx-graph';
@@ -22,6 +22,7 @@ function dagreDemoNode(id: string, label: string): Node {
   selector: 'ngx-graph-dagre-layout-transition-demo',
   templateUrl: './ngx-graph-dagre-layout-transition.component.html',
   styleUrls: ['./ngx-graph-dagre-layout-transition.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgxGraphModule, CommonModule]
 })
 export class NgxGraphDagreLayoutTransitionDemoComponent {

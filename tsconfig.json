@@ -3,6 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist/out-tsc",
+    "strict": false,
+    "ignoreDeprecations": "6.0",
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
