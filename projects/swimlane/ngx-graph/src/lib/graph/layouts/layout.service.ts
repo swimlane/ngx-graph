@@ -14,7 +14,9 @@ const layouts = {
   colaForceDirected: ColaForceDirectedLayout
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'any'
+})
 export class LayoutService {
   getLayout(name: string): Layout {
     if (layouts[name]) {
