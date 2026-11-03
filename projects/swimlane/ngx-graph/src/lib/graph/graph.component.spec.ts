@@ -540,6 +540,84 @@ describe('GraphComponent graph data and layout behavior', () => {
     expect(graph.graph.nodes.map(n => n.id).sort()).toEqual(['a', 'b', 'c']);
   }));
 
+  describe('when nodes or links are empty', () => {
+    const settle = (fixture: ComponentFixture<GraphComponent>) => {
+      fixture.detectChanges();
+      flush();
+      tick(16);
+      fixture.detectChanges();
+      flush();
+    };
+
+    const createGraph = (nodes: Node[], links: Edge[]) => {
+      const fixture = TestBed.createComponent(GraphComponent);
+      fixture.componentRef.setInput('layout', new TestSyncLayout());
+      fixture.componentRef.setInput('view', [400, 300]);
+      fixture.componentRef.setInput('animate', false);
+      fixture.componentRef.setInput('nodes', nodes);
+      fixture.componentRef.setInput('links', links);
+      settle(fixture);
+      return fixture;
+    };
+
+    it('draws nodes bound without any link', fakeAsync(() => {
+      const fixture = createGraph(
+        [
+          { id: 'n1', label: 'A' },
+          { id: 'n2', label: 'B' }
+        ],
+        []
+      );
+
+      expect(fixture.componentInstance.graph.nodes.map(n => n.id)).toEqual(['n1', 'n2']);
+    }));
+
+    it('draws a node added to a graph that has no link', fakeAsync(() => {
+      const fixture = createGraph([{ id: 'n1', label: 'A' }], []);
+
+      fixture.componentRef.setInput('nodes', [
+        { id: 'n1', label: 'A' },
+        { id: 'n2', label: 'B' }
+      ]);
+      settle(fixture);
+
+      expect(fixture.componentInstance.graph.nodes.map(n => n.id)).toEqual(['n1', 'n2']);
+    }));
+
+    it('drops the previous links when the links input becomes empty', fakeAsync(() => {
+      const nodes: Node[] = [
+        { id: 'n1', label: 'A' },
+        { id: 'n2', label: 'B' }
+      ];
+      const fixture = createGraph(nodes, [{ id: 'e1', source: 'n1', target: 'n2' }]);
+      expect(fixture.componentInstance.graph.edges.length).toBe(1);
+
+      fixture.componentRef.setInput('nodes', [{ id: 'n1', label: 'A' }]);
+      fixture.componentRef.setInput('links', []);
+      settle(fixture);
+
+      expect(fixture.componentInstance.graph.nodes.map(n => n.id)).toEqual(['n1']);
+      expect(fixture.componentInstance.graph.edges.length).toBe(0);
+    }));
+
+    it('drops the previous nodes when the nodes input becomes empty', fakeAsync(() => {
+      const fixture = createGraph(
+        [
+          { id: 'n1', label: 'A' },
+          { id: 'n2', label: 'B' }
+        ],
+        [{ id: 'e1', source: 'n1', target: 'n2' }]
+      );
+
+      fixture.componentRef.setInput('nodes', []);
+      fixture.componentRef.setInput('links', []);
+      settle(fixture);
+
+      expect(fixture.componentInstance.graph.nodes.length).toBe(0);
+      expect(fixture.componentInstance.graph.edges.length).toBe(0);
+    }));
+  });
+
   it('keeps link group count aligned with edge count after nodes and links inputs are replaced', fakeAsync(() => {
     const fixture = TestBed.createComponent(GraphComponent);
     const graph = fixture.componentInstance;
