@@ -499,9 +499,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings());
     }
-    const nodes = this.nodes() ?? [];
-    const links = this.links() ?? [];
-    if (layout && nodes.length && links.length) {
+    const nodes = this.nodes();
+    // A graph with nodes but no links is valid, and a graph that was drawn must be rebuilt (and so cleared)
+    // when its inputs become empty. Only skip the update while there is nothing to draw yet, or when the
+    // nodes are not bound.
+    if (layout && nodes && (nodes.length || this.initialized)) {
       this.update();
     }
   }

@@ -2,6 +2,8 @@
 
 ## HEAD (unreleased)
 
+- Fix: `update()` runs on input changes when `nodes` is set and `links` is empty (a graph with nodes and no links is valid), so nodes added to such a graph are drawn. Once a graph has been drawn, an empty `nodes` input also rebuilds (clears) it instead of keeping the previous model on screen. The update is still skipped while `nodes` is unbound (`null`) or empty and nothing has been drawn yet.
+
 ## 13.0.0
 
 - Enhancement: Workspace and library peer dependencies support Angular 22 (`>=19.0.0 <23.0.0`).
